@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<!DOCTYPE config SYSTEM "http://www.matsim.org/files/dtd/config_v1.dtd">
+<config>
+
+    <module name="network">
+        <param name="inputNetworkFile" value="input/network_garmisch.xml" />
+    </module>
+    
+	<module name="plans">
+		<param name="inputPlansFile" value="input/plans.xml.gz" />
+	</module>
+	
+    <module name="controler">
+        <param name="outputDirectory" value="output" />
+    	<param name="mobsim" value="qsim" />
+		<param name="firstIteration" value="0" />
+		<param name="lastIteration" value="20" />
+        <param name="eventsFileFormat" value="xml" />
+    </module>
+ 
+ <module name="qsim"> 
+ <param name="startTime" value="00:00:00" /> 
+ <param name="endTime" value="24:00:00" />
+ <param name="flowCapacityFactor" value="1.0" /> 
+ <param name="storageCapacityFactor" value="1.0" /> 
+ 
+ <param name="stuckTime" value="10" /> 
+ <param name="removeStuckVehicles" value="yes" /> 
+
+ </module>
+	
+    <module name="planCalcScore" >
+        <param name="performing" value="+6" />
+        <param name="traveling" value="-6" />
+        <param name="lateArrival" value="-18.0" />
+
+        <param name="activityType_0"            value="home" />
+        <param name="activityTypicalDuration_0" value="12:00:00" />
+    
+        <param name="activityType_1"            value="work" />
+        <param name="activityTypicalDuration_1" value="08:00:00" />
+
+        <param name="activityOpeningTime_1"     value="07:00:00" />
+        <param name="activityLatestStartTime_1" value="09:00:00" />
+        <param name="activityClosingTime_1"     value="20:00:00" />
+    </module>
+
+    <module name="strategy">
+        <param name="maxAgentPlanMemorySize" value="5" />
+
+        <param name="ModuleProbability_1" value="0.8" />
+        <param name="Module_1" value="ChangeExpBeta" />
+		<param name="ModuleDisableAfterIteration_1" value="null" /> 
+
+
+        <param name="ModuleProbability_2" value="0.2" />
+        <param name="Module_2" value="ReRoute" />
+		<param name="ModuleDisableAfterIteration_2" value="15" /> 
+
+    </module>
+<module name="planscalcroute" >
+	<param name="ptSpeedFactor" value="2.0" />
+</module>
+</config>
