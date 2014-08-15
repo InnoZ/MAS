@@ -16,12 +16,15 @@ But first, let us organize our folder structure such that we will find the vario
 - the workspace is the place where we work with the Eclipse development environment
 
 INSTALING JAVA
-MATSim is written in Java. To run java you need a JRE and to develop Java code you must install a JDK. You can check if Java is already installed on your machine by opening the terminal and typing in 
-$java -version
+MATSim is written in Java. To run java you need a JRE and to develop Java code you must install a JDK. You can check if Java is already installed on your machine by opening the terminal and typing in:
+```bash 
+java -version
+```
 Use the following in the terminal if you don't have JDK installed:
-$ sudo apt-get install openjdk-7-jdk
-
-INSTALING ECLIPSE
+```bash
+sudo apt-get install openjdk-7-jdk
+```
+INSTALLING ECLIPSE
 Most of the core MATSim developers use Ecplise as a software development environment. We recommend the "Eclipse IDE for Java Developers" distribution. To install follow the instructions here: http://www.krizna.com/ubuntu/install-eclipse-in-ubuntu-12-04/
 
 INSTALLING MATSIM

@@ -1,0 +1,6 @@
+# ignore all files and folders inside input and output:
+input/**/* 
+output/**/*
+
+# ignore temp files:
+*~
