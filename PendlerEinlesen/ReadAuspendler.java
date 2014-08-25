@@ -1,4 +1,4 @@
-package garmisch;
+package simulation;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,34 +19,42 @@ public class ReadAuspendler {
 	 * create a reader-object and start the run-method
 	 */
 	public static void main(String[] args) {
-		ReadAuspendler rp = new ReadAuspendler();
-		rp.run();
+		ReadAuspendler ra = new ReadAuspendler();
+		System.out.println("AUSPENDLERDATEN: ");
+		System.out.println();
+		
+		Map<String,Integer> gegebeneSchluessel = ra.run("given");
+		System.out.println("Anzahl gegebener, verschiedener GemeindeSchluessel = " + gegebeneSchluessel.size());
+		System.out.println("gegebene GemeindeSchluessel.entrySet =  " + gegebeneSchluessel.entrySet());
+		System.out.println();
+		Map<String,Integer> uebrigeSchluessel = ra.run("other");
+		System.out.println("Anzahl gegebener Kreisschluessel ohne genaue Angabe zu Gemeinden = " + uebrigeSchluessel.size());
+		System.out.println("Kreisschluessel-fuer-uebrige-Gemeinden.entrySet = " + uebrigeSchluessel.entrySet());
+
 	}
 
 	
 	/**
 	 * this method reads a csv-file with the aid of the pendlerParser-class.
 	 * 
-	 * @return a map containing special relations of departure- and arrival-locations and the corresponding
-	 * number of commuters to that relation.
+	 * @return a map containing special relations of departure- and arrival-locations in the form 
+	 * "AbfahrtsGemeindeschluessel - AnkunftsGemeindeschluessel" as map-key and the corresponding
+	 * number of commuters to that relation as map-value.
 	 */
-	public Map<String,Integer> run() {
+	public Map<String,Integer> run(String string) {
 
-		AuspendlerParser gp = new AuspendlerParser();
+		ParseAuspendler pa = new ParseAuspendler();
 
-		read( "/Users/mini/Documents/MATSim/workspace/MyMatsimProject/inputGarmisch/Garmisch_Auspendler.csv",
-				gp);
-		
-		// print out relationsMap
-		for (Entry<String, Integer> e : gp.relations.entrySet()) {
-			System.out.println(e.getKey() + "\t" + e.getValue());
-		}
-		
-		System.out.println("allCommuters:  " + gp.allCommuters);
-		
-		return gp.relations;
+		read( "input/Garmisch_Auspendler.csv",
+				pa);
+//	System.out.println("Anzahl aller Auspendler:  " + pa.allCommuters  + "  , Anzahl Auspendler aus uebrigen Gemeinden  " + pa.uebrigeGemeindenCommuters);
+
+		if(string.equals("given")){
+		return pa.relationsOfGivenMunicipalities;
+		} else{
+				return pa.relationsOfOtherMunicipalities;
+			}
 	}
-
 	
 	/**
 	 * this method reads a tabular-file using the MatSim-TabularFileHandler. 
@@ -63,17 +71,24 @@ public class ReadAuspendler {
 }
 
 
-class AuspendlerParser implements TabularFileHandler {
+class ParseAuspendler implements TabularFileHandler {
 	String currentFrom = "";
 	String currentTo = "";
 	String current = "";
+	// Anzahl aller Auspendler
 	int allCommuters = 0;
+	// Anzahl der Auspendler aus "uebrigen Gemeinden des Kreises"
+	int uebrigeGemeindenCommuters = 0;
 
-	Map<String, Integer> relations;
+
+	Map<String, Integer> relationsOfGivenMunicipalities;
+	Map<String, Integer> relationsOfOtherMunicipalities;
+
 
 	// Default-Konstruktor
-	AuspendlerParser() {
-		this.relations = new TreeMap<String, Integer>();
+	ParseAuspendler() {
+		this.relationsOfGivenMunicipalities = new TreeMap<String, Integer>();
+		this.relationsOfOtherMunicipalities = new TreeMap<String, Integer>();
 	}
 
 	/*
@@ -84,14 +99,14 @@ class AuspendlerParser implements TabularFileHandler {
 	public void startRow(String[] row) {
 
 		/*
-		 * beachte nur Gemeindeschlüssel, die mindestens 5 Ziffern enthalten
+		 * beachte nur Gemeindeschl��ssel, die mindestens 5 Ziffern enthalten
 		 */
 		if (row[0].length() >= 5 || row[2].length() >= 5) {
 
 		  current = row[2];
 			
 		  /*
-		   * entscheide, ob es sich um den Gemeindeschlüssel des aktuellen Abfahrtsortes 
+		   * entscheide, ob es sich um den Gemeindeschl��ssel des aktuellen Abfahrtsortes 
 		   * oder eines Ankunftsortes handelt
 		   */
 			if (current.isEmpty()) {
@@ -107,21 +122,20 @@ class AuspendlerParser implements TabularFileHandler {
 				
 				if(getBundesland(currentTo).equals("09") 
 					/*
-					 * falls nur Auspendler nach Bayern(ohne Garmisch) berücksichtigt werden sollen:
+					 * falls nur Auspendler nach Bayern(ohne Garmisch) ber��cksichtigt werden sollen:
 					 */ 
 					  && (!getKreis(currentTo).equals("09180"))
 					  /*
-					   * Störzeilen:
+					   * St��rzeilen:
 					   */
 					  	&& (!currentTo.substring(currentTo.length()-3).equals("000"))
 					  	/*
-					  	 * PROBLEM: Landkreise, die als 5-stelliger "Gemeindeschlüssel" in der Pendlerliste auftauchen,
-					  	 * müssen randomisiert auf "ihre" Gemeinden aufgeteilt werden! im Moment werden sie einfach 
+					  	 * PROBLEM: Landkreise, die als 5-stelliger "Gemeindeschl��ssel" in der Pendlerliste auftauchen,
+					  	 * m��ssen randomisiert auf "ihre" Gemeinden aufgeteilt werden! im Moment werden sie einfach 
 					  	 * ignoriert...
 					  	 */
-					  	&& (currentTo.length() > 5)
-					  		&& (!row[3].contains("Gemeinden"))
-									&& (!row[3].contains("Regierungsbezirke")) ){
+					//  	&& (currentTo.length() > 5)
+									&& (!row[3].contains("Gemeinden")) ){
 
 					String key = currentFrom + " - " + currentTo;
 					String anzahl = row[4];
@@ -135,9 +149,12 @@ class AuspendlerParser implements TabularFileHandler {
 					}
 					Integer anzahlPendler = Integer.parseInt(anzahl);
 					allCommuters += anzahlPendler;
-					
-					this.relations.put(key, anzahlPendler);
-					
+					if(currentTo.length() == 5){
+						uebrigeGemeindenCommuters += anzahlPendler;
+						this.relationsOfOtherMunicipalities.put(key, anzahlPendler);
+					} else{
+							this.relationsOfGivenMunicipalities.put(key, anzahlPendler);
+					  }
 				}
 			}
 		}

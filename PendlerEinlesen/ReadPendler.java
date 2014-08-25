@@ -1,4 +1,4 @@
-package garmisch;
+package simulation;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,22 +27,19 @@ public class ReadPendler {
 	/**
 	 * this method reads a csv-file with the aid of the pendlerParser-class.
 	 * 
-	 * @return a map containing special relations of departure- and arrival-locations and the corresponding
-	 * number of commuters to that relation.
+	 * @return a map containing special relations of departure- and arrival-locations in the form 
+	 * "AbfahrtsGemeindeschluessel - AnkunftsGemeindeschluessel" as map-key and the corresponding
+	 * number of commuters to that relation as map-value.
 	 */
 	public Map<String,Integer> run() {
 
 		GarmischPendlerParser gp = new GarmischPendlerParser();
 
-		read( "/Users/mini/Documents/MATSim/workspace/MyMatsimProject/inputGarmisch/Garmisch_Auspendler.csv",
+		read( "input/Garmisch_Auspendler.csv",
 				gp);
 		
-// 		print out relationsMap
-//		for (Entry<String, Integer> e : gp.relations.entrySet()) {
-//			System.out.println(e.getKey() + "\t" + e.getValue());
-//		}
 //		print out number of all commuters
-//		System.out.println("allCommuters:  " + gp.allCommuters);
+		System.out.println("Anzahl aller Pendler innerhalb Garmischs:  " + gp.allCommuters);
 		
 		return gp.relations;
 	}
