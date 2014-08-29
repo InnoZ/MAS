@@ -7,8 +7,8 @@ import org.matsim.core.config.Config;
 import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
-//import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import trafo.TransformationFactory;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+// import trafo.TransformationFactory;
 import org.matsim.core.utils.io.OsmNetworkReader;
 import org.matsim.core.config.ConfigUtils;
 
@@ -16,16 +16,17 @@ import org.matsim.core.config.ConfigUtils;
 public class CreateNetwork {
 
    public static void main(String[] args) {
-      String osm = "input/Geodaten/createNetwork/bayern.osm";
+      String osm = "input/Geodaten/createNetwork/bayernBiggerroads_garmischAllroads.osm";
       Config config = ConfigUtils.createConfig();
       Scenario sc = ScenarioUtils.createScenario(config);
       Network net = sc.getNetwork();
       CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(
-    		  TransformationFactory.WGS84, TransformationFactory.WGS84_UTM32N);
+      "EPSG:4326", "EPSG:32632");
+    //	  TransformationFactory.WGS84, TransformationFactory.WGS84_UTM32N);
       OsmNetworkReader onr = new OsmNetworkReader(net,ct);
       onr.parse(osm); 
       new NetworkCleaner().run(net);
-      new NetworkWriter(net).write("./output/network.xml");
+      new NetworkWriter(net).write("./output/network_bayern.xml");
    }
 }
 
