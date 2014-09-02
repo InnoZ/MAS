@@ -1,5 +1,8 @@
 package simulation;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,6 +23,7 @@ import org.matsim.core.basic.v01.IdImpl;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.MatsimNetworkReader;
+import org.matsim.core.population.PersonImpl;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordImpl;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -41,10 +45,10 @@ import com.vividsolutions.jts.io.WKTReader;
  */
 public class CreateDemandForGarmisch {
 
-	private static final String NETWORKFILE = "input/network_oberbayern.xml";
-	private static final String GEMEINDEN = "input/Geodaten/BayernGemeinden/gmd_ex.shp";
+	private static final String NETWORKFILE = "input/network_bayern.xml";
+	private static final String GEMEINDEN = "input/Geodaten/BayernGemeindenWGS84/bayern_gemeinden_UTM32N.shp";
 	private static final String PLANSFILEOUTPUT = "outputplans/plans_garmisch.xml";
-	private static final String BUILDINGS = "input/Geodaten/buildings_lk_ga/buildings_landkreis_garmisch_partenkirchen_wgs84.shp";
+	private static final String BUILDINGS = "input/Geodaten/buildings_lk_ga/buildings_landkreis_garmisch_partenkirchen_utm32N.shp";
 
 	private Scenario scenario;
 	private Map<String, Geometry> shapeMap;
@@ -88,9 +92,9 @@ public class CreateDemandForGarmisch {
 		relationsEinpendler = re.run("given");
 		relationsUebrigeEinpendler = re.run("other");
 
-		findKeysAndWritePlans(relationsGarmisch);
-		findKeysAndWritePlans(relationsAuspendler);
-		findKeysAndWritePlans(relationsEinpendler);
+		findKeysAndWritePlans(relationsGarmisch, "garmisch");
+		findKeysAndWritePlans(relationsAuspendler, "");
+		findKeysAndWritePlans(relationsEinpendler, "");
 		findKeysAndWritePlansForUebrigePendler(relationsUebrigeAuspendler, true);
 		findKeysAndWritePlansForUebrigePendler(relationsUebrigeEinpendler, false);
 
@@ -109,7 +113,8 @@ public class CreateDemandForGarmisch {
 	 *          map mit key: Gemeindeschluessel von Start & Ziel der
 	 *          Pendlergruppen, value: Anzahl Pendler mit diesem Start/Ziel.
 	 */
-	private void findKeysAndWritePlans(Map<String, Integer> relationsMap) {
+	private void findKeysAndWritePlans(Map<String, Integer> relationsMap,
+			String garmischOderNicht) {
 
 		// Iteriere ueber map mit Pendlerzahlen und rufe fuer jede Pendlergruppe
 		// writePlansFor auf
@@ -127,33 +132,85 @@ public class CreateDemandForGarmisch {
 			String to = liesZiel(key);
 			Integer value = (Integer) thisEntry.getValue();
 
-			writePlansFor(from, to, value);
+			writePlansFor(from, to, value, garmischOderNicht);
 
 		}
 	}
 
 	/**
 	 * @param fromGemeinde
-	 *          : Kreis, aus dem die Pendler kommen.
+	 *          : Gemeinde, aus der die Pendler kommen.
 	 * @param toGemeinde
-	 *          : Kreis, in den die Pendler fahren.
+	 *          : Gemeinde, in die die Pendler fahren.
 	 * @param commuters
-	 *          : Anzahl von Pendlern, die aus fromGemeinde kommen und nach toGemeinde
-	 *          fahren.
+	 *          : Anzahl von Pendlern, die aus fromGemeinde kommen und nach
+	 *          toGemeinde fahren.
 	 * 
-	 *          Diese Methode schreibt die Tagesplaene aller Pendler, die aus
-	 *          fromGemeinde kommen und nach toGemeinde fahren. Dazu werden zunaechst
-	 *          die beiden shapefiles "Gemeinden" und "Gebaeude" im Bezug auf das
-	 *          Gebiet Oberbayern eingelesen. Danach werden die Pendler in zwei
-	 *          Personengruppen aufgeteilt: Die erste besteht aus
-	 *          Autofahrern(53%), die zweite aus Personen, die den oeffentlichen
-	 *          Verkehr nutzen(47%). Zum Schluss werden zufaellige Koordinaten
-	 *          fuer Wohn- und Arbeitsorte der Personen erstellt,!! in denen sich
-	 *          auch tatsaechlich Gebaeude befinden !! (kommt noch)
+	 *          Diese Methode schreibt die Tagesplaene aller Pendler außerhalb
+	 *          Garmisch-Partenkirchens, die aus fromGemeinde kommen und nach
+	 *          toGemeinde fahren. Dazu wird zunaechst das shapefile
+	 *          "Gemeinden" im Bezug auf das Gebiet Bayern.
+	 *          eingelesen. Danach werden die Pendler in zwei Personengruppen
+	 *          aufgeteilt: Die erste besteht aus Autofahrern(53%), die zweite aus
+	 *          Personen, die den oeffentlichen Verkehr nutzen(47%). Zum Schluss
+	 *          werden zufaellige Koordinaten fuer Wohn- und Arbeitsorte der
+	 *          Personen erstellt.
 	 */
-	private void writePlansFor(String fromGemeinde, String toGemeinde, int commuters) {
+	private void writePlansFor(String fromGemeinde, String toGemeinde,
+			int commuters, String garmischOderNicht) {
+
+		if (garmischOderNicht.equals("garmisch")) {
+			writePlansForGarmisch(fromGemeinde, toGemeinde, commuters);
+		} else {
+
+			if (shapeMap == null)
+				// "SCH" ist der Gemeindeschlüssel zu der jeweiligen Geometry
+				this.shapeMap = readShapeFile(GEMEINDEN, "SCH");
+
+			double comm = commuters * SCALEFACTOR;
+			double carcomm = 0.53 * comm;
+			float roundedCarcomm = Math.round(carcomm);
+
+			for (int i = 0; i <= comm; i++) {
+				String mode = "car";
+				if (i > roundedCarcomm)
+					mode = "pt";
+
+				Coord homec = drawRandomPointFromGeometry(this.shapeMap
+						.get(fromGemeinde));
+
+				Coord workc = drawRandomPointFromGeometry(this.shapeMap.get(toGemeinde));
+
+				createOnePerson(i, homec, workc, mode, fromGemeinde + "_" + toGemeinde);
+			}
+		}
+	}
+
+	/**
+	 * @param fromGemeinde
+	 *          : Gemeinde, aus der die Pendler kommen.
+	 * @param toGemeinde
+	 *          : Gemeinde, in die die Pendler fahren.
+	 * @param commuters
+	 *          : Anzahl von Pendlern, die aus fromGemeinde kommen und nach
+	 *          toGemeinde fahren.
+	 * 
+	 *          Diese Methode schreibt die Tagesplaene aller Pendler innerhalb
+	 *          Garmisch-Partenkirchens, die aus fromGemeinde kommen und nach
+	 *          toGemeinde fahren. Dazu werden zunaechst die beiden shapefiles
+	 *          "Gemeinden" und "Gebaeude" im Bezug auf das Gebiet Oberbayern
+	 *          eingelesen. Danach werden die Pendler in zwei Personengruppen
+	 *          aufgeteilt: Die erste besteht aus Autofahrern(53%), die zweite aus
+	 *          Personen, die den oeffentlichen Verkehr nutzen(47%). Zum Schluss
+	 *          werden zufaellige Koordinaten fuer Wohn- und Arbeitsorte der
+	 *          Personen erstellt, in denen sich auch tatsaechlich Gebaeude
+	 *          befinden.
+	 */
+	private void writePlansForGarmisch(String fromGemeinde, String toGemeinde,
+			int commuters) {
 
 		if (shapeMap == null)
+			// "SCH" ist der Gemeindeschlüssel zu der jeweiligen Geometry
 			this.shapeMap = readShapeFile(GEMEINDEN, "SCH");
 		if (buildingsMap == null)
 			this.buildingsMap = readShapeFile(BUILDINGS, "osm_id");
@@ -161,10 +218,6 @@ public class CreateDemandForGarmisch {
 		double comm = commuters * SCALEFACTOR;
 		double carcomm = 0.53 * comm;
 		float roundedCarcomm = Math.round(carcomm);
-
-		// print out keySets of maps
-		// System.out.println(this.shapeMap.keySet());
-		// System.out.println(this.buildingsMap.keySet());
 
 		Geometry[] buildingsAsArray = new Geometry[buildingsMap.size()];
 		buildingsMap.values().toArray(buildingsAsArray);
@@ -174,18 +227,11 @@ public class CreateDemandForGarmisch {
 			if (i > roundedCarcomm)
 				mode = "pt";
 
-			Coord homec = drawRandomPointFromGeometry(this.shapeMap.get(fromGemeinde));
-			
-			Coord workc = drawRandomPointFromGeometry(this.shapeMap.get(toGemeinde));
+			Coord homec = drawRandomPointInBuilding(this.shapeMap.get(fromGemeinde),
+					buildingsAsArray);
 
-			/*
-			 * Coord homec =
-			 * drawRandomPointInTwoGeometries(this.shapeMap.get(fromGemeinde),
-			 * buildingsAsArray); 
-			 * Coord workc =
-			 * drawRandomPointInTwoGeometries(this.shapeMap.get(toGemeinde),
-			 * buildingsAsArray);
-			 */
+			Coord workc = drawRandomPointInBuilding(this.shapeMap.get(toGemeinde),
+					buildingsAsArray);
 
 			createOnePerson(i, homec, workc, mode, fromGemeinde + "_" + toGemeinde);
 		}
@@ -215,10 +261,10 @@ public class CreateDemandForGarmisch {
 
 		Person person = scenario.getPopulation().getFactory()
 				.createPerson(new IdImpl(toFromPrefix + "_" + i));
+
 		Plan plan = scenario.getPopulation().getFactory().createPlan();
 		Activity home = scenario.getPopulation().getFactory()
 				.createActivityFromCoord("home", coord);
-
 		// create random time to leave home
 		double start = Math.random() * 3 + 6; // starting time between 6 and 9
 		double end = Math.random() * 3 + 7; // end time between start+7 and start+10
@@ -233,6 +279,7 @@ public class CreateDemandForGarmisch {
 		// work.setStartTime(start * 60 * 60);
 		work.setEndTime(end * 60 * 60);
 		plan.addActivity(work);
+		// leisure
 		Leg rueckweg = scenario.getPopulation().getFactory().createLeg(mode);
 		plan.addLeg(rueckweg);
 		Activity home2 = scenario.getPopulation().getFactory()
@@ -241,7 +288,7 @@ public class CreateDemandForGarmisch {
 		person.addPlan(plan);
 		scenario.getPopulation().addPerson(person);
 	}
-
+			
 	/**
 	 * Filtert aus den keys der inputMap die Kreisschluessel der Start-/Zielorte
 	 * von Pendlergruppen heraus und erweitert diese zu passenden
@@ -422,7 +469,7 @@ public class CreateDemandForGarmisch {
 				from = kreiszahl;
 				to = liesZiel(relation);
 			}
-			writePlansFor(from, to, value);
+			writePlansFor(from, to, value, "");
 		}
 	}
 
@@ -532,7 +579,8 @@ public class CreateDemandForGarmisch {
 	/**
 	 * @param g
 	 *          Geometry einer bestimmten Gemeinde.
-	 * @return Koordinaten eines zufaellig gewaehlten Punktes, der in der input-Geometry g enthalten ist.
+	 * @return Koordinaten eines zufaellig gewaehlten Punktes, der in der
+	 *         input-Geometry g enthalten ist.
 	 */
 	private Coord drawRandomPointFromGeometry(Geometry g) {
 		Random rnd = MatsimRandom.getLocalInstance();
@@ -564,7 +612,7 @@ public class CreateDemandForGarmisch {
 	 * @return ein Gebaeude, welches zufaellig ausgewaehlt wurde und im
 	 *         input-Landkreis liegt.
 	 */
-	private Coord drawRandomPointInTwoGeometries(Geometry landkreis,
+	private Coord drawRandomPointInBuilding(Geometry gemeinde,
 			Geometry[] buildings) {
 		Random rnd = MatsimRandom.getLocalInstance();
 		Coord result;
@@ -575,7 +623,7 @@ public class CreateDemandForGarmisch {
 			int random = rnd.nextInt(size);
 			Geometry building = buildings[random];
 
-			if (landkreis.contains(building)) {
+			if (gemeinde.contains(building)) {
 				Point center = building.getCentroid();
 				result = new CoordImpl(center.getX(), center.getY());
 				break;
