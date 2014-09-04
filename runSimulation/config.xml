@@ -3,11 +3,11 @@
 <config>
 
     <module name="network">
-        <param name="inputNetworkFile" value="input/network_garmisch.xml" />
+        <param name="inputNetworkFile" value="input/networks/network_bayern.xml" />
     </module>
     
 	<module name="plans">
-		<param name="inputPlansFile" value="input/plans.xml.gz" />
+		<param name="inputPlansFile" value="input/plans/plans_garmisch.xml" />
 	</module>
 	
     <module name="controler">
@@ -18,36 +18,77 @@
         <param name="eventsFileFormat" value="xml" />
     </module>
  
- <module name="qsim"> 
- <param name="startTime" value="00:00:00" /> 
- <param name="endTime" value="24:00:00" />
- <param name="flowCapacityFactor" value="1.0" /> 
- <param name="storageCapacityFactor" value="1.0" /> 
- 
- <param name="stuckTime" value="10" /> 
- <param name="removeStuckVehicles" value="yes" /> 
-
- </module>
+ 	<module name="qsim"> 
+ 		<param name="startTime" value="00:00:00" /> 
+ 		<param name="endTime" value="24:00:00" />
+ 		<param name="flowCapacityFactor" value="0.1" /> 
+ 		<param name="storageCapacityFactor" value="0.1" /> 
+ 		<param name="stuckTime" value="10" /> 
+ 		<param name="removeStuckVehicles" value="yes" /> 
+ 	</module>
+ 	
+ 	<module name="multimodal" >
+		<!-- Use this, if your network is not multi modal. Links with free speeds that are lower than the specified cutoff value will be usable for walk and bike trips. -->
+		<param name="createMultiModalNetwork" value="false" />
+		<!-- Only used, if createMultiModalNetwork is enabled (set value in m/s). -->
+		<param name="cuttoffValueForNonCarModes" value="22.22222222222222" />
+		<param name="dropNonCarRoutes" value="false" />
+		<param name="multiModalSimulationEnabled" value="false" />
+		<!-- Use number of threads > 1 for parallel version using the specified number of threads. -->
+		<param name="numberOfThreads" value="1" />
+		<param name="simulatedModes" value="pt,walk,ride,bike" />
+	</module>
 	
+	 <module name="planscalcroute" >
+	  	<param name="networkModes" value="car" />
+		<!-- factor with which beeline distances (and therefore times) are multiplied in order to obtain an estimate of the network distances/times.  Default is something like 1.3 -->
+		<param name="beelineDistanceFactor" value="1.5" />
+		<!-- All the modes for which the router is supposed to generate network routes (like car) -->
+		<param name="networkModes" value="car" />
+		<!-- Speed for a teleported mode based on beeline-distance: (<beeline distance> * beelineDistanceFactor) / speed. Insert a line like this for every such mode. -->
+		<param name="teleportedModeSpeed_bike" value="4.0" />
+		<!-- Speed for a teleported mode based on beeline-distance: (<beeline distance> * beelineDistanceFactor) / speed. Insert a line like this for every such mode. -->
+		<param name="teleportedModeSpeed_pt" value="20.0" />
+		<!-- Speed for a teleported mode based on beeline-distance: (<beeline distance> * beelineDistanceFactor) / speed. Insert a line like this for every such mode. -->
+		<param name="teleportedModeSpeed_walk" value="1.4" />
+	</module>
+
     <module name="planCalcScore" >
         <param name="performing" value="+6" />
         <param name="traveling" value="-6" />
         <param name="lateArrival" value="-18.0" />
+        <param name="travelling_walk" value="-6.0" />
 
         <param name="activityType_0"            value="home" />
         <param name="activityTypicalDuration_0" value="12:00:00" />
     
         <param name="activityType_1"            value="work" />
         <param name="activityTypicalDuration_1" value="08:00:00" />
-
-        <param name="activityOpeningTime_1"     value="07:00:00" />
+        
+         <param name="activityOpeningTime_1"     value="07:00:00" />
         <param name="activityLatestStartTime_1" value="09:00:00" />
         <param name="activityClosingTime_1"     value="20:00:00" />
+        
+        <param name="activityType_2"            value="leisure" />
+        <param name="activityTypicalDuration_2" value="03:00:00" />
+        
+         <param name="activityOpeningTime_2"     value="08:30:00" />
+        <param name="activityLatestStartTime_2" value="12:00:00" />
+        <param name="activityClosingTime_2"     value="23:00:00" />
+    
+        <param name="activityType_3"            value="shopping" />
+        <param name="activityTypicalDuration_3" value="01:00:00" />
+        
+        <param name="activityOpeningTime_1"     value="08:00:00" />
+        <param name="activityClosingTime_1"     value="20:00:00" />
+        
+        <param name="activityType_4"            value="education" />
+        <param name="activityTypicalDuration_4" value="08:00:00" /> 
     </module>
 
     <module name="strategy">
         <param name="maxAgentPlanMemorySize" value="5" />
-
+        
         <param name="ModuleProbability_1" value="0.8" />
         <param name="Module_1" value="ChangeExpBeta" />
 		<param name="ModuleDisableAfterIteration_1" value="null" /> 
@@ -56,9 +97,9 @@
         <param name="ModuleProbability_2" value="0.2" />
         <param name="Module_2" value="ReRoute" />
 		<param name="ModuleDisableAfterIteration_2" value="15" /> 
-
     </module>
-<module name="planscalcroute" >
-	<param name="ptSpeedFactor" value="2.0" />
-</module>
+    
+	<module name="planscalcroute" >
+		<param name="ptSpeedFactor" value="2.0" />
+	</module>
 </config>

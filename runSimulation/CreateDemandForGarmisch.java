@@ -1,11 +1,16 @@
 package simulation;
 
+import readTrafficParticipants.*;
+import readTrafficVorlaeufig.*;
+import readTrafficVorlaeufig.TrafficPeopleMode.Sex;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
@@ -19,6 +24,7 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PopulationWriter;
+// import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.basic.v01.IdImpl;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
@@ -45,13 +51,17 @@ import com.vividsolutions.jts.io.WKTReader;
  */
 public class CreateDemandForGarmisch {
 
-	private static final String NETWORKFILE = "input/network_bayern.xml";
-	private static final String GEMEINDEN = "input/Geodaten/BayernGemeindenWGS84/bayern_gemeinden_UTM32N.shp";
-	private static final String PLANSFILEOUTPUT = "outputplans/plans_garmisch.xml";
+	private static final String NETWORKFILE = "input/networks/network_bayern.xml";
+	private static final String GEMEINDEN = "input/Geodaten/BayernGemeindenWGS84_UTM32N/bayern_gemeinden_UTM32N.shp";
+	private static final String GARMISCH = "input/Geodaten/Garmisch_Gemeindegrenzen/Garmisch_Gemeindegrenzen_UTM32N.shp";
+	private static final String PLANSFILEOUTPUT = "input/plans/plans_garmisch.xml";
 	private static final String BUILDINGS = "input/Geodaten/buildings_lk_ga/buildings_landkreis_garmisch_partenkirchen_utm32N.shp";
+	private static final String MODALSPLIT_TABLE = "input/Verkehrsdaten/ModalSplit_GAP.csv";
+	private static final String TRAFFIC_TABLE = "input/Verkehrsdaten/DurchschnittWege.csv";
 
 	private Scenario scenario;
 	private Map<String, Geometry> shapeMap;
+	private Map<String, Geometry> garmischMap;
 	private Map<String, Geometry> buildingsMap;
 	private static double SCALEFACTOR = 0.1;
 
@@ -97,6 +107,7 @@ public class CreateDemandForGarmisch {
 		findKeysAndWritePlans(relationsEinpendler, "");
 		findKeysAndWritePlansForUebrigePendler(relationsUebrigeAuspendler, true);
 		findKeysAndWritePlansForUebrigePendler(relationsUebrigeEinpendler, false);
+		createPopulationFromModalSplitTable();
 
 		PopulationWriter pw = new PopulationWriter(scenario.getPopulation(),
 				scenario.getNetwork());
@@ -148,13 +159,12 @@ public class CreateDemandForGarmisch {
 	 * 
 	 *          Diese Methode schreibt die Tagesplaene aller Pendler außerhalb
 	 *          Garmisch-Partenkirchens, die aus fromGemeinde kommen und nach
-	 *          toGemeinde fahren. Dazu wird zunaechst das shapefile
-	 *          "Gemeinden" im Bezug auf das Gebiet Bayern.
-	 *          eingelesen. Danach werden die Pendler in zwei Personengruppen
-	 *          aufgeteilt: Die erste besteht aus Autofahrern(53%), die zweite aus
-	 *          Personen, die den oeffentlichen Verkehr nutzen(47%). Zum Schluss
-	 *          werden zufaellige Koordinaten fuer Wohn- und Arbeitsorte der
-	 *          Personen erstellt.
+	 *          toGemeinde fahren. Dazu wird zunaechst das shapefile "Gemeinden"
+	 *          im Bezug auf das Gebiet Bayern. eingelesen. Danach werden die
+	 *          Pendler in zwei Personengruppen aufgeteilt: Die erste besteht aus
+	 *          Autofahrern(53%), die zweite aus Personen, die den oeffentlichen
+	 *          Verkehr nutzen(47%). Zum Schluss werden zufaellige Koordinaten
+	 *          fuer Wohn- und Arbeitsorte der Personen erstellt.
 	 */
 	private void writePlansFor(String fromGemeinde, String toGemeinde,
 			int commuters, String garmischOderNicht) {
@@ -215,12 +225,12 @@ public class CreateDemandForGarmisch {
 		if (buildingsMap == null)
 			this.buildingsMap = readShapeFile(BUILDINGS, "osm_id");
 
+		Geometry[] buildingsAsArray = new Geometry[buildingsMap.size()];
+		buildingsMap.values().toArray(buildingsAsArray);
+
 		double comm = commuters * SCALEFACTOR;
 		double carcomm = 0.53 * comm;
 		float roundedCarcomm = Math.round(carcomm);
-
-		Geometry[] buildingsAsArray = new Geometry[buildingsMap.size()];
-		buildingsMap.values().toArray(buildingsAsArray);
 
 		for (int i = 0; i <= comm; i++) {
 			String mode = "car";
@@ -250,11 +260,12 @@ public class CreateDemandForGarmisch {
 	 *          : Kombinierte Kennzeichnung des Abfahrts- bzw. Ankunftsortes der
 	 *          Person als Pendler.
 	 * 
-	 *          Diese Methode erzeugt einen MatSimAgenten aus den input-Daten und
-	 *          fuegt diesen dem "scenario" hinzu. Dazu wird zunaechst eine Reihe
-	 *          von Aktivitaeten erzeugt(home -> work -> home). Diese werden
-	 *          anschließend in einem Plan gespeichert. Der Plan wird einer Person
-	 *          hinzugefuegt und diese wiederum der population des scenarios.
+	 *          Diese Methode erzeugt einen MatSimAgenten aus den
+	 *          Pendler-input-Daten und fuegt diesen dem "scenario" hinzu. Dazu
+	 *          wird zunaechst eine Reihe von Aktivitaeten erzeugt(home -> work ->
+	 *          home). Diese werden anschließend in einem Plan gespeichert. Der
+	 *          Plan wird einer Person hinzugefuegt und diese wiederum der
+	 *          population des scenarios.
 	 */
 	private void createOnePerson(int i, Coord coord, Coord coordWork,
 			String mode, String toFromPrefix) {
@@ -279,7 +290,6 @@ public class CreateDemandForGarmisch {
 		// work.setStartTime(start * 60 * 60);
 		work.setEndTime(end * 60 * 60);
 		plan.addActivity(work);
-		// leisure
 		Leg rueckweg = scenario.getPopulation().getFactory().createLeg(mode);
 		plan.addLeg(rueckweg);
 		Activity home2 = scenario.getPopulation().getFactory()
@@ -288,7 +298,240 @@ public class CreateDemandForGarmisch {
 		person.addPlan(plan);
 		scenario.getPopulation().addPerson(person);
 	}
+
+	/**
+	 * erzeugt MatSim-Agenten aus den Daten einer Tabelle,die Informationen über
+	 * das Verkehrsverhalten von Menschen verschiedener Altersgruppen im
+	 * ländlichen Raum enthält.
+	 */
+	private void createPopulationFromModalSplitTable() {
+		if (garmischMap == null)
+			// "SCH" ist der Gemeindeschlüssel zu der jeweiligen Geometry
+			this.garmischMap = readShapeFile(GARMISCH, "SCH");
+		
+		Geometry[] garmischMapAsArray = new Geometry[buildingsMap.size()];
+		buildingsMap.values().toArray(garmischMapAsArray);
+
+		/*
+		 * Read the census file Create the persons and add the socio-demographics
+		 */
+		TrafficPeopleParser tpp = new TrafficPeopleParser();
+
+		tpp.readData(TRAFFIC_TABLE);
+		
+		/*
+		 * get list of traffic-participants-data
+		 */
+		List<TrafficPeopleMode> allParticipants = tpp.getParticipantgroups();
+
+		// manuelle Fehlerausbesserung: weibliches Geschlecht wird vom Parser nicht erkannt
+		for (int i = 9; i <= 17; i++) {
+			allParticipants.get(i).setSex(Sex.f);
+		}
+		
+		TrafficPeopleMode participantgroup = new TrafficPeopleMode();
+		int personIndex = 0;
+		int age = 0;
+		Random rnd = MatsimRandom.getLocalInstance();
+		int randomAge = 0;
+		int randomMapentry = 0;
+		/*
+		 * Create persons and add them to the population
+		 */
+		for (int i = 0; i < allParticipants.size(); i++) {
+			participantgroup = allParticipants.get(i);
+
+			age = participantgroup.getAge();
+			String sex = participantgroup.getSex();
 			
+			/*
+			 * Erzeugung der Agenten, die zu Fuß gehen
+			 */
+			for (int j = 0; j < participantgroup.getPedestrian()* SCALEFACTOR; j++) {
+				
+				Person person = scenario.getPopulation().getFactory()
+						.createPerson(new IdImpl(personIndex));
+				personIndex++;
+				randomAge = rnd.nextInt(age + 9);
+				((PersonImpl) person).setSex(sex);
+				((PersonImpl) person).setAge(Integer.valueOf(randomAge));
+				/*
+				 * create random homeCoordinate and arrivalCoordinate
+				 */
+				randomMapentry = rnd.nextInt(garmischMapAsArray.length-1);
+				Geometry randomGeom = garmischMapAsArray[randomMapentry];
+				Coord homeCoord = drawRandomPointFromGeometry(randomGeom);
+				
+				randomMapentry = rnd.nextInt(garmischMapAsArray.length-1);
+				randomGeom = garmischMapAsArray[randomMapentry];
+				Coord arrivalCoord = drawRandomPointFromGeometry(randomGeom);
+				
+				Plan plan = scenario.getPopulation().getFactory().createPlan();
+				Activity home = scenario.getPopulation().getFactory()
+						.createActivityFromCoord("home", homeCoord);
+				
+				double go = Math.random() * 3 + 10; // starting time between 10 and 13
+				double stop = Math.random() * 5 + 12; // end time between 12 and 17
+				
+				home.setEndTime(go * 60 * 60);
+				plan.addActivity(home);
+				// TransportMode.bla !!!!!!!!!!!!!!!!!!!!!!!
+				Leg hinweg = scenario.getPopulation().getFactory().createLeg("walk");
+				plan.addLeg(hinweg);
+				Activity education = scenario.getPopulation().getFactory()
+						.createActivityFromCoord("education", arrivalCoord);
+				education.setEndTime(stop * 60 * 60);
+				plan.addActivity(education);
+				Leg rueckweg = scenario.getPopulation().getFactory().createLeg("walk");
+				plan.addLeg(rueckweg);
+				Activity home2 = scenario.getPopulation().getFactory()
+						.createActivityFromCoord("home", homeCoord);
+				plan.addActivity(home2);
+				person.addPlan(plan);
+				scenario.getPopulation().addPerson(person);
+			}
+
+			/*
+			 * Erzeugung der Agenten, mit dem Rad fahren
+			 */
+			for (int j = 0; j < participantgroup.getBike()* SCALEFACTOR; j++) {
+				
+				Person person = scenario.getPopulation().getFactory()
+						.createPerson(new IdImpl(personIndex));
+				personIndex++;
+				randomAge = rnd.nextInt(age + 9);
+				((PersonImpl) person).setSex(sex);
+				((PersonImpl) person).setAge(Integer.valueOf(randomAge));
+				/*
+				 * create random homeCoordinate and arrivalCoordinate
+				 */
+				randomMapentry = rnd.nextInt(garmischMapAsArray.length-1);
+				Geometry randomGeom = garmischMapAsArray[randomMapentry];
+				Coord homeCoord = drawRandomPointFromGeometry(randomGeom);
+				
+				randomMapentry = rnd.nextInt(garmischMapAsArray.length-1);
+				randomGeom = garmischMapAsArray[randomMapentry];
+				Coord arrivalCoord = drawRandomPointFromGeometry(randomGeom);
+				
+				Plan plan = scenario.getPopulation().getFactory().createPlan();
+				Activity home = scenario.getPopulation().getFactory()
+						.createActivityFromCoord("home", homeCoord);
+				
+				double go = Math.random() * 3 + 9; // starting time between 9 and 12
+				double stop = Math.random() * 5 + 14; // end time between 14 and 19
+				
+				home.setEndTime(go * 60 * 60);
+				plan.addActivity(home);
+				Leg hinweg = scenario.getPopulation().getFactory().createLeg("bike");
+				plan.addLeg(hinweg);
+				Activity shopping = scenario.getPopulation().getFactory()
+						.createActivityFromCoord("shopping", arrivalCoord);
+				shopping.setEndTime(stop * 60 * 60);
+				plan.addActivity(shopping);
+				Leg rueckweg = scenario.getPopulation().getFactory().createLeg("bike");
+				plan.addLeg(rueckweg);
+				Activity home2 = scenario.getPopulation().getFactory()
+						.createActivityFromCoord("home", homeCoord);
+				plan.addActivity(home2);
+				person.addPlan(plan);
+				scenario.getPopulation().addPerson(person);
+			}
+
+			/*
+			 * Erzeugung der Agenten, mit dem Auto fahren
+			 */
+			for (int j = 0; j < participantgroup.getCar()* SCALEFACTOR; j++) {
+				
+				Person person = scenario.getPopulation().getFactory()
+						.createPerson(new IdImpl(personIndex));
+				personIndex++;
+				randomAge = rnd.nextInt(age + 9);
+				((PersonImpl) person).setSex(sex);
+				((PersonImpl) person).setAge(Integer.valueOf(randomAge));
+				/*
+				 * create random homeCoordinate and arrivalCoordinate
+				 */
+				randomMapentry = rnd.nextInt(garmischMapAsArray.length-1);
+				Geometry randomGeom = garmischMapAsArray[randomMapentry];
+				Coord homeCoord = drawRandomPointFromGeometry(randomGeom);
+				
+				randomMapentry = rnd.nextInt(garmischMapAsArray.length-1);
+				randomGeom = garmischMapAsArray[randomMapentry];
+				Coord arrivalCoord = drawRandomPointFromGeometry(randomGeom);
+				
+				Plan plan = scenario.getPopulation().getFactory().createPlan();
+				Activity home = scenario.getPopulation().getFactory()
+						.createActivityFromCoord("home", homeCoord);
+				
+				double go = Math.random() * 2 + 13 ; // starting time between 13 and 15
+				double stop = Math.random() * 3 + 15; // end time between 15 and 18
+				
+				home.setEndTime(go * 60 * 60);
+				plan.addActivity(home);
+				Leg hinweg = scenario.getPopulation().getFactory().createLeg("car");
+				plan.addLeg(hinweg);
+				Activity work = scenario.getPopulation().getFactory()
+						.createActivityFromCoord("work", arrivalCoord);
+				work.setEndTime(stop * 60 * 60);
+				plan.addActivity(work);
+				Leg rueckweg = scenario.getPopulation().getFactory().createLeg("car");
+				plan.addLeg(rueckweg);
+				Activity home2 = scenario.getPopulation().getFactory()
+						.createActivityFromCoord("home", homeCoord);
+				plan.addActivity(home2);
+				person.addPlan(plan);
+				scenario.getPopulation().addPerson(person);
+			}
+			
+			/*
+			 * Erzeugung der Agenten, die den oeffentlichen Verkehr nutzen
+			 */
+			for (int j = 0; j < participantgroup.getPt()* SCALEFACTOR; j++) {
+				
+				Person person = scenario.getPopulation().getFactory()
+						.createPerson(new IdImpl(personIndex));
+				personIndex++;
+				randomAge = rnd.nextInt(age + 9);
+				((PersonImpl) person).setSex(sex);
+				((PersonImpl) person).setAge(Integer.valueOf(randomAge));
+				/*
+				 * create random homeCoordinate and arrivalCoordinate
+				 */
+				randomMapentry = rnd.nextInt(garmischMapAsArray.length-1);
+				Geometry randomGeom = garmischMapAsArray[randomMapentry];
+				Coord homeCoord = drawRandomPointFromGeometry(randomGeom);
+				
+				randomMapentry = rnd.nextInt(garmischMapAsArray.length-1);
+				randomGeom = garmischMapAsArray[randomMapentry];
+				Coord arrivalCoord = drawRandomPointFromGeometry(randomGeom);
+				
+				Plan plan = scenario.getPopulation().getFactory().createPlan();
+				Activity home = scenario.getPopulation().getFactory()
+						.createActivityFromCoord("home", homeCoord);
+				
+				double go = Math.random() * 3 + 8; // starting time between 8 and 11
+				double stop = Math.random() * 4 + 16; // end time between 16 and 20
+				
+				home.setEndTime(go * 60 * 60);
+				plan.addActivity(home);
+				Leg hinweg = scenario.getPopulation().getFactory().createLeg("pt");
+				plan.addLeg(hinweg);
+				Activity leisure = scenario.getPopulation().getFactory()
+						.createActivityFromCoord("leisure", arrivalCoord);
+				leisure.setEndTime(stop * 60 * 60);
+				plan.addActivity(leisure);
+				Leg rueckweg = scenario.getPopulation().getFactory().createLeg("pt");
+				plan.addLeg(rueckweg);
+				Activity home2 = scenario.getPopulation().getFactory()
+						.createActivityFromCoord("home", homeCoord);
+				plan.addActivity(home2);
+				person.addPlan(plan);
+				scenario.getPopulation().addPerson(person);
+			}
+
+		}
+	}
+
 	/**
 	 * Filtert aus den keys der inputMap die Kreisschluessel der Start-/Zielorte
 	 * von Pendlergruppen heraus und erweitert diese zu passenden
