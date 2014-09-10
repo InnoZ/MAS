@@ -8,6 +8,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -53,7 +55,8 @@ public class CreateDemandForGarmisch {
 
 	private static final String NETWORKFILE = "input/networks/network_bayern.xml";
 	private static final String GEMEINDEN = "input/Geodaten/BayernGemeindenWGS84_UTM32N/bayern_gemeinden_UTM32N.shp";
-	private static final String GARMISCH = "input/Geodaten/Garmisch_Gemeindegrenzen/Garmisch_Gemeindegrenzen_UTM32N.shp";
+	// private static final String GARMISCH =
+	// "input/Geodaten/Garmisch_Gemeindegrenzen/Garmisch_Gemeindegrenzen_UTM32N.shp";
 	private static final String PLANSFILEOUTPUT = "input/plans/plans_garmisch.xml";
 	private static final String BUILDINGS = "input/Geodaten/buildings_lk_ga/buildings_landkreis_garmisch_partenkirchen_utm32N.shp";
 	private static final String MODALSPLIT_TABLE = "input/Verkehrsdaten/ModalSplit_GAP.csv";
@@ -61,7 +64,6 @@ public class CreateDemandForGarmisch {
 
 	private Scenario scenario;
 	private Map<String, Geometry> shapeMap;
-	private Map<String, Geometry> garmischMap;
 	private Map<String, Geometry> buildingsMap;
 	Geometry[] buildingsAsArray;
 	private static double SCALEFACTOR = 0.1;
@@ -301,17 +303,139 @@ public class CreateDemandForGarmisch {
 		scenario.getPopulation().addPerson(person);
 	}
 
-	private void createModalSplitPopulation() {
+	/**
+	 * Erstellt AgentenPläne auf Basis einer ModalSplitTabelle
+	 */
+	@SuppressWarnings("unchecked")
+	private void createModalSplitPopulationNew() {
 
 		TrafficParticipantsParser tpp = new TrafficParticipantsParser();
 
 		tpp.readData(MODALSPLIT_TABLE);
 
+		/*
+		 * Erstelle Liste, die alle Verkehrsteilnehmergruppen als
+		 * TrafficParticipants speichert.
+		 */
 		List<TrafficParticipants> allParticipants = tpp.getParticipantgroups();
 		TrafficParticipants participantgroup = new TrafficParticipants();
-		int personIndex = 0;
-		int age = 0;
+
+		/*
+		 * Teile die Liste in zwei ArrayLists nach dem Geschlecht der
+		 * Verkehrsteilnehmer auf und sortiere sie anschließend nach deren Alter.
+		 */
+		List<TrafficParticipants> male = new ArrayList<TrafficParticipants>();
+		List<TrafficParticipants> female = new ArrayList<TrafficParticipants>();
+
+		Comparator<TrafficParticipants> compareAge = new CompareAge();
+		for (int i = 0; i < allParticipants.size(); i++) {
+			participantgroup = allParticipants.get(i);
+
+			if (participantgroup.getSex().equals("m")) {
+				male.add(participantgroup);
+			} else {
+				female.add(participantgroup);
+			}
+		}
+
+		Collections.sort(male, compareAge);
+		for (int i = 0; i < male.size(); i++) {
+		}
+		Collections.sort(female, compareAge);
+		for (int i = 0; i < female.size(); i++) {
+		}
+
+		/*
+		 * Iteriere über die Liste männlicher Verkehrsteilnehmer und betrachte die
+		 * einzelnen Altersgruppen separat. Damit ist Geschlecht und Alter eines
+		 * MatSimagenten schon festgelegt. Des Weiteren werden bei der Erstellung
+		 * einer Person 2 - 4 Aktivitäten erzeugt.
+		 */
+		String[] activityTypes = { "work", "businessRelatedTravel", "education",
+				"shopping", "errand", "leisure", "attendance" };
+
 		Random rnd = MatsimRandom.getLocalInstance();
+		
+		int age = 0;
+		String sex = "";
+
+		for (int i = 0; i < male.size(); i = i + 4) {
+			
+			int activitiesPerDay = 2 + rnd.nextInt(2);
+			int randomTrafficMode = rnd.nextInt(4);
+			int randomactivity = rnd.nextInt(6);
+
+			TrafficParticipants maleParticipants = male.get(i + randomTrafficMode);
+			String mode = maleParticipants.getMode();
+			age = maleParticipants.getAge();
+			sex = "m";
+
+			while (!(activitiesPerDay == 0)) {
+				/*
+				 * Lege eine Map für jede Altersgruppe von Verkehrsteilnehmern an, in
+				 * der die Anzahl von Personen zu den versch. Wegezwecken gespeichert
+				 * werden.
+				 */
+				Map<String, Integer> activities = new HashMap<String, Integer>();
+
+				activities.put("attendance", participantgroup.getAttendance());
+				activities.put("businessRelatedTravel",
+						participantgroup.getBusinessRelatedTravel());
+				activities.put("education", participantgroup.getEducation());
+				activities.put("errand", participantgroup.getErrand());
+				activities.put("leisure", participantgroup.getLeisure());
+				activities.put("shopping", participantgroup.getShopping());
+				activities.put("work", participantgroup.getWork());
+
+				System.out.println("acts:   " + (activities.entrySet()));
+
+				// performingPeople = number of persons performing a certain activity
+				//int performingPeople = 0;
+				String act = "";
+				int numberOfZeroPerformancers = 0;
+
+				/*
+				 * Diese while-schleife läuft nur so lange, wie es noch
+				 * values in der activities-map gibt, die nicht Null sind, d.h. so lange noch performingPeople übrig sind.  
+				 * Bei jedem Fund eines nicht-Null-values wird dieser um einen Wert gesenkt. Sind alle Values
+				 * gleich Null, so wurden allen performers schon genügend activities zugewiesen.
+				 * PROBLEM: die schleife stimmt noch nicht. bisher wird nur abgefragt, ob noch activities vergeben werden können, 
+				 * aber nciht, welche. Dann fehlt noch, dass die Personen, plans usw. konkret erstellt werden.
+				 */
+				while (numberOfZeroPerformancers < 7) {
+					act = activityTypes[randomactivity];
+					int performingPeople = activities.get(act);
+
+					Integer zero = new Integer(0);
+
+					for (Integer n : activities.values()) {
+						if (zero.equals(n)) {
+							numberOfZeroPerformancers++;
+						}
+					}
+				}
+				
+				activitiesPerDay--;
+			}
+		}
+	}
+
+	private void createModalSplitPopulation() {
+
+		TrafficParticipantsParser tpp = new TrafficParticipantsParser();
+
+		tpp.readData(MODALSPLIT_TABLE);
+		/*
+		 * Erstelle Liste, die alle Verkehrsteilnehmergruppen als
+		 * TrafficParticipants speichert.
+		 */
+		List<TrafficParticipants> allParticipants = tpp.getParticipantgroups();
+		TrafficParticipants participantgroup = new TrafficParticipants();
+		
+		Random rnd = MatsimRandom.getLocalInstance();
+
+		int age = 0;
+		int personIndex = 0;
 		int randomAge = 0;
 
 		/*
@@ -339,6 +463,7 @@ public class CreateDemandForGarmisch {
 			activities.put("shopping", participantgroup.getShopping());
 			activities.put("work", participantgroup.getWork());
 
+			System.out.println("acts:   " + (activities.entrySet()));
 			Iterator<Entry<String, Integer>> entries = activities.entrySet()
 					.iterator();
 
@@ -352,7 +477,8 @@ public class CreateDemandForGarmisch {
 				Integer value = (Integer) thisEntry.getValue();
 
 				/*
-				 * Iteriere ueber die Personen mit gleichem Alter und selbem Wegezweck
+				 * Iteriere ueber die Personen mit gleichem Alter und selbem Wegezweck.
+				 * IdImpl bekommt einen String als Argument.
 				 */
 				for (int j = 0; j < value - 1; j++) {
 					Person person = scenario.getPopulation().getFactory()

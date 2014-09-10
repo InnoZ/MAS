@@ -1,0 +1,744 @@
+09180112;Bad Kohlgrub;;; ;;;;;
+;;09162000;München, Landeshauptstadt;64;43;21;55;9;X
+;;09162;München, Landeshauptstadt;64;43;21;55;9;X
+;;09173;Bad Tölz-Wolfratshausen;16;12;4;X;X;X
+;;09180112;Bad Kohlgrub;160;64;96;142;18;7
+;;09180113;Bad Bayersoien;27;14;13;24;3;6
+;;09180115;Ettal;13;9;4;10;3;X
+;;09180117;Garmisch-Partenkirchen, Markt;52;28;24;X;X;4
+;;09180124;Murnau a.Staffelsee, Markt;137;55;82;130;7;4
+;;09180125;Oberammergau;51;16;35;46;5;3
+;;09180129;Saulgrub;50;29;21;45;5;X
+;;09180131;Schwaigen;10;4;6;X;X;X
+;;09180132;Seehausen a.Staffelsee;10;5;5;X;X;X
+;;09180134;Uffing a.Staffelsee;12;7;5;X;X;X
+;;09180;Übrige Gemeinden (Kreis);39;26;13;X;X;X
+;;09180;Garmisch-Partenkirchen;561;257;304;519;42;33
+;;09184;München;10;7;3;X;X;X
+;;09190141;Penzberg, Stadt;21;14;7;X;X;X
+;;09190148;Schongau, Stadt;11;7;4;X;X;X
+;;09190157;Weilheim i.OB, Stadt;29;15;14;X;X;3
+;;09190;Übrige Gemeinden (Kreis);45;31;14;X;X;5
+;;09190;Weilheim-Schongau;106;67;39;X;X;10
+;;091;Übrige Kreise (Regierungsbezirk);36;27;9;32;4;5
+;;091;Oberbayern;793;413;380;736;57;50
+;;09;Übrige Regierungsbezirke (Bundesland);14;11;3;9;5;X
+;;09;Bayern;807;424;383;745;62;51
+;;ZZ;Übrige Bundesländer;27;21;6;X;X;X
+;;ZZ;BUNDESGEBIET;834;445;389;772;62;52
+;;ZZ;INSGESAMT;834;445;389;772;62;52
+;;ZZ;Darunter: AUSPENDLER;674;381;293;630;44;45
+;;ZZ;  davon: in die ABL;672;379;293;628;44;45
+;;ZZ;  davon: in die NBL;X;X;X;X;X;X
+09180113;Bad Bayersoien;;; ;;;;;
+;;09162000;München, Landeshauptstadt;11;6;5;X;X;X
+;;09162;München, Landeshauptstadt;11;6;5;X;X;X
+;;09180112;Bad Kohlgrub;19;10;9;X;X;X
+;;09180113;Bad Bayersoien;82;41;41;77;5;4
+;;09180117;Garmisch-Partenkirchen, Markt;13;7;6;X;X;X
+;;09180124;Murnau a.Staffelsee, Markt;29;11;18;X;X;4
+;;09180125;Oberammergau;32;11;21;29;3;4
+;;09180129;Saulgrub;36;20;16;X;X;X
+;;09180;Übrige Gemeinden (Kreis);30;19;11;X;X;X
+;;09180;Garmisch-Partenkirchen;241;119;122;231;10;16
+;;09190140;Peiting, Markt;20;9;11;X;X;4
+;;09190145;Rottenbuch;10;7;3;X;X;X
+;;09190148;Schongau, Stadt;29;17;12;X;X;X
+;;09190;Übrige Gemeinden (Kreis);49;30;19;X;X;9
+;;09190;Weilheim-Schongau;108;63;45;X;X;16
+;;091;Übrige Kreise (Regierungsbezirk);20;14;6;X;X;X
+;;091;Oberbayern;380;202;178;365;15;34
+;;097;Schwaben;13;X;X;X;X;X
+;;09;Übrige Regierungsbezirke (Bundesland);X;X;X;X;X;X
+;;09;Bayern;395;214;181;380;15;34
+;;ZZ;Übrige Bundesländer;10;X;X;X;X;X
+;;ZZ;BUNDESGEBIET;405;223;182;390;15;34
+;;ZZ;INSGESAMT;405;223;182;390;15;34
+;;ZZ;Darunter: AUSPENDLER;323;182;141;313;10;30
+;;ZZ;  davon: in die ABL;321;180;141;311;10;30
+;;ZZ;  davon: in die NBL;X;X;X;X;X;X
+09180114;Eschenlohe;;; ;;;;;
+;;09162000;München, Landeshauptstadt;38;17;21;X;X;X
+;;09162;München, Landeshauptstadt;38;17;21;X;X;X
+;;09173;Bad Tölz-Wolfratshausen;16;7;9;X;X;X
+;;09180114;Eschenlohe;110;69;41;76;34;X
+;;09180116;Farchant;17;9;8;X;X;X
+;;09180117;Garmisch-Partenkirchen, Markt;131;51;80;126;5;12
+;;09180124;Murnau a.Staffelsee, Markt;89;43;46;83;6;3
+;;09180126;Oberau;16;9;7;X;X;X
+;;09180127;Ohlstadt;18;7;11;X;X;X
+;;09180;Übrige Gemeinden (Kreis);40;23;17;X;X;5
+;;09180;Garmisch-Partenkirchen;421;211;210;374;47;24
+;;09190141;Penzberg, Stadt;28;16;12;X;X;3
+;;09190157;Weilheim i.OB, Stadt;19;15;4;X;X;X
+;;09190;Übrige Gemeinden (Kreis);14;11;3;X;X;X
+;;09190;Weilheim-Schongau;61;42;19;X;X;6
+;;091;Übrige Kreise (Regierungsbezirk);21;18;3;X;X;X
+;;091;Oberbayern;557;295;262;507;50;32
+;;09;Übrige Regierungsbezirke (Bundesland);7;X;X;X;X;X
+;;09;Bayern;564;301;263;513;51;33
+;;ZZ;Übrige Bundesländer;11;6;5;X;X;X
+;;ZZ;BUNDESGEBIET;575;307;268;524;51;33
+;;ZZ;INSGESAMT;575;307;268;524;51;33
+;;ZZ;Darunter: AUSPENDLER;465;238;227;448;17;32
+;;ZZ;  davon: in die ABL;464;237;227;447;17;32
+;;ZZ;  davon: in die NBL;X;X;X;X;X;X
+09180115;Ettal;;; ;;;;;
+;;09180115;Ettal;115;46;69;67;48;X
+;;09180117;Garmisch-Partenkirchen, Markt;36;18;18;32;4;3
+;;09180124;Murnau a.Staffelsee, Markt;17;8;9;X;X;X
+;;09180125;Oberammergau;37;18;19;32;5;4
+;;09180;Übrige Gemeinden (Kreis);32;18;14;X;X;3
+;;09180;Garmisch-Partenkirchen;237;108;129;179;58;13
+;;091;Übrige Kreise (Regierungsbezirk);23;18;5;X;X;X
+;;091;Oberbayern;260;126;134;201;59;15
+;;09;Übrige Regierungsbezirke (Bundesland);3;X;X;X;X;X
+;;09;Bayern;263;129;134;203;60;15
+;;ZZ;Übrige Bundesländer;4;X;X;X;X;X
+;;ZZ;BUNDESGEBIET;267;133;134;207;60;15
+;;ZZ;INSGESAMT;267;133;134;207;60;15
+;;ZZ;Darunter: AUSPENDLER;152;87;65;140;12;13
+;;ZZ;  davon: in die ABL;151;86;65;139;12;13
+;;ZZ;  davon: in die NBL;X;X;X;X;X;X
+09180116;Farchant;;; ;;;;;
+;;064;Reg.-Bez. Darmstadt;14;11;3;X;X;X
+;;06;Hessen;14;11;3;X;X;X
+;;08;Baden-Württemberg;10;6;4;X;X;X
+;;09162000;München, Landeshauptstadt;66;37;29;X;X;X
+;;09162;München, Landeshauptstadt;66;37;29;X;X;X
+;;09173147;Wolfratshausen, Stadt;10;5;5;X;X;X
+;;09173;Übrige Gemeinden (Kreis);11;X;X;X;X;X
+;;09173;Bad Tölz-Wolfratshausen;21;15;6;X;X;X
+;;09180115;Ettal;12;5;7;9;3;X
+;;09180116;Farchant;232;122;110;207;25;14
+;;09180117;Garmisch-Partenkirchen, Markt;651;270;381;610;41;42
+;;09180118;Grainau;19;9;10;X;X;X
+;;09180123;Mittenwald, Markt;10;5;5;X;X;X
+;;09180124;Murnau a.Staffelsee, Markt;60;32;28;54;6;5
+;;09180125;Oberammergau;27;11;16;X;X;3
+;;09180126;Oberau;46;25;21;X;X;X
+;;09180;Übrige Gemeinden (Kreis);47;25;22;40;7;X
+;;09180;Garmisch-Partenkirchen;1.104;504;600;1.016;88;70
+;;09184;München;11;X;X;X;X;X
+;;09188;Starnberg;10;6;4;X;X;X
+;;09190141;Penzberg, Stadt;25;17;8;X;X;X
+;;09190157;Weilheim i.OB, Stadt;17;9;8;X;X;4
+;;09190;Übrige Gemeinden (Kreis);15;12;3;X;X;X
+;;09190;Weilheim-Schongau;57;38;19;54;3;6
+;;091;Übrige Kreise (Regierungsbezirk);21;14;7;X;X;X
+;;091;Oberbayern;1.290;625;665;1.197;93;78
+;;097;Schwaben;13;6;7;X;X;X
+;;09;Übrige Regierungsbezirke (Bundesland);8;5;3;X;X;X
+;;09;Bayern;1.311;636;675;1.218;93;79
+;;ZZ;Übrige Bundesländer;12;5;7;X;X;X
+;;ZZ;BUNDESGEBIET;1.347;658;689;1.252;95;79
+;;ZZ;INSGESAMT;1.347;658;689;1.252;95;79
+;;ZZ;Darunter: AUSPENDLER;1.115;536;579;1.045;70;65
+;;ZZ;  davon: in die ABL;1.109;533;576;1.039;70;65
+;;ZZ;  davon: in die NBL;6;3;3;X;X;X
+09180117;Garmisch-Partenkirchen, Markt;;; ;;;;;
+;;02000000;Hamburg, Freie und Hansestadt;12;3;9;X;X;X
+;;02000;Hamburg, Freie und Hansestadt;12;3;9;X;X;X
+;;020;Hamburg;12;3;9;X;X;X
+;;02;Hamburg;12;3;9;X;X;X
+;;03;Niedersachsen;14;X;X;10;4;X
+;;051;Reg.-Bez. Düsseldorf;27;16;11;X;X;X
+;;053;Reg.-Bez. Köln;20;9;11;15;5;X
+;;05;Übrige Regierungsbezirke (Bundesland);14;9;5;X;X;X
+;;05;Nordrhein-Westfalen;61;34;27;56;5;X
+;;06412000;Frankfurt am Main, Stadt;19;9;10;X;X;X
+;;06412;Frankfurt am Main, Stadt;19;9;10;X;X;X
+;;06435007;Erlensee, Stadt;57;51;6;43;14;X
+;;06435;Main-Kinzig-Kreis;57;51;6;43;14;X
+;;064;Übrige Kreise (Regierungsbezirk);19;16;3;16;3;X
+;;064;Reg.-Bez. Darmstadt;95;76;19;76;19;X
+;;06;Übrige Regierungsbezirke (Bundesland);5;X;X;X;X;X
+;;06;Hessen;100;80;20;80;20;X
+;;070;Rheinland-Pfalz;18;9;9;15;3;X
+;;07;Rheinland-Pfalz;18;9;9;15;3;X
+;;081;Reg.-Bez. Stuttgart;23;18;5;20;3;X
+;;084;Reg.-Bez. Tübingen;20;13;7;14;6;X
+;;08;Übrige Regierungsbezirke (Bundesland);18;10;8;15;3;X
+;;08;Baden-Württemberg;61;41;20;49;12;X
+;;09162000;München, Landeshauptstadt;461;240;221;420;41;16
+;;09162;München, Landeshauptstadt;461;240;221;420;41;16
+;;09173112;Bad Tölz, Stadt;19;11;8;X;X;X
+;;09173126;Geretsried, Stadt;11;8;3;8;3;X
+;;09173133;Kochel a.See;15;9;6;X;X;X
+;;09173147;Wolfratshausen, Stadt;23;12;11;X;X;X
+;;09173;Übrige Gemeinden (Kreis);14;10;4;X;X;X
+;;09173;Bad Tölz-Wolfratshausen;82;50;32;76;6;X
+;;09178124;Freising, Stadt;28;14;14;25;3;X
+;;09178;Übrige Gemeinden (Kreis);9;X;X;X;X;X
+;;09178;Freising;37;21;16;32;5;X
+;;09179;Fürstenfeldbruck;12;7;5;X;X;X
+;;09180114;Eschenlohe;52;34;18;43;9;3
+;;09180115;Ettal;27;11;16;23;4;X
+;;09180116;Farchant;212;114;98;185;27;22
+;;09180117;Garmisch-Partenkirchen, Markt;6.042;2.574;3.468;5.028;1.014;289
+;;09180118;Grainau;238;120;118;201;37;21
+;;09180122;Krün;70;29;41;48;22;4
+;;09180123;Mittenwald, Markt;83;52;31;66;17;6
+;;09180124;Murnau a.Staffelsee, Markt;267;173;94;215;52;13
+;;09180125;Oberammergau;88;43;45;77;11;6
+;;09180126;Oberau;138;96;42;115;23;5
+;;09180127;Ohlstadt;20;11;9;X;X;3
+;;09180135;Unterammergau;15;7;8;X;X;X
+;;09180136;Wallgau;16;4;12;X;X;X
+;;09180;Übrige Gemeinden (Kreis);30;16;14;26;4;X
+;;09180;Garmisch-Partenkirchen;7.298;3.284;4.014;6.075;1.223;373
+;;09182;Miesbach;12;7;5;X;X;X
+;;09184138;Planegg;14;8;6;X;X;X
+;;09184147;Unterföhring;11;6;5;X;X;X
+;;09184;Übrige Gemeinden (Kreis);68;51;17;58;10;X
+;;09184;München;93;65;28;80;13;X
+;;09188113;Berg;11;4;7;X;X;X
+;;09188139;Starnberg, Stadt;14;8;6;11;3;X
+;;09188;Übrige Gemeinden (Kreis);28;15;13;X;X;X
+;;09188;Starnberg;53;27;26;47;6;X
+;;09190140;Peiting, Markt;16;5;11;X;X;X
+;;09190141;Penzberg, Stadt;86;56;30;72;14;5
+;;09190148;Schongau, Stadt;16;X;X;11;5;X
+;;09190157;Weilheim i.OB, Stadt;72;49;23;68;4;7
+;;09190;Übrige Gemeinden (Kreis);44;28;16;40;4;5
+;;09190;Weilheim-Schongau;234;153;81;207;27;18
+;;091;Übrige Kreise (Regierungsbezirk);65;45;20;60;5;4
+;;091;Oberbayern;8.347;3.899;4.448;7.020;1.327;418
+;;092;Niederbayern;10;X;X;7;3;X
+;;094;Oberfranken;10;3;7;X;X;X
+;;095;Mittelfranken;13;8;5;X;X;X
+;;09761000;Augsburg;21;14;7;9;12;X
+;;09761;Augsburg, Stadt;21;14;7;9;12;X
+;;09763000;Kempten (Allgäu);20;9;11;X;X;X
+;;09763;Kempten (Allgäu), Stadt;20;9;11;X;X;X
+;;09764000;Memmingen;10;X;X;4;6;X
+;;09764;Memmingen, Stadt;10;X;X;4;6;X
+;;097;Übrige Kreise (Regierungsbezirk);23;11;12;X;X;X
+;;097;Schwaben;74;43;31;54;20;4
+;;09;Übrige Regierungsbezirke (Bundesland);15;X;X;X;X;X
+;;09;Bayern;8.469;3.974;4.495;7.114;1.355;422
+;;11000000;Berlin, Stadt;21;4;17;X;X;8
+;;11000;Berlin, Stadt;21;4;17;X;X;8
+;;110;Berlin;21;4;17;X;X;8
+;;11;Berlin;21;4;17;X;X;8
+;;ZZ;Übrige Bundesländer;29;19;10;X;X;X
+;;ZZ;BUNDESGEBIET;8.785;4.176;4.609;7.382;1.403;434
+;;ZZ;INSGESAMT;8.785;4.176;4.609;7.382;1.403;434
+;;ZZ;Darunter: AUSPENDLER;2.743;1.602;1.141;2.354;389;145
+;;ZZ;  davon: in die ABL;2.700;1.583;1.117;2.312;388;137
+;;ZZ;  davon: in die NBL;43;19;24;X;X;8
+09180118;Grainau;;; ;;;;;
+;;064;Reg.-Bez. Darmstadt;12;8;4;X;X;X
+;;06;Hessen;12;8;4;X;X;X
+;;09162000;München, Landeshauptstadt;39;21;18;33;6;X
+;;09162;München, Landeshauptstadt;39;21;18;33;6;X
+;;09180116;Farchant;25;11;14;X;X;X
+;;09180117;Garmisch-Partenkirchen, Markt;571;295;276;540;31;34
+;;09180118;Grainau;350;175;175;262;88;19
+;;09180124;Murnau a.Staffelsee, Markt;30;18;12;27;3;X
+;;09180126;Oberau;20;14;6;X;X;X
+;;09180;Übrige Gemeinden (Kreis);40;25;15;X;X;X
+;;09180;Garmisch-Partenkirchen;1.036;538;498;913;123;57
+;;09190141;Penzberg, Stadt;10;X;X;X;X;X
+;;09190;Übrige Gemeinden (Kreis);14;7;7;X;X;X
+;;09190;Weilheim-Schongau;24;15;9;X;X;3
+;;091;Übrige Kreise (Regierungsbezirk);33;26;7;29;4;X
+;;091;Oberbayern;1.132;600;532;998;134;64
+;;09;Übrige Regierungsbezirke (Bundesland);12;9;3;X;X;X
+;;09;Bayern;1.144;609;535;1.010;134;64
+;;ZZ;Übrige Bundesländer;26;14;12;X;X;X
+;;ZZ;BUNDESGEBIET;1.182;631;551;1.047;135;66
+;;ZZ;INSGESAMT;1.182;631;551;1.047;135;66
+;;ZZ;Darunter: AUSPENDLER;832;456;376;785;47;47
+;;ZZ;  davon: in die ABL;824;453;371;777;47;47
+;;ZZ;  davon: in die NBL;8;3;5;X;X;X
+09180119;Großweil;;; ;;;;;
+;;09162000;München, Landeshauptstadt;58;29;29;X;X;X
+;;09162;München, Landeshauptstadt;58;29;29;X;X;X
+;;09173133;Kochel a.See;46;28;18;X;X;5
+;;09173142;Schlehdorf;10;X;X;X;X;X
+;;09173;Übrige Gemeinden (Kreis);44;21;23;X;X;X
+;;09173;Bad Tölz-Wolfratshausen;100;51;49;96;4;8
+;;09180117;Garmisch-Partenkirchen, Markt;20;10;10;X;X;X
+;;09180119;Großweil;51;26;25;48;3;X
+;;09180124;Murnau a.Staffelsee, Markt;93;30;63;X;X;3
+;;09180127;Ohlstadt;16;5;11;X;X;X
+;;09180;Übrige Gemeinden (Kreis);32;14;18;X;X;3
+;;09180;Garmisch-Partenkirchen;212;85;127;207;5;9
+;;09184;München;18;12;6;X;X;X
+;;09185149;Neuburg a.d.Donau, Stadt;11;X;X;X;X;X
+;;09185;Neuburg-Schrobenhausen;11;X;X;X;X;X
+;;09188139;Starnberg, Stadt;15;11;4;X;X;X
+;;09188;Übrige Gemeinden (Kreis);9;3;6;X;X;X
+;;09188;Starnberg;24;14;10;X;X;X
+;;09190141;Penzberg, Stadt;107;56;51;103;4;6
+;;09190157;Weilheim i.OB, Stadt;23;13;10;X;X;3
+;;09190;Übrige Gemeinden (Kreis);39;28;11;X;X;6
+;;09190;Weilheim-Schongau;169;97;72;164;5;15
+;;091;Übrige Kreise (Regierungsbezirk);12;X;X;X;X;X
+;;091;Oberbayern;604;309;295;588;16;36
+;;09;Übrige Regierungsbezirke (Bundesland);7;4;3;X;X;X
+;;09;Bayern;611;313;298;595;16;36
+;;ZZ;Übrige Bundesländer;11;X;X;X;X;X
+;;ZZ;BUNDESGEBIET;622;322;300;606;16;36
+;;ZZ;INSGESAMT;622;322;300;606;16;36
+;;ZZ;Darunter: AUSPENDLER;571;296;275;558;13;34
+;;ZZ;  davon: in die ABL;571;296;275;558;13;34
+09180122;Krün;;; ;;;;;
+;;09162000;München, Landeshauptstadt;29;17;12;X;X;X
+;;09162;München, Landeshauptstadt;29;17;12;X;X;X
+;;09173133;Kochel a.See;14;X;X;10;4;X
+;;09173;Übrige Gemeinden (Kreis);15;9;6;X;X;X
+;;09173;Bad Tölz-Wolfratshausen;29;21;8;25;4;X
+;;09180117;Garmisch-Partenkirchen, Markt;165;78;87;158;7;17
+;;09180122;Krün;224;113;111;167;57;21
+;;09180123;Mittenwald, Markt;61;37;24;X;X;4
+;;09180136;Wallgau;28;21;7;X;X;X
+;;09180;Übrige Gemeinden (Kreis);32;15;17;X;X;X
+;;09180;Garmisch-Partenkirchen;510;264;246;441;69;45
+;;091;Übrige Kreise (Regierungsbezirk);31;22;9;X;X;X
+;;091;Oberbayern;599;324;275;526;73;49
+;;09;Übrige Regierungsbezirke (Bundesland);8;4;4;X;X;X
+;;09;Bayern;607;328;279;534;73;50
+;;ZZ;Übrige Bundesländer;19;10;9;X;X;X
+;;ZZ;BUNDESGEBIET;626;338;288;551;75;51
+;;ZZ;INSGESAMT;626;338;288;551;75;51
+;;ZZ;Darunter: AUSPENDLER;402;225;177;384;18;30
+;;ZZ;  davon: in die ABL;397;221;176;380;17;29
+;;ZZ;  davon: in die NBL;5;X;X;X;X;X
+09180123;Mittenwald, Markt;;; ;;;;;
+;;064;Reg.-Bez. Darmstadt;15;12;3;X;X;X
+;;06;Übrige Regierungsbezirke (Bundesland);X;X;X;X;X;X
+;;06;Hessen;16;13;3;X;X;X
+;;08;Baden-Württemberg;17;9;8;X;X;X
+;;09162000;München, Landeshauptstadt;73;47;26;70;3;8
+;;09162;München, Landeshauptstadt;73;47;26;70;3;8
+;;09173112;Bad Tölz, Stadt;15;X;X;X;X;X
+;;09173133;Kochel a.See;16;12;4;X;X;X
+;;09173;Übrige Gemeinden (Kreis);14;11;3;X;X;X
+;;09173;Bad Tölz-Wolfratshausen;45;37;8;X;X;3
+;;09180114;Eschenlohe;13;X;X;X;X;X
+;;09180116;Farchant;20;13;7;X;X;X
+;;09180117;Garmisch-Partenkirchen, Markt;495;230;265;476;19;52
+;;09180122;Krün;177;69;108;135;42;31
+;;09180123;Mittenwald, Markt;1.193;542;651;1.070;123;57
+;;09180124;Murnau a.Staffelsee, Markt;28;20;8;X;X;X
+;;09180126;Oberau;22;X;X;19;3;3
+;;09180136;Wallgau;30;14;16;X;X;X
+;;09180;Übrige Gemeinden (Kreis);22;10;12;X;X;X
+;;09180;Garmisch-Partenkirchen;2.000;929;1.071;1.809;191;147
+;;09181132;Penzing;18;13;5;X;X;X
+;;09181;Übrige Gemeinden (Kreis);12;4;8;X;X;X
+;;09181;Landsberg am Lech;30;17;13;X;X;X
+;;09184;München;12;8;4;X;X;X
+;;09190141;Penzberg, Stadt;16;7;9;X;X;X
+;;09190157;Weilheim i.OB, Stadt;16;11;5;X;X;X
+;;09190;Übrige Gemeinden (Kreis);10;7;3;X;X;X
+;;09190;Weilheim-Schongau;42;25;17;X;X;3
+;;091;Übrige Kreise (Regierungsbezirk);34;26;8;31;3;X
+;;091;Oberbayern;2.236;1.089;1.147;2.035;201;161
+;;097;Schwaben;26;17;9;X;X;X
+;;09;Übrige Regierungsbezirke (Bundesland);12;6;6;X;X;X
+;;09;Bayern;2.274;1.112;1.162;2.070;204;162
+;;ZZ;Übrige Bundesländer;38;14;24;X;X;X
+;;ZZ;BUNDESGEBIET;2.345;1.148;1.197;2.137;208;165
+;;ZZ;INSGESAMT;2.345;1.148;1.197;2.137;208;165
+;;ZZ;Darunter: AUSPENDLER;1.152;606;546;1.067;85;108
+;;ZZ;  davon: in die ABL;1.133;601;532;1.049;84;107
+;;ZZ;  davon: in die NBL;19;5;14;X;X;X
+09180124;Murnau a.Staffelsee, Markt;;; ;;;;;
+;;051;Reg.-Bez. Düsseldorf;11;6;5;X;X;X
+;;05;Übrige Regierungsbezirke (Bundesland);14;10;4;X;X;X
+;;05;Nordrhein-Westfalen;25;16;9;X;X;X
+;;064;Reg.-Bez. Darmstadt;13;X;X;X;X;X
+;;06;Übrige Regierungsbezirke (Bundesland);X;X;X;X;X;X
+;;06;Hessen;14;11;3;X;X;X
+;;083;Reg.-Bez. Freiburg;10;7;3;X;X;X
+;;08;Übrige Regierungsbezirke (Bundesland);23;15;8;X;X;X
+;;08;Baden-Württemberg;33;22;11;30;3;X
+;;09162000;München, Landeshauptstadt;393;207;186;351;42;10
+;;09162;München, Landeshauptstadt;393;207;186;351;42;10
+;;09173112;Bad Tölz, Stadt;12;X;X;X;X;X
+;;09173126;Geretsried, Stadt;17;8;9;X;X;X
+;;09173133;Kochel a.See;32;19;13;X;X;X
+;;09173147;Wolfratshausen, Stadt;31;17;14;X;X;X
+;;09173;Übrige Gemeinden (Kreis);27;14;13;23;4;X
+;;09173;Bad Tölz-Wolfratshausen;119;60;59;111;8;5
+;;09175;Ebersberg;12;8;4;X;X;X
+;;09178124;Freising, Stadt;15;6;9;X;X;X
+;;09178;Übrige Gemeinden (Kreis);X;X;X;X;X;X
+;;09178;Freising;17;8;9;X;X;X
+;;09180112;Bad Kohlgrub;11;3;8;X;X;X
+;;09180114;Eschenlohe;21;13;8;X;X;X
+;;09180115;Ettal;11;3;8;X;X;X
+;;09180116;Farchant;22;11;11;X;X;4
+;;09180117;Garmisch-Partenkirchen, Markt;250;96;154;226;24;9
+;;09180119;Großweil;21;12;9;X;X;X
+;;09180124;Murnau a.Staffelsee, Markt;1.948;747;1.201;1.682;266;82
+;;09180125;Oberammergau;36;9;27;32;4;X
+;;09180126;Oberau;20;11;9;X;X;X
+;;09180127;Ohlstadt;46;12;34;42;4;X
+;;09180128;Riegsee;12;4;8;X;X;X
+;;09180131;Schwaigen;13;4;9;X;X;X
+;;09180132;Seehausen a.Staffelsee;71;23;48;66;5;4
+;;09180133;Spatzenhausen;13;4;9;X;X;X
+;;09180134;Uffing a.Staffelsee;24;14;10;21;3;3
+;;09180;Übrige Gemeinden (Kreis);29;18;11;25;4;X
+;;09180;Garmisch-Partenkirchen;2.548;984;1.564;2.229;319;111
+;;09181;Landsberg am Lech;10;X;X;X;X;X
+;;09182;Miesbach;14;10;4;X;X;X
+;;09184138;Planegg;12;8;4;X;X;X
+;;09184;Übrige Gemeinden (Kreis);74;53;21;65;9;X
+;;09184;München;86;61;25;76;10;X
+;;09185149;Neuburg a.d.Donau, Stadt;10;X;X;X;X;X
+;;09185;Neuburg-Schrobenhausen;10;X;X;X;X;X
+;;09188132;Seefeld;14;7;7;X;X;X
+;;09188139;Starnberg, Stadt;33;14;19;X;X;4
+;;09188141;Tutzing;10;4;6;X;X;X
+;;09188;Übrige Gemeinden (Kreis);27;17;10;X;X;X
+;;09188;Starnberg;84;42;42;80;4;4
+;;09190121;Eglfing;26;19;7;X;X;X
+;;09190131;Huglfing;28;17;11;24;4;X
+;;09190136;Obersöchering;17;11;6;X;X;X
+;;09190139;Peißenberg, Markt;32;23;9;29;3;3
+;;09190140;Peiting, Markt;14;4;10;X;X;X
+;;09190141;Penzberg, Stadt;151;92;59;143;8;10
+;;09190148;Schongau, Stadt;13;X;X;X;X;X
+;;09190157;Weilheim i.OB, Stadt;183;97;86;176;7;8
+;;09190;Übrige Gemeinden (Kreis);55;36;19;51;4;5
+;;09190;Weilheim-Schongau;519;311;208;490;29;30
+;;091;Übrige Kreise (Regierungsbezirk);27;21;6;X;X;X
+;;091;Oberbayern;3.839;1.730;2.109;3.420;419;162
+;;09761000;Augsburg;39;15;24;27;12;X
+;;09761;Augsburg, Stadt;39;15;24;27;12;X
+;;097;Übrige Kreise (Regierungsbezirk);25;15;10;22;3;X
+;;097;Schwaben;64;30;34;49;15;X
+;;09;Übrige Regierungsbezirke (Bundesland);25;13;12;X;X;X
+;;09;Bayern;3.928;1.773;2.155;3.492;436;164
+;;ZZ;Übrige Bundesländer;23;17;6;X;X;X
+;;ZZ;BUNDESGEBIET;4.023;1.839;2.184;3.582;441;164
+;;ZZ;INSGESAMT;4.023;1.839;2.184;3.582;441;164
+;;ZZ;Darunter: AUSPENDLER;2.075;1.092;983;1.900;175;82
+;;ZZ;  davon: in die ABL;2.067;1.088;979;1.892;175;82
+;;ZZ;  davon: in die NBL;8;4;4;X;X;X
+09180125;Oberammergau;;; ;;;;;
+;;08436049;Isny im Allgäu, Stadt;26;8;18;20;6;X
+;;08436;Ravensburg;26;8;18;20;6;X
+;;084;Reg.-Bez. Tübingen;26;8;18;20;6;X
+;;08;Übrige Regierungsbezirke (Bundesland);4;X;X;X;X;X
+;;08;Baden-Württemberg;30;12;18;24;6;X
+;;09162000;München, Landeshauptstadt;109;61;48;102;7;X
+;;09162;München, Landeshauptstadt;109;61;48;102;7;X
+;;09173;Bad Tölz-Wolfratshausen;14;8;6;X;X;X
+;;09180112;Bad Kohlgrub;22;8;14;X;X;3
+;;09180115;Ettal;62;24;38;55;7;X
+;;09180116;Farchant;19;9;10;X;X;X
+;;09180117;Garmisch-Partenkirchen, Markt;217;93;124;203;14;11
+;;09180124;Murnau a.Staffelsee, Markt;94;51;43;90;4;6
+;;09180125;Oberammergau;729;284;445;622;107;24
+;;09180126;Oberau;35;21;14;X;X;3
+;;09180129;Saulgrub;31;21;10;26;5;X
+;;09180135;Unterammergau;31;21;10;X;X;3
+;;09180;Übrige Gemeinden (Kreis);36;22;14;33;3;X
+;;09180;Garmisch-Partenkirchen;1.276;554;722;1.133;143;55
+;;09184;München;15;11;4;X;X;X
+;;09190140;Peiting, Markt;14;11;3;X;X;X
+;;09190141;Penzberg, Stadt;23;16;7;X;X;X
+;;09190148;Schongau, Stadt;20;14;6;17;3;X
+;;09190157;Weilheim i.OB, Stadt;14;11;3;X;X;X
+;;09190;Übrige Gemeinden (Kreis);28;17;11;X;X;X
+;;09190;Weilheim-Schongau;99;69;30;92;7;3
+;;091;Übrige Kreise (Regierungsbezirk);30;17;13;X;X;3
+;;091;Oberbayern;1.543;720;823;1.384;159;62
+;;097;Schwaben;24;17;7;X;X;X
+;;09;Übrige Regierungsbezirke (Bundesland);12;9;3;X;X;X
+;;09;Bayern;1.579;746;833;1.418;161;63
+;;ZZ;Übrige Bundesländer;29;19;10;26;3;X
+;;ZZ;BUNDESGEBIET;1.638;777;861;1.468;170;63
+;;ZZ;INSGESAMT;1.638;777;861;1.468;170;63
+;;ZZ;Darunter: AUSPENDLER;909;493;416;846;63;39
+;;ZZ;  davon: in die ABL;901;489;412;839;62;39
+;;ZZ;  davon: in die NBL;8;4;4;X;X;X
+09180126;Oberau;;; ;;;;;
+;;09162000;München, Landeshauptstadt;63;41;22;60;3;4
+;;09162;München, Landeshauptstadt;63;41;22;60;3;4
+;;09173147;Wolfratshausen, Stadt;10;5;5;X;X;X
+;;09173;Übrige Gemeinden (Kreis);14;X;X;X;X;X
+;;09173;Bad Tölz-Wolfratshausen;24;17;7;X;X;X
+;;09180115;Ettal;10;4;6;X;X;X
+;;09180116;Farchant;35;12;23;32;3;3
+;;09180117;Garmisch-Partenkirchen, Markt;364;147;217;334;30;30
+;;09180118;Grainau;13;5;8;X;X;X
+;;09180124;Murnau a.Staffelsee, Markt;83;40;43;71;12;3
+;;09180125;Oberammergau;29;12;17;25;4;X
+;;09180126;Oberau;217;113;104;186;31;8
+;;09180127;Ohlstadt;11;X;X;X;X;X
+;;09180;Übrige Gemeinden (Kreis);35;19;16;X;X;X
+;;09180;Garmisch-Partenkirchen;797;354;443;711;86;50
+;;09184;München;10;7;3;X;X;X
+;;09188;Starnberg;12;8;4;X;X;X
+;;09190141;Penzberg, Stadt;17;13;4;X;X;X
+;;09190157;Weilheim i.OB, Stadt;30;20;10;X;X;X
+;;09190;Übrige Gemeinden (Kreis);24;18;6;X;X;X
+;;09190;Weilheim-Schongau;71;51;20;68;3;X
+;;091;Übrige Kreise (Regierungsbezirk);9;X;X;X;X;X
+;;091;Oberbayern;986;486;500;893;93;59
+;;097;Schwaben;11;7;4;X;X;X
+;;09;Übrige Regierungsbezirke (Bundesland);6;X;X;X;X;X
+;;09;Bayern;1.003;498;505;909;94;59
+;;ZZ;Übrige Bundesländer;27;18;9;23;4;X
+;;ZZ;BUNDESGEBIET;1.030;516;514;932;98;59
+;;ZZ;INSGESAMT;1.030;516;514;932;98;59
+;;ZZ;Darunter: AUSPENDLER;813;403;410;746;67;51
+;;ZZ;  davon: in die ABL;808;399;409;742;66;51
+;;ZZ;  davon: in die NBL;5;X;X;X;X;X
+09180127;Ohlstadt;;; ;;;;;
+;;05;Nordrhein-Westfalen;10;7;3;X;X;X
+;;08;Baden-Württemberg;12;X;X;X;X;X
+;;09162000;München, Landeshauptstadt;111;68;43;107;4;4
+;;09162;München, Landeshauptstadt;111;68;43;107;4;4
+;;09173133;Kochel a.See;11;7;4;X;X;X
+;;09173147;Wolfratshausen, Stadt;19;14;5;X;X;X
+;;09173;Übrige Gemeinden (Kreis);32;17;15;X;X;X
+;;09173;Bad Tölz-Wolfratshausen;62;38;24;59;3;3
+;;09180114;Eschenlohe;12;4;8;X;X;X
+;;09180116;Farchant;12;9;3;X;X;X
+;;09180117;Garmisch-Partenkirchen, Markt;129;51;78;122;7;9
+;;09180119;Großweil;10;6;4;X;X;X
+;;09180124;Murnau a.Staffelsee, Markt;277;104;173;267;10;13
+;;09180125;Oberammergau;16;6;10;X;X;X
+;;09180126;Oberau;14;7;7;X;X;X
+;;09180127;Ohlstadt;248;123;125;235;13;13
+;;09180132;Seehausen a.Staffelsee;16;7;9;13;3;X
+;;09180134;Uffing a.Staffelsee;10;X;X;X;X;X
+;;09180;Übrige Gemeinden (Kreis);37;23;14;X;X;X
+;;09180;Garmisch-Partenkirchen;781;349;432;746;35;40
+;;09184;München;24;19;5;21;3;X
+;;09188139;Starnberg, Stadt;14;5;9;X;X;3
+;;09188;Übrige Gemeinden (Kreis);13;6;7;X;X;X
+;;09188;Starnberg;27;11;16;X;X;5
+;;09190121;Eglfing;10;X;X;X;X;X
+;;09190136;Obersöchering;12;9;3;X;X;X
+;;09190139;Peißenberg, Markt;12;7;5;X;X;X
+;;09190141;Penzberg, Stadt;51;29;22;X;X;5
+;;09190157;Weilheim i.OB, Stadt;56;38;18;X;X;4
+;;09190;Übrige Gemeinden (Kreis);20;13;7;X;X;X
+;;09190;Weilheim-Schongau;161;106;55;X;X;13
+;;091;Übrige Kreise (Regierungsbezirk);21;11;10;X;X;X
+;;091;Oberbayern;1.187;602;585;1.138;49;67
+;;097;Schwaben;12;8;4;9;3;X
+;;09;Übrige Regierungsbezirke (Bundesland);8;X;X;X;X;X
+;;09;Bayern;1.207;617;590;1.155;52;68
+;;ZZ;Übrige Bundesländer;13;9;4;X;X;X
+;;ZZ;BUNDESGEBIET;1.242;643;599;1.189;53;69
+;;ZZ;INSGESAMT;1.242;643;599;1.189;53;69
+;;ZZ;Darunter: AUSPENDLER;994;520;474;954;40;56
+;;ZZ;  davon: in die ABL;992;519;473;952;40;56
+;;ZZ;  davon: in die NBL;X;X;X;X;X;X
+09180128;Riegsee;;; ;;;;;
+;;09162000;München, Landeshauptstadt;29;18;11;X;X;X
+;;09162;München, Landeshauptstadt;29;18;11;X;X;X
+;;09173;Bad Tölz-Wolfratshausen;20;15;5;X;X;X
+;;09180117;Garmisch-Partenkirchen, Markt;20;11;9;X;X;X
+;;09180124;Murnau a.Staffelsee, Markt;118;54;64;113;5;10
+;;09180128;Riegsee;19;9;10;16;3;X
+;;09180;Übrige Gemeinden (Kreis);36;20;16;X;X;3
+;;09180;Garmisch-Partenkirchen;193;94;99;183;10;15
+;;09190121;Eglfing;10;X;X;X;X;X
+;;09190141;Penzberg, Stadt;25;13;12;X;X;4
+;;09190157;Weilheim i.OB, Stadt;25;18;7;X;X;X
+;;09190;Übrige Gemeinden (Kreis);32;22;10;X;X;4
+;;09190;Weilheim-Schongau;92;62;30;X;X;11
+;;091;Übrige Kreise (Regierungsbezirk);21;12;9;X;X;X
+;;091;Oberbayern;355;201;154;339;16;27
+;;09;Übrige Regierungsbezirke (Bundesland);4;X;X;X;X;X
+;;09;Bayern;359;204;155;343;16;27
+;;ZZ;Übrige Bundesländer;10;7;3;X;X;X
+;;ZZ;BUNDESGEBIET;369;211;158;352;17;28
+;;ZZ;INSGESAMT;369;211;158;352;17;28
+;;ZZ;Darunter: AUSPENDLER;350;202;148;336;14;28
+;;ZZ;  davon: in die ABL;349;201;148;335;14;28
+;;ZZ;  davon: in die NBL;X;X;X;X;X;X
+09180129;Saulgrub;;; ;;;;;
+;;09162000;München, Landeshauptstadt;27;17;10;X;X;X
+;;09162;München, Landeshauptstadt;27;17;10;X;X;X
+;;09173;Bad Tölz-Wolfratshausen;13;10;3;X;X;X
+;;09180112;Bad Kohlgrub;44;16;28;X;X;3
+;;09180115;Ettal;12;8;4;X;X;X
+;;09180117;Garmisch-Partenkirchen, Markt;56;33;23;53;3;3
+;;09180124;Murnau a.Staffelsee, Markt;69;25;44;X;X;4
+;;09180125;Oberammergau;87;32;55;X;X;5
+;;09180129;Saulgrub;95;52;43;X;X;7
+;;09180135;Unterammergau;12;8;4;X;X;X
+;;09180;Übrige Gemeinden (Kreis);45;23;22;X;X;3
+;;09180;Garmisch-Partenkirchen;420;197;223;411;9;26
+;;09184;München;10;4;6;X;X;X
+;;09190140;Peiting, Markt;15;9;6;X;X;X
+;;09190148;Schongau, Stadt;30;24;6;X;X;X
+;;09190157;Weilheim i.OB, Stadt;23;13;10;X;X;X
+;;09190;Übrige Gemeinden (Kreis);48;34;14;X;X;X
+;;09190;Weilheim-Schongau;116;80;36;112;4;6
+;;091;Übrige Kreise (Regierungsbezirk);18;9;9;X;X;X
+;;091;Oberbayern;604;317;287;591;13;34
+;;097;Schwaben;10;7;3;X;X;X
+;;09;Übrige Regierungsbezirke (Bundesland);X;X;X;X;X;X
+;;09;Bayern;616;325;291;603;13;34
+;;ZZ;Übrige Bundesländer;16;7;9;X;X;X
+;;ZZ;BUNDESGEBIET;632;332;300;617;15;34
+;;ZZ;INSGESAMT;632;332;300;617;15;34
+;;ZZ;Darunter: AUSPENDLER;537;280;257;524;13;27
+;;ZZ;  davon: in die ABL;533;280;253;521;12;27
+;;ZZ;  davon: in die NBL;4;X;X;X;X;X
+09180131;Schwaigen;;; ;;;;;
+;;09162000;München, Landeshauptstadt;20;9;11;X;X;X
+;;09162;München, Landeshauptstadt;20;9;11;X;X;X
+;;09180117;Garmisch-Partenkirchen, Markt;22;8;14;X;X;5
+;;09180124;Murnau a.Staffelsee, Markt;52;18;34;X;X;4
+;;09180131;Schwaigen;11;4;7;X;X;X
+;;09180;Übrige Gemeinden (Kreis);37;27;10;X;X;4
+;;09180;Garmisch-Partenkirchen;122;57;65;119;3;13
+;;09190141;Penzberg, Stadt;10;6;4;X;X;X
+;;09190;Übrige Gemeinden (Kreis);19;14;5;X;X;X
+;;09190;Weilheim-Schongau;29;20;9;X;X;X
+;;091;Übrige Kreise (Regierungsbezirk);16;11;5;X;X;X
+;;091;Oberbayern;187;97;90;184;3;18
+;;09;Übrige Regierungsbezirke (Bundesland);X;X;X;X;X;X
+;;09;Bayern;188;98;90;185;3;18
+;;ZZ;Übrige Bundesländer;6;X;X;X;X;X
+;;ZZ;BUNDESGEBIET;194;102;92;191;3;18
+;;ZZ;INSGESAMT;194;102;92;191;3;18
+;;ZZ;Darunter: AUSPENDLER;183;98;85;180;3;18
+;;ZZ;  davon: in die ABL;183;98;85;180;3;18
+09180132;Seehausen a.Staffelsee;;; ;;;;;
+;;09162000;München, Landeshauptstadt;91;58;33;86;5;4
+;;09162;München, Landeshauptstadt;91;58;33;86;5;4
+;;09173;Bad Tölz-Wolfratshausen;17;9;8;X;X;X
+;;09180117;Garmisch-Partenkirchen, Markt;36;16;20;33;3;X
+;;09180124;Murnau a.Staffelsee, Markt;256;106;150;220;36;11
+;;09180132;Seehausen a.Staffelsee;38;16;22;30;8;X
+;;09180;Übrige Gemeinden (Kreis);57;36;21;51;6;4
+;;09180;Garmisch-Partenkirchen;387;174;213;334;53;15
+;;09184;München;15;9;6;X;X;X
+;;09188139;Starnberg, Stadt;10;X;X;7;3;X
+;;09188;Übrige Gemeinden (Kreis);9;4;5;X;X;X
+;;09188;Starnberg;19;6;13;16;3;X
+;;09190141;Penzberg, Stadt;22;13;9;X;X;X
+;;09190157;Weilheim i.OB, Stadt;42;26;16;X;X;7
+;;09190;Übrige Gemeinden (Kreis);30;16;14;27;3;X
+;;09190;Weilheim-Schongau;94;55;39;91;3;9
+;;091;Übrige Kreise (Regierungsbezirk);17;13;4;X;X;X
+;;091;Oberbayern;640;324;316;574;66;31
+;;097;Schwaben;12;4;8;9;3;X
+;;09;Übrige Regierungsbezirke (Bundesland);5;X;X;X;X;X
+;;09;Bayern;657;333;324;588;69;31
+;;ZZ;Übrige Bundesländer;32;24;8;X;X;3
+;;ZZ;BUNDESGEBIET;689;357;332;620;69;34
+;;ZZ;INSGESAMT;689;357;332;620;69;34
+;;ZZ;Darunter: AUSPENDLER;651;341;310;590;61;34
+;;ZZ;  davon: in die ABL;648;339;309;587;61;32
+;;ZZ;  davon: in die NBL;3;X;X;X;X;X
+09180133;Spatzenhausen;;; ;;;;;
+;;09162000;München, Landeshauptstadt;16;9;7;X;X;X
+;;09162;München, Landeshauptstadt;16;9;7;X;X;X
+;;09180124;Murnau a.Staffelsee, Markt;76;28;48;X;X;4
+;;09180132;Seehausen a.Staffelsee;13;5;8;X;X;X
+;;09180133;Spatzenhausen;21;12;9;18;3;3
+;;09180134;Uffing a.Staffelsee;14;3;11;X;X;4
+;;09180;Übrige Gemeinden (Kreis);14;5;9;X;X;X
+;;09180;Garmisch-Partenkirchen;138;53;85;132;6;13
+;;09188;Starnberg;12;7;5;X;X;X
+;;09190141;Penzberg, Stadt;17;9;8;X;X;X
+;;09190157;Weilheim i.OB, Stadt;20;12;8;X;X;X
+;;09190;Übrige Gemeinden (Kreis);32;20;12;X;X;4
+;;09190;Weilheim-Schongau;69;41;28;X;X;7
+;;091;Übrige Kreise (Regierungsbezirk);27;17;10;X;X;X
+;;091;Oberbayern;262;127;135;253;9;24
+;;09;Übrige Regierungsbezirke (Bundesland);3;X;X;X;X;X
+;;09;Bayern;265;128;137;255;10;24
+;;ZZ;Übrige Bundesländer;5;X;X;X;X;X
+;;ZZ;BUNDESGEBIET;270;132;138;259;11;24
+;;ZZ;INSGESAMT;270;132;138;259;11;24
+;;ZZ;Darunter: AUSPENDLER;249;120;129;241;8;21
+;;ZZ;  davon: in die ABL;248;120;128;240;8;21
+;;ZZ;  davon: in die NBL;X;X;X;X;X;X
+09180134;Uffing a.Staffelsee;;; ;;;;;
+;;09162000;München, Landeshauptstadt;113;70;43;X;X;X
+;;09162;München, Landeshauptstadt;113;70;43;X;X;X
+;;09173;Bad Tölz-Wolfratshausen;26;13;13;X;X;X
+;;09180117;Garmisch-Partenkirchen, Markt;49;20;29;46;3;X
+;;09180124;Murnau a.Staffelsee, Markt;175;61;114;169;6;10
+;;09180127;Ohlstadt;15;5;10;X;X;X
+;;09180132;Seehausen a.Staffelsee;16;4;12;X;X;X
+;;09180134;Uffing a.Staffelsee;155;78;77;144;11;6
+;;09180;Übrige Gemeinden (Kreis);50;28;22;X;X;5
+;;09180;Garmisch-Partenkirchen;460;196;264;437;23;21
+;;09184;München;18;12;6;X;X;X
+;;09188139;Starnberg, Stadt;10;X;X;X;X;X
+;;09188;Übrige Gemeinden (Kreis);22;11;11;X;X;X
+;;09188;Starnberg;32;13;19;X;X;4
+;;09190121;Eglfing;15;11;4;X;X;X
+;;09190139;Peißenberg, Markt;17;9;8;X;X;X
+;;09190140;Peiting, Markt;15;X;X;X;X;X
+;;09190141;Penzberg, Stadt;61;35;26;X;X;5
+;;09190157;Weilheim i.OB, Stadt;79;35;44;X;X;7
+;;09190;Übrige Gemeinden (Kreis);57;34;23;X;X;4
+;;09190;Weilheim-Schongau;244;126;118;241;3;18
+;;091;Übrige Kreise (Regierungsbezirk);28;18;10;X;X;X
+;;091;Oberbayern;921;448;473;887;34;47
+;;097;Schwaben;15;9;6;X;X;X
+;;09;Übrige Regierungsbezirke (Bundesland);11;8;3;X;X;X
+;;09;Bayern;947;465;482;911;36;49
+;;ZZ;Übrige Bundesländer;16;13;3;X;X;X
+;;ZZ;BUNDESGEBIET;963;478;485;927;36;49
+;;ZZ;INSGESAMT;963;478;485;927;36;49
+;;ZZ;Darunter: AUSPENDLER;808;400;408;783;25;43
+;;ZZ;  davon: in die ABL;805;398;407;780;25;43
+;;ZZ;  davon: in die NBL;3;X;X;X;X;X
+09180135;Unterammergau;;; ;;;;;
+;;09162000;München, Landeshauptstadt;23;13;10;X;X;3
+;;09162;München, Landeshauptstadt;23;13;10;X;X;3
+;;09180112;Bad Kohlgrub;14;4;10;X;X;X
+;;09180115;Ettal;25;15;10;X;X;X
+;;09180117;Garmisch-Partenkirchen, Markt;59;32;27;X;X;4
+;;09180124;Murnau a.Staffelsee, Markt;51;19;32;X;X;4
+;;09180125;Oberammergau;133;54;79;X;X;7
+;;09180126;Oberau;12;4;8;X;X;X
+;;09180129;Saulgrub;17;12;5;X;X;3
+;;09180135;Unterammergau;70;48;22;X;X;X
+;;09180;Übrige Gemeinden (Kreis);36;23;13;X;X;3
+;;09180;Garmisch-Partenkirchen;417;211;206;411;6;21
+;;09190;Weilheim-Schongau;56;41;15;X;X;5
+;;091;Übrige Kreise (Regierungsbezirk);22;18;4;X;X;X
+;;091;Oberbayern;518;283;235;508;10;30
+;;09;Übrige Regierungsbezirke (Bundesland);10;7;3;X;X;X
+;;09;Bayern;528;290;238;518;10;30
+;;ZZ;Übrige Bundesländer;15;8;7;12;3;X
+;;ZZ;BUNDESGEBIET;543;298;245;530;13;30
+;;ZZ;INSGESAMT;543;298;245;530;13;30
+;;ZZ;Darunter: AUSPENDLER;473;250;223;461;12;30
+;;ZZ;  davon: in die ABL;471;250;221;459;12;30
+;;ZZ;  davon: in die NBL;X;X;X;X;X;X
+09180136;Wallgau;;; ;;;;;
+;;09162000;München, Landeshauptstadt;15;11;4;X;X;X
+;;09162;München, Landeshauptstadt;15;11;4;X;X;X
+;;09173133;Kochel a.See;22;X;X;X;X;X
+;;09173;Übrige Gemeinden (Kreis);13;X;X;X;X;X
+;;09173;Bad Tölz-Wolfratshausen;35;X;X;32;3;X
+;;09180117;Garmisch-Partenkirchen, Markt;135;64;71;130;5;15
+;;09180122;Krün;56;21;35;49;7;5
+;;09180123;Mittenwald, Markt;47;25;22;X;X;3
+;;09180124;Murnau a.Staffelsee, Markt;10;5;5;X;X;X
+;;09180136;Wallgau;123;60;63;107;16;8
+;;09180;Übrige Gemeinden (Kreis);20;14;6;X;X;5
+;;09180;Garmisch-Partenkirchen;391;189;202;360;31;36
+;;09190;Weilheim-Schongau;12;8;4;X;X;X
+;;091;Übrige Kreise (Regierungsbezirk);14;8;6;X;X;X
+;;091;Oberbayern;467;249;218;430;37;42
+;;09;Übrige Regierungsbezirke (Bundesland);10;X;X;X;X;X
+;;09;Bayern;477;257;220;440;37;43
+;;ZZ;Übrige Bundesländer;11;5;6;X;X;X
+;;ZZ;BUNDESGEBIET;488;262;226;451;37;43
+;;ZZ;INSGESAMT;488;262;226;451;37;43
+;;ZZ;Darunter: AUSPENDLER;365;202;163;344;21;35
+;;ZZ;  davon: in die ABL;364;202;162;343;21;35
+;;ZZ;  davon: in die NBL;X;X;X;X;X;X
