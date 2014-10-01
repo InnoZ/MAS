@@ -57,7 +57,7 @@ public class CreateDemandForGarmisch {
 	private static final String GEMEINDEN = "input/Geodaten/BayernGemeindenWGS84_UTM32N/bayern_gemeinden_UTM32N.shp";
 	// private static final String GARMISCH =
 	// "input/Geodaten/Garmisch_Gemeindegrenzen/Garmisch_Gemeindegrenzen_UTM32N.shp";
-	private static final String PLANSFILEOUTPUT = "input/plans/plans_garmisch.xml";
+	private static final String PLANSFILEOUTPUT = "input/plans/plans_test.xml";
 	private static final String BUILDINGS = "input/Geodaten/buildings_lk_ga/buildings_landkreis_garmisch_partenkirchen_utm32N.shp";
 	private static final String MODALSPLIT_TABLE = "input/Verkehrsdaten/ModalSplit_GAP.csv";
 	private static final String TRAFFIC_TABLE = "input/Verkehrsdaten/DurchschnittWege.csv";
@@ -110,7 +110,9 @@ public class CreateDemandForGarmisch {
 		findKeysAndWritePlans(relationsEinpendler, "");
 		findKeysAndWritePlansForUebrigePendler(relationsUebrigeAuspendler, true);
 		findKeysAndWritePlansForUebrigePendler(relationsUebrigeEinpendler, false);
-		createModalSplitPopulation();
+		// createModalSplitPopulation();
+		createModalSplitPopulationNew();
+		// createPopulationFromModalSplitVorlaeufig();
 
 		PopulationWriter pw = new PopulationWriter(scenario.getPopulation(),
 				scenario.getNetwork());
@@ -355,12 +357,12 @@ public class CreateDemandForGarmisch {
 				"shopping", "errand", "leisure", "attendance" };
 
 		Random rnd = MatsimRandom.getLocalInstance();
-		
+
 		int age = 0;
 		String sex = "";
 
 		for (int i = 0; i < male.size(); i = i + 4) {
-			
+
 			int activitiesPerDay = 2 + rnd.nextInt(2);
 			int randomTrafficMode = rnd.nextInt(4);
 			int randomactivity = rnd.nextInt(6);
@@ -390,17 +392,19 @@ public class CreateDemandForGarmisch {
 				System.out.println("acts:   " + (activities.entrySet()));
 
 				// performingPeople = number of persons performing a certain activity
-				//int performingPeople = 0;
+				// int performingPeople = 0;
 				String act = "";
 				int numberOfZeroPerformancers = 0;
 
 				/*
-				 * Diese while-schleife läuft nur so lange, wie es noch
-				 * values in der activities-map gibt, die nicht Null sind, d.h. so lange noch performingPeople übrig sind.  
-				 * Bei jedem Fund eines nicht-Null-values wird dieser um einen Wert gesenkt. Sind alle Values
-				 * gleich Null, so wurden allen performers schon genügend activities zugewiesen.
-				 * PROBLEM: die schleife stimmt noch nicht. bisher wird nur abgefragt, ob noch activities vergeben werden können, 
-				 * aber nciht, welche. Dann fehlt noch, dass die Personen, plans usw. konkret erstellt werden.
+				 * Diese while-schleife läuft nur so lange, wie es noch values in der
+				 * activities-map gibt, die nicht Null sind, d.h. so lange noch
+				 * performingPeople übrig sind. Bei jedem Fund eines nicht-Null-values
+				 * wird dieser um einen Wert gesenkt. Sind alle Values gleich Null, so
+				 * wurden allen performers schon genügend activities zugewiesen.
+				 * PROBLEM: die schleife stimmt noch nicht. bisher wird nur abgefragt,
+				 * ob noch activities vergeben werden können, aber nciht, welche. Dann
+				 * fehlt noch, dass die Personen, plans usw. konkret erstellt werden.
 				 */
 				while (numberOfZeroPerformancers < 7) {
 					act = activityTypes[randomactivity];
@@ -414,7 +418,7 @@ public class CreateDemandForGarmisch {
 						}
 					}
 				}
-				
+
 				activitiesPerDay--;
 			}
 		}
@@ -426,12 +430,16 @@ public class CreateDemandForGarmisch {
 
 		tpp.readData(MODALSPLIT_TABLE);
 		/*
-		 * Erstelle Liste, die alle Verkehrsteilnehmergruppen als
-		 * TrafficParticipants speichert.
+		 * Erstelle Liste, in der alle Verkehrsteilnehmergruppen als
+		 * TrafficParticipants gespeichert werden. Dabei besteht eine
+		 * Verkehrsteilnehmergruppe aus Personen zwischen x und x+10 Jahren. Die
+		 * Mitglieder einer Gruppe haben alle dasselbe Geschlecht und denselben
+		 * Verkehrsmodus(walk,bike,car oder pt). Das Objekt TrafficParticipants
+		 * speichert je einen Integer als Personenanzahl pro Aktivität.
 		 */
 		List<TrafficParticipants> allParticipants = tpp.getParticipantgroups();
 		TrafficParticipants participantgroup = new TrafficParticipants();
-		
+
 		Random rnd = MatsimRandom.getLocalInstance();
 
 		int age = 0;
@@ -490,7 +498,7 @@ public class CreateDemandForGarmisch {
 					if (age == 0) {
 						randomAge = 6 + rnd.nextInt(3);
 					}
-					randomAge = rnd.nextInt(age + 9);
+					randomAge = age + rnd.nextInt(9);
 					((PersonImpl) person).setSex(sex);
 					((PersonImpl) person).setAge(Integer.valueOf(randomAge));
 
@@ -555,7 +563,11 @@ public class CreateDemandForGarmisch {
 	/**
 	 * erzeugt MatSim-Agenten aus den Daten einer Tabelle,die Informationen über
 	 * das Verkehrsverhalten von Menschen verschiedener Altersgruppen im
-	 * ländlichen Raum enthält.
+	 * ländlichen Raum enthält. Hierbi werden Personen in Gruppen zusammengefasst,
+	 * die das gleiche Alterund das selbe Geschlecht, sowie den gleichen
+	 * Verkehrsmodus benutzen. Ueber Aktivitäten wird keine Aussage gemacht.
+	 * Allerdings ist die durchschnittliche Anzahl an Wegen pro Person für die
+	 * verschiedenen Personengruppen vorhanden.
 	 */
 	private void createPopulationFromModalSplitVorlaeufig() {
 		/*
