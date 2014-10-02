@@ -2,7 +2,6 @@ package simulation;
 
 import readTrafficParticipants.*;
 import readTrafficVorlaeufig.*;
-import readTrafficVorlaeufig.TrafficPeopleMode.Sex;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -110,8 +109,8 @@ public class CreateDemandForGarmisch {
 		findKeysAndWritePlans(relationsEinpendler, "");
 		findKeysAndWritePlansForUebrigePendler(relationsUebrigeAuspendler, true);
 		findKeysAndWritePlansForUebrigePendler(relationsUebrigeEinpendler, false);
-		// createModalSplitPopulation();
-		createModalSplitPopulationNew();
+		//createModalSplitPopulation();
+		 createModalSplitPopulationNew();
 		// createPopulationFromModalSplitVorlaeufig();
 
 		PopulationWriter pw = new PopulationWriter(scenario.getPopulation(),
@@ -122,7 +121,7 @@ public class CreateDemandForGarmisch {
 
 	/**
 	 * Filtert aus den keys der input-map die Gemeindeschluessel der
-	 * Pendlergruppen heraus und gibt diese, zusammen mit dem jeweils zuheörigen
+	 * Pendlergruppen heraus und gibt diese, zusammen mit dem jeweils zugehörigen
 	 * map-value, an writePlansFor() weiter. Dort werden Agenten-Pläne erstellt.
 	 * 
 	 * @param relationsMap
@@ -341,11 +340,7 @@ public class CreateDemandForGarmisch {
 		}
 
 		Collections.sort(male, compareAge);
-		for (int i = 0; i < male.size(); i++) {
-		}
 		Collections.sort(female, compareAge);
-		for (int i = 0; i < female.size(); i++) {
-		}
 
 		/*
 		 * Iteriere über die Liste männlicher Verkehrsteilnehmer und betrachte die
@@ -361,18 +356,18 @@ public class CreateDemandForGarmisch {
 		int age = 0;
 		String sex = "";
 
-		for (int i = 0; i < male.size(); i = i + 4) {
+		for (int i = 0; i < male.size(); i++) {
 
 			int activitiesPerDay = 2 + rnd.nextInt(2);
 			int randomTrafficMode = rnd.nextInt(4);
 			int randomactivity = rnd.nextInt(6);
+			int randomAge = rnd.nextInt(9);
 
-			TrafficParticipants maleParticipants = male.get(i + randomTrafficMode);
-			String mode = maleParticipants.getMode();
-			age = maleParticipants.getAge();
+			TrafficParticipants currentMaleParticipants = male.get(i);
+			String mode = currentMaleParticipants.getMode();
+			age = currentMaleParticipants.getAge() + randomAge;
 			sex = "m";
 
-			while (!(activitiesPerDay == 0)) {
 				/*
 				 * Lege eine Map für jede Altersgruppe von Verkehrsteilnehmern an, in
 				 * der die Anzahl von Personen zu den versch. Wegezwecken gespeichert
@@ -380,16 +375,47 @@ public class CreateDemandForGarmisch {
 				 */
 				Map<String, Integer> activities = new HashMap<String, Integer>();
 
-				activities.put("attendance", participantgroup.getAttendance());
+				activities.put("attendance", currentMaleParticipants.getAttendance());
 				activities.put("businessRelatedTravel",
-						participantgroup.getBusinessRelatedTravel());
-				activities.put("education", participantgroup.getEducation());
-				activities.put("errand", participantgroup.getErrand());
-				activities.put("leisure", participantgroup.getLeisure());
-				activities.put("shopping", participantgroup.getShopping());
-				activities.put("work", participantgroup.getWork());
+						currentMaleParticipants.getBusinessRelatedTravel());
+				activities.put("education", currentMaleParticipants.getEducation());
+				activities.put("errand", currentMaleParticipants.getErrand());
+				activities.put("leisure", currentMaleParticipants.getLeisure());
+				activities.put("shopping", currentMaleParticipants.getShopping());
+				activities.put("work", currentMaleParticipants.getWork());
 
 				System.out.println("acts:   " + (activities.entrySet()));
+				
+				int numberOfAllActs = 0; 
+				for (int j = 0; j < activityTypes.length; j++) {
+					numberOfAllActs += activities.get(activityTypes[j]);
+				}
+				System.out.println("NUMBER OF ALL ACTS : " + numberOfAllActs);
+				
+				/**
+				 * Der Plan fuer eine neue while.Schleife: while (!(numberOfAllActs == 0)) {...}
+				 *  -> zähle mit jeder neuen activity-vergabe numberOfAllActs um eins runter.
+				 *  
+				 *  Inhalt: 
+				 *  
+				 *  int newAct = activityTypes[randomactivity];
+				 *  if(! activities.get(newAct)==0){
+				 *  createOnePerson(...activity1 = ..)
+				 *  }
+				 * 
+				 * activitiesPerDay --;
+				 * numberOfAllActs --;
+				 * 
+				 *  int randomactivity = rnd.nextInt(6);
+				 *  newAct = activityTypes[randomactivity];
+				 *  if(! activities.get(newAct)==0 && ! personXY.getActivity == newAct && ! activitiesPerDay == 0){
+				 *  createOnePerson(...activity2 = ..)
+				 *  }
+				 *  
+				 *  ...
+				 *  
+				 */
+				while (!(activitiesPerDay == 0)) {
 
 				// performingPeople = number of persons performing a certain activity
 				// int performingPeople = 0;
@@ -424,6 +450,27 @@ public class CreateDemandForGarmisch {
 		}
 	}
 
+	
+	private void setModeForParticipantgroup(List<TrafficParticipants> participants){
+		
+		for (int i = 0; i < participants.size(); i++) {
+			TrafficParticipants currentPartcipantGroup = participants.get(i);
+			String mode = currentPartcipantGroup.getMode();
+			
+			if(mode.equals("zu Fuß")){
+				currentPartcipantGroup.setMode("walk");
+			} else if(mode.equals("Fahrrad")){
+				currentPartcipantGroup.setMode("bike");
+			} else if(mode.equals("OEPV")){
+				currentPartcipantGroup.setMode("pt");
+			} else if(mode.equals("Fahrer")){
+				currentPartcipantGroup.setMode("car");
+			} else if(mode.equals("Mitfahrer")){
+				currentPartcipantGroup.setMode("car");
+			}
+		}
+		
+	}
 	private void createModalSplitPopulation() {
 
 		TrafficParticipantsParser tpp = new TrafficParticipantsParser();
@@ -432,10 +479,11 @@ public class CreateDemandForGarmisch {
 		/*
 		 * Erstelle Liste, in der alle Verkehrsteilnehmergruppen als
 		 * TrafficParticipants gespeichert werden. Dabei besteht eine
-		 * Verkehrsteilnehmergruppe aus Personen zwischen x und x+10 Jahren. Die
-		 * Mitglieder einer Gruppe haben alle dasselbe Geschlecht und denselben
-		 * Verkehrsmodus(walk,bike,car oder pt). Das Objekt TrafficParticipants
-		 * speichert je einen Integer als Personenanzahl pro Aktivität.
+		 * Verkehrsteilnehmergruppe aus Personen zwischen x und x+10 Jahren (wobei 0
+		 * < x < 80 & x durch 10 teilbar). Die Mitglieder einer Gruppe haben alle
+		 * dasselbe Geschlecht und denselben Verkehrsmodus(walk,bike,car oder pt).
+		 * Das Objekt TrafficParticipants speichert je einen Integer als
+		 * Personenanzahl pro Aktivität.
 		 */
 		List<TrafficParticipants> allParticipants = tpp.getParticipantgroups();
 		TrafficParticipants participantgroup = new TrafficParticipants();
@@ -567,11 +615,13 @@ public class CreateDemandForGarmisch {
 	 * die das gleiche Alterund das selbe Geschlecht, sowie den gleichen
 	 * Verkehrsmodus benutzen. Ueber Aktivitäten wird keine Aussage gemacht.
 	 * Allerdings ist die durchschnittliche Anzahl an Wegen pro Person für die
-	 * verschiedenen Personengruppen vorhanden.
+	 * verschiedenen Personengruppen vorhanden. Die Methode modelliert die Agenten
+	 * so, dass alle Fußgänger zur Schule gehn, alle Fahrradfahrer einkaufen, alle
+	 * Autofahrer zur Arbeit fahren und alle pt-Nutzer Freizeit machen.
 	 */
 	private void createPopulationFromModalSplitVorlaeufig() {
 		/*
-		 * Read the census file Create the persons and add the socio-demographics
+		 * Read the census file, create the agents and add the socio-demographics
 		 */
 		TrafficPeopleParser tpp = new TrafficPeopleParser();
 
@@ -593,7 +643,6 @@ public class CreateDemandForGarmisch {
 		int age = 0;
 		Random rnd = MatsimRandom.getLocalInstance();
 		int randomAge = 0;
-		int randomMapentry = 0;
 		/*
 		 * Create persons and add them to the population
 		 */
