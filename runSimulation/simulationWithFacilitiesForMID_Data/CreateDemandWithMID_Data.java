@@ -26,26 +26,27 @@ import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.api.experimental.facilities.ActivityFacility;
 import org.matsim.core.basic.v01.IdImpl;
+import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.facilities.FacilitiesReaderMatsimV1;
+import org.matsim.core.network.MatsimNetworkReader;
 import org.matsim.core.population.ActivityImpl;
 import org.matsim.core.population.PersonImpl;
 import org.matsim.core.population.PlanImpl;
 import org.matsim.core.scenario.ScenarioImpl;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.QuadTree;
+import org.matsim.core.utils.geometry.CoordImpl;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 
 import com.ctc.wstx.dtd.StarModel;
 
 public class CreateDemandWithMID_Data {
-	private Scenario scenario;
+	Scenario scenario;
 
-	// We need another population, the PUS population
-	private Scenario scenarioPUS;
-
-	// [[ 3 ]] here you have to fill in the path of the pus files
 	private String tripsFile = "./input/CensusAndTravelsurveys/MID/travelsurvey.csv";
-	// private String pusPersonsFile = "./InputZurich/travelsurvey_persons.txt";
 
 	private ObjectAttributes personHomeAndWorkLocations;
 	private Random random = new Random(3838494);
@@ -66,15 +67,13 @@ public class CreateDemandWithMID_Data {
 	public void run(Scenario scenario, ObjectAttributes objectAttributes,
 			Map<Id, Integer> facilityCapacities) {
 		this.scenario = scenario;
-		this.scenarioPUS = ScenarioUtils.createScenario(ConfigUtils
-				.createConfig());
 		this.personHomeAndWorkLocations = objectAttributes;
 		this.facilityCapacities = facilityCapacities;
 		this.init();
 		this.createPlans();
 	}
 
-	private void init() {
+	public void init() {
 		/*
 		 * Build quad trees for assigning facility locations
 		 */
@@ -139,14 +138,14 @@ public class CreateDemandWithMID_Data {
 	/**
 	 * @param activityType 
 	 * @param coordStart coordinate of the starting point for this trip
-	 * @param distance tripdistance from starting point to destination 
+	 * @param distance real tripdistance from starting point to destination(read from MID-Data) 
 	 * @return facility for the correct activityType at destination point
 	 * @throws NullPointerException
 	 * 
-	 * This method finds a facility whose coordinates have least a distance to the starting point of the trip that is 
-	 * as long as the given input-distance.
+	 * This method finds a facility which satisfies the following condition:
+	 * absolutValue( distance(startingPoint, facility) - real_tripDistance ) = minimal
 	 */
-	private ActivityFacility chooseFacility(String activityType, Coord coordStart, double distance) throws NullPointerException{
+	 ActivityFacility chooseFacility(String activityType, Coord coordStart, double distance) throws NullPointerException{
 		
 		QuadTree<ActivityFacility> facilitiesTree = getFacilitesTree(activityType);
 
@@ -155,48 +154,52 @@ public class CreateDemandWithMID_Data {
 		  double xCoordCenter = coordStart.getX();
 		  double yCoordCenter = coordStart.getY();
 		  ArrayList<ActivityFacility> facilities = new ArrayList<ActivityFacility>();
-		  ArrayList<ActivityFacility> previousFacilitiesCollection = new ArrayList<ActivityFacility>();
-		  double radius = distance;
-		  double realDistance = 0;	
-		  
-		  while (realDistance < distance){
-
-			 facilities = (ArrayList<ActivityFacility>) facilitiesTree.get(xCoordCenter, yCoordCenter, radius);
-		     facilities.removeAll(previousFacilitiesCollection);
-		     
-			 if(facilities != null && facilities.size() != 0){
-			   for (ActivityFacility activityFacility : facilities) {
-			     realDistance = calculateDistance(activityFacility.getCoord(), coordStart);
-			     if(realDistance >= distance){
-				   return activityFacility;
-			     }
-		       }
-			 }
-			 /*
-			  * Es ist möglich, dass innerhalb des Gebiets mit radius x keine facility liegt, deren Abstand zum Mittelpunkt
-			  * mindestens distance groß ist. Deshalb erweitern wir den Radius um 20%.
-			  */
-			 radius *= 1.2;
-		     previousFacilitiesCollection = facilities;
-		 }  
+		  double radius = 2*distance;
+		  /*
+		   * find most suitable facility for above given condition
+		   */
+		  while(facilities.size() == 0){
+			facilities = (ArrayList<ActivityFacility>) facilitiesTree.get(xCoordCenter, yCoordCenter, radius);
+			  radius *= 1.2;
+		  }
+		  /*
+		   * find nearest facility to a coordinate which has input-distance to starting point.
+		   */
+		  double simulatedDistance = 0;	
+		  double variance = 0;
+		  double min = Double.POSITIVE_INFINITY;
+		  ActivityFacility facility = null;
+		  for (ActivityFacility activityFacility : facilities) {
+		    simulatedDistance = calculateDistance(activityFacility.getCoord(), coordStart);
+		    variance = Math.abs(simulatedDistance - distance);
+			    if(variance <= min){
+			    	min = variance;		
+			    	facility = activityFacility;
+			    }
+		   }
+		   System.out.println("ABWEICHUNG DER SIMULIERTEN DISTANZ (STARTKOORDINATE, FACILITY) ZUR GEGEBENEN DISTANZ (START-, ZIELKOORIDNATE) : ");
+		   System.out.println("facilityId: " + facility.getId().toString() + "\t variance: " + variance + " meter");
+		   return facility;
 		}else{
 			throw new NullPointerException("facilitiesTree = null");
 		}
-		return null;
 	}
 
-	private double calculateDistance(Coord start, Coord destination) {
+	/**
+	 * @param tripStart
+	 * @param tripEnd
+	 * @return distance length of the trip in meters
+	 */
+	private double calculateDistance(Coord tripStart, Coord tripEnd) {
 
-		double x = start.getX() - start.getY();
-		double y = destination.getX() - destination.getY();
+		double x = Math.abs(tripEnd.getX() - tripStart.getX() );
+		double y = Math.abs(tripEnd.getY() - tripStart.getY() );
 
 		double distance = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-		return distance;
+		double beeLineToRouteDistance = 1.3;
+		return distance*beeLineToRouteDistance;
 	}
 
-	/*
-	 * [[ 4 ]]
-	 */
 	private void createPlans() {
 		/*
 		 * For convenience and code readability store population and population
@@ -283,8 +286,9 @@ public class CreateDemandWithMID_Data {
 					 */
 					Coord coordStart = previousActivity.getCoord();
 					String activityType = parts[index_activityType].trim();
+					// read distance in km and convert it to m
 					double distanceFromPreviousToCurrentAct = Double
-							.parseDouble(parts[index_distance].trim());
+							.parseDouble(parts[index_distance].trim())*1000;
 
 					ActivityFacility facility = chooseFacility(activityType,
 							coordStart, distanceFromPreviousToCurrentAct);
@@ -307,41 +311,6 @@ public class CreateDemandWithMID_Data {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	private ActivityFacility getRandomLocation(Activity activity,
-			Coord coordPreviousActivity, double radius) {
-		double xCoordCenter = coordPreviousActivity.getX();
-		double yCoordCenter = coordPreviousActivity.getY();
-		ArrayList<ActivityFacility> facilities = new ArrayList<ActivityFacility>();
-
-		if (activity.getType().startsWith("s")) {
-			while (facilities.size() == 0) {
-				facilities = (ArrayList<ActivityFacility>) this.shopFacilitiesTree
-						.get(xCoordCenter, yCoordCenter, radius);
-				radius *= 2.0;
-			}
-		} else if (activity.getType().startsWith("l")) {
-			while (facilities.size() == 0) {
-				facilities = (ArrayList<ActivityFacility>) this.leisureFacilitiesTree
-						.get(xCoordCenter, yCoordCenter, radius);
-				radius *= 2.0;
-			}
-		} else if (activity.getType().startsWith("e")) {
-			while (facilities.size() == 0) {
-				facilities = (ArrayList<ActivityFacility>) this.educationFacilitiesTree
-						.get(xCoordCenter, yCoordCenter, radius);
-				radius *= 2.0;
-			}
-		} else { // work
-			while (facilities.size() == 0) {
-				facilities = (ArrayList<ActivityFacility>) this.workFacilitiesTree
-						.get(xCoordCenter, yCoordCenter, radius);
-				radius *= 2.0;
-			}
-		}
-		int randomIndex = (int) (random.nextFloat() * (facilities.size()));
-		return facilities.get(randomIndex);
 	}
 
 	private double randomizeTimes() {
