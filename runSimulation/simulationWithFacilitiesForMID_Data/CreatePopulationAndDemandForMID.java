@@ -28,12 +28,15 @@ public class CreatePopulationAndDemandForMID {
 	
 	private void run() {
 		this.init();
+		/*
+		 * read facilities, store them in scenario and also store capacities in a Map
+		 */
 		CreateFacilitiesGAP_MID_Data facilityCreator = new CreateFacilitiesGAP_MID_Data();
 		facilityCreator.initAndRun(this.scenario);
 		CreatePopulationWithMID_Data populationCreator = new CreatePopulationWithMID_Data();
 		populationCreator.run(this.scenario, facilityCreator.getIDs());
-		//CreateDemandWithMID_Data demandCreator = new CreateDemandWithMID_Data();
-		//demandCreator.run(this.scenario, populationCreator.getPersonHomeLocations(), facilityCreator.getCapacities());
+		CreateDemandWithMID_Data demandCreator = new CreateDemandWithMID_Data();
+		demandCreator.run(this.scenario, populationCreator.getPersonHomeLocations(), populationCreator.getErrorPersons(), facilityCreator.getCapacities());
 		this.write();
 	}
 	

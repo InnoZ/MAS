@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
 
@@ -53,8 +54,8 @@ public class CreateDemandWithMID_Data {
 
 	private List<Id> pusWorkers = new Vector<Id>();
 	private List<Id> pusNonWorkers = new Vector<Id>();
-
-	private Map<Id, Integer> facilityCapacities = new HashMap<Id, Integer>();
+	private ArrayList<Id> errorPersons;
+	Map<Id, Integer> facilityCapacities = new HashMap<Id, Integer>();
 
 	private QuadTree<ActivityFacility> shopFacilitiesTree;
 	private QuadTree<ActivityFacility> leisureFacilitiesTree;
@@ -65,26 +66,25 @@ public class CreateDemandWithMID_Data {
 			.getLogger(CreateDemandWithMID_Data.class);
 
 	public void run(Scenario scenario, ObjectAttributes objectAttributes,
-			Map<Id, Integer> facilityCapacities) {
+			ArrayList<Id> errorPersons, Map<Id, Integer> facilityCapacities) {
 		this.scenario = scenario;
 		this.personHomeAndWorkLocations = objectAttributes;
+		this.errorPersons = errorPersons;
 		this.facilityCapacities = facilityCapacities;
 		this.init();
 		this.createPlans();
 	}
 
-	public void init() {
+	private void init() {
 		/*
 		 * Build quad trees for assigning facility locations
 		 */
-		this.shopFacilitiesTree = this.createActivitiesTree("shop",
-				this.scenario);
+		this.shopFacilitiesTree = this.createActivitiesTree("shop", this.scenario);
 		this.leisureFacilitiesTree = this.createActivitiesTree("leisure",
 				this.scenario);
 		this.educationFacilitiesTree = this.createActivitiesTree("education",
 				this.scenario);
-		this.workFacilitiesTree = this.createActivitiesTree("work",
-				this.scenario);
+		this.workFacilitiesTree = this.createActivitiesTree("work", this.scenario);
 	}
 
 	/*
@@ -100,8 +100,7 @@ public class CreateDemandWithMID_Data {
 
 	/**
 	 * @param time
-	 *            String which contains a daytime in the form
-	 *            "hour:minute:second"
+	 *          String which contains a daytime in the form "hour:minute:second"
 	 * @return the time as a double expressed in seconds
 	 */
 	private double calculateTimeInSeconds(String time) {
@@ -113,76 +112,152 @@ public class CreateDemandWithMID_Data {
 	}
 
 	/**
-	 * @param activityType 
-	 * @return QuadTree that contains all facilities for the specified input-activityType
+	 * @param activityType
+	 * @return QuadTree that contains all facilities for the specified
+	 *         input-activityType
 	 */
-	private QuadTree<ActivityFacility> getFacilitesTree(String activityType){
+	private QuadTree<ActivityFacility> getFacilitesTree(String activityType) {
 		QuadTree<ActivityFacility> facilitiesTree = null;
 
-		int type = activityType.charAt(0); 
-		switch (type) { // e = 101, l =  108, s = 115, w = 119 
-		
-		case 101 : facilitiesTree = this.educationFacilitiesTree;
-					break;
-		case 108 : facilitiesTree = this.leisureFacilitiesTree;
-					break;
-		case 115 : facilitiesTree = this.shopFacilitiesTree;
-					break;
-		case 119 : facilitiesTree = this.workFacilitiesTree;
-					break;
-		default: 	break;
+		int type = activityType.charAt(0);
+		switch (type) { // e = 101, l = 108, s = 115, w = 119
+
+		case 101:
+			facilitiesTree = this.educationFacilitiesTree;
+			break;
+		case 108:
+			facilitiesTree = this.leisureFacilitiesTree;
+			break;
+		case 115:
+			facilitiesTree = this.shopFacilitiesTree;
+			break;
+		case 119:
+			facilitiesTree = this.workFacilitiesTree;
+			break;
+		default:
+			break;
 		}
 		return facilitiesTree;
 	}
-	
-	/**
-	 * @param activityType 
-	 * @param coordStart coordinate of the starting point for this trip
-	 * @param distance real tripdistance from starting point to destination(read from MID-Data) 
-	 * @return facility for the correct activityType at destination point
-	 * @throws NullPointerException
-	 * 
-	 * This method finds a facility which satisfies the following condition:
-	 * absolutValue( distance(startingPoint, facility) - real_tripDistance ) = minimal
-	 */
-	 ActivityFacility chooseFacility(String activityType, Coord coordStart, double distance) throws NullPointerException{
-		
-		QuadTree<ActivityFacility> facilitiesTree = getFacilitesTree(activityType);
 
-		if(facilitiesTree != null){
-			
-		  double xCoordCenter = coordStart.getX();
-		  double yCoordCenter = coordStart.getY();
-		  ArrayList<ActivityFacility> facilities = new ArrayList<ActivityFacility>();
-		  double radius = 2*distance;
-		  /*
-		   * find most suitable facility for above given condition
-		   */
-		  while(facilities.size() == 0){
-			facilities = (ArrayList<ActivityFacility>) facilitiesTree.get(xCoordCenter, yCoordCenter, radius);
-			  radius *= 1.2;
-		  }
-		  /*
-		   * find nearest facility to a coordinate which has input-distance to starting point.
-		   */
-		  double simulatedDistance = 0;	
-		  double variance = 0;
-		  double min = Double.POSITIVE_INFINITY;
-		  ActivityFacility facility = null;
-		  for (ActivityFacility activityFacility : facilities) {
-		    simulatedDistance = calculateDistance(activityFacility.getCoord(), coordStart);
-		    variance = Math.abs(simulatedDistance - distance);
-			    if(variance <= min){
-			    	min = variance;		
-			    	facility = activityFacility;
-			    }
-		   }
-		   System.out.println("ABWEICHUNG DER SIMULIERTEN DISTANZ (STARTKOORDINATE, FACILITY) ZUR GEGEBENEN DISTANZ (START-, ZIELKOORIDNATE) : ");
-		   System.out.println("facilityId: " + facility.getId().toString() + "\t variance: " + variance + " meter");
-		   return facility;
-		}else{
+	/**
+	 * @param activityType
+	 * @param coordStart
+	 *          coordinate of the starting point for this trip
+	 * @param distance
+	 *          real trip-distance from starting point to destination(read from
+	 *          MID-Data)
+	 * @return facility with the correct activityType at optimal destination point
+	 * 
+	 *         This method finds a facility which satisfies the following
+	 *         condition: absolutValue( distance(startingPoint, facility) -
+	 *         real_tripDistance ) = minimal
+	 */
+	private ActivityFacility chooseFacility(String activityType,
+			Coord coordStart, double distance) {
+
+		/*
+		 * find suitable facilities in the ring at distance of 0.8*(input-distance)
+		 * from coordStart with width is 0.4*(input-distance).
+		 */
+		ArrayList<ActivityFacility> facilities = new ArrayList<ActivityFacility>();
+
+		facilities = findFacilitiesInCertainArea(activityType, distance, coordStart);
+
+		/*
+		 * find nearest facility to a coordinate which has input-distance to
+		 * starting point.
+		 */
+		double simulatedDistance = 0;
+		double variance = 0;
+		double min = Double.POSITIVE_INFINITY;
+		double max = Double.NEGATIVE_INFINITY;
+		ActivityFacility facility = null;
+
+		if (activityType.startsWith("w")) {
+			int capacity = 0;
+
+			for (ActivityFacility activityFacility : facilities) {
+				capacity = facilityCapacities.get(activityFacility.getId());
+				simulatedDistance = calculateDistance(activityFacility.getCoord(),
+						coordStart);
+				variance = Math.abs(simulatedDistance - distance);
+				if (capacity > max) {
+					max = capacity;
+					System.out.println("max = capacity " + capacity);
+					facility = activityFacility;
+				} else if (capacity == max) {
+					System.out.println("max == capacity " + capacity);
+
+					if (variance <= min) {
+						min = variance;
+						facility = activityFacility;
+					}
+				}
+			}
+		} else {
+			for (ActivityFacility activityFacility : facilities) {
+
+				simulatedDistance = calculateDistance(activityFacility.getCoord(),
+						coordStart);
+				variance = Math.abs(simulatedDistance - distance);
+				if (variance <= min) {
+					min = variance;
+					facility = activityFacility;
+				}
+			}
+		}
+
+		System.out
+				.println("ABWEICHUNG DER SIMULIERTEN DISTANZ (STARTKOORDINATE, FACILITY) ZUR GEGEBENEN DISTANZ (START-, ZIELKOORIDNATE) : ");
+		System.out.println("facilityId: " + facility.getId().toString()
+				+ "\t variance: " + variance + " meter");
+		return facility;
+	}
+
+	/**
+	 * @param activityType
+	 *          at destination
+	 * @param distance
+	 *          optimal distance from coordStart to destination
+	 * @param coordStart
+	 *          center of the area in which we are looking for facilities
+	 * @return List of all facilities which have the specified activityType and
+	 *         lie in the area between two concentric circles around coordStart
+	 *         with radii 08.*distance and 1.2*distance.
+	 * @throws NullPointerException
+	 *           , if there aren't any facilities found.
+	 */
+	private ArrayList<ActivityFacility> findFacilitiesInCertainArea(
+			String activityType, double distance, Coord coordStart)
+			throws NullPointerException {
+
+		QuadTree<ActivityFacility> facilitiesTree = getFacilitesTree(activityType);
+		ArrayList<ActivityFacility> facilities = new ArrayList<ActivityFacility>();
+
+		if (facilitiesTree != null) {
+
+			double xCoordCenter = coordStart.getX();
+			double yCoordCenter = coordStart.getY();
+			double radiusExpand = distance * 1.2;
+			double radiusRestrict = distance * 0.8;
+			ArrayList<ActivityFacility> ignorableFacilities = new ArrayList<ActivityFacility>();
+
+			while (facilities.size() == 0) {
+				facilities = (ArrayList<ActivityFacility>) facilitiesTree.get(
+						xCoordCenter, yCoordCenter, radiusExpand);
+				ignorableFacilities = (ArrayList<ActivityFacility>) facilitiesTree.get(
+						xCoordCenter, yCoordCenter, radiusRestrict);
+
+				facilities.removeAll(ignorableFacilities);
+
+				radiusExpand *= 1.2;
+				radiusRestrict *= 0.8;
+			}
+		} else {
 			throw new NullPointerException("facilitiesTree = null");
 		}
+		return facilities;
 	}
 
 	/**
@@ -192,12 +267,12 @@ public class CreateDemandWithMID_Data {
 	 */
 	private double calculateDistance(Coord tripStart, Coord tripEnd) {
 
-		double x = Math.abs(tripEnd.getX() - tripStart.getX() );
-		double y = Math.abs(tripEnd.getY() - tripStart.getY() );
+		double x = Math.abs(tripEnd.getX() - tripStart.getX());
+		double y = Math.abs(tripEnd.getY() - tripStart.getY());
 
 		double distance = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 		double beeLineToRouteDistance = 1.3;
-		return distance*beeLineToRouteDistance;
+		return distance * beeLineToRouteDistance;
 	}
 
 	private void createPlans() {
@@ -230,7 +305,7 @@ public class CreateDemandWithMID_Data {
 			// int index_age = 9;
 			// int index_CarAvailable = 10;
 			// int index_license =11;
-			int index_numerOfCompanions = 12;
+			int index_numberOfCompanions = 12;
 			// int index_isEmployed = 13;
 
 			Activity previousActivity = null;
@@ -243,69 +318,72 @@ public class CreateDemandWithMID_Data {
 				String parts[] = line.split("\t");
 
 				Id personId = new IdImpl(parts[index_personId]);
-				Person person = population.getPersons().get(personId);
-				CreatePlanForPerson(person, population);
-				Plan plan = person.getSelectedPlan();
-				/*
-				 * If a new person is read add a home activity (first origin
-				 * activity) Otherwise add a leg and an activity (destination
-				 * activity)
-				 */
-				if (!personId.equals(previousPerson)) {
-
-					((PersonImpl) person)
-							.createDesires("desired activity durations");
-					ActivityFacility facility;
-					facility = (ActivityFacility) this.personHomeAndWorkLocations
-							.getAttribute(person.getId().toString(), "home");
-					ActivityImpl activity;
-					activity = (ActivityImpl) populationFactory
-							.createActivityFromCoord("home",
-									facility.getCoord());
+				if (!(this.errorPersons.contains(personId)) && (Integer.valueOf(parts[index_tripID]) < 99)){
+					Person person = population.getPersons().get(personId);
+					if (person == null) {
+						System.out.println("person = null, personId: "
+								+ personId.toString());
+					}
+					// CreatePlanForPerson(person, population);
+					Plan plan = populationFactory.createPlan();
+					person.addPlan(plan);
+					((PersonImpl) person).setSelectedPlan(plan);
 					/*
-					 * add facility-properties to activity
+					 * If a new person is read add a home activity (first origin activity)
+					 * Otherwise add a leg and an activity (destination activity)
 					 */
-					activity.setFacilityId(facility.getId());
-					activity.setLinkId(facility.getLinkId());
+					if (!personId.equals(previousPerson)) {
 
-					activity.setType("h");
-					time = calculateTimeInSeconds(parts[index_startTime].trim());
-					activity.setEndTime(time);
-					previousActivity = activity;
-					plan.addActivity(activity);
-				} else {
-					/*
-					 * Add a leg from previous location to this location with
-					 * the given mode
-					 */
-					String mode = parts[index_mode].trim();
-					plan.addLeg(populationFactory.createLeg(mode));
+						((PersonImpl) person).createDesires("desired activity durations");
+						ActivityFacility facility;
+						facility = (ActivityFacility) this.personHomeAndWorkLocations
+								.getAttribute(person.getId().toString(), "home");
+						ActivityImpl activity;
+						activity = (ActivityImpl) populationFactory
+								.createActivityFromCoord("home", facility.getCoord());
+						/*
+						 * add facility-properties to activity
+						 */
+						activity.setFacilityId(facility.getId());
+						activity.setLinkId(facility.getLinkId());
 
-					/*
-					 * Add activity given its type.
-					 */
-					Coord coordStart = previousActivity.getCoord();
-					String activityType = parts[index_activityType].trim();
-					// read distance in km and convert it to m
-					double distanceFromPreviousToCurrentAct = Double
-							.parseDouble(parts[index_distance].trim())*1000;
+						activity.setType("h");
+						System.out.println("parts[index_startTime]: " + parts[index_startTime] + "personId: " + person.getId().toString());
+						time = calculateTimeInSeconds(parts[index_startTime].trim());
+						activity.setEndTime(time);
+						previousActivity = activity;
+						plan.addActivity(activity);
+					} else {
+						/*
+						 * Add a leg from previous location to this location with the given
+						 * mode
+						 */
+						String mode = parts[index_mode].trim();
+						plan.addLeg(populationFactory.createLeg(mode));
 
-					ActivityFacility facility = chooseFacility(activityType,
-							coordStart, distanceFromPreviousToCurrentAct);
+						/*
+						 * Add activity given its type.
+						 */
+						Coord coordStart = previousActivity.getCoord();
+						String activityType = parts[index_activityType].trim();
+						// read distance in km and convert it to m
+						double distanceFromPreviousToCurrentAct = Double
+								.parseDouble(parts[index_distance].trim()) * 1000;
 
-					Activity activity = populationFactory
-							.createActivityFromCoord(activityType,
-									facility.getCoord());
+						ActivityFacility facility = chooseFacility(activityType,
+								coordStart, distanceFromPreviousToCurrentAct);
 
-					Double duration = Double
-							.parseDouble(parts[index_activityDuration]);
-					// store the desired duration in the persons knowledge
-					((PersonImpl) person).getDesires().putActivityDuration(
-							activityType, duration);
-					plan.addActivity(activity);
+						Activity activity = populationFactory.createActivityFromCoord(
+								activityType, facility.getCoord());
+
+						Double duration = Double.parseDouble(parts[index_activityDuration]);
+						// store the desired duration in the persons knowledge
+						((PersonImpl) person).getDesires().putActivityDuration(
+								activityType, duration);
+						plan.addActivity(activity);
+					}
 				}
 			}
-
 			bufferedReader.close();
 		} // end try
 		catch (IOException e) {
@@ -322,14 +400,13 @@ public class CreateDemandWithMID_Data {
 		return scenario;
 	}
 
-	public QuadTree<ActivityFacility> createActivitiesTree(String activityType,
+	private QuadTree<ActivityFacility> createActivitiesTree(String activityType,
 			Scenario scenario) {
 		QuadTree<ActivityFacility> facQuadTree;
 
 		if (activityType.equals("all")) {
 			facQuadTree = this.builFacQuadTree(activityType,
-					((ScenarioImpl) scenario).getActivityFacilities()
-							.getFacilities());
+					((ScenarioImpl) scenario).getActivityFacilities().getFacilities());
 		} else {
 			facQuadTree = this.builFacQuadTree(activityType,
 					((ScenarioImpl) scenario).getActivityFacilities()
@@ -366,8 +443,8 @@ public class CreateDemandWithMID_Data {
 		maxy += 1.0;
 		System.out.println("        xrange(" + minx + "," + maxx + "); yrange("
 				+ miny + "," + maxy + ")");
-		QuadTree<ActivityFacility> quadtree = new QuadTree<ActivityFacility>(
-				minx, miny, maxx, maxy);
+		QuadTree<ActivityFacility> quadtree = new QuadTree<ActivityFacility>(minx,
+				miny, maxx, maxy);
 		for (final ActivityFacility f : facilities_of_type.values()) {
 			quadtree.put(f.getCoord().getX(), f.getCoord().getY(), f);
 		}

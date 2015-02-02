@@ -3,6 +3,7 @@ package simulationWithFacilitiesForMID_Data;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
 
@@ -26,44 +27,52 @@ import org.matsim.utils.objectattributes.ObjectAttributes;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class CreatePopulationWithMID_Data {
-private Scenario scenario;
-	
-	// [[ 0 ]] here you have to fill in the path of the census file
+	private Scenario scenario;
+
 	private String censusFile = "./input/CensusAndTravelsurveys/MID/census_GAP.csv";
 	private Map<Id, Id> personHomeFacilities;
 	private ObjectAttributes personHomeLocations = new ObjectAttributes();
-	private final static Logger log = Logger.getLogger(CreatePopulationWithMID_Data.class);
+	/**
+	 * list of personIds for which there occurred an error while reading their
+	 * line.
+	 */
+	private ArrayList<Id> errorPersons = new ArrayList<Id>();
+	private final static Logger log = Logger
+			.getLogger(CreatePopulationWithMID_Data.class);
 
 	// --------------------------------------------------------------------------
-	
+
 	public void run(Scenario scenario, Map<Id, Id> personHomeFacilities) {
 		this.scenario = scenario;
 		this.init(personHomeFacilities);
 		this.populationCreation();
 	}
-	
-	private void init(Map<Id,Id> personHomeFacilities) {		
+
+	private void init(Map<Id, Id> personHomeFacilities) {
 		/*
-		 * Build quad tree for assigning home locations. Read sozioDemographics and Geometries.
+		 * Build quad tree for assigning home locations. Read sozioDemographics and
+		 * Geometries.
 		 */
 		this.personHomeFacilities = personHomeFacilities;
-		}
-	
-	private void populationCreation() {
+	}
+
+	private void populationCreation() throws NullPointerException {
 		/*
-		 * For convenience and code readability store population and population factory in a local variable 
+		 * For convenience and code readability store population and population
+		 * factory in a local variable
 		 */
-		Population population = this.scenario.getPopulation();   
+		Population population = this.scenario.getPopulation();
 		PopulationFactory populationFactory = population.getFactory();
 
 		/*
-		 * Read the file
-		 * Create the persons and add the socio-demographics
+		 * Read the file Create the persons and add the socio-demographics
 		 */
+		int lineCounter = 0;
 		try {
-			BufferedReader bufferedReader = new BufferedReader(new FileReader(this.censusFile));
-			String line = bufferedReader.readLine(); //skip header
-			
+			BufferedReader bufferedReader = new BufferedReader(new FileReader(
+					this.censusFile));
+			String line = bufferedReader.readLine(); // skip header
+
 			int index_personId = 0;
 			int index_sex = 1;
 			int index_age = 2;
@@ -80,7 +89,7 @@ private Scenario scenario;
 
 			while ((line = bufferedReader.readLine()) != null) {
 				String parts[] = line.split("\t");
-			
+
 				/*
 				 * test, if any of the read entries is NULL. In this case skip the line.
 				 */
@@ -90,53 +99,77 @@ private Scenario scenario;
 				caravailability = parts[index_CarAvailabe].trim();
 				license = parts[index_License].trim();
 				isEmployed = parts[index_isEmployed].trim();
-				
-				if(! (personId.equals("NULL") || sex.equals("NULL") || age.equals("NULL") || caravailability.equals("NULL") || 
-						license.equals("NULL") || isEmployed.equals("NULL")) ){ 
-					
+
+				// error handling
+				if (personId.equals("NULL")) {
+					throw new NullPointerException("personId in line " + lineCounter
+							+ " is null!");
+				} else if (age.equals("NULL") || isEmployed.equals("NULL")) {
+					Id personID = new IdImpl(Integer.valueOf(personId));
+					System.out.println("PERSONID = " + personId);
+					errorPersons.add(personID);
+					System.out.println("age or isEmployed information is null in line " + lineCounter + " for person " + personId);
+				} else {
+
 					/*
-					 * Create a person, set its sociodemographic parameters and add it to the population
+					 * Create a person, set its sociodemographic parameters and add it to
+					 * the population
 					 */
-					Person person = populationFactory.createPerson(this.scenario.createId(personId));
+					Person person = populationFactory.createPerson(this.scenario
+							.createId(personId));
 					// set sex
-					((PersonImpl)person).setSex("" + sex.charAt(0)); 
+					if (!sex.equals(null)) {
+						((PersonImpl) person).setSex("" + sex.charAt(0));
+					}
 					// set age
-					((PersonImpl)person).setAge(Integer.parseInt(age));
+					((PersonImpl) person).setAge(Integer.parseInt(age));
 					// set driver's license
-					if(license.equals("true")){
-					((PersonImpl)person).setLicence("yes");
-					} else{
-						((PersonImpl)person).setLicence("no");
+					if (!license.equals(null)) {
+						if (license.equals("true")) {
+							((PersonImpl) person).setLicence("yes");
+						} else {
+							((PersonImpl) person).setLicence("no");
+						}
 					}
 					// set car availability
-					((PersonImpl)person).setCarAvail(caravailability);
+					if (!caravailability.equals(null)) {
+						((PersonImpl) person).setCarAvail(caravailability);
+					}
 					// set employment
 					employed = (parts[index_isEmployed].trim()).equals("true");
-					((PersonImpl)person).setEmployed(employed);
-	
+					((PersonImpl) person).setEmployed(employed);
+
 					population.addPerson(person);
-					/* 
-					 * Get the home facility for the current person and buffer it in the ObjectAttributes-map.
+					/*
+					 * Get the home facility for the current person and buffer it in the
+					 * ObjectAttributes-map.
 					 */
 					Id person_Id = new IdImpl(Integer.valueOf(personId));
 					Id homeFacility_Id = this.personHomeFacilities.get(person_Id);
-					ActivityFacility homeFacility = ((ScenarioImpl) scenario).getActivityFacilities().getFacilities().get(homeFacility_Id);	
-	
-					personHomeLocations.putAttribute(person.getId().toString(), "home", homeFacility);	
+					ActivityFacility homeFacility = ((ScenarioImpl) scenario)
+							.getActivityFacilities().getFacilities().get(homeFacility_Id);
+
+					personHomeLocations.putAttribute(person.getId().toString(), "home",
+							homeFacility);
+					lineCounter++;
 				}
 			}
-			
+
 		} // end try
 		catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public Scenario getScenario() {
-		return scenario;
+		return this.scenario;
 	}
 
 	public ObjectAttributes getPersonHomeLocations() {
-		return personHomeLocations;
+		return this.personHomeLocations;
+	}
+	
+	public ArrayList<Id> getErrorPersons(){
+		return this.errorPersons;
 	}
 }
