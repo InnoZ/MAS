@@ -12,6 +12,20 @@ public class Counts {
 	private int countPT = 0;
 	private int countWalk = 0;
 
+	/**
+	 * @return total number of counted cars, bikes and participants of public transport.
+	 */
+	public int totalNumberVeh(){
+		return this.countCars + this.countBikes + this.countPT;
+	}
+	
+	/**
+	 * @return total number of counted cars, bikes and also participants of public transport and walkers.
+	 */
+	public int totalNumber(){
+		return this.totalNumberVeh() + this.countWalk;
+	}
+	
 	public int getCars() {
 		return this.countCars;
 	}

@@ -35,22 +35,17 @@ import Mathfunctions.Calculator;
 public class CountTraffic implements LinkEnterEventHandler,
 		AgentDepartureEventHandler {
 
-	/**
-	 * walking-/biking-/pt-people: number of persons with this LegMode in the
-	 * whole simulation -> problem: agents that walk, use bike or pt are
-	 * teleported in the simulation which means: their tripduration is calculated
-	 * by multiplying the beeline of the covered distance with a certain constant.
-	 * So they don't enter on links i.e. don't have any LinkEnterEvents which
-	 * could be counted.
-	 */
 	private int scalingfactor = 10;
 	private static final String NETWORKFILE = "input/networks/network_bayern.xml";
 	private static final String EVENTSFILE = "pendlerOutputMultiModal/ITERS/it.20/20.events.xml.gz";
 	private static final String OUTPUTFILE = "output/flowTest.csv";
 	/**
-	 * Map that stores the number of counted cars for specified (relevant) links.
+	 * Map that stores the number of counted cars in the simulation for specified
+	 * (relevant) links.
 	 */
-	private Map<Id, Counts> counts = new HashMap<Id, Counts>();
+	private Map<Id, Counts> simCounts = new HashMap<Id, Counts>();
+	private Map<Id, Integer> trafficVolume;
+
 	/**
 	 * Map that stores a person's LegMode if the person owns an
 	 * AgentDepartureEvent.
@@ -58,14 +53,13 @@ public class CountTraffic implements LinkEnterEventHandler,
 	private Map<Id, String> modes = new HashMap<Id, String>();
 	private Calculator calc = new Calculator();
 	private Counts totalCounts = new Counts();
-	private Map<Id, Integer> calibrationLinks;
 	Object[] linkIds;
 
 	public Map<Id, Counts> getCounts() {
-		return this.counts;
+		return this.simCounts;
 	}
 
-	public void run() {
+	public void run(Map<Id, Integer> calibrationLinks) {
 		/*
 		 * create the scenario and read the networkfile
 		 */
@@ -75,21 +69,22 @@ public class CountTraffic implements LinkEnterEventHandler,
 		 * read trafficCount, choose calibrationLinks and fill linkId-array with
 		 * them.
 		 */
-		SeparateCalibrationFromValidationLinks cv = new SeparateCalibrationFromValidationLinks();
-		cv.run();
-		this.calibrationLinks = new HashMap<Id, Integer>();
-		this.calibrationLinks.putAll(cv.getCalibrationLinks());
-		linkIds = this.calibrationLinks.keySet().toArray();
+		this.trafficVolume = new HashMap<Id, Integer>();
+		this.trafficVolume.putAll(calibrationLinks);
+		linkIds = this.trafficVolume.keySet().toArray();
+
+		EventsManager manager = EventsUtils.createEventsManager();
+		manager.addHandler(this);
+		new MatsimEventsReader(manager).readFile(EVENTSFILE);
+		writeNumberOfMovingAgentsForSpecifiedLinks(OUTPUTFILE);
 	}
 
 	public static void main(String[] args) {
+		SeparateCalibrationFromValidationLinks cv = new SeparateCalibrationFromValidationLinks();
+		cv.run();
 
 		CountTraffic ct = new CountTraffic();
-		ct.run();
-		EventsManager manager = EventsUtils.createEventsManager();
-		manager.addHandler(ct);
-		new MatsimEventsReader(manager).readFile(EVENTSFILE);
-		ct.writeNumberOfMovingAgentsForSpecifiedLinks(OUTPUTFILE);
+		ct.run(cv.getCalibrationLinks());
 	}
 
 	/**
@@ -103,7 +98,7 @@ public class CountTraffic implements LinkEnterEventHandler,
 			Writer writer = IOUtils.getBufferedWriter(outfileName);
 			writer.write("LinkId" + "\t" + "cars" + "\t" + "bikes" + "\t" + "pt"
 					+ "\t" + "walk" + "\n");
-			for (Entry<Id, Counts> countEntry : this.counts.entrySet()) {
+			for (Entry<Id, Counts> countEntry : this.simCounts.entrySet()) {
 				writer.write(countEntry.getKey() + "\t"
 						+ calc.scaleReverse(countEntry.getValue().getCars()) + "\t"
 						+ countEntry.getValue().getBikes() * scalingfactor + "\t"
@@ -122,9 +117,9 @@ public class CountTraffic implements LinkEnterEventHandler,
 	 * @param outfileName
 	 *          outputfile in which the table of counts is written.
 	 * 
-	 *          Writes number of counted agents moving in the sim for links given in the linkIds-array
-	 *          in the outputtable. Additionally for comparison CountData is
-	 *          written in the outputtable.
+	 *          Writes number of counted agents moving in the sim for links given
+	 *          in the linkIds-array in the outputtable. Additionally for
+	 *          comparison CountData is written in the outputtable.
 	 */
 	private void writeNumberOfMovingAgentsForSpecifiedLinks(String outfileName) {
 		/**
@@ -136,36 +131,37 @@ public class CountTraffic implements LinkEnterEventHandler,
 
 		try {
 			Writer writer = IOUtils.getBufferedWriter(outfileName);
-			writer.write("LinkId" + "\t" + "cars" + "\t" + "bikes" + "\t" + "pt"
-					+ "\t" + "walk" + "\t" + "traffic-counts" + "\t"
-					+ "difference between traffic-count and sim-count" + "\t"
-					+ "difference in % of census" + "\n");
-			for (Entry<Id, Counts> countEntry : this.counts.entrySet()) {
-		
-				for (int i = 0; i < linkIds.length; i++) {
-					/**
-					 * calculate statistical values for the outputtable.
-					 */
-					int volumeForCurrentLink = this.calibrationLinks
-							.get(linkIds[i]);
-					int difference = volumeForCurrentLink
-							- countEntry.getValue().getCars() * scalingfactor;
-					differences.add(difference);
+			// write header
+			writer.write("LinkId" + "\t" + "sim-cars" + "\t" + "sim-bikes" + "\t"
+					+ "sim-pt" + "\t" + "sim-walk" + "\t" + "total" + "\t"
+					+ "traffic-counts" + "\t" + "diff traffic-count and sim-count" + "\t"
+					+ "diff as % of traffic-count" + "\n");
 
-					double percentage = calculatePercentage(volumeForCurrentLink,
-							difference);
+			Counts currentValue = null;
+			Id currentLinkId = null;
+			for (Entry<Id, Counts> countEntry : this.simCounts.entrySet()) {
+				
+				currentValue = countEntry.getValue();
+				currentLinkId = countEntry.getKey();
+				int volumeForCurrentLink = this.trafficVolume.get(currentLinkId);
+				int totalNumberOfVehicles = calc.scaleReverse(currentValue.totalNumber());
 
-					if (countEntry.getKey().equals(linkIds[i])) {
-						writer.write(countEntry.getKey() + "\t"
-								+ countEntry.getValue().getCars() * scalingfactor + "\t"
-								+ countEntry.getValue().getBikes() * scalingfactor + "\t"
-								+ countEntry.getValue().getPT() * scalingfactor + "\t"
-								+ countEntry.getValue().getWalk() * scalingfactor + "\t"
-								+ volumeForCurrentLink + "\t" + difference + "\t" + percentage
-								+ "\n");
+				int difference = volumeForCurrentLink
+						- calc.scaleReverse(currentValue.getCars());
+				differences.add(difference);
 
-					}
-				}
+				double differenceCounts = calc.relativeDifference(
+						volumeForCurrentLink, totalNumberOfVehicles);
+
+				writer.write(countEntry.getKey() + "\t"
+						+ calc.scaleReverse(currentValue.getCars()) + "\t"
+						+ calc.scaleReverse(currentValue.getBikes()) + "\t"
+						+ calc.scaleReverse(currentValue.getPT()) + "\t"
+						+ calc.scaleReverse(currentValue.getWalk()) + "\t"
+						+ calc.scaleReverse(currentValue.totalNumber()) + "\t"
+						+ volumeForCurrentLink + "\t" 
+						+ (volumeForCurrentLink - totalNumberOfVehicles) + "\t" 
+						+ differenceCounts + "\n");
 			}
 			/**
 			 * write overall result to outputtable
@@ -182,10 +178,6 @@ public class CountTraffic implements LinkEnterEventHandler,
 			e.printStackTrace();
 
 		}
-	}
-
-	private double calculatePercentage(int n1, int n2) {
-		return Math.round((((100.0 / n1) * n2) * 100)) / 100.0;
 	}
 
 	/**
@@ -220,43 +212,58 @@ public class CountTraffic implements LinkEnterEventHandler,
 
 	/**
 	 * @param event
-	 *          is a LinkEnterEvent. In our simulation this is an event which can
-	 *          only performed by a person using a car because the other
-	 *          transport-modes are teleported. Therefore the differentiation
-	 *          between car, bike, pt and walk is senseless for the moment but
-	 *          could be needed later.
+	 *          is a LinkEnterEvent. According to the mode of the person which is
+	 *          performing this event, the Counts-Object for the specified
+	 *          events-links-id will be updated if the link-id is included in the
+	 *          traffic-counts-map (trafficVolume).
 	 */
 	@Override
 	public void handleEvent(LinkEnterEvent event) {
 		Id linkId = event.getLinkId();
-		// if(linkIds contain linkId){ do... damit nur die events gespeichert
-		// werden, die an relevanten links stattfinden
-		Id personId = event.getPersonId();
+		/*
+		 * speichere nur events, die an relevanten links stattfinden!
+		 */
+		if (trafficVolume.containsKey(linkId)) {
+			Id personId = event.getPersonId();
 
-		Counts countAll = new Counts();
-		if (counts.containsKey(linkId)) {
-			countAll = counts.get(linkId);
+			Counts countAll = new Counts();
+			if (simCounts.containsKey(linkId)) {
+				countAll = simCounts.get(linkId);
+			}
+			String mode = modes.get(personId);
+			setActualCountAccordingToMode(mode, countAll);
+			this.simCounts.put(linkId, countAll);
 		}
-		String mode = modes.get(personId);
+	}
+
+	/**
+	 * @param mode
+	 *          the actual mode of current person
+	 * @param toBeSet
+	 *          actual Counts Object for a specified link
+	 * @return toBeSet including the last counted mode
+	 */
+	private Counts setActualCountAccordingToMode(String mode, Counts toBeSet) {
 
 		int mode_initialLetter = mode.charAt(0);
 		switch (mode_initialLetter) {
 		case 98:
-			countAll.raiseBikesByOne(); // b = 98 Unicode
+			toBeSet.raiseBikesByOne(); // b = 98 Unicode
 			break;
 		case 99:
-			countAll.raiseCarsByOne(); // c = 99
+			toBeSet.raiseCarsByOne(); // c = 99
 			break;
 		case 112:
-			countAll.raisePTByOne(); // p = 112
+			toBeSet.raisePTByOne(); // p = 112
 			break;
 		case 119:
-			countAll.raiseWalkByOne(); // w = 119
+			toBeSet.raiseWalkByOne(); // w = 119
 			break;
 		default:
 			break;
 		}
-		this.counts.put(linkId, countAll);
+
+		return toBeSet;
 	}
 
 	/**
