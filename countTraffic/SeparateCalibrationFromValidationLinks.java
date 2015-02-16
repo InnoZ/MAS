@@ -81,6 +81,8 @@ public class SeparateCalibrationFromValidationLinks {
 		System.out.println(cv.allLinks.keySet().toString() + "\n");
 		System.out.println("CalibrationLinks");
 		System.out.println(cv.calibrationLinks.keySet().toString() + "\n");
+		System.out.println("CalibrationCounts");
+		System.out.println(cv.calibrationLinks.entrySet().toString() + "\n");
 		System.out.println("ValidationLinks");
 		System.out.println(cv.validationLinks.keySet().toString() + "\n");
 	}

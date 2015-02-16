@@ -27,7 +27,8 @@ import org.matsim.core.utils.io.IOUtils;
 import Mathfunctions.Calculator;
 
 /**
- * A class for counting traffic on specified links in matsim-simulaion
+ * A class for counting traffic on specified links in matsim-simulaion and
+ * compare it to real traffic-count.
  * 
  * @author yasemin
  * 
@@ -35,44 +36,40 @@ import Mathfunctions.Calculator;
 public class CountTraffic implements LinkEnterEventHandler,
 		AgentDepartureEventHandler {
 
-	private int scalingfactor = 10;
 	private static final String NETWORKFILE = "input/networks/network_bayern.xml";
 	private static final String EVENTSFILE = "pendlerOutputMultiModal/ITERS/it.20/20.events.xml.gz";
-	private static final String OUTPUTFILE = "output/flowTest.csv";
+	private static final String OUTPUTFILE = "output/CountFuerPendlerSim.csv";
+	private static final String KALIBRIERUNGSTUFE = "1";
 	/**
-	 * Map that stores the number of counted cars in the simulation for specified
-	 * (relevant) links.
+	 * Map that stores the number of counted vehicles and walking agents in the
+	 * simulation for specified (relevant) links.
 	 */
 	private Map<Id, Counts> simCounts = new HashMap<Id, Counts>();
+	/**
+	 * Map that stores the number of counted vehicles from traffic count for
+	 * specified (relevant) links.
+	 */
 	private Map<Id, Integer> trafficVolume;
-
 	/**
 	 * Map that stores a person's LegMode if the person owns an
 	 * AgentDepartureEvent.
 	 */
 	private Map<Id, String> modes = new HashMap<Id, String>();
 	private Calculator calc = new Calculator();
-	private Counts totalCounts = new Counts();
-	Object[] linkIds;
-
-	public Map<Id, Counts> getCounts() {
-		return this.simCounts;
-	}
+	private int totalCountsInSim = 0;
 
 	public void run(Map<Id, Integer> calibrationLinks) {
 		/*
-		 * create the scenario and read the networkfile
+		 * create the scenario, read the networkfile and trafficCount and choose
+		 * calibrationLinks.
 		 */
 		Scenario sc = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		new MatsimNetworkReader(sc).readFile(NETWORKFILE);
-		/*
-		 * read trafficCount, choose calibrationLinks and fill linkId-array with
-		 * them.
-		 */
 		this.trafficVolume = new HashMap<Id, Integer>();
 		this.trafficVolume.putAll(calibrationLinks);
-		linkIds = this.trafficVolume.keySet().toArray();
-
+		/*
+		 * read events-file and fill sim-Counts-Map with entries
+		 */
 		EventsManager manager = EventsUtils.createEventsManager();
 		manager.addHandler(this);
 		new MatsimEventsReader(manager).readFile(EVENTSFILE);
@@ -80,36 +77,27 @@ public class CountTraffic implements LinkEnterEventHandler,
 	}
 
 	public static void main(String[] args) {
-		SeparateCalibrationFromValidationLinks cv = new SeparateCalibrationFromValidationLinks();
-		cv.run();
+		CreateCalibrationLinks cc = new CreateCalibrationLinks();
+		cc.run();
+
+		// SeparateCalibrationFromValidationLinks cv = new
+		// SeparateCalibrationFromValidationLinks();
+		// cv.run();
 
 		CountTraffic ct = new CountTraffic();
-		ct.run(cv.getCalibrationLinks());
+		ct.run(cc.getCalibrationLinks());
 	}
 
-	/**
-	 * @param outfileName
-	 *          outputfile in which the table of counts is written.
-	 * 
-	 *          Writes counted cars for all links in the outputfile.
-	 */
-	private void writeFlowForAllLinks(String outfileName) {
+	private void writeAnalysis(ArrayList<Double> differences, Writer writer) {
+
+		double arithmeticMean = calc.arithmeticMean(differences);
+		double variance = calc.variance(differences, arithmeticMean);
 		try {
-			Writer writer = IOUtils.getBufferedWriter(outfileName);
-			writer.write("LinkId" + "\t" + "cars" + "\t" + "bikes" + "\t" + "pt"
-					+ "\t" + "walk" + "\n");
-			for (Entry<Id, Counts> countEntry : this.simCounts.entrySet()) {
-				writer.write(countEntry.getKey() + "\t"
-						+ calc.scaleReverse(countEntry.getValue().getCars()) + "\t"
-						+ countEntry.getValue().getBikes() * scalingfactor + "\t"
-						+ countEntry.getValue().getPT() * scalingfactor + "\t"
-						+ countEntry.getValue().getWalk() * scalingfactor + "\n");
-			}
-			writer.flush();
-			writer.close();
+			writer.write("Differenz im Mittel: " + arithmeticMean + "\t"
+					+ "Varianz: " + variance + "\t" + "Standardabweichung: "
+					+ calc.standardDeviaion(variance) + "\n" + "\n");
 		} catch (IOException e) {
 			e.printStackTrace();
-
 		}
 	}
 
@@ -118,91 +106,81 @@ public class CountTraffic implements LinkEnterEventHandler,
 	 *          outputfile in which the table of counts is written.
 	 * 
 	 *          Writes number of counted agents moving in the sim for links given
-	 *          in the linkIds-array in the outputtable. Additionally for
-	 *          comparison CountData is written in the outputtable.
+	 *          in the calibrationLinks-map to the outputtable. For comparison
+	 *          additionally the CountData is written to the outputtable.
 	 */
 	private void writeNumberOfMovingAgentsForSpecifiedLinks(String outfileName) {
 		/**
-		 * create list to store values of differences between traffic-counts and
-		 * simulation counts. Out of these values we will calculate the
-		 * standard_deviation.
+		 * create lists to store values of preciseness relating traffic-counts and
+		 * simulation-counts for further analysis.
 		 */
-		List<Integer> differences = new ArrayList<Integer>();
+		ArrayList<Double> diffInPercent = new ArrayList<Double>();
+		ArrayList<Double> absDifferences = new ArrayList<Double>();
 
 		try {
 			Writer writer = IOUtils.getBufferedWriter(outfileName);
+			writer.write("KALIBRIERUNGSSTUFE " + this.KALIBRIERUNGSTUFE + "\n\n" );
 			// write header
 			writer.write("LinkId" + "\t" + "sim-cars" + "\t" + "sim-bikes" + "\t"
 					+ "sim-pt" + "\t" + "sim-walk" + "\t" + "total" + "\t"
-					+ "traffic-counts" + "\t" + "diff traffic-count and sim-count" + "\t"
-					+ "diff as % of traffic-count" + "\n");
+					+ "traffic-counts" + "\t" + "total diff |traffic-count|-|sim-count|"
+					+ "\t" + "diff anteilig an traffic-count in %" + "\n");
 
 			Counts currentValue = null;
 			Id currentLinkId = null;
+			/*
+			 * iterate over simulation-counts and write them an their difference to
+			 * traffic-counts to outputfile
+			 */
 			for (Entry<Id, Counts> countEntry : this.simCounts.entrySet()) {
-				
+
 				currentValue = countEntry.getValue();
 				currentLinkId = countEntry.getKey();
-				int volumeForCurrentLink = this.trafficVolume.get(currentLinkId);
-				int totalNumberOfVehicles = calc.scaleReverse(currentValue.totalNumber());
+				int volumeTrafficCountForCurrentLink = this.trafficVolume
+						.get(currentLinkId);
+				int volumeSimForCurrentLink = currentValue.getTotal();
 
-				int difference = volumeForCurrentLink
-						- calc.scaleReverse(currentValue.getCars());
-				differences.add(difference);
+				int absDifference = volumeTrafficCountForCurrentLink
+						- volumeSimForCurrentLink;
+				absDifferences.add((double) Math.abs(absDifference));
 
-				double differenceCounts = calc.relativeDifference(
-						volumeForCurrentLink, totalNumberOfVehicles);
+				double relatDifference = calc.relativeDifference(
+						volumeTrafficCountForCurrentLink, volumeSimForCurrentLink);
+				diffInPercent.add(relatDifference);
 
-				writer.write(countEntry.getKey() + "\t"
-						+ calc.scaleReverse(currentValue.getCars()) + "\t"
-						+ calc.scaleReverse(currentValue.getBikes()) + "\t"
-						+ calc.scaleReverse(currentValue.getPT()) + "\t"
-						+ calc.scaleReverse(currentValue.getWalk()) + "\t"
-						+ calc.scaleReverse(currentValue.totalNumber()) + "\t"
-						+ volumeForCurrentLink + "\t" 
-						+ (volumeForCurrentLink - totalNumberOfVehicles) + "\t" 
-						+ differenceCounts + "\n");
+				writer.write(currentLinkId + "\t" + currentValue.getCars() + "\t"
+						+ currentValue.getBikes() + "\t" + currentValue.getPT() + "\t"
+						+ currentValue.getWalk() + "\t" + currentValue.getTotal() + "\t"
+						+ volumeTrafficCountForCurrentLink + "\t" + absDifference + "\t"
+						+ relatDifference + "\n");
 			}
 			/**
 			 * write overall result to outputtable
 			 */
 			writer.write("\n");
-			writer.write("walk gesamt: " + this.totalCounts.getWalk() + "\t"
-					+ "bike gesamt: " + this.totalCounts.getBikes() + "\t"
-					+ "pt gesamt: " + this.totalCounts.getPT() + "\t" + "car gesamt: "
-					+ this.totalCounts.getCars() + "\t" + "Standardabweichung: "
-					+ CalculateStandardDeviation(differences) + "\n");
+			writer.write("trips gesamt in Simulation: "
+					+ calc.scaleReverse(this.totalCountsInSim) + "\t"
+					+ "Counts relevante Links in Sim: "
+					+ calc.sumOverCountsMapValues(simCounts) + "\t"
+					+ "Counts aus Verkehrszählung: "
+					+ calc.sumOverIntegerMapValues(trafficVolume) + "\n");
+			writer.write("\n");
+			/*
+			 * write analysis for difference in % and total difference
+			 */
+			writer
+					.write("Analyse für Differenz anteilig an Verkehrszählung in %: \n");
+			writeAnalysis(diffInPercent, writer);
+			writer.write("Analyse für absolute Differenz in Anzahl Agenten/Autos: \n");
+			writeAnalysis(absDifferences, writer);
+
 			writer.flush();
 			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 
 		}
-	}
-
-	/**
-	 * @param differences
-	 *          List of values for which the standard-deviation shell be
-	 *          calculated.
-	 * @return standard-deviation of values which are stored in the input-list.
-	 */
-	private double CalculateStandardDeviation(List<Integer> differences) {
-		double deviation = 0;
-		double average = 0;
-		double result = 0;
-
-		for (int i = 0; i < differences.size(); i++) {
-			average += differences.get(i);
-		}
-		average /= differences.size();
-
-		for (int i = 0; i < differences.size(); i++) {
-			deviation += (differences.get(i) - average)
-					* (differences.get(i) - average);
-		}
-		result = Math.round(Math.sqrt((deviation / average)) * 100) / 100.0;
-		System.out.println("Abweichung: " + result);
-		return result;
+		System.out.println("done!");
 	}
 
 	@Override
@@ -269,32 +247,16 @@ public class CountTraffic implements LinkEnterEventHandler,
 	/**
 	 * @param event
 	 *          is an AgentDepartureEvent. For every departure of an agent there's
-	 *          once created such an event. Here we count whole trips in the
-	 *          simulation which are performed by bike, walk or pt.
+	 *          once created such an event. Here for every trip the specified mode
+	 *          is attached to a personId by storing in a map. Addidtionally we
+	 *          count the number if all trips in the simulation in
+	 *          totalCountsInSim.
 	 */
 	@Override
 	public void handleEvent(AgentDepartureEvent event) {
 		Id personId = event.getPersonId();
 		String mode = event.getLegMode();
-
 		this.modes.put(personId, mode);
-		int mode_initialLetter = mode.charAt(0);
-		switch (mode_initialLetter) {
-		case 98:
-			this.totalCounts.raiseBikesByOne(); // b = 98 Unicode
-			break;
-		case 99:
-			this.totalCounts.raiseCarsByOne(); // c = 99
-			break;
-		case 112:
-			this.totalCounts.raisePTByOne(); // p = 112
-			break;
-		case 119:
-			this.totalCounts.raiseWalkByOne(); // w = 119
-			break;
-		default:
-			break;
-		}
+		this.totalCountsInSim++;
 	}
-
 }
