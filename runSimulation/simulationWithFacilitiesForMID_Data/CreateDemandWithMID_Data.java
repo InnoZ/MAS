@@ -42,6 +42,8 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 
+import Mathfunctions.Calculator;
+
 import com.ctc.wstx.dtd.StarModel;
 
 public class CreateDemandWithMID_Data {
@@ -51,6 +53,7 @@ public class CreateDemandWithMID_Data {
 
 	private ObjectAttributes personHomeAndWorkLocations;
 	private Random random = new Random(3838494);
+	private Calculator calc = new Calculator();
 	private ArrayList<Id> errorPersons;
 	private Map<Id, Integer> workFacilityCapacities = new HashMap<Id, Integer>();
 
@@ -94,39 +97,6 @@ public class CreateDemandWithMID_Data {
 		person.addPlan(plan);
 		((PersonImpl) person).setSelectedPlan(plan);
 		return plan;
-	}
-
-	/**
-	 * @param time
-	 *          String which contains a daytime in the form "hour:minute:second"
-	 * @return the time as a double expressed in seconds
-	 */
-	private double calculateTimeInSeconds(String time) {
-		String timeParts[] = time.split(":");
-
-		int hours = Integer.valueOf(timeParts[0]);
-		int minutes = Integer.valueOf(timeParts[1]);
-		return hours * 360 + minutes * 60;
-	}
-
-	/**
-	 * @param distance
-	 *          String which contains a distance in the form "x,yz..." km
-	 * @return the distance as an int expressed in meters
-	 */
-	int calculateDistanceInMeter(String distance) {
-
-		String distanceParts[] = distance.split(",");
-		int km = Integer.valueOf(distanceParts[0]) * 1000;
-		if (distanceParts.length > 1) {
-			int hunderterStelle = Integer.valueOf(distanceParts[1].charAt(0) + "") * 100;
-			km += hunderterStelle;
-			if (distanceParts[1].length() >= 2) {
-				int zehnerStelle = Integer.valueOf(distanceParts[1].charAt(1) + "") * 10;
-				km += zehnerStelle;
-			}
-		}
-		return km;
 	}
 
 	/**
@@ -184,8 +154,8 @@ public class CreateDemandWithMID_Data {
 		ArrayList<ActivityFacility> facilities = new ArrayList<ActivityFacility>();
 
 		facilities = findFacilitiesInCertainArea(activityType, distance, coordStart);
-		
-		if(facilities == null){
+
+		if (facilities == null) {
 			return null;
 		}
 
@@ -204,7 +174,7 @@ public class CreateDemandWithMID_Data {
 
 			for (ActivityFacility activityFacility : facilities) {
 				capacity = workFacilityCapacities.get(activityFacility.getId());
-				simulatedDistance = calculateDistance(activityFacility.getCoord(),
+				simulatedDistance = calc.calculateDistance(activityFacility.getCoord(),
 						coordStart);
 				variance = Math.abs(simulatedDistance - distance);
 				if (capacity > max) {
@@ -221,7 +191,7 @@ public class CreateDemandWithMID_Data {
 		} else {
 			for (ActivityFacility activityFacility : facilities) {
 
-				simulatedDistance = calculateDistance(activityFacility.getCoord(),
+				simulatedDistance = calc.calculateDistance(activityFacility.getCoord(),
 						coordStart);
 				variance = Math.abs(simulatedDistance - distance);
 				if (variance <= min) {
@@ -271,8 +241,9 @@ public class CreateDemandWithMID_Data {
 
 				radiusExpand *= 1.2;
 				radiusRestrict *= 0.8;
-				if(k > 20){
-					return null;				
+				if (k > 20) {
+					System.out.println("no facility found!");
+					return null;
 				}
 				k++;
 			}
@@ -282,19 +253,56 @@ public class CreateDemandWithMID_Data {
 		return facilities;
 	}
 
-	/**
-	 * @param tripStart
-	 * @param tripEnd
-	 * @return distance length of the trip in meters
-	 */
-	private double calculateDistance(Coord tripStart, Coord tripEnd) {
+	private Activity createHomeActivityFromFacilitiesMap(Id personId,
+			PopulationFactory populationFactory) {
+		ActivityFacility facility;
+		facility = (ActivityFacility) this.personHomeAndWorkLocations.getAttribute(
+				personId.toString(), "home");
+		ActivityImpl activity;
+		activity = (ActivityImpl) populationFactory.createActivityFromCoord("home",
+				facility.getCoord());
+		activity.setFacilityId(facility.getId());
+		activity.setLinkId(facility.getLinkId());
+		activity.setType("home");
+		return activity;
 
-		double x = Math.abs(tripEnd.getX() - tripStart.getX());
-		double y = Math.abs(tripEnd.getY() - tripStart.getY());
+	}
 
-		double distance = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-		double beeLineToRouteDistance = 1.3;
-		return distance * beeLineToRouteDistance;
+	private double createEndTimeForLastAcivity(String activityType, double tripEndTime, Id personId) {
+
+		double time = 0;
+		int activityType_initialLetter = activityType.charAt(0);
+		switch (activityType_initialLetter) {
+		case 115:
+			time = 0.2 + random.nextDouble(); // s = 115, shopping: 0.2 - 1.2h
+			break;
+		case 101:
+			time = 2 + random.nextDouble() * 4; // e = 101, education: 2-6h
+			break;
+		case 108:
+			time = 1 + random.nextDouble() * 3; // l = 108, leisure: 1 - 4h
+			break;
+		case 119:
+			time = 3 + random.nextDouble() * 4; // w = 119, work: 3 - 7h
+			break;
+		default:
+			break;
+		}
+		time *= 3600;
+
+		time += tripEndTime;
+
+	// avoid that person is longer en route than 12 p.m.
+		double redundantSeconds = (time) - 24*3600; 
+		if(redundantSeconds > 0){
+			time -= redundantSeconds;
+			// time ohne tripEndTime merken und dann skalieren!! sonst werden die werte viel zu klein.
+			// nach skalieren wieder auf tripEndTime draufaddieren.
+			time *= (0.5 + random.nextDouble()/2);
+			System.out.println("person " + personId.toString() + "has time " + time/3600);
+
+		}
+		return time;
 	}
 
 	private void createPlans() {
@@ -331,8 +339,12 @@ public class CreateDemandWithMID_Data {
 			// int index_isEmployed = 13;
 
 			Activity previousActivity = null;
-			Id previousPerson = null;
+			Person previousPerson = null;
+			String previousMode = new String();
+			double previousEndTime = 0.0;
 			double time = 0.0;
+			double duration = 0.0;
+			Plan plan = null;
 
 			while ((line = bufferedReader.readLine()) != null) {
 				String parts[] = line.split("\t");
@@ -344,91 +356,124 @@ public class CreateDemandWithMID_Data {
 				 */
 				if (!(this.errorPersons.contains(personId))
 						&& (Integer.valueOf(parts[index_tripID]) < 99)
-						&& !(parts[index_activityDuration].equals("NULL"))
 						&& !(parts[index_startTime].equals("NULL"))
 						&& !(parts[index_endTime].equals("NULL"))) {
 
 					Person person = population.getPersons().get(personId);
-					Plan plan = CreatePlanForPerson(person, population);
 					/*
-					 * If a new person is read add a home activity (first origin activity)
-					 * Otherwise add a leg and an activity (destination activity)
+					 * set subsequently for previous trip the end-time of activity
 					 */
-					if (!personId.equals(previousPerson)) {
-
-						((PersonImpl) person).createDesires("desired activity durations");
-						ActivityFacility facility;
-						facility = (ActivityFacility) this.personHomeAndWorkLocations
-								.getAttribute(person.getId().toString(), "home");
-						ActivityImpl activity;
-						activity = (ActivityImpl) populationFactory
-								.createActivityFromCoord("home", facility.getCoord());
+					if (previousPerson != null && personId.equals(previousPerson.getId())) {
+						Activity act = previousActivity;
+						double start = calc.calculateTimeInSeconds(parts[index_startTime]
+								.trim());
+						act.setEndTime(start);
+						plan.getPlanElements().remove(previousActivity);
+						plan.addActivity(act);
+						// store the desired duration in the persons knowledge
+						double activityDuration = start - previousEndTime;
+						if (activityDuration > 0) {
+							((PersonImpl) previousPerson).getDesires().putActivityDuration(
+									previousActivity.getType(), activityDuration);
+						} else {
+						//	System.out.println("PersonId for no desire: "
+						//			+ previousPerson.getId().toString());
+						}
+					} else {
 						/*
-						 * add facility-properties to activity
+						 * eliminate subsequently for previous activity home the end-time
+						 * (last activity in plan doesn't have an end-time) and add a leg to
+						 * home-act if necessary
 						 */
-						activity.setFacilityId(facility.getId());
-						activity.setLinkId(facility.getLinkId());
-						activity.setType("h");
-						time = calculateTimeInSeconds(parts[index_startTime].trim());
+						if (previousPerson != null) {
+							Activity activity = createHomeActivityFromFacilitiesMap(
+									previousPerson.getId(), populationFactory);
+							plan.getPlanElements().remove(previousActivity);
+							if (!previousActivity.getType().equals("home")) {
+								double endTime = createEndTimeForLastAcivity(previousActivity.getType(), previousEndTime, previousPerson.getId());
+								previousActivity.setEndTime(endTime);
+								plan.getPlanElements().add(previousActivity);
+								plan.addLeg(populationFactory.createLeg(previousMode));
+							}
+							plan.addActivity(activity);
+						}
+						/*
+						 * If a new person is read(i.e. !person.equals(previousPerson))
+						 * create a plan for that person and add a home activity (first
+						 * origin activity) before adding a leg and another activity
+						 * (destination activity)
+						 */
+						plan = CreatePlanForPerson(person, population);
+						((PersonImpl) person).createDesires("desired activity durations");
+						Activity activity = createHomeActivityFromFacilitiesMap(
+								person.getId(), populationFactory);
+						time = calc.calculateTimeInSeconds(parts[index_startTime].trim());
 						activity.setEndTime(time);
 						previousActivity = activity;
 						plan.addActivity(activity);
-						previousPerson = personId;
+						previousPerson = person;
+					}
+
+					/*
+					 * Add a leg from previous location to this location with the given
+					 * mode
+					 */
+					String mode = parts[index_mode];
+					if (mode.contains("passenger")) {
+						mode = "pt";
+					}
+					previousMode = mode;
+					plan.addLeg(populationFactory.createLeg(mode));
+					/*
+					 * Add activity given its type.
+					 */
+					Coord coordStart = previousActivity.getCoord();
+					String activityType = parts[index_activityType].trim();
+					ActivityFacility facility;
+
+					if (activityType.equals("home")) {
+						facility = (ActivityFacility) this.personHomeAndWorkLocations
+								.getAttribute(person.getId().toString(), "home");
+
 					} else {
-						/*
-						 * Add a leg from previous location to this location with the given
-						 * mode
-						 */
-						String mode = parts[index_mode].trim();
-						plan.addLeg(populationFactory.createLeg(mode));
-
-						/*
-						 * Add activity given its type.
-						 */
-						Coord coordStart = previousActivity.getCoord();
-						String activityType = parts[index_activityType].trim();
-						ActivityFacility facility;
-
-						if (activityType.equals("home")) {
-							facility = (ActivityFacility) this.personHomeAndWorkLocations
-									.getAttribute(person.getId().toString(), "home");
-
-						} else {
-							if (activityType.equals("other") || activityType.equals("NULL")) {
-
-								double duration = Double
-										.parseDouble(parts[index_activityDuration]);
-								String previousActivityType = previousActivity.getType()
-										.toString();
-
-								activityType = chooseRandomActivity(duration,
-										previousActivityType);
-							}
-
-							double distanceFromPreviousToCurrentAct = 0;
-
-							if (parts[index_distance].equals("NULL")) {
-								distanceFromPreviousToCurrentAct = errorHandlingForDistance(mode);
+						if (activityType.equals("other") || activityType.equals("NULL")) {
+							// get trip-duration
+							if (parts[index_activityDuration].trim().equals("NULL")) {
+								duration = calc.calculateDurationInMinutes(
+										parts[index_startTime], parts[index_endTime]);
 							} else {
-								distanceFromPreviousToCurrentAct = calculateDistanceInMeter(parts[index_distance]
-										.trim());
+								duration = Double.parseDouble(parts[index_activityDuration]);
 							}
-							facility = chooseFacility(activityType, coordStart,
-									distanceFromPreviousToCurrentAct);
-							if(facility == null){
-								continue;
-							}
+							String previousActivityType = previousActivity.getType()
+									.toString();
+
+							activityType = chooseRandomActivity(duration,
+									previousActivityType);
 						}
 
-						Activity activity = populationFactory.createActivityFromCoord(
-								activityType, facility.getCoord());
+						double distanceFromPreviousToCurrentAct = 0;
 
-						Double duration = Double.parseDouble(parts[index_activityDuration]);
-						// store the desired duration in the persons knowledge
-						((PersonImpl) person).getDesires().putActivityDuration(
-								activityType, duration);
-						plan.addActivity(activity);
+						if (parts[index_distance].equals("NULL")) {
+							distanceFromPreviousToCurrentAct = errorHandlingForDistance(mode);
+						} else {
+							distanceFromPreviousToCurrentAct = calc
+									.calculateDistanceInMeter(parts[index_distance].trim());
+						}
+						facility = chooseFacility(activityType, coordStart,
+								distanceFromPreviousToCurrentAct);
+						if (facility == null) {
+							continue;
+						}
 					}
+
+					Activity activity = populationFactory.createActivityFromCoord(
+							activityType, facility.getCoord());
+					((ActivityImpl) activity).setFacilityId(facility.getId());
+
+					previousEndTime = calc.calculateTimeInSeconds(parts[index_endTime]
+							.trim());
+					previousActivity = activity;
+					plan.addActivity(activity);
 				}
 			}
 			bufferedReader.close();
@@ -467,7 +512,6 @@ public class CreateDemandWithMID_Data {
 	 */
 	private String chooseRandomActivity(double duration,
 			String previousActivityType) {
-
 		String activityType = null;
 		/*
 		 * if activityDuration < 60 minutes choose between shop and leisure, else
@@ -502,11 +546,6 @@ public class CreateDemandWithMID_Data {
 			} while (activityType.equals(previousActivityType));
 		}
 		return activityType;
-	}
-
-	private double randomizeTimes() {
-		final double sigma = 1.0;
-		return random.nextGaussian() * sigma * 3600.0;
 	}
 
 	public Scenario getScenario() {
