@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -242,7 +244,7 @@ public class CreateDemandWithMID_Data {
 				radiusExpand *= 1.2;
 				radiusRestrict *= 0.8;
 				if (k > 20) {
-					System.out.println("no facility found!");
+					// System.out.println("no facility found!");
 					return null;
 				}
 				k++;
@@ -268,41 +270,42 @@ public class CreateDemandWithMID_Data {
 
 	}
 
-	private double createEndTimeForLastAcivity(String activityType, double tripEndTime, Id personId) {
+	private double createEndTimeForLastAcivity(String activityType,
+			double lastTripEndTime, Id personId) {
 
-		double time = 0;
+		double activityDuration = 0;
 		int activityType_initialLetter = activityType.charAt(0);
 		switch (activityType_initialLetter) {
 		case 115:
-			time = 0.2 + random.nextDouble(); // s = 115, shopping: 0.2 - 1.2h
+			activityDuration = 0.2 + random.nextDouble(); // s = 115, shopping: 0.2 -
+																										// 1.2h
 			break;
 		case 101:
-			time = 2 + random.nextDouble() * 4; // e = 101, education: 2-6h
+			activityDuration = 2 + random.nextDouble() * 4; // e = 101, education:
+																											// 2-6h
 			break;
 		case 108:
-			time = 1 + random.nextDouble() * 3; // l = 108, leisure: 1 - 4h
+			activityDuration = 1 + random.nextDouble() * 3; // l = 108, leisure: 1 -
+																											// 4h
 			break;
 		case 119:
-			time = 3 + random.nextDouble() * 4; // w = 119, work: 3 - 7h
+			activityDuration = 3 + random.nextDouble() * 4; // w = 119, work: 3 - 7h
 			break;
 		default:
 			break;
 		}
-		time *= 3600;
+		activityDuration *= 3600;
 
-		time += tripEndTime;
+		double tripEndTime = activityDuration + lastTripEndTime;
 
-	// avoid that person is longer en route than 12 p.m.
-		double redundantSeconds = (time) - 24*3600; 
-		if(redundantSeconds > 0){
-			time -= redundantSeconds;
-			// time ohne tripEndTime merken und dann skalieren!! sonst werden die werte viel zu klein.
-			// nach skalieren wieder auf tripEndTime draufaddieren.
-			time *= (0.5 + random.nextDouble()/2);
-			System.out.println("person " + personId.toString() + "has time " + time/3600);
-
+		// avoid that person is longer en route than 12 p.m.
+		double redundantSeconds = (tripEndTime) - 24 * 3600;
+		while ((redundantSeconds > 0)) {
+			activityDuration *= 0.85;
+			tripEndTime = activityDuration + lastTripEndTime;
+			redundantSeconds = (tripEndTime) - 24 * 3600;
 		}
-		return time;
+		return tripEndTime;
 	}
 
 	private void createPlans() {
@@ -339,10 +342,13 @@ public class CreateDemandWithMID_Data {
 			// int index_isEmployed = 13;
 
 			Activity previousActivity = null;
+			Activity prepreviousActivity = null;
+			Activity temporary = null;
 			Person previousPerson = null;
 			String previousMode = new String();
+			double previousStartTime = 0.0;
 			double previousEndTime = 0.0;
-			double time = 0.0;
+			double startTime = 0.0;
 			double duration = 0.0;
 			Plan plan = null;
 
@@ -364,21 +370,32 @@ public class CreateDemandWithMID_Data {
 					 * set subsequently for previous trip the end-time of activity
 					 */
 					if (previousPerson != null && personId.equals(previousPerson.getId())) {
-						Activity act = previousActivity;
-						double start = calc.calculateTimeInSeconds(parts[index_startTime]
+						startTime = calc.calculateTimeInSeconds(parts[index_startTime]
 								.trim());
-						act.setEndTime(start);
-						plan.getPlanElements().remove(previousActivity);
-						plan.addActivity(act);
+						/*
+						 * error-handling: If currentActivity starts earlier than
+						 * previousActivity, swap startTimes
+						 */
+						/*
+						 * if (previousStartTime > startTime) { double temp = startTime;
+						 * startTime = previousStartTime; previousStartTime = temp; if
+						 * (prepreviousActivity != null) {
+						 * if(person.getId().toString().equals("2017483")){
+						 * System.out.println("ACTS vorher: temp =  " + temporary.toString()
+						 * + " prevAct = " + previousActivity.toString() + " preprev = " +
+						 * prepreviousActivity); } temporary = prepreviousActivity;
+						 * prepreviousActivity = previousActivity; previousActivity =
+						 * temporary; } if(person.getId().toString().equals("2017483")){
+						 * System.out.println("ACTS nachher: temp =  " +
+						 * temporary.toString() + " prevAct = " +
+						 * previousActivity.toString() + " preprev = " +
+						 * prepreviousActivity); } }
+						 */
+						previousActivity.setEndTime(startTime);
 						// store the desired duration in the persons knowledge
-						double activityDuration = start - previousEndTime;
-						if (activityDuration > 0) {
-							((PersonImpl) previousPerson).getDesires().putActivityDuration(
-									previousActivity.getType(), activityDuration);
-						} else {
-						//	System.out.println("PersonId for no desire: "
-						//			+ previousPerson.getId().toString());
-						}
+						storePersonsDesiredDuration(startTime, previousEndTime,
+								previousPerson, previousActivity.getType());
+
 					} else {
 						/*
 						 * eliminate subsequently for previous activity home the end-time
@@ -386,16 +403,24 @@ public class CreateDemandWithMID_Data {
 						 * home-act if necessary
 						 */
 						if (previousPerson != null) {
+							List<PlanElement> planE = new LinkedList<PlanElement>();
+							planE = sortListOfPlanElementsByEndTimes(plan.getPlanElements(),
+									populationFactory);
+							plan.getPlanElements().clear();
+							insertPlanElementsInPlan(plan, planE);
 							Activity activity = createHomeActivityFromFacilitiesMap(
 									previousPerson.getId(), populationFactory);
 							plan.getPlanElements().remove(previousActivity);
 							if (!previousActivity.getType().equals("home")) {
-								double endTime = createEndTimeForLastAcivity(previousActivity.getType(), previousEndTime, previousPerson.getId());
+								double endTime = createEndTimeForLastAcivity(
+										previousActivity.getType(), previousEndTime,
+										previousPerson.getId());
 								previousActivity.setEndTime(endTime);
 								plan.getPlanElements().add(previousActivity);
 								plan.addLeg(populationFactory.createLeg(previousMode));
 							}
 							plan.addActivity(activity);
+							previousStartTime = 0.0;
 						}
 						/*
 						 * If a new person is read(i.e. !person.equals(previousPerson))
@@ -407,8 +432,9 @@ public class CreateDemandWithMID_Data {
 						((PersonImpl) person).createDesires("desired activity durations");
 						Activity activity = createHomeActivityFromFacilitiesMap(
 								person.getId(), populationFactory);
-						time = calc.calculateTimeInSeconds(parts[index_startTime].trim());
-						activity.setEndTime(time);
+						startTime = calc.calculateTimeInSeconds(parts[index_startTime]
+								.trim());
+						activity.setEndTime(startTime);
 						previousActivity = activity;
 						plan.addActivity(activity);
 						previousPerson = person;
@@ -470,16 +496,82 @@ public class CreateDemandWithMID_Data {
 							activityType, facility.getCoord());
 					((ActivityImpl) activity).setFacilityId(facility.getId());
 
+					/*
+					 * if(person.getId().toString().equals("2017483")){
+					 * System.out.println("currentAct: " + activity.getType() + "  prev: "
+					 * + calc.makeTimePrintable(previousStartTime) + " start: " +
+					 * calc.makeTimePrintable(startTime) +
+					 * " previousStartTime > startTime? " + (previousStartTime >
+					 * startTime)); }
+					 */
+					previousStartTime = startTime;
 					previousEndTime = calc.calculateTimeInSeconds(parts[index_endTime]
 							.trim());
-					previousActivity = activity;
 					plan.addActivity(activity);
+					prepreviousActivity = previousActivity;
+					previousActivity = activity;
+
 				}
 			}
 			bufferedReader.close();
 		} // end try
 		catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void insertPlanElementsInPlan(Plan plan, List<PlanElement> planE) {
+		System.out.println("PLANELEMENTS:  " + planE.toString());
+		for (PlanElement planElement : planE) {
+			if (planElement instanceof Activity) {
+				plan.addActivity((Activity) planElement);
+			} else {
+				plan.addLeg((Leg) planElement);
+			}
+		}
+	}
+
+	private List<PlanElement> sortListOfPlanElementsByEndTimes(
+			List<PlanElement> planElements, PopulationFactory populationFactory) {
+		Plan plan = populationFactory.createPlan();
+		List<Activity> activities = new ArrayList<Activity>();
+		ListIterator<PlanElement> listIterator = planElements
+				.listIterator(planElements.size());
+		/*
+		 * partition of planElements in activities and legs
+		 */
+		while (listIterator.hasNext()) {
+			if (listIterator.next() instanceof Activity) {
+				activities.add((Activity) listIterator.next());
+				planElements.remove(listIterator.next());
+			}
+		}
+
+		for (int i = 0; i < activities.size() - 1; i++) {
+			double endTime1 = (activities.get(i)).getEndTime();
+			double endTime2 = (activities.get(i + 1)).getEndTime();
+			if (endTime1 > endTime2) {
+				ActivityImpl temp = new ActivityImpl(activities.get(i + 1));
+				activities.add(i, temp);
+				activities.remove(i + 2);
+			}
+		}
+
+		for (int i = 0; i < planElements.size() - 1; i += 2) {
+			System.out.println("sizeof(acts): " + activities.size() + " sizeof(legs) " + planElements.size());
+			ActivityImpl temp = new ActivityImpl(activities.get(0));
+			planElements.add(i, temp);
+			activities.remove(0);
+		}
+		return planElements;
+	}
+
+	private void storePersonsDesiredDuration(double startTime,
+			double previousEndTime, Person previousPerson, String prevActType) {
+		double activityDuration = startTime - previousEndTime;
+		if (activityDuration > 0) {
+			((PersonImpl) previousPerson).getDesires().putActivityDuration(
+					prevActType, activityDuration);
 		}
 	}
 
