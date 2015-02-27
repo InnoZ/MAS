@@ -175,11 +175,13 @@ public class CreateDemandWithMID_Data {
 			int capacity = 0;
 
 			for (ActivityFacility activityFacility : facilities) {
+				
 				capacity = workFacilityCapacities.get(activityFacility.getId());
+				System.out.println("facilityId = " + activityFacility.getId().toString() + "  capacity = " + capacity);
 				simulatedDistance = calc.calculateDistance(activityFacility.getCoord(),
 						coordStart);
 				variance = Math.abs(simulatedDistance - distance);
-				if (capacity > max) {
+				if (capacity != 0 && capacity > max) {
 					max = capacity;
 					facility = activityFacility;
 				} else if (capacity == max) {
@@ -189,6 +191,13 @@ public class CreateDemandWithMID_Data {
 						facility = activityFacility;
 					}
 				}
+			}
+			if(capacity == 0){
+				return null;
+			} else{
+			capacity = workFacilityCapacities.get(facility.getId());
+			capacity --;
+			workFacilityCapacities.put(facility.getId(), capacity);
 			}
 		} else {
 			for (ActivityFacility activityFacility : facilities) {
@@ -342,11 +351,8 @@ public class CreateDemandWithMID_Data {
 			// int index_isEmployed = 13;
 
 			Activity previousActivity = null;
-			Activity prepreviousActivity = null;
-			Activity temporary = null;
 			Person previousPerson = null;
 			String previousMode = new String();
-			double previousStartTime = 0.0;
 			double previousEndTime = 0.0;
 			double startTime = 0.0;
 			double duration = 0.0;
@@ -360,37 +366,23 @@ public class CreateDemandWithMID_Data {
 				 * put on errorList in CreatePopulationWithMID_Data.java) or tripId > 99
 				 * (means that the line with this tripId contains many "NULL"s)
 				 */
-				if (!(this.errorPersons.contains(personId))
-						&& (Integer.valueOf(parts[index_tripID]) < 99)
-						&& !(parts[index_startTime].equals("NULL"))
-						&& !(parts[index_endTime].equals("NULL"))) {
+				if (!(this.errorPersons.contains(personId))) {
 
 					Person person = population.getPersons().get(personId);
+					if(Integer.valueOf(parts[index_tripID]) > 99
+							|| (parts[index_startTime].equals("NULL"))
+							|| (parts[index_endTime].equals("NULL"))){
+						System.out.println("PERSON TO REMOVE: " + personId.toString());
+						population.getPersons().remove(personId);
+						System.out.println(population.getPersons().containsValue(person));
+						continue;
+						}
 					/*
 					 * set subsequently for previous trip the end-time of activity
 					 */
 					if (previousPerson != null && personId.equals(previousPerson.getId())) {
 						startTime = calc.calculateTimeInSeconds(parts[index_startTime]
 								.trim());
-						/*
-						 * error-handling: If currentActivity starts earlier than
-						 * previousActivity, swap startTimes
-						 */
-						/*
-						 * if (previousStartTime > startTime) { double temp = startTime;
-						 * startTime = previousStartTime; previousStartTime = temp; if
-						 * (prepreviousActivity != null) {
-						 * if(person.getId().toString().equals("2017483")){
-						 * System.out.println("ACTS vorher: temp =  " + temporary.toString()
-						 * + " prevAct = " + previousActivity.toString() + " preprev = " +
-						 * prepreviousActivity); } temporary = prepreviousActivity;
-						 * prepreviousActivity = previousActivity; previousActivity =
-						 * temporary; } if(person.getId().toString().equals("2017483")){
-						 * System.out.println("ACTS nachher: temp =  " +
-						 * temporary.toString() + " prevAct = " +
-						 * previousActivity.toString() + " preprev = " +
-						 * prepreviousActivity); } }
-						 */
 						previousActivity.setEndTime(startTime);
 						// store the desired duration in the persons knowledge
 						storePersonsDesiredDuration(startTime, previousEndTime,
@@ -403,11 +395,6 @@ public class CreateDemandWithMID_Data {
 						 * home-act if necessary
 						 */
 						if (previousPerson != null) {
-							List<PlanElement> planE = new LinkedList<PlanElement>();
-							planE = sortListOfPlanElementsByEndTimes(plan.getPlanElements(),
-									populationFactory);
-							plan.getPlanElements().clear();
-							insertPlanElementsInPlan(plan, planE);
 							Activity activity = createHomeActivityFromFacilitiesMap(
 									previousPerson.getId(), populationFactory);
 							plan.getPlanElements().remove(previousActivity);
@@ -420,7 +407,6 @@ public class CreateDemandWithMID_Data {
 								plan.addLeg(populationFactory.createLeg(previousMode));
 							}
 							plan.addActivity(activity);
-							previousStartTime = 0.0;
 						}
 						/*
 						 * If a new person is read(i.e. !person.equals(previousPerson))
@@ -449,7 +435,6 @@ public class CreateDemandWithMID_Data {
 						mode = "pt";
 					}
 					previousMode = mode;
-					plan.addLeg(populationFactory.createLeg(mode));
 					/*
 					 * Add activity given its type.
 					 */
@@ -496,19 +481,10 @@ public class CreateDemandWithMID_Data {
 							activityType, facility.getCoord());
 					((ActivityImpl) activity).setFacilityId(facility.getId());
 
-					/*
-					 * if(person.getId().toString().equals("2017483")){
-					 * System.out.println("currentAct: " + activity.getType() + "  prev: "
-					 * + calc.makeTimePrintable(previousStartTime) + " start: " +
-					 * calc.makeTimePrintable(startTime) +
-					 * " previousStartTime > startTime? " + (previousStartTime >
-					 * startTime)); }
-					 */
-					previousStartTime = startTime;
 					previousEndTime = calc.calculateTimeInSeconds(parts[index_endTime]
 							.trim());
+					plan.addLeg(populationFactory.createLeg(mode));
 					plan.addActivity(activity);
-					prepreviousActivity = previousActivity;
 					previousActivity = activity;
 
 				}
@@ -520,48 +496,19 @@ public class CreateDemandWithMID_Data {
 		}
 	}
 
-	private void insertPlanElementsInPlan(Plan plan, List<PlanElement> planE) {
-		System.out.println("PLANELEMENTS:  " + planE.toString());
-		for (PlanElement planElement : planE) {
-			if (planElement instanceof Activity) {
-				plan.addActivity((Activity) planElement);
+	private List<PlanElement> printPlanElements(List<PlanElement> planElements) {
+		Iterator it = planElements.iterator();
+		PlanElement pe = null;
+		System.out.println(" PlanElements:  ");
+		while (it.hasNext()) {
+			pe = (PlanElement) it.next();
+			if (pe instanceof Activity) {
+				System.out.println("type = " + ((Activity) pe).getType()
+						+ "  endTime = " + ((Activity) pe).getEndTime());
 			} else {
-				plan.addLeg((Leg) planElement);
+				System.out.println("mode = " + ((Leg) pe).getMode()
+						+ "  getDepartureTime = " + ((Leg) pe).getDepartureTime());
 			}
-		}
-	}
-
-	private List<PlanElement> sortListOfPlanElementsByEndTimes(
-			List<PlanElement> planElements, PopulationFactory populationFactory) {
-		Plan plan = populationFactory.createPlan();
-		List<Activity> activities = new ArrayList<Activity>();
-		ListIterator<PlanElement> listIterator = planElements
-				.listIterator(planElements.size());
-		/*
-		 * partition of planElements in activities and legs
-		 */
-		while (listIterator.hasNext()) {
-			if (listIterator.next() instanceof Activity) {
-				activities.add((Activity) listIterator.next());
-				planElements.remove(listIterator.next());
-			}
-		}
-
-		for (int i = 0; i < activities.size() - 1; i++) {
-			double endTime1 = (activities.get(i)).getEndTime();
-			double endTime2 = (activities.get(i + 1)).getEndTime();
-			if (endTime1 > endTime2) {
-				ActivityImpl temp = new ActivityImpl(activities.get(i + 1));
-				activities.add(i, temp);
-				activities.remove(i + 2);
-			}
-		}
-
-		for (int i = 0; i < planElements.size() - 1; i += 2) {
-			System.out.println("sizeof(acts): " + activities.size() + " sizeof(legs) " + planElements.size());
-			ActivityImpl temp = new ActivityImpl(activities.get(0));
-			planElements.add(i, temp);
-			activities.remove(0);
 		}
 		return planElements;
 	}

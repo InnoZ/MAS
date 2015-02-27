@@ -1,0 +1,9 @@
+hhp_ID	sex	age	carAvailable	license	employment
+2009951	male	51	NULL	true	true
+2009952	female	48	always	true	true
+2009953	male	21	NULL	false	true
+2009954	male	17	NULL	false	true
+2009955	male	14	NULL	false	true
+2012201	female	62	always	true	false
+2012202	male	67	NULL	true	false
+2014251	female	52	always	true	false
