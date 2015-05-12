@@ -49,10 +49,6 @@ public class CreatePopulationWithMID_Data {
 	}
 
 	private void init(Map<Id, Id> personHomeFacilities) {
-		/*
-		 * Build quad tree for assigning home locations. Read sozioDemographics and
-		 * Geometries.
-		 */
 		this.personHomeFacilities = personHomeFacilities;
 	}
 
@@ -65,7 +61,7 @@ public class CreatePopulationWithMID_Data {
 		PopulationFactory populationFactory = population.getFactory();
 
 		/*
-		 * Read the file Create the persons and add the socio-demographics
+		 * Read the file, create persons and add their sociodemographic data
 		 */
 		int lineCounter = 0;
 		try {
@@ -132,7 +128,7 @@ public class CreatePopulationWithMID_Data {
 						}
 					}
 					// set car availability
-					if (!caravailability.equals(null)) {
+					if (!caravailability.equals("NULL")) {
 						((PersonImpl) person).setCarAvail(caravailability);
 					}
 					// set employment

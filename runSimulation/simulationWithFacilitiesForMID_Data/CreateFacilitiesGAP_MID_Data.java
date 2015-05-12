@@ -34,7 +34,8 @@ public class CreateFacilitiesGAP_MID_Data {
 			.getLogger(CreateFacilitiesGAP_MID_Data.class);
 	private Scenario scenario;
 	private String censusFile = "./input/CensusAndTravelsurveys/MID/census_GAP.csv";
-	private String businessCensusFile = "./input/CensusAndTravelsurveys/MID/business_census_GAP.csv";
+	private String businessCensusFile = "./input/CensusAndTravelsurveys/business_census_GAP_Test.csv";
+	private String OUTPUTFILE = "./input/facilitiesGAP_mitHome.xml";
 	private CoordinateTransformation ct = TransformationFactory
 			.getCoordinateTransformation("EPSG:4326", "EPSG:32632");
 	/*
@@ -216,6 +217,6 @@ public class CreateFacilitiesGAP_MID_Data {
 
 	public void write() {
 		new FacilitiesWriter(((ScenarioImpl) this.scenario).getActivityFacilities())
-				.write("./input/facilitiesGAP_mitHome.xml"); // facilitiesGAP.xml.gz
+				.write(OUTPUTFILE); // facilitiesGAP.xml.gz
 	}
 }
