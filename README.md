@@ -27,6 +27,8 @@ sudo apt-get install openjdk-7-jdk
 INSTALLING ECLIPSE
 Most of the core MATSim developers use Ecplise as a software development environment. We recommend the "Eclipse IDE for Java Developers" distribution. To install follow the instructions here: http://www.krizna.com/ubuntu/install-eclipse-in-ubuntu-12-04/
 
+It might be easier to install eclipse using the software centre.
+
 INSTALLING MATSIM
 The version number is 0.5.x, with 'x' being the number of latest official bugfix release. Make sure always to use the latest bugfix release. In order to access code and data, the Eclipse IDE is used instead of the command line. Take the following steps to install MATSim in Eclipse.
 
