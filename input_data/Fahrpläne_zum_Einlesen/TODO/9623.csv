@@ -1,0 +1,51 @@
+"","",Montag - Freitag,""
+Linie ,9623 ,9623 9621 9623 ,9623
+Fahrtnummer ,001 ,003 002 005 ,007
+Haltestellen ,"",S ,""
+agen Kirchplatz ab ,9.05 ,10.05 14.40 ,15.40
+urnau Hagener Straße ,9.07 ,10.07 14.42 ,15.42
+urnau UKM/Schwaigangerstr. ,9.09 ,10.09 14.44 ,15.44
+urnau Kreiskrankenhaus ,9.10 ,10.10 14.45 ,15.45
+urnau Seidlstraße ,9.11 ,10.11 14.46 ,15.46
+urnau Rathaus/Pfarrstraße ,9.13 ,10.13 14.48 ,15.48
+urnau Weindorfer Str. ,9.15 ,10.15 14.50 ,15.50
+urnau Sollerstr. ,9.16 ,10.16 14.51 ,15.51
+urnau Bahnhof an ,9.20 ,10.20 14.55 ,15.55
+Anschlußhinweis,"","",""
+Zug nach München ab ,9.32 ,10.33 15.32 ,16.32
+Zug nach Garmisch-Partenk. ab ,9.28 ,10.28 15.28 ,16.28
+urnau Bahnhof ab ,9.20 ,10.20 13.50 14.55 ,15.55
+urnau Seniorenheim ,9.22 ,10.22 13.57 14.57 ,15.57
+urnau Klinik Hochried ,9.24 ,10.24 13.59 14.59 ,15.59
+urnau Berggeist ,9.25 ,10.25 14.01 15.00 ,16.00
+ermannswies Erholungsheim ,9.26 ,10.26 14.02 15.01 ,16.01
+urnau Westried ,9.27 ,10.27 14.03 15.02 ,16.02
+rafenaschau Bahnhof ,9.29 ,10.29 15.04 ,16.04
+rafenaschau Seniorenheim an ,9.33 ,10.33 14.05 15.08 ,16.08
+rafenaschau Birkenallee an ,9.35 ,10.35 15.10 ,16.10
+"","","",Montag - Freitag,"",""
+Linie ,9621 ,9623 ,9623 9623 9623 ,9623 ,9623
+Fahrtnummer ,001 ,002 ,004 006 008 ,010 ,012
+Haltestellen ,S ,"","","",""
+rafenaschau Seniorenheim ab ,6.30 ,9.33 ,10.33 14.08 ,15.08 ,16.08
+rafenaschau Birkenallee ,"",9.35 ,10.35 14.10 ,15.10 ,16.10
+rafenaschau Bahnhof ,"",9.40 ,10.40 14.15 ,15.15 ,16.15
+urnau Westried ,6.34 ,9.42 ,10.42 14.17 ,15.17 ,16.17
+ermannswies Erholungsheim ,6.35 ,9.43 ,10.43 14.18 ,15.18 ,16.18
+urnau Berggeist ,6.36 ,9.44 ,10.44 14.19 ,15.19 ,16.19
+urnau Klinik Hochried ,6.38 ,9.45 ,10.45 14.20 ,15.20 ,16.20
+urnau Ramsachleite ,6.39 ,9.46 ,10.46 14.21 ,15.21 ,16.21
+urnau Seniorenheim ,6.40 ,9.47 ,10.47 14.22 ,15.22 ,16.22
+urnau Bahnhof an ,6.45 ,9.50 ,10.50 14.25 ,15.25 ,16.25
+Anschlußhinweis,"","","","",""
+Zug nach München ab ,6.49 ,10.33 ,11.32 14.31 ,15.32 ,16.32
+Zug nach Garmisch-Partenk. ab ,6.52 ,10.28 ,11.28 14.28 ,15.28 ,16.28
+urnau Bahnhof ab ,"",9.50 ,11.17 14.25 ,15.25,""
+urnau Weindorfer Str. ,"",9.53 ,11.20 14.28 ,15.28,""
+urnau Sollerstr. ,"",9.54 ,11.21 14.29 ,15.29,""
+urnau Rathaus/Pfarrstraße ,"",9.56 ,11.23 14.31 ,15.31,""
+urnau Seidlstraße ,"",9.58 ,11.25 14.33 ,15.33,""
+urnau Kreiskrankenhaus ,"",9.59 ,11.26 14.34 ,15.34,""
+urnau UKM/Schwaigangerstr. ,"",10.00 ,11.27 14.35 ,15.35,""
+urnau Hagener Straße ,"",10.02 ,11.29 14.37 ,15.37,""
+agen Kirchplatz an ,"",10.04 ,11.31 14.39 ,15.39,""
