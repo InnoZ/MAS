@@ -6,7 +6,7 @@ The multi-agent simulation repository (MAS) stores
 - scripts to run
 	* MATSim on the InnoZ playground server
 	* scenario generation from scratch
-- brief descriptions scenario generation, in perticular our (InnoZ) approach of traffic modelling
+- brief descriptions of the process of scenario generation, in perticular our (InnoZ) approach of traffic modelling (see [Wiki] (https://github.com/00Bock/MAS/wiki))
 
 ## Basic requirements
 To access the MATSim data, you need a user account on the playground. Just contact either Benno Bock, Daniel Hosse or Benjamin Stolte to create an account for you.
