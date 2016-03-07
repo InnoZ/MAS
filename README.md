@@ -18,7 +18,9 @@ If you want to write java scripts or your own java classes to extend or modify M
 There are several implementations of jdks available. The most common ones are the Oracle implementation and OpenJDK. Choose for yourself which one you prefer, they should work identically.
 To install Java on a Windows system, just download the installation file of the latest release and follow the instructions during the installation process.
 The installation of Java under a Linux distribution can either be done in the software center or in the terminal. In the terminal, just type
+
 > sudo apt-ge install openjdk-[version]-jdk
+
 and replace version with the latest release number (currently it is openjk-8).
 
 ### Installing Eclipse
