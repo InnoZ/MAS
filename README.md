@@ -1,52 +1,32 @@
 MAS
 ===
 
-analysis and (potentially) development of a multi-agent simultation for carsharing
+The multi-agent simulation repository (MAS) stores
+- input files for MATSim scenarios
+- scripts to run
+	* MATSim on the InnoZ playground server
 
-Text taken from:
-http://www.matsim.org/docs/tutorials/8lessons/installation
+## Basic requirements
+To access the MATSim data, you need a user account on the playground. Just contact either Benno Bock, Daniel Hosse or Benjamin Stolte to create an account for you.
+You can access the playground via ssh. If you're computer has a Linux or an OS operating system, you need nothing else than an existing user account. On Windows, you need to install an ssh client program like PuTTY or WinSCP.
 
-INSTALATION
-Follow the links to, first, install necessary software on your machine and, second, learn some very basic concepts about Java programming.
-But first, let us organize our folder structure such that we will find the various downloads easier again:
-1. create a folder called "MATSimTutorial" on an easy accessible place (i.e. your desktop or directly under C:, D: or any other partition)
-2. inside it, create the folders "install", "software" and "workspace".
-- in install, we download all kind of software to install
-- in software we download software that works without installation
-- the workspace is the place where we work with the Eclipse development environment
+To run one of the scenarios from the terminal on your local machine you need a Java development kit (jdk). The java version used in the latest MATSim release (e.g. matsim-0.x.x.zip) is jdk7, for the development version or your own MATSim playground you will probably need jdk8.
 
-INSTALING JAVA
-MATSim is written in Java. To run java you need a JRE and to develop Java code you must install a JDK. You can check if Java is already installed on your machine by opening the terminal and typing in:
-```bash 
-java -version
-```
-Use the following in the terminal if you don't have JDK installed:
-```bash
-sudo apt-get install openjdk-7-jdk
-```
-INSTALLING ECLIPSE
-Most of the core MATSim developers use Ecplise as a software development environment. We recommend the "Eclipse IDE for Java Developers" distribution. To install follow the instructions here: http://www.krizna.com/ubuntu/install-eclipse-in-ubuntu-12-04/
+If you want to write java scripts or your own java classes to extend or modify MATSim, you also need a software IDE (most of the MATSim developers use Eclipse IDE for Java Developers, http://www.eclipse.org/downloads/packages/eclipse-ide-java-developers/mars2).
 
-It might be easier to install eclipse using the software centre.
+### Installing Java
+There are several implementations of jdks available. The most common ones are the Oracle implementation and OpenJDK. Choose for yourself which one you prefer, they should work identically.
+To install Java on a Windows system, just download the installation file of the latest release and follow the instructions during the installation process.
+The installation of Java under a Linux distribution can either be done in the software center or in the terminal. In the terminal, just type
+> sudo apt-ge install openjdk-[version]-jdk
+and replace version with the latest release number (currently it is openjk-8).
 
-INSTALLING MATSIM
-The version number is 0.5.x, with 'x' being the number of latest official bugfix release. Make sure always to use the latest bugfix release. In order to access code and data, the Eclipse IDE is used instead of the command line. Take the following steps to install MATSim in Eclipse.
+### Installing Eclipse
+Windows: Download the zip-File and unzip it to wherever you want to place it.
+To install Eclipse in Linux follow the instructions here: http://www.krizna.com/ubuntu/install-eclipse-in-ubuntu-12-04/ or use the software center.
 
-- Download the current release (matsim-0.5.x.zip, replace x with the number of the bugfix release) from the sourceforge download page (http://sourceforge.net/project/showfiles.php?group_id=167850) and save it on your desktop.
-- Unzip the file. A folder (matsim-0.5.x) is created.
-- Start Eclipse.
-- Start a new Java Project: Click File -> New -> Java Project
-- Deselect the "Use default location" checkbox
-- For the "Location", choose the unzipped matsim-0.5.x folder.
-- Make sure a JRE 6 (or newer version) is set in section JRE.
-- Click Next.
-- To make the MATSim source code visible in Eclipse do  the following:
-    - In the "Java Settings" dialogue, click the Libraries tab.
-    - In the JARs list, choose matsim-0.5.x-sources.jar and click Remove.
-    - In the JARs list, choose matsim-0.5.x.jar and expand it.
-    - Click Source attachment: (None), then click Edit....
-    - Click Workspace....
-    - Choose matsim-0.5.x/matsim-0.5.x-sources.jar, then click OK.
-    - Click again OK to confirm the "Source Attachment Configuration" Dialog
-    - Click Finish.
-Congratulations! You have successfully installed MATSim for usage with Eclipse. The project can be found in the Package Explorer on the left side of the screen. You can now investigate the MATSim software project, e.g.. Browse the source code of MATSim (packages in Referenced Libraries - matsim-0.5.x.jar). For this, make sure that the package presentation is hierarchical: Click the small triangle at the top right of the Package Explorer, then choose Package presentation - Hierarchical.
+## MATSim Documentation
+Due to the contant development process of MATSim, we do not provide a documentation in this repo. For information about how to set up, run and interpret MATSim see
+- MATSim Website ( http://www.matsim.org )
+or
+- MATSim book ( http://ci.matsim.org:8080/view/All/job/MATSim-Book/ws/matsimbook-latest.pdf )
