@@ -8,7 +8,8 @@ The multi-agent simulation repository (MAS) stores
 
 ## Basic requirements
 To access the MATSim data, you need a user account on the playground. Just contact either Benno Bock, Daniel Hosse or Benjamin Stolte to create an account for you.
-You can access the playground via ssh. If you're computer has a Linux or an OS operating system, you need nothing else than an existing user account. On Windows, you need to install an ssh client program like PuTTY or WinSCP.
+
+You can access the playground via SecureShell (ssh). If your computer has a Linux or an OS operating system, you need nothing else than an existing user account. On Windows, you need to install an ssh client program like PuTTY or WinSCP.
 
 To run one of the scenarios from the terminal on your local machine you need a Java development kit (jdk). The java version used in the latest MATSim release (e.g. matsim-0.x.x.zip) is jdk7, for the development version or your own MATSim playground you will probably need jdk8.
 
