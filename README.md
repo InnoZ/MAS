@@ -15,7 +15,7 @@ You can access the playground via SecureShell (ssh). If your computer has a Linu
 
 To run one of the scenarios from the terminal on your local machine you need a Java development kit (jdk). The java version used in the latest MATSim release (e.g. matsim-0.x.x.zip) is jdk7, for the development version or your own MATSim playground you will probably need jdk8.
 
-If you want to write java scripts or your own java classes to extend or modify MATSim, you also need a software IDE (most of the MATSim developers use Eclipse IDE for Java Developers, http://www.eclipse.org/downloads/packages/eclipse-ide-java-developers/mars2).
+If you want to write java scripts or your own java classes to extend or modify MATSim, you also need a software IDE (most of the MATSim developers use [Eclipse IDE for Java Developers](http://www.eclipse.org/downloads/packages/eclipse-ide-java-developers/mars2)).
 
 ### Installing Java
 There are several implementations of jdks available. The most common ones are the Oracle implementation and OpenJDK. Choose for yourself which one you prefer, they should work identically.
