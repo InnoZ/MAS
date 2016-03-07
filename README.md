@@ -28,7 +28,7 @@ Windows: Download the zip-File and unzip it to wherever you want to place it.
 To install Eclipse in Linux follow the instructions here: http://www.krizna.com/ubuntu/install-eclipse-in-ubuntu-12-04/ or use the software center.
 
 ## MATSim Documentation
-Due to the contant development process of MATSim, we do not provide a documentation in this repo. For information about how to set up, run and interpret MATSim see
+Due to the constant development process of MATSim, we do not provide a documentation in this repo. For information about how to set up, run and interpret MATSim see
 - MATSim Website ( http://www.matsim.org )
 or
 - MATSim book ( http://ci.matsim.org:8080/view/All/job/MATSim-Book/ws/matsimbook-latest.pdf )
