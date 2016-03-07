@@ -19,7 +19,7 @@ There are several implementations of jdks available. The most common ones are th
 To install Java on a Windows system, just download the installation file of the latest release and follow the instructions during the installation process.
 The installation of Java under a Linux distribution can either be done in the software center or in the terminal. In the terminal, just type
 
-> sudo apt-ge install openjdk-[version]-jdk
+> sudo apt-get install openjdk-[version]-jdk
 
 and replace version with the latest release number (currently it is openjk-8).
 
