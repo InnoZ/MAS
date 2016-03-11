@@ -6,12 +6,7 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.Default
 
 public class RunUtils {
 
-	public static void addBasicStrategySettings(StrategyConfigGroup strategy, String[] subpopulations){
-		addBasicStrategySettings(strategy, subpopulations, strategy.getFractionOfIterationsToDisableInnovation());
-	}
-	
-	public static void addBasicStrategySettings(StrategyConfigGroup strategy, String[] subpopulations,
-			double fractionOfIterationsToDisableInnovation) {
+	public static void addBasicStrategySettings(StrategyConfigGroup strategy, String[] subpopulations) {
 		
 		for(String subpopulation : subpopulations){
 			
@@ -30,22 +25,16 @@ public class RunUtils {
 			
 		}
 		
-		strategy.setFractionOfIterationsToDisableInnovation(fractionOfIterationsToDisableInnovation);
+		strategy.setFractionOfIterationsToDisableInnovation(0.8);
 		
 	}
 	
-	public static void addSubtourModeChoiceSettings(StrategyConfigGroup strategy, String[] subpopulations,
-			double weight){
+	public static void addSubtourModeChoiceSettings(StrategyConfigGroup strategy, double weight){
 		
-		for(String subpopulation : subpopulations){
-
-			StrategySettings smc = new StrategySettings();
-			smc.setStrategyName(DefaultStrategy.SubtourModeChoice.name());
-			smc.setSubpopulation(subpopulation);
-			smc.setWeight(weight);
-			strategy.addStrategySettings(smc);
-			
-		}
+		StrategySettings smc = new StrategySettings();
+		smc.setStrategyName(DefaultStrategy.SubtourModeChoice.name());
+		smc.setWeight(weight);
+		strategy.addStrategySettings(smc);
 		
 	}
 	

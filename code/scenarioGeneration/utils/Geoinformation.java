@@ -1,19 +1,25 @@
 package playground.dhosse.scenarios.generic.utils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
-import org.matsim.api.core.v01.Coord;
-import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 
-import playground.dhosse.gap.Global;
-
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 
 /**
  * 
@@ -25,6 +31,9 @@ import com.vividsolutions.jts.geom.Point;
 public class Geoinformation {
 	
 	private static Map<String, Geometry> geometries = new HashMap<String, Geometry>();
+	
+	//no instance!
+	private Geoinformation(){};
 	
 	public static void readGeodataFromShapefile(String filename, Set<String> ids){
 		
@@ -39,6 +48,58 @@ public class Geoinformation {
 				geometries.put(kennzahl, (Geometry)feature.getDefaultGeometry());
 				
 			}
+			
+		}
+		
+	}
+	
+	public static void readGeodataFromDatabase(String filename, Set<String> ids) throws Exception{
+		
+		WKTReader wktReader = new WKTReader();
+		
+		Properties properties = new Properties();
+		
+		try {
+			
+			properties.load(new FileInputStream(new File("")));
+			Class.forName(properties.getProperty("")).newInstance();
+			Connection connection = DriverManager.getConnection(properties.getProperty(""),
+					properties.getProperty(""), properties.getProperty(""));
+			
+			if(connection != null){
+
+				Statement statement = connection.createStatement();
+				ResultSet set = statement.executeQuery("select id,geometry from [table] where [condition]"
+						+ "and ...");
+				
+				while(set.next()){
+					
+					String key = set.getString("id");
+					String g = set.getString("geometry");
+					
+					if(g != null){
+						
+						if(!g.isEmpty()){
+							
+							geometries.put(key, wktReader.read(g));
+							
+						}
+						
+					}
+					
+				}
+				
+				connection.close();
+				
+			} else{
+				
+				throw new Exception("Database connection could not be established! Aborting...");
+				
+			}
+			
+		} catch (IOException | InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException | ParseException e) {
+			
+			e.printStackTrace();
 			
 		}
 		
@@ -73,21 +134,4 @@ public class Geoinformation {
 		
 	}
 	
-	public static Coord shoot(Geometry geometry){
-		
-		Point point = null;
-		double x, y;
-		
-		do{
-			
-			x = geometry.getEnvelopeInternal().getMinX() + Global.random.nextDouble() * (geometry.getEnvelopeInternal().getMaxX() - geometry.getEnvelopeInternal().getMinX());
-	  	    y = geometry.getEnvelopeInternal().getMinY() + Global.random.nextDouble() * (geometry.getEnvelopeInternal().getMaxY() - geometry.getEnvelopeInternal().getMinY());
-	  	    point = MGC.xy2Point(x, y);
-			
-		}while(!geometry.contains(point));
-		
-		return MGC.point2Coord(point);
-		
-	}
-
 }

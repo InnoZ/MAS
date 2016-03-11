@@ -11,17 +11,23 @@ public class Configuration {
 	private static final String SEP = "\t";
 	private static final String COMMENT = "#";
 	private static final String OSM_FILE = "osmFile";
-	private static final String SURVEY_AREA_ID = "surveyAreaId";
-	private static final String VICINITY_IDS = "vicinityIds";
+	private static final String SURVEY_AREA_IDS = "surveyAreaIds";
 	private static final String CRS = "coordinateSystem";
 	private static final String WORKING_DIR = "workingDirectory";
+	private static final String INPUT_COMMUTER_FILE = "inputCommuterFile";
+	private static final String INPUT_REVERSE_COMMUTER_FILE = "inputReverseCommuterFile";
+	private static final String POPULATION_TYPE = "populationType";
 	
 	//MEMBERS
 	private String osmFile;
-	private String surveyAreaId;
-	private String[] vicinityIds;
+	private String[] surveyAreaIds;
 	private String crs;
 	private String workingDirectory;
+	private String inputCommuterFile;
+	private String inputReverseCommuterFile;
+	private PopulationType popType;
+	
+	public enum PopulationType{dummy,commuter,complete};
 	
 	Configuration(String file){
 		
@@ -47,13 +53,9 @@ public class Configuration {
 						
 						this.osmFile = lineParts[1];
 						
-					} else if(SURVEY_AREA_ID.equals(lineParts[0])){
+					} else if(SURVEY_AREA_IDS.equals(lineParts[0])){
 						
-						this.surveyAreaId = lineParts[1];
-						
-					} else if(VICINITY_IDS.equals(lineParts[0])){
-						
-						this.vicinityIds = lineParts[1].split(",");
+						this.surveyAreaIds = lineParts[1].split(",");
 						
 					} else if(CRS.equals(lineParts[0])){
 						
@@ -62,6 +64,18 @@ public class Configuration {
 					} else if(WORKING_DIR.equals(lineParts[0])){
 						
 						this.workingDirectory = lineParts[1];
+						
+					} else if(INPUT_COMMUTER_FILE.equals(lineParts[0])){
+						
+						this.inputCommuterFile = lineParts[1];
+						
+					} else if(INPUT_REVERSE_COMMUTER_FILE.equals(lineParts[0])){
+						
+						this.inputReverseCommuterFile = lineParts[1];
+						
+					} else if(POPULATION_TYPE.equals(lineParts[0])){
+						
+						this.popType = PopulationType.valueOf(lineParts[1]);
 						
 					}
 					
@@ -81,12 +95,8 @@ public class Configuration {
 		return this.osmFile;
 	}
 
-	public String getSurveyAreaId() {
-		return this.surveyAreaId;
-	}
-
-	public String[] getVicinityIds() {
-		return this.vicinityIds;
+	public String[] getSurveyAreaIds() {
+		return this.surveyAreaIds;
 	}
 
 	public String getCrs() {
@@ -95,6 +105,18 @@ public class Configuration {
 
 	public String getWorkingDirectory() {
 		return workingDirectory;
+	}
+	
+	public String getCommuterFile() {
+		return this.inputCommuterFile;
+	}
+	
+	public String getReverseCommuterFile() {
+		return this.inputReverseCommuterFile;
+	}
+	
+	public PopulationType getPopulationType() {
+		return this.popType;
 	}
 	
 }
