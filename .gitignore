@@ -1,6 +1,6 @@
 # ignore all files and folders inside input and output:
 input/**/* 
 output/**/*
-
+.project
 # ignore temp files:
 *~
