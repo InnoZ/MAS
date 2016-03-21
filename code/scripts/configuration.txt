@@ -1,0 +1,32 @@
+#Configuration file for generating a MATSim pre-base scenario
+#the parameters below can be edited according to one's needs
+#
+#the file that contains the osm data (db?)
+osmFile	""
+#
+#the id(s) of the survey area(s)
+surveyAreaIds	""
+#
+#the coordinate system used
+coordinateSystem	EPSG:32632
+#
+#working directory (where the input and output files should be located)
+workingDirectory	""
+#
+#commuters (db?)
+inputCommuterFile	""
+#
+#reverse commuters (db?)
+inputReverseCommuterFile	""
+#
+#The type of population you want to create. Possible values are "dummy","commuter","complete"
+populationType	complete
+#
+#this part refers to the mid database
+databaseUrl	jdbc:postgresql://localhost:5432/
+midDatabase	mid
+databaseUser	postgres
+password	postgres
+query	select * from persons where bland=9 and ktyp=9
+useHouseholds	false
+onlyWorkingDays	true
