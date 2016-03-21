@@ -14,6 +14,10 @@ public class MobilityDatabaseMain {
 			MiDParser parser = new MiDParser();
 			parser.run(configuration);
 			
+		} else {
+			
+			throw new RuntimeException("You must pass a configuration file as runtime argument!");
+			
 		}
 		
 	}
