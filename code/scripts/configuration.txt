@@ -35,6 +35,6 @@ databaseUrl	jdbc:postgresql://localhost:5432/
 midDatabase	mid
 databaseUser	postgres
 password	postgres
-query	select * from persons where bland=9 and ktyp=9
+midQquery	select * from persons where bland=9 and ktyp=9
 useHouseholds	false
 onlyWorkingDays	true
