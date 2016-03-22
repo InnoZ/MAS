@@ -3,24 +3,32 @@
 #The variables' names however should not be edited in order not to break the scenario generation process.
 
 #I'm trying to make as many variables as possible fixed to keep the configurable part small. /dhosse
+#Especially basic input data (e.g. MiD, admin borders, osm) should be non-configurable.
+
 
 #The file that contains the osm data (in database?) /dhosse
 osmFile	""
 
+
 #The id(s) of the survey area(s)
 surveyAreaIds	""
+
 
 #The coordinate system used (automatically by selecting a survey area? In most cases UTM32N and UTM33N will be used) /dhosse
 coordinateSystem	EPSG:32632
 
+
 #Working directory (where the input and output files should be located) /dhosse
 workingDirectory	""
+
 
 #commuters (n database?) /dhosse
 inputCommuterFile	""
 
+
 #reverse commuters (in database?) /dhosse
 inputReverseCommuterFile	""
+
 
 #The type of population you want to create. Possible values are "dummy","commuter","complete"
 #dummy: some randomly distributed population of any size (for playing around)
@@ -28,13 +36,12 @@ inputReverseCommuterFile	""
 #complete: plan creation with integration of mobility survey data, commuter data etc.
 populationType	complete
 
+
 #This part refers to the MiD database
 #Must not be edited unless you know what you're doing!
-#It would be enough to keep the last three parameters in here, I'm only having a problem with commiting our database password into a public repo (MATSim)... /dhosse
-databaseUrl	jdbc:postgresql://localhost:5432/
-midDatabase	mid
+#It would be enough to keep the last three parameters in here, I'm only having a problem with commiting a database password into a public repo (MATSim)... /dhosse
 databaseUser	postgres
 password	postgres
-midQquery	select * from persons where bland=9 and ktyp=9
+midQuery	select * from persons where bland=9 and ktyp=9
 useHouseholds	false
 onlyWorkingDays	true
