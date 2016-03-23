@@ -22,6 +22,7 @@ coordinateSystem	EPSG:32632
 workingDirectory	""
 
 
+#Commuter files should definitely be inside a database somewhere / dhosse
 #commuters (n database?) /dhosse
 inputCommuterFile	""
 
@@ -38,10 +39,11 @@ populationType	complete
 
 
 #This part refers to the MiD database
-#Must not be edited unless you know what you're doing!
-#It would be enough to keep the last three parameters in here, I'm only having a problem with commiting a database password into a public repo (MATSim)... /dhosse
+#Edit only if you know what you're doing!
+#It would be enough to keep the last three parameters in here, I'm only having a problem with committing a database password into a public repo (MATSim)... /dhosse
 databaseUser	postgres
 password	postgres
+#The query could be automated by selected the bbsr district type directly from geodata. //dhosse
 midQuery	select * from persons where bland=9 and ktyp=9
 useHouseholds	false
 onlyWorkingDays	true
