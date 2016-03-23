@@ -163,32 +163,6 @@ psu_nr numeric
 
 copy mid2008.households from '/home/dhosse/MiD2008_PUF_Haushalte2.csv' DELIMITER ';'
 
-create view Haushalte_MiD2008 as
-select
-hhid as "Haushalts-ID",
-sourceid as "Methode des Haushalts-Interviews",
-hh_gew as "Gewichtungsfaktor Haushate",
-h01 as "Leben Sie in Ihrem Haushalt...",
-h02 as "Anzahl Personen im Haushalt",
-p1nr as "Person 1",
-p2nr as "Person 2",
-p3nr as "Person 3",
-p4nr as "Person 4",
-p5nr as "Person 5",
-p6nr as "Person 6",
-p7nr as "Person 7",
-p8nr as "Person 8",
-hpalter1 as "Alter Person 1",
-hpalter2 as "Alter Person 2",
-hpalter3 as "Alter Person 3",
-hpalter4 as "Alter Person 4",
-hpalter5 as "Alter Person 5",
-hpalter6 as "Alter Person 6",
-hpalter7 as "Alter Person 7",
-hpalter8 as "Alter Person 8",
-...//TODO
-from households
-
 CREATE TABLE mid2008.persons (
 hhid character varying,
 pid character varying,
