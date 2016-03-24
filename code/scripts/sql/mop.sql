@@ -379,3 +379,41 @@ anorm2sa numeric,
 anorm2so numeric,
 gewhhpwo numeric
 );
+
+create table mop1994.children(
+id character varying,
+persnr character varying,
+jahr numeric,
+ausfueller numeric,
+sex numeric,
+gebjahr numeric,
+beruf numeric,
+wechsarb numeric,
+lagearb numeric,
+oefferr numeric,
+fussmin numeric,
+parkp numeric,
+zeitopnv numeric,
+bahncard numeric,
+zweirad numeric,
+fahrrad numeric
+);
+
+create view view_mop1994_persons as select
+id as "Haushalts-ID",
+persnr as "Personen-ID",
+jahr as "Erhebungsjahr",
+ausfueller as "Ausfüllender",
+sex as "Geschlecht",
+gebjahr as "Geburtsjahr",
+beruf as "Berufstätigkeit",
+wechsarb as "Wechsel Arbeits- / Ausbildungsplatz im letzten Jahr",
+lagearb as "Lage des Arbeits- / Ausbildungsplatzes / der Schule...",
+oefferr as "Erreichbarkeit des Arbeits... mit ÖV",
+fussmin as "Fußweg von Haltestelle Arbeits...",
+parkp as "Parkplatzsituation am Arbeits...",
+zeitopnv as "Zeitkarte für ÖV vorhanden",
+bahncard as "Bahncard vorhanden",
+zweirad as "Zweirad vorhanden",
+fahrrad as "Fahrrad vorhanden"
+from mop1994.children;
