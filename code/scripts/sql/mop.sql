@@ -399,7 +399,7 @@ zweirad numeric,
 fahrrad numeric
 );
 
-create view view_mop1994_persons as select
+create view view_mop1994_children as select
 id as "Haushalts-ID",
 persnr as "Personen-ID",
 jahr as "Erhebungsjahr",
@@ -417,3 +417,55 @@ bahncard as "Bahncard vorhanden",
 zweirad as "Zweirad vorhanden",
 fahrrad as "Fahrrad vorhanden"
 from mop1994.children;
+
+create table mop1994.ways(
+id character varying,
+persnr character varying,
+jahr numeric,
+wotag numeric,
+bertag numeric,
+datum numeric,
+temp numeric,
+regen numeric,
+wnrt numeric,
+abzeit numeric,
+zweck numeric,
+vm1 numeric,
+vm2 numeric,
+vm3 numeric,
+vm4 numeric,
+vm5 numeric,
+vmdiw numeric,
+anzeit numeric,
+km numeric,
+dauer numeric,
+speed numeric,
+weggew numeric,
+kmgew numeric
+);
+
+create view view_mop1994_ways as select
+id as "Haushalts-ID",
+persnr as "Personen-ID",
+jahr as "Erhebungsjahr",
+wotag as "Wochentag",
+bertag as "Berichtstag",
+datum as "Datum des Tages",
+temp as "Temperatur [°C]",
+regen as "Regenmenge [mm]",
+wnrt as "Weg-Nr.",
+abzeit as "Abfahrtszeit",
+zweck as "Wegezweck",
+vm1 as "Erstes auf dem Weg benutztes Verkehrsmittel",
+vm2 as "Zweites auf dem Weg benutztes Verkehrsmittel",
+vm3 as "Drittes auf dem Weg benutztes Verkehrsmittel",
+vm4 as "Viertes auf dem Weg benutztes Verkehrsmittel",
+vm5 as "Fünftes auf dem Weg benutztes Verkehrsmittel",
+vmdiw as "Verkehrsmittel",
+anzeit as "Ankunftszeit",
+km as "Entfernung",
+dauer as "Wegdauer",
+speed as "Geschwindigkeit",
+weggew as "Weggewicht",
+kmgew as "KM-Gewicht"
+from mop1994.ways;
