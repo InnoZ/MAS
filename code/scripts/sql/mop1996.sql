@@ -1,4 +1,4 @@
-create table mop1995.households(
+create table mop1996.households(
 id character varying,
 jahr numeric,
 bik numeric,
@@ -59,9 +59,9 @@ pcweb numeric,
 gewhhwo numeric
 );
 
-copy mop1995.households from '/home/dhosse/mop/1995/Haushalte.csv' delimiter ';'
+copy mop1996.households from '/home/dhosse/mop/1996/Haushalte.csv' delimiter ';'
 
-create view view_mop1995_households as select
+create view view_mop1996_households as select
 id as "Haushalts-ID",
 jahr as "Erhebungsjahr",
 bik as "Raumtyp nach BIK",
@@ -120,9 +120,9 @@ handy as "Anzahl Handys im Haushalt",
 pc as "PC im Haushalt",
 pcweb as "Internetzugang",
 gewhhwo as "Hochrechnenfaktor"
-from mop1995.households;
+from mop1996.households;
 
-create table mop1995.persons(
+create table mop1996.persons(
 id character varying,
 persnr character varying,
 jahr numeric,
@@ -186,9 +186,9 @@ anorm2so numeric,
 gewhhpwo numeric
 );
 
-copy mop1995.persons from '/home/dhosse/mop/1995/Personen.csv' delimiter ';';
+copy mop1996.persons from '/home/dhosse/mop/1996/Personen.csv' delimiter ';';
 
-create view view_mop1995_persons as select
+create view view_mop1996_persons as select
 id as "Haushalts-ID",
 persnr as "Personen-ID",
 jahr as "Erhebungsjahr",
@@ -250,9 +250,9 @@ anorm2fr as "andere Besonderheiten am Freitag: zweite Nennung",
 anorm2sa as "andere Besonderheiten am Samstag: zweite Nennung",
 anorm2so as "andere Besonderheiten am Sonntag: zweite Nennung",
 gewhhpwo as "kombinierter Gewichtungsfaktor"
-from mop1995.persons;
+from mop1996.persons;
 
-create table mop1995.children(
+create table mop1996.children(
 id character varying,
 persnr character varying,
 jahr numeric,
@@ -271,9 +271,9 @@ zweirad numeric,
 fahrrad numeric
 );
 
-copy mop1995.children from '/home/dhosse/mop/1995/Kinder.csv' delimiter ';';
+copy mop1996.children from '/home/dhosse/mop/1996/Kinder.csv' delimiter ';';
 
-create view view_mop1995_children as select
+create view view_mop1996_children as select
 id as "Haushalts-ID",
 persnr as "Personen-ID",
 jahr as "Erhebungsjahr",
@@ -290,9 +290,61 @@ zeitopnv as "Zeitkarte für ÖV vorhanden",
 bahncard as "Bahncard vorhanden",
 zweirad as "Zweirad vorhanden",
 fahrrad as "Fahrrad vorhanden"
-from mop1995.children;
+from mop1996.children;
 
-create table mop1995.ways(
+create table mop1996.personsWithoutJournal(
+id character varying,
+persnr character varying,
+jahr numeric,
+ausfueller numeric,
+sex numeric,
+gebjahr numeric,
+alter numeric,
+schulab numeric,
+beruf numeric,
+wechsarb numeric,
+lagearb numeric,
+oefferr numeric,
+fussmin numeric,
+parkp numeric,
+fspkw numeric,
+fsmot numeric,
+pkwverf numeric,
+zeitopv numeric,
+bahncard numeric,
+zweirad numeric,
+moped numeric,
+fahrrad numeric
+);
+
+copy mop1996.personswithoutjournal from '/home/dhosse/mop/1996/PoT.csv' delimiter ';';
+
+create view view_mop1996_pot as select
+id as "Haushalts-ID",
+persnr as "Personen-ID",
+jahr as "Erhebungsjahr",
+ausfueller as "Ausfüllender",
+sex as "Geschlecht",
+gebjahr as "Geburtsjahr",
+alter as "Alter",
+schulab as "höchster Schulabschluss",
+beruf as "Berufstätigkeit",
+wechsarb as "Wechsel Arbeits- / Ausbildungsplatz im letzten Jahr",
+lagearb as "Lage des Arbeits- / Ausbildungsplatzes / der Schule...",
+oefferr as "Erreichbarkeit des Arbeits... mit ÖV",
+fussmin as "Fußweg von Haltestelle Arbeits...",
+parkp as "Parkplatzsituation am Arbeits...",
+fspkw as "Pkw-Führerschein",
+fsmot as "Motorrad-Führerschein",
+pkwverf as "Pkw-Verfügbarkeit",
+zeitopnv as "Zeitkarte für ÖV vorhanden",
+bahncard as "Bahncard vorhanden",
+zweirad as "Zweirad vorhanden",
+moped as "Mofa / Moped / Motorrad vorhanden",
+fahrrad as "Fahrrad vorhanden"
+from mop1996.personswithoutjournal;
+
+create table mop1996.ways(
 id character varying,
 persnr character varying,
 jahr numeric,
@@ -318,9 +370,9 @@ weggew numeric,
 kmgew numeric
 );
 
-copy mop1995.ways from '/home/dhosse/mop/1995/Wege.csv' delimiter ';';
+copy mop1996.ways from '/home/dhosse/mop/1996/Wege.csv' delimiter ';';
 
-create view view_mop1995_ways as select
+create view view_mop1996_ways as select
 id as "Haushalts-ID",
 persnr as "Personen-ID",
 jahr as "Erhebungsjahr",
@@ -344,9 +396,9 @@ dauer as "Wegdauer",
 speed as "Geschwindigkeit",
 weggew as "Weggewicht",
 kmgew as "KM-Gewicht"
-from mop1995.ways;
+from mop1996.ways;
 
-create table mop1995.personDays(
+create table mop1996.personDays(
 id character varying,
 persnr character varying,
 jahr numeric,
@@ -416,13 +468,13 @@ dau_dien numeric,
 anzheim numeric,
 km_heim numeric,
 dau_heim numeric,
-musterzw numeric,
-mustervm numeric
+musterzw character varying,
+mustervm character varying
 );
 
-copy mop1995.personDays from '/home/dhosse/mop/1995/Personentage.csv' delimiter ';';
+copy mop1996.personDays from '/home/dhosse/mop/1996/Personentage.csv' delimiter ';';
 
-create view view_mop1995_personDays as select
+create view view_mop1996_personDays as select
 id as "Haushalts-ID",
 persnr as "Personen-ID",
 jahr as "Erhebungsjahr",
@@ -494,4 +546,4 @@ km_heim as "Strecke nach Hause (entfernungsgewichtet) [km]",
 dau_heim as "Dauer nach Hause (entfernungsgewichtet) [min]",
 musterzw as "Reihung der Wegezwecke",
 mustervm as "Reihung der benutzten Verkehrsmittel"
-from mop1995.personDays;
+from mop1996.personDays;
