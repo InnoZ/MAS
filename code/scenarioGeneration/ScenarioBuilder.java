@@ -79,7 +79,7 @@ public class ScenarioBuilder {
 		
 		try {
 			
-			Geoinformation.readGeodataFromDatabase("", filterIds);
+			Geoinformation.readGeodataFromDatabase(filterIds);
 			
 		} catch (Exception e) {
 			
@@ -99,8 +99,6 @@ public class ScenarioBuilder {
 			log.warn("No population will be created.");
 			
 		}
-		//read mid data
-		//read tracking data
 		
 		log.info("########## Scenario created!");
 		

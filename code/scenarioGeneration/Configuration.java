@@ -10,6 +10,7 @@ public class Configuration {
 	//TAGS
 	private static final String SEP = "\t";
 	private static final String COMMENT = "#";
+	
 	private static final String OSM_FILE = "osmFile";
 	private static final String SURVEY_AREA_IDS = "surveyAreaIds";
 	private static final String CRS = "coordinateSystem";
@@ -17,6 +18,15 @@ public class Configuration {
 	private static final String INPUT_COMMUTER_FILE = "inputCommuterFile";
 	private static final String INPUT_REVERSE_COMMUTER_FILE = "inputReverseCommuterFile";
 	private static final String POPULATION_TYPE = "populationType";
+	private static final String USE_HOUSEHOLDS = "useHouseholds";
+	private static final String DATABASE_URL = "databaseUrl";
+	private static final String MID_DATABASE = "midDatabase";
+	private static final String MID_HH_TABLE = "midHouseholds";
+	private static final String MID_PERSONS_TABLE = "midPersons";
+	private static final String DATABASE_USER = "databaseUser";
+	private static final String DATABASE_PASSWD = "password";
+	private static final String SQL_QUERY_MID = "midQuery"; //TODO change this one in configuration files
+	private static final String ONLY_WORKING_DAYS = "onlyWorkingDays";
 	
 	//MEMBERS
 	private String osmFile;
@@ -26,10 +36,23 @@ public class Configuration {
 	private String inputCommuterFile;
 	private String inputReverseCommuterFile;
 	private PopulationType popType;
+	private int personsInSurveyArea;
+	private boolean useHouseholds = false;
+	private boolean onlyWorkingDays = false;
+	
+	private String databaseUrl;
+	private String midDatabase;
+	private String midHouseholdsTable;
+	private String midPersonsTable;
+	private String midWaysTable;
+	private String databaseUser;
+	private String userPassword;
+	
+	private String query;
 	
 	public enum PopulationType{dummy,commuter,complete};
 	
-	Configuration(String file){
+	public Configuration(String file){
 		
 		readConfigurationFile(file);
 		
@@ -77,6 +100,42 @@ public class Configuration {
 						
 						this.popType = PopulationType.valueOf(lineParts[1]);
 						
+					} else if(USE_HOUSEHOLDS.equals(lineParts[0])){
+						
+						this.useHouseholds = Boolean.parseBoolean(lineParts[1]);
+						
+					} else if(DATABASE_URL.equals(lineParts[0])){
+						
+						this.databaseUrl = lineParts[1];
+						
+					} else if(MID_HH_TABLE.equals(lineParts[0])){
+						
+						this.midHouseholdsTable = lineParts[1];
+						
+					} else if(MID_PERSONS_TABLE.equals(lineParts[0])){
+						
+						this.midPersonsTable = lineParts[1];
+						
+					} else if(DATABASE_USER.equals(lineParts[0])){
+						
+						this.databaseUser = lineParts[1];
+						
+					} else if(DATABASE_PASSWD.equals(lineParts[0])){
+						
+						this.userPassword = lineParts[1];
+						
+					} else if(MID_DATABASE.equals(lineParts[0])){
+						
+						this.midDatabase = lineParts[1];
+						
+					} else if(SQL_QUERY_MID.equals(lineParts[0])){
+						
+						this.query = lineParts[1];
+						
+					} else if(ONLY_WORKING_DAYS.equals(lineParts[0])){
+						
+						this.onlyWorkingDays = Boolean.parseBoolean(lineParts[1]);
+						
 					}
 					
 				}
@@ -117,6 +176,46 @@ public class Configuration {
 	
 	public PopulationType getPopulationType() {
 		return this.popType;
+	}
+	
+	public int getNumberOfPersons(){
+		return this.personsInSurveyArea;
+	}
+	
+	public boolean isUsingHouseholds(){
+		return this.useHouseholds;
+	}
+	
+	public String getHouseholdDatabaseUrl(){
+		return (this.databaseUrl + this.midHouseholdsTable);
+	}
+	
+	public String getPersonDatabaseUrl(){
+		return (this.databaseUrl + this.midPersonsTable);
+	}
+	
+	public String getWayDatabaseUrl(){
+		return (this.databaseUrl + this.midWaysTable);
+	}
+	
+	public String getDatabaseUsername(){
+		return this.databaseUser;
+	}
+	
+	public String getPassword(){
+		return this.userPassword;
+	}
+
+	public String getMidDatabase() {
+		return (this.databaseUrl + this.midDatabase);
+	}
+
+	public String getSqlQuery() {
+		return query;
+	}
+	
+	public boolean isOnlyUsingWorkingDays(){
+		return this.onlyWorkingDays;
 	}
 	
 }

@@ -1,7 +1,5 @@
 package playground.dhosse.scenarios.generic.utils;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,7 +9,6 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import org.matsim.core.utils.gis.ShapeFileReader;
@@ -53,29 +50,46 @@ public class Geoinformation {
 		
 	}
 	
-	public static void readGeodataFromDatabase(String filename, Set<String> ids) throws Exception{
+	public static void readGeodataFromDatabase(Set<String> ids) throws Exception{
 		
 		WKTReader wktReader = new WKTReader();
 		
-		Properties properties = new Properties();
-		
 		try {
 			
-			properties.load(new FileInputStream(new File("")));
-			Class.forName(properties.getProperty("")).newInstance();
-			Connection connection = DriverManager.getConnection(properties.getProperty(""),
-					properties.getProperty(""), properties.getProperty(""));
+			Class.forName("org.postgresql.Driver").newInstance();
+			Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/geodata",
+					"dhosse", "");
 			
 			if(connection != null){
 
 				Statement statement = connection.createStatement();
-				ResultSet set = statement.executeQuery("select id,geometry from [table] where [condition]"
-						+ "and ...");
+				StringBuilder builder = new StringBuilder();
+
+				int i = 0;
+				
+				for(String id : ids){
+
+					if(i < ids.size() - 1){
+						
+						builder.append(" id like '" + id + "%' OR");
+						
+					} else {
+						
+						builder.append(" id like '" + id + "%'");
+						
+					}
+					
+					i++;
+					
+				}
+				
+				ResultSet set = statement.executeQuery("select id, st_astext(geometry)"
+						+ " from  where" + builder.toString());
 				
 				while(set.next()){
 					
 					String key = set.getString("id");
-					String g = set.getString("geometry");
+					String g = set.getString("wkt");
 					
 					if(g != null){
 						
@@ -97,7 +111,8 @@ public class Geoinformation {
 				
 			}
 			
-		} catch (IOException | InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException | ParseException e) {
+		} catch (IOException | InstantiationException | IllegalAccessException | ClassNotFoundException |
+				SQLException | ParseException e) {
 			
 			e.printStackTrace();
 			
