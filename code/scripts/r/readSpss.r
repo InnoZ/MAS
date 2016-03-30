@@ -18,4 +18,5 @@ data <- d[filter,]
 ###############################################################
 
 #write the filtered data into a table (text) file. sep stands for the separating character
-write.table(data, "/home/dhosse/Dokumente/10_data/MiD2008/csv/MiD2008_PUF_Wege2.csv", sep=";")
+#set row and column names to "false"
+write.table(data, "/home/dhosse/Dokumente/10_data/MiD2008/csv/MiD2008_PUF_Wege2.csv", sep=";",row.names=F,col.names=F)
