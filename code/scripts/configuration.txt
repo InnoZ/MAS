@@ -6,15 +6,12 @@
 #Especially basic input data (e.g. MiD, admin borders, osm) should be non-configurable.
 
 
-#The file that contains the osm data (in database?) /dhosse
-osmFile	""
-
-
 #The id(s) of the survey area(s)
 surveyAreaIds	""
 
 
 #The coordinate system used (automatically by selecting a survey area? In most cases UTM32N and UTM33N will be used) /dhosse
+#Input data must have the projection EPSG:4326!
 coordinateSystem	EPSG:32632
 
 
@@ -44,6 +41,6 @@ populationType	complete
 databaseUser	postgres
 password	postgres
 #The query could be automated by selected the bbsr district type directly from geodata. //dhosse
-midQuery	select * from persons where bland=9 and ktyp=9
-useHouseholds	false
+midQuery	select * from mid2008.persons_raw where bland=3 and rtypd7=3
+useHouseholds	true
 onlyWorkingDays	true
