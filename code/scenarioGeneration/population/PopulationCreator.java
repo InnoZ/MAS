@@ -1,5 +1,6 @@
 package playground.dhosse.scenarios.generic.population;
 
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
@@ -13,27 +14,25 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.population.PersonUtils;
+import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.PopulationWriter;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.matsim.households.Household;
-import org.matsim.households.HouseholdImpl;
-import org.matsim.households.HouseholdsWriterV10;
-import org.matsim.households.Income.IncomePeriod;
+import org.matsim.utils.objectattributes.ObjectAttributes;
+import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 
 import playground.dhosse.scenarios.generic.Configuration;
 import playground.dhosse.scenarios.generic.population.io.commuters.CommuterDataElement;
 import playground.dhosse.scenarios.generic.population.io.commuters.CommuterFileReader;
 import playground.dhosse.scenarios.generic.population.io.mid.MiDActivity;
-import playground.dhosse.scenarios.generic.population.io.mid.MiDHousehold;
 import playground.dhosse.scenarios.generic.population.io.mid.MiDParser;
 import playground.dhosse.scenarios.generic.population.io.mid.MiDPerson;
 import playground.dhosse.scenarios.generic.population.io.mid.MiDPlan;
 import playground.dhosse.scenarios.generic.population.io.mid.MiDPlanElement;
 import playground.dhosse.scenarios.generic.population.io.mid.MiDWay;
 import playground.dhosse.scenarios.generic.utils.ActivityTypes;
+import playground.dhosse.scenarios.generic.utils.AdministrativeUnit;
 import playground.dhosse.scenarios.generic.utils.Geoinformation;
 import playground.dhosse.utils.GeometryUtils;
 
@@ -70,9 +69,9 @@ public class PopulationCreator {
 	
 	private static void createDummyPopulation(Scenario scenario){
 		
-		for(Entry<String,Geometry> fromEntry : Geoinformation.getGeometries().entrySet()){
+		for(Entry<String,AdministrativeUnit> fromEntry : Geoinformation.getAdminUnits().entrySet()){
 			
-			for(Entry<String,Geometry> toEntry : Geoinformation.getGeometries().entrySet()){
+			for(Entry<String,AdministrativeUnit> toEntry : Geoinformation.getAdminUnits().entrySet()){
 
 				for(int i = 0; i < 1000; i++){
 
@@ -80,8 +79,10 @@ public class PopulationCreator {
 							fromEntry.getKey() + "_" + toEntry.getKey() + "-" + i));
 					Plan plan = scenario.getPopulation().getFactory().createPlan();
 					
-					Coord homeCoord = transformation.transform(GeometryUtils.shoot(fromEntry.getValue()));
-					Coord workCoord = transformation.transform(GeometryUtils.shoot(toEntry.getValue()));
+					Coord homeCoord = transformation.transform(GeometryUtils.shoot(fromEntry.getValue()
+							.getGeometry()));
+					Coord workCoord = transformation.transform(GeometryUtils.shoot(toEntry.getValue()
+							.getGeometry()));
 					
 					Activity home = scenario.getPopulation().getFactory().createActivityFromCoord("home",
 							homeCoord);
@@ -132,8 +133,8 @@ public class PopulationCreator {
 				String homeId = entry.getValue().getFromId();
 				String workId = entry.getValue().toString();
 				
-				Geometry homeCell = Geoinformation.getGeometries().get(homeId);
-				Geometry workCell = Geoinformation.getGeometries().get(workId);
+				Geometry homeCell = Geoinformation.getAdminUnits().get(homeId).getGeometry();
+				Geometry workCell = Geoinformation.getAdminUnits().get(workId).getGeometry();
 				
 				for(int i = 0; i < entry.getValue().getCommuters(); i++){
 					
@@ -158,9 +159,104 @@ public class PopulationCreator {
 		MiDParser parser = new MiDParser();
 		parser.run(configuration);
 		
-		//TODO further working w/ MiD data and so on
+		Population population = scenario.getPopulation();
+		ObjectAttributes personAttributes = new ObjectAttributes();
+		scenario.addScenarioElement(PersonUtils.PERSON_ATTRIBUTES, personAttributes);
 		
-		writeOutput(parser, configuration);
+		for(AdministrativeUnit au : Geoinformation.getAdminUnits().values()){
+			
+			for(int i = 0; i < au.getNumberOfInhabitants(); i++){
+				
+				double personalRandom = MatsimRandom.getLocalInstance().nextDouble();
+				
+				Person person = population.getFactory().createPerson(Id.createPersonId(au.getId() + "_" + i));
+				Plan plan = population.getFactory().createPlan();
+
+				List<MiDPerson> templatePersons = null;
+				MiDPerson personTemplate = null;
+				
+				if(personalRandom <= au.getpChild()){
+					
+					//create a child
+					templatePersons = parser.getClassifiedPersons().get(PersonUtils.CHILD);
+					
+				} else if(personalRandom <= (au.getpChild() + au.getpAdult())){
+					
+					//create an adult
+					templatePersons = parser.getClassifiedPersons().get(PersonUtils.ADULT);
+					
+				} else{
+					
+					//create a pensioner
+					templatePersons = parser.getClassifiedPersons().get(PersonUtils.PENSIONER);
+					
+				}
+				
+				personTemplate = PersonUtils.getTemplate(templatePersons,
+						personalRandom * PersonUtils.getTotalWeight(templatePersons));
+				
+				//TODO employed, car avail, license
+				personAttributes.putAttribute(person.getId().toString(), PersonUtils.ATT_SEX, personTemplate.getSex());
+				personAttributes.putAttribute(person.getId().toString(), PersonUtils.ATT_AGE, personTemplate.getAge());
+				
+				if(personTemplate.getPlans().size() > 0){
+
+					MiDPlan templatePlan = personTemplate.getPlans().get((int)Math.round(personalRandom) * personTemplate.getPlans().size() - 1);
+					
+					//TODO: locate home and main activity
+					Coord homeLocation = GeometryUtils.shoot(au.getGeometry());
+					Coord mainActLocation = null;
+					
+					for(MiDPlanElement mpe : templatePlan.getPlanElements()){
+						
+						if(mpe instanceof MiDActivity){
+							
+							MiDActivity act = (MiDActivity)mpe;
+							String type = act.getActType();
+							double start = act.getStartTime();
+							double end = act.getEndTime();
+							
+							Coord coord = type.equals(ActivityTypes.HOME) ? homeLocation : GeometryUtils.shoot(au.getGeometry());
+							
+							Activity activity = population.getFactory().createActivityFromCoord(type, coord);
+							activity.setMaximumDuration(end - start);
+							plan.addActivity(activity);
+							
+						} else {
+							
+							MiDWay way = (MiDWay)mpe;
+							String mode = way.getMainMode();
+							double departure = way.getStartTime();
+							double ttime = way.getEndTime() - departure;
+							
+							Leg leg = population.getFactory().createLeg(mode);
+							leg.setDepartureTime(departure);
+							leg.setTravelTime(ttime);
+							plan.addLeg(leg);
+							
+						}
+						
+					}
+					
+				} else {
+					
+					//create a 24hrs home activity
+					Activity home = population.getFactory().createActivityFromCoord(ActivityTypes.HOME, new Coord(0, 0));
+					home.setMaximumDuration(24 * 3600);
+					plan.addActivity(home);
+					
+				}
+				
+				//in the end: add the person to the population
+				person.addPlan(plan);
+				person.setSelectedPlan(plan);
+				population.addPerson(person);
+				
+			}
+			
+		}
+		
+		writeOutput(scenario, configuration.getWorkingDirectory());
 		
 	}
 	
@@ -197,93 +293,11 @@ public class PopulationCreator {
 		
 	}
 	
-	private static void writeOutput(MiDParser parser, Configuration configuration){
+	private static void writeOutput(Scenario scenario, String workingDirectory){
 		
-		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		
-		for(MiDPerson person : parser.getPersons().values()){
-			
-			Person p = scenario.getPopulation().getFactory().createPerson(Id.createPersonId(person.getId()));
-			PersonUtils.setAge(p, person.getAge());
-			PersonUtils.setCarAvail(p, Boolean.toString(person.getCarAvailable()));
-			PersonUtils.setEmployed(p, person.isEmployed());
-			PersonUtils.setLicence(p, Boolean.toString(person.isHasLicense()));
-			PersonUtils.setSex(p, Integer.toString(person.getSex()));
-			
-			for(MiDPlan plan : person.getPlans()){
-				
-				Plan pl = scenario.getPopulation().getFactory().createPlan();
-				
-				for(MiDPlanElement element : plan.getPlanElements()){
-					
-					if(element instanceof MiDActivity){
-						
-						MiDActivity act = (MiDActivity)element;
-						
-						Activity activity = scenario.getPopulation().getFactory().createActivityFromCoord(
-								act.getActType(), new Coord(0.0d, 0.0d));
-						activity.setStartTime(act.getStartTime());
-						activity.setEndTime(act.getEndTime());
-						pl.addActivity(activity);
-						
-					} else{
-						
-						MiDWay way = (MiDWay)element;
-						
-						Leg leg = scenario.getPopulation().getFactory().createLeg(way.getMainMode());
-						leg.setDepartureTime(way.getStartTime());
-						leg.setTravelTime(way.getEndTime() - way.getStartTime());
-						pl.addLeg(leg);
-						
-					}
-					
-				}
-				
-				p.addPlan(pl);
-				
-			}
-			
-			if(!p.getPlans().isEmpty()){
-				scenario.getPopulation().addPerson(p);
-			}
-			
-		}
-		
-		new PopulationWriter(scenario.getPopulation()).write(configuration.getWorkingDirectory() +
-				"/matsimInput/plansFromMiD.xml.gz");
-		
-		if(configuration.isUsingHouseholds()){
-
-			for(MiDHousehold household : parser.getHouseholds().values()){
-			
-				Household hh = scenario.getHouseholds().getFactory().createHousehold(
-						Id.create(household.getId(), Household.class));
-				
-				for(String pid : household.getMemberIds()){
-					
-					Id<Person> personId = Id.createPersonId(pid);
-					
-					if(scenario.getPopulation().getPersons().containsKey(personId)){
-					
-						((HouseholdImpl)hh).getMemberIds().add(personId);
-						
-					}
-					
-				}
-				
-				hh.setIncome(scenario.getHouseholds().getFactory().createIncome(household.getIncome(),
-						IncomePeriod.month));
-				
-				if(!hh.getMemberIds().isEmpty()){
-					scenario.getHouseholds().getHouseholds().put(hh.getId(), hh);
-				}
-				
-			}
-			
-			new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration.getWorkingDirectory() +
-					"/matsimInput/hhFromMiD.xml.gz");
-			
-		}
+		new PopulationWriter(scenario.getPopulation()).write(workingDirectory + "plans.xml.gz");
+		new ObjectAttributesXmlWriter((ObjectAttributes) scenario.getScenarioElement(
+				PersonUtils.PERSON_ATTRIBUTES)).writeFile(workingDirectory + "personAttributes.xml.gz");
 		
 	}
 	

@@ -10,6 +10,11 @@ public class AdministrativeUnit {
 	private Integer districtType;
 	private Integer municipalityType;
 	
+	private int nInhabitants;
+	private double pChild;
+	private double pAdult;
+	private double pPensioner;
+	
 	private Geometry geometry;
 	
 	public AdministrativeUnit(String id){
@@ -66,6 +71,22 @@ public class AdministrativeUnit {
 
 	public void setGeometry(Geometry geometry) {
 		this.geometry = geometry;
+	}
+	
+	public int getNumberOfInhabitants(){
+		return this.nInhabitants;
+	}
+
+	public double getpChild() {
+		return pChild;
+	}
+
+	public double getpAdult() {
+		return pAdult;
+	}
+
+	public double getpPensioner() {
+		return pPensioner;
 	}
 
 }

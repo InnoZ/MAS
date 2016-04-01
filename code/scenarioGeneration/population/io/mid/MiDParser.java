@@ -51,7 +51,7 @@ public class MiDParser {
 			log.info("Parsing MiD database to create a synthetic population");
 			
 			Class.forName("org.postgresql.Driver").newInstance();
-			Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/mid",
+			Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/mobility_surveys",
 					configuration.getDatabaseUsername(), configuration.getPassword());
 		
 			if(connection != null){
@@ -229,7 +229,7 @@ public class MiDParser {
 		
 		if(isUsingHouseholds){
 			
-			set = statement.executeQuery("select * from persons");
+			set = statement.executeQuery("select * from mid2008.persons_raw");
 			
 		} else {
 			
@@ -248,8 +248,13 @@ public class MiDParser {
 			String age = set.getString(MiDConstants.PERSON_AGE);
 			String employed = set.getString(MiDConstants.PERSON_EMPLOYED);
 			
+			int personGroup = set.getInt(MiDConstants.PERSON_GROUP_12);
+			int phase = set.getInt(MiDConstants.PERSON_LIFE_PHASE);
+			
 			MiDPerson person = new MiDPerson(hhId + personId, sex, age, carAvail, license, employed);
 			person.setWeight(personWeight);
+			person.setPersonGroup(personGroup);
+			person.setLifePhase(phase);
 			
 			if(isUsingHouseholds){
 				
@@ -272,7 +277,7 @@ public class MiDParser {
 			}
 			
 			//generate person hash in order to classify the current person
-			String hash = HashGenerator.generateMiDPersonHash(person);
+			String hash = HashGenerator.generateAgeGroupHash(person);
 			
 			if(!this.midPersonsClassified.containsKey(hash)){
 				
@@ -305,7 +310,7 @@ public class MiDParser {
 		
 		Statement statement = connection.createStatement();
 
-		String query = "select * from ways";
+		String query = "select * from mid2008.ways_raw";
 		
 		if(onlyWorkingDays){
 			query.concat(" where stichtag < 6");
@@ -578,6 +583,10 @@ public class MiDParser {
 	
 	public Map<String, MiDPerson> getPersons(){
 		return this.midPersons;
+	}
+	
+	public Map<String, List<MiDPerson>> getClassifiedPersons(){
+		return this.midPersonsClassified;
 	}
 	
 }
