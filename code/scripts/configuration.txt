@@ -19,21 +19,15 @@ coordinateSystem	EPSG:32632
 workingDirectory	""
 
 
-#Commuter files should definitely be inside a database somewhere / dhosse
-#commuters (n database?) /dhosse
-inputCommuterFile	""
-
-
-#reverse commuters (in database?) /dhosse
-inputReverseCommuterFile	""
-
-
 #The type of population you want to create. Possible values are "dummy","commuter","complete"
 #dummy: some randomly distributed population of any size (for playing around)
 #commuter: only commuters with home-work-home trips (that may be sufficient for some use-cases)
 #complete: plan creation with integration of mobility survey data, commuter data etc.
 populationType	complete
 
+
+#The public transport part
+createTransit	false
 
 #This part refers to the MiD database
 #Edit only if you know what you're doing!
