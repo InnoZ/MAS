@@ -7,7 +7,7 @@
 
 
 #The id(s) of the survey area(s)
-surveyAreaIds	""
+surveyAreaIds	9180
 
 
 #The coordinate system used (automatically by selecting a survey area? In most cases UTM32N and UTM33N will be used) /dhosse
@@ -16,7 +16,7 @@ coordinateSystem	EPSG:32632
 
 
 #Working directory (where the input and output files should be located) /dhosse
-workingDirectory	""
+workingDirectory	/home/dhosse/
 
 
 #The type of population you want to create. Possible values are "dummy","commuter","complete"
@@ -24,6 +24,15 @@ workingDirectory	""
 #commuter: only commuters with home-work-home trips (that may be sufficient for some use-cases)
 #complete: plan creation with integration of mobility survey data, commuter data etc.
 populationType	complete
+
+#The scale factor for the population and network capacities
+#Any numeric value larger than 0 and less or equal 1
+scaleFactor	1
+
+
+#Defines if buildings should be used as activity locations.
+#Default is false (= use landuse data only)
+useBuildings	false
 
 
 #The public transport part
@@ -35,6 +44,8 @@ createTransit	false
 databaseUser	postgres
 password	postgres
 #The query could be automated by selected the bbsr district type directly from geodata. //dhosse
-midQuery	select * from mid2008.persons_raw where bland=3 and rtypd7=3
+midQuery	select * from households_raw where bland=9 and rtypd7=7
 useHouseholds	true
+#optional: use vehicle data from mid to model non-generic vehicles for households (useHouseholds has to be set to "true")
+useVehicles	false
 onlyWorkingDays	true
