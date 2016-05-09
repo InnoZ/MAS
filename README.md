@@ -33,6 +33,8 @@ To access the Mobility DataHub, you need a user account on the playground. Just 
 
 You can access the playground via SecureShell (ssh). If your computer has a Linux or an OS operating system, you need nothing else than an existing user account, ssh should already be installed. On Windows, you need to install an ssh client program like [PuTTY](http://www.putty.org) or [WinSCP](https://winscp.net). More hints can be found [here](https://www.innoz.de/de/mobility-database-1).
 
+## First steps
+An outdated but maybe still helfull documentray can be found here: http://archive.matsim.org/docs/tutorials/8lessons
 
 
 
