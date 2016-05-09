@@ -31,6 +31,7 @@ If Ubuntu should not find the requested files, you need to add the ppa key with 
 
 After that, run
 - sudo apt-get update
+
 and execute the sudo apt-get install command again.
 
 If you have further questions, have a look at [this page](https://wiki.ubuntuusers.de/Java/Installation/).
