@@ -62,7 +62,7 @@ midQuery	select * from mid2008.households_raw where bland=15 and rtypd7=6
 
 #This part refers to the MiD database
 #Edit only if you know what you're doing! This part could eventually vanish from the configuration... /dhosse
-databaseUser	dhosse
-password	Sgyvelj2ZD
-localPort	3000
+databaseUser	YYYYYYYYYYYYYY
+password	XXXXXXXXXXXXXXX
+localPort	3100
 
