@@ -7,7 +7,8 @@
 
 #The id(s) of the survey area(s)
 #If unknown, look into table gadm.districts
-surveyAreaIds	09180
+surveyAreaIds	15001
+#TODO: vicinity of survey area
 
 
 #The coordinate system used (automatically by selecting a survey area? In most cases UTM32N and UTM33N will be used) /dhosse
@@ -55,13 +56,13 @@ onlyWorkingDays	true
 useVehicles	false
 
 #The query could be automated by selecting the bbsr district type directly from geodata. //dhosse
-midQuery	select * from mid2008.households_raw where bland=9 and rtypd7=6
+midQuery	select * from mid2008.households_raw where bland=15 and rtypd7=6
 
 #############################################################################################################################################
 
 #This part refers to the MiD database
 #Edit only if you know what you're doing! This part could eventually vanish from the configuration... /dhosse
-databaseUser	postgres
-password	postgres
+databaseUser	dhosse
+password	Sgyvelj2ZD
 localPort	3000
 
