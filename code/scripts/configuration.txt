@@ -1,13 +1,13 @@
 #Configuration file for generating a MATSim pre-base scenario
 #The parameters below can be edited according to one's needs.
 #The variables' names however should not be edited in order not to break the scenario generation process.
-
 #I'm trying to make as many variables as possible fixed to keep the configurable part small. /dhosse
 #Especially basic input data (e.g. MiD, admin borders, osm) should be non-configurable.
 
 
 #The id(s) of the survey area(s)
-surveyAreaIds	9180
+#If unknown, look into table gadm.districts
+surveyAreaIds	09180
 
 
 #The coordinate system used (automatically by selecting a survey area? In most cases UTM32N and UTM33N will be used) /dhosse
@@ -25,27 +25,43 @@ workingDirectory	/home/dhosse/
 #complete: plan creation with integration of mobility survey data, commuter data etc.
 populationType	complete
 
-#The scale factor for the population and network capacities
+#The scale factor for the population (number of persons) and network capacities
 #Any numeric value larger than 0 and less or equal 1
 scaleFactor	1
-
-
-#Defines if buildings should be used as activity locations.
-#Default is false (= use landuse data only)
-useBuildings	false
 
 
 #The public transport part
 createTransit	false
 
-#This part refers to the MiD database
-#Edit only if you know what you're doing!
-#It would be enough to keep the last three parameters in here, I'm only having a problem with committing a database password into a public repo (MATSim)... /dhosse
-databaseUser	postgres
-password	postgres
-#The query could be automated by selected the bbsr district type directly from geodata. //dhosse
-midQuery	select * from households_raw where bland=9 and rtypd7=7
+
+#############################################################################################################################################
+#survey specific config options
+
+#Defines if buildings should be used as activity locations.
+#Default is false (= use landuse data only)
+#true means: buildings are used to locate activities inside building blocks
+useBuildings	false
+
+
+#use the household dataset instead of the persons dataset to create the population
 useHouseholds	true
+
+
+#if true, only working days will be used to generate daily plans
+onlyWorkingDays	true
+
+
 #optional: use vehicle data from mid to model non-generic vehicles for households (useHouseholds has to be set to "true")
 useVehicles	false
-onlyWorkingDays	true
+
+#The query could be automated by selecting the bbsr district type directly from geodata. //dhosse
+midQuery	select * from mid2008.households_raw where bland=9 and rtypd7=6
+
+#############################################################################################################################################
+
+#This part refers to the MiD database
+#Edit only if you know what you're doing! This part could eventually vanish from the configuration... /dhosse
+databaseUser	postgres
+password	postgres
+localPort	3000
+
