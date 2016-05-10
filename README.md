@@ -49,9 +49,13 @@ To access the Mobility DataHub, you need a user account on the playground. Just 
 You can access the playground via SecureShell (ssh). If your computer has a Linux or an OS operating system, you need nothing else than an existing user account, ssh should already be installed. On Windows, you need to install an ssh client program like [PuTTY](http://www.putty.org) or [WinSCP](https://winscp.net). More hints can be found [here](https://www.innoz.de/de/mobility-database-1).
 
 ## First steps - Setting up your workspace
+
 ### MATSim
+
 To set up MATSim in your Eclipse workspace, you need to visit hhtp://www.matsim.org and download the latest stable release. After the download has finished, unpack the zip file to a location in your workspace. Eventually, you should see a folder named e.g. matism-0.7.0.
+
 In Eclipse, start the new Java project wizard. Uncheck the default location checkbox and choose the matsim folder you just unpacked. Then, press "Finish".
+
 Now, we need to set up the MATSim libraries in the correct way. For that, right-click on your matsim project and select "Properties". In the properties dialog, choose the "Java build path" tab and then the "Libraries" tab. You should see two libraries. We expand the "Referenced libraries" by clicking on the arrow on the left side and search for the files "matsim.[VERSION].jar" and "matsim.[VERSION]-source.jar". Delete the source file and expand the regular matsim jar.
 Edit the source attachment and choose the previously deleted matsim sources jar. Also, set the native library location to "matsim-[VERSION]/libs". After that, MATSim should be set up correctly.
 
