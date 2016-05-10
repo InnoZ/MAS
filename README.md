@@ -52,7 +52,7 @@ You can access the playground via SecureShell (ssh). If your computer has a Linu
 
 ### MATSim
 
-To set up MATSim in your Eclipse workspace, you need to visit hhtp://www.matsim.org and download the latest stable release. After the download has finished, unpack the zip file to a location in your workspace. Eventually, you should see a folder named e.g. matism-0.7.0.
+To set up MATSim in your Eclipse workspace, you need to visit www.matsim.org and download the latest stable release. After the download has finished, unpack the zip file to a location in your workspace. Eventually, you should see a folder named e.g. matism-0.7.0.
 
 In Eclipse, start the new Java project wizard. Uncheck the default location checkbox and choose the matsim folder you just unpacked. Then, press "Finish".
 
@@ -60,8 +60,4 @@ Now, we need to set up the MATSim libraries in the correct way. For that, right-
 Edit the source attachment and choose the previously deleted matsim sources jar. Also, set the native library location to "matsim-[VERSION]/libs". After that, MATSim should be set up correctly.
 
 ### Additional libraries
-
-
-
-
-
+In order to run the scenario generation code, you need two additional java libraries we provide in the [libraries folder](https://github.com/00Bock/MAS/tree/master/libraries). Just add them to your project's Java build path.
