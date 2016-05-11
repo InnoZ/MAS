@@ -18,14 +18,11 @@ import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.LinkImpl;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordUtils;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.PointFeatureFactory;
 import org.matsim.core.utils.gis.PolylineFeatureFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
@@ -40,29 +37,43 @@ import playground.dhosse.utils.io.AbstractCsvReader;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
+/**
+ * 
+ * Utilities in terms of geometries.
+ * 
+ * @author dhosse
+ *
+ */
 public class GeometryUtils {
-	
+
+	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	private static final Logger log = Logger.getLogger(GeometryUtils.class);
-	
+	private static final String SPACE = " ";
+	private static final String TRIPLE_SPACE = "   ";
 	private static final String TAB = "\t";
 	private static final String END = "END";
+	static enum geometryType{shell,hole};
+	/////////////////////////////////////////////////////////////////////////////////////////
 	
-	static final String BIG_ENDIAN = "00";
-	static final String LITTLE_ENDIAN = "01";
-	static final String WKB_POINT = "00000001";
-	static final String WKB_LINE_STRING = "00000002";
-	static final String WKB_MULTI_LINE_STRING = "00000005";
+	// No instance needed!
+	private GeometryUtils(){};
 	
+	/**
+	 * 
+	 * Creates a {@link com.vividsolutions.jts.geom.Geometry} from a given polygon file.
+	 * 
+	 * @param file Input polygon (*.poly) file
+	 * @return A polygon geometry
+	 */
 	public static Geometry createGeometryFromPolygonFile(String file){
 		
-		Set<LinkedList<Coordinate>> additiveGeometriesSet = new HashSet<>();
-		Set<LinkedList<Coordinate>> subtractiveGeometriesSet = new HashSet<>();
+		//create separate lists for shell and hole geometries
+		Set<LinkedList<Coordinate>> shellGeometriesSet = new HashSet<>();
+		Set<LinkedList<Coordinate>> holeGeometriesSet = new HashSet<>();
 		
 		BufferedReader reader = IOUtils.getBufferedReader(file);
 		
@@ -78,27 +89,30 @@ public class GeometryUtils {
 				
 				if(parts[0].equals(END) || type == null){
 					
+					// Check what type of geometry we currently have
 					if(type == null){
 					
 						if(parts[0].startsWith("!")){
 							
-							type = "sub";
+							type = geometryType.hole.name();
 							
 						} else{
 							
-							type = "add";
+							type = geometryType.shell.name();
 							
 						}
 						
 					} else if(parts[0].equals(END)){
 
-						if(type.equals("add")){
+						// check if the coordinate list is part of a shell or a hole geometry
+						// and add it to the corresponding collection
+						if(type.equals(geometryType.shell.name())){
 
-							additiveGeometriesSet.add(coordinateList);
+							shellGeometriesSet.add(coordinateList);
 							
 						} else {
 							
-							subtractiveGeometriesSet.add(coordinateList);
+							holeGeometriesSet.add(coordinateList);
 							
 						}
 						
@@ -109,21 +123,26 @@ public class GeometryUtils {
 					
 				} else{
 
+					// This part is necessary because some polygon files are not
+					// well-formatted
 					if(parts.length < 2){
 						
-						String[] subParts = parts[0].split("   ")[1].split(" ");
-						coordinateList.addLast(new Coordinate(Double.parseDouble(subParts[0]), Double.parseDouble(subParts[1])));
+						String[] subParts = parts[0].split(TRIPLE_SPACE)[1].split(SPACE);
+						coordinateList.addLast(new Coordinate(Double.parseDouble(subParts[0]),
+								Double.parseDouble(subParts[1])));
 						
 					} else {
 						
-						coordinateList.addLast(new Coordinate(Double.parseDouble(parts[1]), Double.parseDouble(parts[2])));
+						coordinateList.addLast(new Coordinate(Double.parseDouble(parts[1]),
+								Double.parseDouble(parts[2])));
 						
 					}
-					
+					//
 				}
 				
 			}
 			
+			//close the file reader
 			reader.close();
 			
 		} catch (IOException e) {
@@ -132,18 +151,20 @@ public class GeometryUtils {
 			
 		}
 		
-		LinearRing[] holes = new LinearRing[subtractiveGeometriesSet.size()];
+		LinearRing[] holes = new LinearRing[holeGeometriesSet.size()];
 
 		List<Coordinate> shellCoordinatesList = new ArrayList<>();
 		
-		for(List<Coordinate> coordinatesList : additiveGeometriesSet){
+		// Create shell coordinate lists
+		for(List<Coordinate> coordinatesList : shellGeometriesSet){
 			
 			shellCoordinatesList.addAll(coordinatesList);
 			
 		}
 		
 		int index = 0;
-		for(List<Coordinate> hole : subtractiveGeometriesSet){
+		// Create hole coordinate lists
+		for(List<Coordinate> hole : holeGeometriesSet){
 			
 			Coordinate[] coordinates = new Coordinate[hole.size()];
 			holes[index] = new GeometryFactory().createLinearRing(hole.toArray(coordinates));
@@ -153,14 +174,24 @@ public class GeometryUtils {
 		
 		Coordinate[] coordinates = new Coordinate[shellCoordinatesList.size()];
 
+		// Create a polygon from the created shell and hole coordinate lists 
 		Polygon p1 = new GeometryFactory().createPolygon(new GeometryFactory().createLinearRing(shellCoordinatesList.toArray(coordinates)), holes);
 		
 		return new GeometryFactory().createMultiPolygon(new Polygon[]{p1});
 		
 	}
 	
+	/**
+	 * 
+	 * Creates an ESRI shape file from a  MATSim network.
+	 * 
+	 * @param network A MAtsim network.
+	 * @param shapefilePath The output directory for the shape file.
+	 * @param crs The coordinate reference system used for the shape file's features.
+	 */
 	public static void writeNetwork2Shapefile(Network network, String shapefilePath, String crs){
 		
+		// Create a link feature collection and add the most important characteristics
 		Collection<SimpleFeature> linkFeatures = new ArrayList<SimpleFeature>();
 		PolylineFeatureFactory linkFactory = new PolylineFeatureFactory.Builder().
 				setCrs(MGC.getCRS(crs)).
@@ -177,6 +208,8 @@ public class GeometryUtils {
 				addAttribute("origId", String.class).
 				create();
 
+		// Go through all links, create features for each of them and add them to the feature 
+		// collection.
 		for (Link link : network.getLinks().values()) {
 			Coordinate fromNodeCoordinate = new Coordinate(link.getFromNode().getCoord().getX(), link.getFromNode().getCoord().getY());
 			Coordinate toNodeCoordinate = new Coordinate(link.getToNode().getCoord().getX(), link.getToNode().getCoord().getY());
@@ -189,6 +222,8 @@ public class GeometryUtils {
 			linkFeatures.add(ft);
 		}
 		
+		// If the feature collection contains at least one element, write it to the specified
+		// location, else log an error.
 		if(linkFeatures.size() > 0){
 			
 			ShapeFileWriter.writeGeometries(linkFeatures, shapefilePath + "/links.shp");
@@ -196,15 +231,19 @@ public class GeometryUtils {
 		} else {
 			
 			log.error("Link feature collection is empty and thus there is no file to write...");
+			log.info("Continuing anyways...");
 			
 		}
 		
+		// Create a link feature collection
 		Collection<SimpleFeature> nodeFeatures = new ArrayList<>();
 		PointFeatureFactory pointFactory = new PointFeatureFactory.Builder().
 				setCrs(MGC.getCRS(crs)).
 				addAttribute("id", String.class).
 				create();
-		
+
+		// Go through all links, create features for each of them and add them to the feature 
+		// collection.
 		for(Node node : network.getNodes().values()){
 			
 			SimpleFeature feature = pointFactory.createPoint(MGC.coord2Coordinate(node.getCoord()),
@@ -213,6 +252,8 @@ public class GeometryUtils {
 			
 		}
 		
+		// If the feature collection contains at least one element, write it to the specified
+		// location, else log an error.
 		if(nodeFeatures.size() > 0){
 			
 			ShapeFileWriter.writeGeometries(nodeFeatures, shapefilePath + "/nodes.shp");
@@ -220,6 +261,7 @@ public class GeometryUtils {
 		} else {
 			
 			log.error("Point feature collection is empty and thus there is no file to write...");
+			log.info("Continuing anyways...");
 			
 		}
 		
@@ -275,50 +317,14 @@ public class GeometryUtils {
 		
 	}
 	
-	public static String geometryToWKB(Geometry g){
-		
-		return geometryToWKB(g, TransformationFactory.getCoordinateTransformation("EPSG:4326", "EPSG:4326"));
-		
-	}
-	
 	/**
 	 * 
-	 * Converts the given geometry into a well-known binary string.
+	 * Shoots a random {@link Coord} that lies inside the given geometry.
 	 * 
-	 * @param g the geometry
-	 * @return the wkb string representation of the geometry
+	 * @param geometry The target geometry.
+	 * @param random The random object that mutates the coordinate.
+	 * @return A MATSim coord.
 	 */
-	public static String geometryToWKB(Geometry g, CoordinateTransformation transformation){
-		
-		StringBuilder wkb = new StringBuilder(BIG_ENDIAN);
-		
-		if(g instanceof Point){
-			
-			wkb.append(WKB_POINT);
-			
-		} else if(g instanceof LineString){
-			
-			wkb.append(WKB_LINE_STRING);
-			
-		} else if(g instanceof MultiLineString){
-			
-			wkb.append(WKB_MULTI_LINE_STRING);
-			
-		}
-		
-		for(Coordinate coordinate : g.getCoordinates()){
-			
-			Coord c = transformation.transform(MGC.coordinate2Coord(coordinate));
-			
-			wkb.append(Long.toHexString(Double.doubleToRawLongBits(c.getX())));
-			wkb.append(Long.toHexString(Double.doubleToRawLongBits(c.getY())));
-			
-		}
-		
-		return wkb.toString();
-		
-	}
-	
 	public static Coord shoot(Geometry geometry, Random random){
 		
 		Point point = null;
@@ -326,21 +332,46 @@ public class GeometryUtils {
 		
 		do{
 			
-			x = geometry.getEnvelopeInternal().getMinX() + random.nextDouble() * (geometry.getEnvelopeInternal().getMaxX() - geometry.getEnvelopeInternal().getMinX());
-	  	    y = geometry.getEnvelopeInternal().getMinY() + random.nextDouble() * (geometry.getEnvelopeInternal().getMaxY() - geometry.getEnvelopeInternal().getMinY());
+			// Shoot random x and y components and create a point of them
+			x = geometry.getEnvelopeInternal().getMinX() + random.nextDouble() *
+					(geometry.getEnvelopeInternal().getMaxX() -
+							geometry.getEnvelopeInternal().getMinX());
+			
+	  	    y = geometry.getEnvelopeInternal().getMinY() + random.nextDouble() *
+	  	    		(geometry.getEnvelopeInternal().getMaxY() -
+	  	    				geometry.getEnvelopeInternal().getMinY());
+	  	    
 	  	    point = MGC.xy2Point(x, y);
 			
+	  	    //if the point lies within the geometry, break out of the loop
 		} while(!geometry.contains(point));
 		
 		return MGC.point2Coord(point);
 		
 	}
 	
+	/**
+	 *
+	 * Shoots a random {@link Coord} that lies inside the given geometry. Also, the last known
+	 * geometry of e.g. a travel chain must be given as well as the maximum distance between
+	 * this last and the next coordinate. 
+	 * 
+	 * @param geometry The target geometry.
+	 * @param fromCoord The last known coord of a travel chain.
+	 * @param distance The distance between {@code fromCoord} and the next coordinate.
+	 * @param random The random object that mutates the coordinate.
+	 * @return A Matsim coord.
+	 */
 	public static Coord shoot(Geometry geometry, Coord fromCoord, double distance, Random random){
 		
 		Coord coord = null;
+		
 		do{
+			
 			coord = GeometryUtils.shoot(geometry, random);
+			
+			//if the distance between the coords is equal or smaller than the given distance,
+			//break out of the loop.
 		}while(CoordUtils.calcDistance(coord, fromCoord) > distance);
 		
 		return coord;
