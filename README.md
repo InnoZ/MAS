@@ -60,4 +60,4 @@ Now, we need to set up the MATSim libraries in the correct way. For that, right-
 Edit the source attachment and choose the previously deleted matsim sources jar. Also, set the native library location to "matsim-[VERSION]/libs". After that, MATSim should be set up correctly.
 
 ### Additional libraries
-In order to run the scenario generation code, you need two additional java libraries we provide in the [libraries folder](https://github.com/00Bock/MAS/tree/master/libraries). Just add them to your project's Java build path.
+In order to run the scenario generation code, you need additional java libraries we provide in the [libraries folder](https://github.com/00Bock/MAS/tree/master/libraries). Just add them to your project's Java build path.
