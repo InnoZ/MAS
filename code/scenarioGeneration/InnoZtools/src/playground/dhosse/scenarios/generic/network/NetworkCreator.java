@@ -11,7 +11,7 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.io.OsmNetworkReader;
 
 import playground.dhosse.utils.GeometryUtils;
-
+@Deprecated
 public class NetworkCreator {
 
 	/**

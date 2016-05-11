@@ -3,7 +3,6 @@ input/**/*
 output/**/*
 #ignore local eclipse preferences
 .project
-.class
 code/scenarioGeneration/InnoZtools/bin/*
 # ignore temp files:
 *~
