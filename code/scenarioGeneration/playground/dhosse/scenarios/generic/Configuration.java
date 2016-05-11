@@ -31,6 +31,7 @@ public class Configuration {
 	private static final String USE_HOUSEHOLDS = "useHouseholds";
 	private static final String USE_CARS = "useCars";
 	private static final String SQL_QUERY_MID = "midQuery"; //TODO find a way to remove this!
+	private static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
 	
 	private static final String DATABASE_USER = "databaseUser";
 	private static final String DATABASE_PASSWD = "password";
@@ -51,6 +52,8 @@ public class Configuration {
 	
 	private int localPort = 0;
 	private final int remotePort = 5432;
+	
+	private int numberOfHouseholds = 0;
 	
 	private String databaseUser;
 	private String userPassword;
@@ -127,6 +130,10 @@ public class Configuration {
 					} else if(LOCAL_PORT.equals(lineParts[0])){
 						
 						this.localPort = Integer.parseInt(lineParts[1]);
+						
+					} else if(NUMBER_OF_HH.equals(lineParts[0])){
+						
+						this.numberOfHouseholds = Integer.parseInt(lineParts[1]);
 						
 					}
 					
@@ -222,6 +229,10 @@ public class Configuration {
 	
 	public int getRemotePort(){
 		return this.remotePort;
+	}
+	
+	public int getNumberOfHouseholds(){
+		return this.numberOfHouseholds;
 	}
 	
 	public void dumpSettings(){

@@ -21,7 +21,7 @@ import playground.dhosse.scenarios.generic.population.io.mid.MiDParser;
 
 public class Distribution {
 
-	private CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, "EPSG:32632");
+	private CoordinateTransformation transformation;
 	
 	//activityType, mode, matrix
 	private Map<String, Map<String,Matrix>> transitionMatrices = new HashMap<String, Map<String, Matrix>>();
@@ -30,12 +30,13 @@ public class Distribution {
 	private LeastCostPathCalculator lcpc;
 	private final Network network;
 	
-	public Distribution(final Network network, MiDParser parser){
+	public Distribution(final Network network, MiDParser parser, final CoordinateTransformation transformation){
 
 		this.network = network;
 		TravelDisutility tdis = new FreespeedTravelTimeAndDisutility(-6, 6, 0);
 		TravelTime ttime = new FreespeedTravelTimeAndDisutility(-6, 6, 0);
 		this.lcpc = new Dijkstra(network, tdis, ttime);
+		this.transformation = transformation;
 		this.create(parser);
 		
 	}

@@ -12,6 +12,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.geotools.referencing.CRS;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -33,7 +34,11 @@ import org.matsim.households.HouseholdImpl;
 import org.matsim.households.Income.IncomePeriod;
 import org.matsim.households.IncomeImpl;
 import org.matsim.utils.objectattributes.ObjectAttributes;
+import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.matsim.vehicles.Vehicle;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.NoSuchAuthorityCodeException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import playground.dhosse.scenarios.generic.Configuration;
 import playground.dhosse.scenarios.generic.population.io.mid.MiDActivity;
@@ -81,13 +86,19 @@ public class PopulationCreator {
 
 	private static CoordinateTransformation transformation;
 	
-	public static void run(Configuration configuration, Scenario scenario){
+	public static void run(Configuration configuration, Scenario scenario) throws NoSuchAuthorityCodeException, FactoryException{
 		
 		log.info("Creating population for MATSim scenario...");
 		log.info("Selected type of population: " + configuration.getPopulationType().name());
+
+		CoordinateReferenceSystem from = null;
+		CoordinateReferenceSystem to = null;
+
+		from = CRS.decode("EPSG:4326", true);
+		to = CRS.decode(configuration.getCrs(), true);
 		
 		transformation = TransformationFactory.getCoordinateTransformation(
-				TransformationFactory.WGS84, configuration.getCrs());
+				from.toString(), to.toString());
 		
 		switch(configuration.getPopulationType()){
 		
@@ -120,9 +131,9 @@ public class PopulationCreator {
 					Plan plan = scenario.getPopulation().getFactory().createPlan();
 					
 					Coord homeCoord = transformation.transform(GeometryUtils.shoot(fromEntry.getValue()
-							.getGeometry()));
+							.getGeometry(),random));
 					Coord workCoord = transformation.transform(GeometryUtils.shoot(toEntry.getValue()
-							.getGeometry()));
+							.getGeometry(),random));
 					
 					Activity home = scenario.getPopulation().getFactory().createActivityFromCoord("home",
 							homeCoord);
@@ -201,7 +212,7 @@ public class PopulationCreator {
 		MiDParser parser = new MiDParser();
 		parser.run(configuration);
 		
-		distribution = new Distribution(scenario.getNetwork(), parser);
+		distribution = new Distribution(scenario.getNetwork(), parser, transformation);
 		
 		if(configuration.isUsingHouseholds()){
 		
@@ -221,12 +232,12 @@ public class PopulationCreator {
 		ObjectAttributes personAttributes = new ObjectAttributes();
 		scenario.addScenarioElement(PersonUtils.PERSON_ATTRIBUTES, personAttributes);
 		
-		//TODO distribution of household sizes...
-		//47, 33, 10, 7, 3 (GP)
+		//TODO number of households...
 		//nhh hb 308705
 		//nhh gap 36531
 		//berlin: 1966000
-		//dessau-rossla: 45106
+		//dessau-rosslau: 45106
+		//os: 84218
 		
 		int[] hhDistribution = new int[8];
 
@@ -235,7 +246,7 @@ public class PopulationCreator {
 		Collections.sort(households, householdComparator);
 		
 		//TODO number of households in db table...
-		for(int i = 0; i < 45106; i++){
+		for(int i = 0; i < configuration.getNumberOfHouseholds(); i++){
 			
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 			AdministrativeUnit au = null;
@@ -292,7 +303,7 @@ public class PopulationCreator {
 					
 					accumulatedWeight += g.getArea();
 					if(p <= accumulatedWeight){
-						homeLocation = transformation.transform(GeometryUtils.shoot(g));
+						homeLocation = transformation.transform(GeometryUtils.shoot(g, random));
 						homeCell = au;
 						break;
 					}
@@ -301,17 +312,13 @@ public class PopulationCreator {
 				
 			} else {
 				
-				homeLocation = transformation.transform(GeometryUtils.shoot(au.getGeometry()));
+				homeLocation = transformation.transform(GeometryUtils.shoot(au.getGeometry(), random));
 				homeCell = au;
 				
 			}
 
 			//create as many persons as were reported and add them to the household
 			for(int j = 0; j < nPersons; j++){
-				
-//					if(i == 67){
-//						System.out.println();
-//					}
 				
 				String personId = template.getMemberIds().get(j);
 				MiDPerson templatePerson = parser.getPersons().get(personId);
@@ -342,9 +349,7 @@ public class PopulationCreator {
 			
 		}
 		
-		System.out.println(hhDistribution[0] + "\t" + hhDistribution[1] + "\t" + hhDistribution[2] + "\t" + hhDistribution[3] + "\t" + hhDistribution[4]);
-		
-		System.out.println("closest vs no closest found: " + cnt + "\t" + cntNoClosest);
+		new ObjectAttributesXmlWriter(personAttributes).writeFile("/home/dhosse/dessau/personAtts.xml.gz");
 		
 	}
 	
@@ -400,6 +405,10 @@ public class PopulationCreator {
 		mainActLocation = null;
 		lastLeg = null;
 		lastActCoord = null;
+
+//		if(population.getPersons().size() > 13){
+//			System.out.println();
+//		}
 		
 		Person person = population.getFactory().createPerson(Id.createPersonId(homeCell.getId() + "_" + personTemplate.getId() + "_" + i));
 		Plan plan = population.getFactory().createPlan();
@@ -446,9 +455,8 @@ public class PopulationCreator {
 				
 			}
 			
-			//TODO: locate home and main activity
 			homeLocation = homeCoord != null ? homeCoord :
-				transformation.transform(GeometryUtils.shoot(homeCell.getGeometry()));
+				transformation.transform(GeometryUtils.shoot(homeCell.getGeometry(),random));
 			lastActCoord = homeLocation;
 
 			if(templatePlan.getPlanElements().size() > 1){
@@ -720,7 +728,7 @@ public class PopulationCreator {
 		double distance = 0.;
 		String mode = null;
 		if(lastLeg != null){
-			distance = lastLeg.getTravelDistance();//Modes.getDistanceTravelledForModeAndTravelTime(lastLeg.getMainMode(), lastLeg.getEndTime() - lastLeg.getStartTime());//
+			distance = lastLeg.getTravelDistance();
 			mode = lastLeg.getMainMode();
 		}
 		if(lastActCoord == null){
@@ -739,7 +747,7 @@ public class PopulationCreator {
 			coord = homeLocation;
 			au = homeCell;
 			
-		} else if(act.getId() == templatePlan.getMainActId()){ // || act.getActType().equals("work") || act.getActType().equals("education")
+		} else if(act.getId() == templatePlan.getMainActId()){
 			
 			au = mainActCell;
 			
@@ -766,7 +774,6 @@ public class PopulationCreator {
 			
 			double a = 0;
 			double b = 0;
-			double z = c;
 			
 			int cnt = 0;
 			do{
@@ -837,7 +844,7 @@ public class PopulationCreator {
 
 				int index = random.nextInt(closest.size());
 				Geometry area = closest.get(index);
-				return transformation.transform(GeometryUtils.shoot(area));
+				return transformation.transform(GeometryUtils.shoot(area,random));
 				
 			}
 			
@@ -853,7 +860,7 @@ public class PopulationCreator {
 				
 				int index = random.nextInt(closest.size());
 				Geometry area = closest.get(index);
-				return transformation.transform(GeometryUtils.shoot(area));
+				return transformation.transform(GeometryUtils.shoot(area,random));
 				
 			} else {
 				
@@ -861,7 +868,7 @@ public class PopulationCreator {
 				
 				Geometry area = Geoinformation.getQuadTreeForActType(actType).getClosest(lastActCoord.getX(), lastActCoord.getY());
 				
-				return transformation.transform(GeometryUtils.shoot(area));
+				return transformation.transform(GeometryUtils.shoot(area,random));
 				
 			}
 		
@@ -874,7 +881,7 @@ public class PopulationCreator {
 				
 				int index = random.nextInt(closest.size());
 				Geometry area = closest.get(index);
-				return transformation.transform(GeometryUtils.shoot(area));
+				return transformation.transform(GeometryUtils.shoot(area,random));
 				
 			} else {
 				
@@ -882,7 +889,7 @@ public class PopulationCreator {
 				
 				Geometry area = Geoinformation.getQuadTreeForActType(actType).getClosest(lastActCoord.getX(), lastActCoord.getY());
 				
-				return transformation.transform(GeometryUtils.shoot(area));
+				return transformation.transform(GeometryUtils.shoot(area,random));
 				
 			}
 			

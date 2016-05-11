@@ -114,7 +114,7 @@ public class NetworkCreatorFromPsql {
 	
 	private Map<String, HighwayDefaults> highwayDefaults = new HashMap<String, HighwayDefaults>();
 	
-	public void create(){
+	public void create() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, ParseException{
 		
 		if(this.highwayDefaults.size() < 1){
 			
@@ -136,7 +136,7 @@ public class NetworkCreatorFromPsql {
 		WKTReader wktReader = new WKTReader();
 		Set<WayEntry> wayEntries = new HashSet<>();
 		
-		try {
+//		try {
 			
 			log.info("Connection to mobility database...");
 		
@@ -190,12 +190,12 @@ public class NetworkCreatorFromPsql {
 				
 			}
 			
-		} catch (InstantiationException | IllegalAccessException
-				| ClassNotFoundException | SQLException | ParseException e) {
-
-			e.printStackTrace();
-			
-		}
+//		} catch (InstantiationException | IllegalAccessException
+//				| ClassNotFoundException | SQLException | ParseException e) {
+//
+//			e.printStackTrace();
+//			
+//		}
 		
 	}
 	
@@ -270,6 +270,8 @@ public class NetworkCreatorFromPsql {
 		log.info("MATSim links: " + scenario.getNetwork().getLinks().size());
 		
 	}
+	
+	private Map<Coord,Node> coords2Nodes = new HashMap<Coord, Node>();
 	
 	private void createLink(WayEntry entry, double length, Coordinate from, Coordinate to){
 		
@@ -385,13 +387,22 @@ public class NetworkCreatorFromPsql {
 			}
 
 			Coord fromCoord = this.transform.transform(MGC.coordinate2Coord(from));
-			Node closestFromNode = ((NetworkImpl)scenario.getNetwork()).getNearestNode(fromCoord);
-			Node fromNode = setNode(fromCoord, closestFromNode);
+			Node fromNode = null;
+			if(!coords2Nodes.containsKey(fromCoord)){
+				fromNode = setNode(fromCoord);
+				coords2Nodes.put(fromCoord, fromNode);
+			} else {
+				fromNode = coords2Nodes.get(fromCoord);
+			}
 			
 			Coord toCoord = this.transform.transform(MGC.coordinate2Coord(to));
-			Node closestToNode = ((NetworkImpl)scenario.getNetwork()).getNearestNode(toCoord);
-			
-			Node toNode = setNode(toCoord, closestToNode);
+			Node toNode = null;
+			if(!coords2Nodes.containsKey(toCoord)){
+				toNode = setNode(toCoord);
+				coords2Nodes.put(toCoord, toNode);
+			} else {
+				toNode = coords2Nodes.get(toCoord);
+			}
 			
 			String origId = entry.osmId;
 			
@@ -438,185 +449,14 @@ public class NetworkCreatorFromPsql {
 		}
 		
 	}
-
-	//basically a copy from OsmNetworkReader
-//	private void createLink(WayEntry entry, double length){
-//	
-//		HighwayDefaults defaults = this.highwayDefaults.get(entry.highwayTag);
-//		
-//		//if there are defaults for the highway type of the current way, we proceed
-//		//else the way is simply skipped
-//		if(defaults != null){
-//			
-//			//set all values to default
-//			double freespeed = defaults.freespeed;
-//			double freespeedFactor = defaults.freespeedFactor;
-//			double lanesPerDirection = defaults.lanesPerDirection;
-//			double laneCapacity = defaults.laneCapacity;
-//			boolean oneway = defaults.oneway;
-//			boolean onewayReverse = false;
-//
-//			//freespeed tag
-//			String freespeedTag = entry.maxspeedTag;
-//			if(freespeedTag != null){
-//				
-//				try{
-//					
-//					freespeed = Double.parseDouble(freespeedTag) / 3.6;
-//					
-//				} catch(NumberFormatException e){
-//					
-//					e.printStackTrace();
-//					
-//				}
-//				
-//			}
-//			
-//			if("roundabout".equals(entry.junctionTag)){
-//				
-//				oneway = true;
-//				
-//			}
-//			
-//			//oneway tag
-//			if(entry.onewayTag != null){
-//
-//				if(entry.onewayTag.equals("yes") || entry.onewayTag.equals("true") || entry.onewayTag.equals("1")){
-//					
-//					oneway = true;
-//					
-//				} else if(entry.onewayTag.equals("no")){
-//					
-//					oneway = false;
-//					
-//				} else if(entry.onewayTag.equals("-1")){
-//					
-//					onewayReverse = true;
-//					oneway = false;
-//					
-//				}
-//				
-//			}
-//			
-//			if(entry.highwayTag.equalsIgnoreCase("trunk") || entry.highwayTag.equalsIgnoreCase("primary") ||
-//					entry.highwayTag.equalsIgnoreCase("secondary")){
-//	            
-//				if((oneway || onewayReverse) && lanesPerDirection == 1.0){
-//	            
-//					lanesPerDirection = 2.0;
-//					
-//	            }
-//				
-//			}
-//			
-//			String lanesTag = entry.lanesTag;
-//			if(lanesTag != null){
-//				
-//				try {
-//					double totalNofLanes = Double.parseDouble(lanesTag);
-//					if (totalNofLanes > 0) {
-//						lanesPerDirection = totalNofLanes;
-//
-//			            if (!oneway && !onewayReverse) {
-//			            	
-//			                lanesPerDirection /= 2.;
-//			                
-//			            }
-//					}
-//				
-//				} catch (Exception e) {
-//					
-//					e.printStackTrace();
-//				
-//				}
-//				
-//			}
-//			
-//			double capacity = lanesPerDirection * laneCapacity;
-//			
-//			if(this.scaleMaxSpeed){
-//				
-//				freespeed *= freespeedFactor;
-//				
-//			}
-//
-//			Coord from = this.transform.transform(MGC.coordinate2Coord(entry.geometry.getCoordinates()[0]));
-//			Node closestFromNode = ((NetworkImpl)scenario.getNetwork()).getNearestNode(from);
-//			Node fromNode = setNode(from, closestFromNode);
-//			
-//			Coord to = this.transform.transform(MGC.coordinate2Coord(entry.geometry.getCoordinates()[entry.geometry.getCoordinates().length - 1]));
-//			Node closestToNode = ((NetworkImpl)scenario.getNetwork()).getNearestNode(to);
-//			
-//			Node toNode = setNode(to, closestToNode);
-//			
-//			String origId = entry.osmId;
-//			
-//			if(!onewayReverse){
-//				
-//				Link link = scenario.getNetwork().getFactory().createLink(Id.createLinkId(linkCounter), fromNode, toNode);
-//				link.setCapacity(capacity);
-//				link.setFreespeed(freespeed);
-//				link.setLength(length);
-//				link.setNumberOfLanes(lanesPerDirection);
-//				
-//				if(link instanceof LinkImpl){
-//					
-//					((LinkImpl)link).setOrigId(origId);
-//					((LinkImpl)link).setType(entry.highwayTag);
-//					
-//				}
-//				
-//				scenario.getNetwork().addLink(link);
-//				linkCounter++;
-//				
-//			}
-//			
-//			if(!oneway){
-//				
-//				Link link = scenario.getNetwork().getFactory().createLink(Id.createLinkId(linkCounter), toNode, fromNode);
-//				link.setCapacity(capacity);
-//				link.setFreespeed(freespeed);
-//				link.setLength(length);
-//				link.setNumberOfLanes(lanesPerDirection);
-//				
-//				if(link instanceof LinkImpl){
-//					
-//					((LinkImpl)link).setOrigId(origId);
-//					((LinkImpl)link).setType(entry.highwayTag);
-//					
-//				}
-//				
-//				scenario.getNetwork().addLink(link);
-//				linkCounter++;
-//				
-//			}
-//			
-//		}
-//		
-//	}
 	
-	private Node setNode(Coord coord, Node closestNode){
+	private Node setNode(Coord coord){
 		
 		Node node = null;
 		
-		if(closestNode != null){
-		
-			if(CoordUtils.calcDistance(coord, closestNode.getCoord()) == 0){
-				
-				node = closestNode;
-				
-				
-			} else {
-				node = scenario.getNetwork().getFactory().createNode(Id.createNodeId(nodeCounter), coord);
-				scenario.getNetwork().addNode(node);
-				nodeCounter++;
-			}
-			
-		} else {
-			node = scenario.getNetwork().getFactory().createNode(Id.createNodeId(nodeCounter), coord);
-			scenario.getNetwork().addNode(node);
-			nodeCounter++;
-		}
+		node = scenario.getNetwork().getFactory().createNode(Id.createNodeId(nodeCounter), coord);
+		scenario.getNetwork().addNode(node);
+		nodeCounter++;
 		
 		return node;
 		

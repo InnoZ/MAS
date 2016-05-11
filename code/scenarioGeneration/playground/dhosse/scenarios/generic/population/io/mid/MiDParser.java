@@ -15,30 +15,15 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.population.PopulationWriter;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.CollectionUtils;
-import org.matsim.core.utils.geometry.CoordImpl;
 import org.matsim.core.utils.misc.Time;
-import org.matsim.households.Household;
-import org.matsim.households.HouseholdImpl;
-import org.matsim.households.HouseholdsWriterV10;
-import org.matsim.households.Income.IncomePeriod;
 
 import playground.dhosse.scenarios.generic.Configuration;
 import playground.dhosse.scenarios.generic.population.HashGenerator;
 import playground.dhosse.scenarios.generic.population.io.mid.MiDParser.Subtour.subtourType;
 import playground.dhosse.scenarios.generic.utils.ActivityTypes;
 import playground.dhosse.scenarios.generic.utils.Hydrograph;
-import playground.dhosse.utils.PersonUtils;
 import playground.dhosse.utils.RecursiveStatsContainer;
 
 /**
@@ -68,7 +53,6 @@ public class MiDParser {
 	
 	public Map<String, Hydrograph> activityTypeHydrographs = new HashMap<>();
 	
-	@SuppressWarnings("deprecation")
 	public void run(Configuration configuration){
 		
 		try {
@@ -109,93 +93,6 @@ public class MiDParser {
 		} catch (SQLException | InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 			
 			e.printStackTrace();
-			
-		}
-		
-		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		
-		for(MiDPerson person : this.getPersons().values()){
-			
-			Person p = scenario.getPopulation().getFactory().createPerson(Id.createPersonId(person.getId()));
-			PersonUtils.setAge(p, person.getAge());
-			PersonUtils.setCarAvail(p, Boolean.toString(person.getCarAvailable()));
-			PersonUtils.setEmployed(p, person.isEmployed());
-			PersonUtils.setLicence(p, Boolean.toString(person.hasLicense()));
-			PersonUtils.setSex(p, person.getSex());
-			
-			for(MiDPlan plan : person.getPlans()){
-				
-				Plan pl = scenario.getPopulation().getFactory().createPlan();
-				double weight = 0.;
-				
-				for(MiDPlanElement element : plan.getPlanElements()){
-					
-					if(element instanceof MiDActivity){
-						
-						MiDActivity act = (MiDActivity)element;
-						
-						Activity activity = scenario.getPopulation().getFactory().createActivityFromCoord(act.getActType(),
-								new CoordImpl(0.0d, 0.0d));
-						activity.setStartTime(act.getStartTime());
-						activity.setEndTime(act.getEndTime());
-						pl.addActivity(activity);
-						
-					} else{
-						
-						MiDWay way = (MiDWay)element;
-						
-						Leg leg = scenario.getPopulation().getFactory().createLeg(way.getMainMode());
-						leg.setDepartureTime(way.getStartTime());
-						leg.setTravelTime(way.getEndTime() - way.getStartTime());
-						weight += way.getWeight();
-						pl.addLeg(leg);
-						
-					}
-					
-				}
-				
-				pl.getCustomAttributes().put("weight", weight);
-				
-				p.addPlan(pl);
-				
-			}
-			
-			if(!p.getPlans().isEmpty()){
-				scenario.getPopulation().addPerson(p);
-			}
-			
-		}
-		
-		new PopulationWriter(scenario.getPopulation()).write("/home/dhosse/plansFromMiD.xml.gz");
-		
-		if(configuration.isUsingHouseholds()){
-
-			for(MiDHousehold household : this.getHouseholds().values()){
-			
-				Household hh = scenario.getHouseholds().getFactory().createHousehold(Id.create(household.getId(), Household.class));
-				
-				for(String pid : household.getMemberIds()){
-					
-					Id<Person> personId = Id.createPersonId(pid);
-					
-					if(scenario.getPopulation().getPersons().containsKey(personId)){
-					
-						((HouseholdImpl)hh).getMemberIds().add(personId);
-						
-					}
-					
-				}
-				
-				hh.setIncome(scenario.getHouseholds().getFactory().createIncome(household.getIncome(),
-						IncomePeriod.month));
-				
-				if(!hh.getMemberIds().isEmpty()){
-					scenario.getHouseholds().getHouseholds().put(hh.getId(), hh);
-				}
-				
-			}
-			
-			new HouseholdsWriterV10(scenario.getHouseholds()).writeFile("/home/dhosse/hhFromMiD.xml.gz");
 			
 		}
 		
@@ -434,10 +331,6 @@ public class MiDParser {
 				way.setTravelDistance(travelDistance);
 				
 				plan.incrementWeight(weight);
-				
-//				if(person.getId().equals("2298521")){
-//					System.out.println();
-//				}
 				
 				if(plan.getPlanElements().size() < 1){
 					
@@ -681,17 +574,11 @@ public class MiDParser {
 				plan.setMainActId(mainAct.getId());
 				plan.setMainActIndex(plan.getPlanElements().indexOf(mainAct));
 				
-				System.out.println("\n#####################################################################");
-				System.out.println(person.getId());
-				System.out.println(plan.getMainActIndex());
-				
 				for(MiDPlanElement pe : plan.getPlanElements()){
 					
 					if(pe instanceof MiDActivity){
 						
 						MiDActivity act = (MiDActivity)pe;
-						
-						System.out.print(act.getActType() + "_");
 						
 						if(act.getActType().equals(plan.getMainActType()) && act.getId() != plan.getMainActId()){
 							
@@ -708,8 +595,6 @@ public class MiDParser {
 				}
 				
 				List<Subtour> subtours = createSubtours(plan);
-				
-				System.out.println("\n");
 				
 				Set<Integer> breakpoints = new HashSet<>();
 				
@@ -758,19 +643,6 @@ public class MiDParser {
 					}
 					
 				}
-				
-//				String fromActType = ((MiDActivity)plan.getPlanElements().get(subtour.getStartIndex())).getActType();
-//				String toActType = ((MiDActivity)plan.getPlanElements().get(subtour.getStartIndex())).getActType();
-//				
-//				if(fromActType.equals(toActType)){
-//					subtour.type = subtourType.inter;
-//				} else if(fromActType.equals(ActivityTypes.HOME) && toActType.equals(plan.getMainActType())){
-//					subtour.type = subtourType.back;
-//				} else {
-//					subtour.type = subtourType.forth;
-//				}
-//				
-//				System.out.println(subtour.toString() + "\t" + subtour.type + "\t" + fromActType + "-" + toActType);
 				
 			}
 			

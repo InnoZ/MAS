@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -318,15 +319,15 @@ public class GeometryUtils {
 		
 	}
 	
-	public static Coord shoot(Geometry geometry){
+	public static Coord shoot(Geometry geometry, Random random){
 		
 		Point point = null;
 		double x, y;
 		
 		do{
 			
-			x = geometry.getEnvelopeInternal().getMinX() + MatsimRandom.getLocalInstance().nextDouble() * (geometry.getEnvelopeInternal().getMaxX() - geometry.getEnvelopeInternal().getMinX());
-	  	    y = geometry.getEnvelopeInternal().getMinY() + MatsimRandom.getLocalInstance().nextDouble() * (geometry.getEnvelopeInternal().getMaxY() - geometry.getEnvelopeInternal().getMinY());
+			x = geometry.getEnvelopeInternal().getMinX() + random.nextDouble() * (geometry.getEnvelopeInternal().getMaxX() - geometry.getEnvelopeInternal().getMinX());
+	  	    y = geometry.getEnvelopeInternal().getMinY() + random.nextDouble() * (geometry.getEnvelopeInternal().getMaxY() - geometry.getEnvelopeInternal().getMinY());
 	  	    point = MGC.xy2Point(x, y);
 			
 		} while(!geometry.contains(point));
@@ -335,11 +336,11 @@ public class GeometryUtils {
 		
 	}
 	
-	public static Coord shoot(Geometry geometry, Coord fromCoord, double distance){
+	public static Coord shoot(Geometry geometry, Coord fromCoord, double distance, Random random){
 		
 		Coord coord = null;
 		do{
-			coord = GeometryUtils.shoot(geometry);
+			coord = GeometryUtils.shoot(geometry, random);
 		}while(CoordUtils.calcDistance(coord, fromCoord) > distance);
 		
 		return coord;

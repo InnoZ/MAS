@@ -2,6 +2,7 @@ package playground.dhosse.scenarios.generic;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,6 +11,9 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.opengis.referencing.FactoryException;
+
+import com.vividsolutions.jts.io.ParseException;
 
 import playground.dhosse.scenarios.generic.network.NetworkCreatorFromPsql;
 import playground.dhosse.scenarios.generic.population.PopulationCreator;
@@ -51,7 +55,13 @@ public class ScenarioBuilder {
 		log.info("########## network generation");
 		
 		NetworkCreatorFromPsql networkCreator = new NetworkCreatorFromPsql(scenario, configuration);
-		networkCreator.create();
+		try {
+			networkCreator.create();
+		} catch (InstantiationException | IllegalAccessException
+				| ClassNotFoundException | SQLException | ParseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		//TODO: change network creator to use osm db
 //		NetworkCreator.main(new String[]{
 //				configuration.getCrs(),
@@ -88,7 +98,11 @@ public class ScenarioBuilder {
 		
 		if(configuration.getPopulationType() != null){
 			
-			PopulationCreator.run(configuration, scenario);
+			try {
+				PopulationCreator.run(configuration, scenario);
+			} catch (FactoryException e) {
+				e.printStackTrace();
+			}
 			
 		} else {
 			

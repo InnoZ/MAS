@@ -77,7 +77,7 @@ class OsmDbConnection {
 		int i = 0;
 		
 		for(String id : ids){
-			//TODO remove leading '0' for final version
+
 			if(i < ids.size() - 1){
 				
 				builder.append(" " + MUN_KEY + " like '" + id + "%' OR");
@@ -97,7 +97,7 @@ class OsmDbConnection {
 
 //		ResultSet set = statement.executeQuery("select vkz_nr, st_astext(geom) from gadm.berlin_vz;");
 		
-		MathTransform t = CRS.findMathTransform(CRS.decode("EPSG:4326"), CRS.decode(configuration.getCrs()));
+		MathTransform t = CRS.findMathTransform(CRS.decode("EPSG:4326",true), CRS.decode(configuration.getCrs(),true));
 		
 		while(set.next()){
 			
@@ -557,12 +557,13 @@ class OsmDbConnection {
 					if(au.getGeometry().contains(g) || au.getGeometry().touches(g) || au.getGeometry().intersects(g)){
 						
 						au.addLanduseGeometry(landuse, g);
-						if(!landuse.equals(ActivityTypes.LEISURE)&&!landuse.equals("residential")){
-							au.addLanduseGeometry(ActivityTypes.WORK, g);
-						}
-						if(!landuse.equals("residential")){
-							au.addLanduseGeometry(ActivityTypes.OTHER, g);
-						}
+//						if(!landuse.equals(ActivityTypes.LEISURE)&&!landuse.equals("residential")){
+//							au.addLanduseGeometry(ActivityTypes.WORK, g);
+//						}
+//						if(!landuse.equals(ActivityTypes.LEISURE)&&!landuse.equals("residential")&&
+//								!landuse.equals(ActivityTypes.SHOPPING)){
+//							au.addLanduseGeometry(ActivityTypes.OTHER, g);
+//						}
 						
 						if(!Geoinformation.actType2QT.containsKey(landuse)){
 							
@@ -570,26 +571,26 @@ class OsmDbConnection {
 									boundingBox.getCoordinates()[0].y, boundingBox.getCoordinates()[2].x, boundingBox.getCoordinates()[2].y));
 							
 						} 
-						if(!Geoinformation.actType2QT.containsKey(ActivityTypes.WORK)){
-							Geoinformation.actType2QT.put(ActivityTypes.WORK, new QuadTree<>(boundingBox.getCoordinates()[0].x,
-									boundingBox.getCoordinates()[0].y, boundingBox.getCoordinates()[2].x, boundingBox.getCoordinates()[2].y));
-						}
-						if(!Geoinformation.actType2QT.containsKey(ActivityTypes.OTHER)){
-							Geoinformation.actType2QT.put(ActivityTypes.OTHER, new QuadTree<>(boundingBox.getCoordinates()[0].x,
-									boundingBox.getCoordinates()[0].y, boundingBox.getCoordinates()[2].x, boundingBox.getCoordinates()[2].y));
-						}
+//						if(!Geoinformation.actType2QT.containsKey(ActivityTypes.WORK)){
+//							Geoinformation.actType2QT.put(ActivityTypes.WORK, new QuadTree<>(boundingBox.getCoordinates()[0].x,
+//									boundingBox.getCoordinates()[0].y, boundingBox.getCoordinates()[2].x, boundingBox.getCoordinates()[2].y));
+//						}
+//						if(!Geoinformation.actType2QT.containsKey(ActivityTypes.OTHER)){
+//							Geoinformation.actType2QT.put(ActivityTypes.OTHER, new QuadTree<>(boundingBox.getCoordinates()[0].x,
+//									boundingBox.getCoordinates()[0].y, boundingBox.getCoordinates()[2].x, boundingBox.getCoordinates()[2].y));
+//						}
 						
 						Coord c = ct.transform(MGC.point2Coord(g.getCentroid()));
 						
 						if(this.boundingBox.contains(MGC.coord2Point(c))){
 							
 							Geoinformation.actType2QT.get(landuse).put(c.getX(), c.getY(), g);
-							if(!landuse.equals("residential")){
-								Geoinformation.actType2QT.get(ActivityTypes.OTHER).put(c.getX(), c.getY(), g);
-							}
-							if(!landuse.equals(ActivityTypes.LEISURE)&&!landuse.equals("residential")){
-								Geoinformation.actType2QT.get(ActivityTypes.WORK).put(c.getX(), c.getY(), g);
-							}
+//							if(!landuse.equals(ActivityTypes.LEISURE)&&!landuse.equals("residential")){
+//								Geoinformation.actType2QT.get(ActivityTypes.OTHER).put(c.getX(), c.getY(), g);
+//							}
+//							if(!landuse.equals(ActivityTypes.LEISURE)&&!landuse.equals("residential")){
+//								Geoinformation.actType2QT.get(ActivityTypes.WORK).put(c.getX(), c.getY(), g);
+//							}
 							
 						}
 						
@@ -621,6 +622,7 @@ class OsmDbConnection {
 	void readBuildings(Connection connection) throws SQLException, ParseException{
 	
 		//TODO this method implies we are eventually using facilities in MATSim...
+		//alternatively: use buildings to "bound" activities
 		log.info("Reading in buildings...");
 		
 		WKTReader wktReader = new WKTReader();
