@@ -50,25 +50,26 @@ public class MobilityDatabaseMain {
 		if(args.length > 0){
 			
 //			Logger.getLogger("org.matsim.core.controler.injector").setLevel(Level.OFF);
-			
-			//TODO this method actually needs to call playground.dhosse.scenarios.generic.ScenarioBuilder
-			//we need to call the MATSim code from here because of an issue w/ a maven module that uses
-			//psql 8.x. Since we need version 9.4, I created a separate project w/ the required includes //dhosse 04/16 
+
+			// create a new configuration that holds all the information and switches needed to generate a
+			// MATSim scenario
 			Configuration configuration = new Configuration(args[0]);
 
 			try {
 			
-				//mechanism that writes the log file into the working directory
+				// Mechanism that writes the log file into the working directory
 				OutputDirectoryLogging.initLoggingWithOutputDirectory(configuration
 						.getWorkingDirectory());
 			
-				//create a ssh tunnel to the playground
+				// Create a ssh tunnel to the playground
 				SshConnector.connect(configuration);
 			
+				// Dump scenario generation settings on the console and create the output directory
 				configuration.dumpSettings();
 				new File(configuration.getWorkingDirectory()).mkdirs();
 				
-				MatsimRandom.reset(4711);
+				// Reset the random seed
+				MatsimRandom.reset(configuration.getRandomSeed());
 				
 				Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 				scenario.getConfig().scenario().setUseHouseholds(true);

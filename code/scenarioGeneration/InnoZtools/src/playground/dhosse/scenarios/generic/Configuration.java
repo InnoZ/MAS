@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
+import org.matsim.core.config.experimental.ReflectiveConfigGroup.StringGetter;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.io.IOUtils;
 
@@ -37,6 +38,8 @@ public class Configuration {
 	private static final String DATABASE_PASSWD = "password";
 	private static final String LOCAL_PORT = "localPort";
 	
+	private static final String RANDOM_SEED = "randomSeed";
+	
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS
@@ -59,6 +62,8 @@ public class Configuration {
 	private String userPassword;
 	
 	private String query;
+	
+	private long randomSeed = 4711;
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////	
 	
@@ -134,6 +139,10 @@ public class Configuration {
 					} else if(NUMBER_OF_HH.equals(lineParts[0])){
 						
 						this.numberOfHouseholds = Integer.parseInt(lineParts[1]);
+						
+					} else if(RANDOM_SEED.equals(lineParts[0])){
+						
+						this.randomSeed = Long.parseLong(lineParts[1]);
 						
 					}
 					
@@ -233,6 +242,11 @@ public class Configuration {
 	
 	public int getNumberOfHouseholds(){
 		return this.numberOfHouseholds;
+	}
+	
+	@StringGetter("randomSeed")
+	public long getRandomSeed(){
+		return this.randomSeed;
 	}
 	
 	public void dumpSettings(){
