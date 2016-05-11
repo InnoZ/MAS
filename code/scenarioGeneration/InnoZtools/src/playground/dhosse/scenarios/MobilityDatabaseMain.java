@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.NetworkWriter;
@@ -30,7 +29,7 @@ import com.vividsolutions.jts.io.ParseException;
 
 /**
  * 
- * Test class for database connection and population generation.
+ * Entry-point for database connection and scenario generation.
  * 
  * @author dhosse
  *
@@ -47,8 +46,10 @@ public class MobilityDatabaseMain {
 		
 		log.info("Start...");
 		
+		// Check, if there is a configuration file given
 		if(args.length > 0){
 			
+			//TODO
 //			Logger.getLogger("org.matsim.core.controler.injector").setLevel(Level.OFF);
 
 			// create a new configuration that holds all the information and switches needed to generate a
@@ -71,10 +72,13 @@ public class MobilityDatabaseMain {
 				// Reset the random seed
 				MatsimRandom.reset(configuration.getRandomSeed());
 				
+				// Create a MATSim scenario
 				Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+				// Enable the usage of households
 				scenario.getConfig().scenario().setUseHouseholds(true);
 				((ScenarioImpl)scenario).createHouseholdsContainer();
 				
+				// Generate a String set that stores the identifier(s) of the survey area regions
 				Set<String> ids = new HashSet<>();
 				for(String id : configuration.getSurveyAreaIds()){
 					
@@ -82,16 +86,20 @@ public class MobilityDatabaseMain {
 					
 				}
 				
+				// Read everything concerning geodata (borders, landuse, buildings, ...)
 				Geoinformation.readGeodataFromDatabase(configuration, ids, scenario);
 				
+				// Create a MATSim network from OpenStreetMap data
 				NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario, configuration);
 //				nc.setSimplifyNetwork(true); TODO not implemented in matsim 0.7.0
 				nc.setCleanNetwork(true);
 				nc.setScaleMaxSpeed(true);
 				nc.create();
 				
+				// Create a MATSim population
 				PopulationCreator.run(configuration, scenario);
 				
+				// Dump scenario elements into working directory
 				new NetworkWriter(scenario.getNetwork()).write(configuration.getWorkingDirectory() + "network.xml.gz");
 				new PopulationWriter(scenario.getPopulation()).write(configuration.getWorkingDirectory() + "plans.xml.gz");
 				new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration.getWorkingDirectory() + "households.xml.gz");
