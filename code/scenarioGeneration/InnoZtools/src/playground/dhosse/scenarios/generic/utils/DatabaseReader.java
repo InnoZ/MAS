@@ -15,7 +15,6 @@ import org.apache.log4j.Logger;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -38,44 +37,71 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
-class OsmDbConnection {
+/**
+ * 
+ * This class uses a {@link java.sql.Connection} to retrieve data from a database.
+ * There are methods for getting administrative borders data and OpenStreetMap data.
+ * 
+ * @author dhosse
+ *
+ */
+class DatabaseReader {
 
-	private static final Logger log = Logger.getLogger(OsmDbConnection.class);
-	
-	private final GeometryFactory gFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.maximumPreciseValue));
+	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
+	private static final Logger log = Logger.getLogger(DatabaseReader.class);
+	private final GeometryFactory gFactory = new GeometryFactory(new PrecisionModel(
+			PrecisionModel.maximumPreciseValue));
 	private final WKTReader wktReader = new WKTReader();
-	
-	//FIELD NAMES (for mobility database version)
 	private final String SCHEMA_GADM = "gadm";
 	private final String TABLE_DISTRICTS = "districts";
-	
 	private final String SCHEMA_OSM = "osm";
 	private final String TABLE_RELATIONS = "planet_osm_rels";
 	private final String TABLE_WAYS = "osm_ways";
 	private final String TABLE_NODES = "osm_nodes";
 	private final String TABLE_POLYGONS = "osm_polygon";
 	private final String TABLE_POINTS = "osm_point";
-	
 	private final String BLAND = "cca_4";
 	private final String MUN_KEY = "cca_4";
-	
+	/////////////////////////////////////////////////////////////////////////////////////////
+
+	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	private Geometry boundingBox;
 	private CoordinateTransformation ct;
+	/////////////////////////////////////////////////////////////////////////////////////////
 	
-	OsmDbConnection(final Scenario scenario){}
+	/**
+	 * Std. constructor
+	 */
+	DatabaseReader(){}
 	
-	public void readAdminBorders(Connection connection, Configuration configuration, Set<String> ids) throws SQLException,
+	/**
+	 * 
+	 * This method reads administrative units from a database and puts them into the {@link Geoinformation}
+	 * object. Only the administrative units with the specified ids are taken into account.
+	 * 
+	 * @param connection The database connection
+	 * @param configuration The configuration parameters.
+	 * @param ids The ids of the administrative border we want to have the geometries of.
+	 * 
+	 * @throws SQLException
+	 * @throws NoSuchAuthorityCodeException
+	 * @throws FactoryException
+	 * @throws ParseException
+	 * @throws MismatchedDimensionException
+	 * @throws TransformException
+	 */
+	void readAdminBorders(Connection connection, Configuration configuration, Set<String> ids) throws SQLException,
 		NoSuchAuthorityCodeException, FactoryException, ParseException, MismatchedDimensionException, TransformException{
 
 		log.info("Reading administrative borders from database...");
-		
-		log.info("Successfully connected with geoinformation database");
 
+		// Create a new statement to execute the sql query
 		Statement statement = connection.createStatement();
 		StringBuilder builder = new StringBuilder();
 		
 		int i = 0;
 		
+		// Append all ids inside the given collection to a string
 		for(String id : ids){
 
 			if(i < ids.size() - 1){
@@ -92,13 +118,20 @@ class OsmDbConnection {
 			
 		}
 		
+		// Execute the query and store the returned valued inside a set.
 		ResultSet set = statement.executeQuery("select " + BLAND + "," + MUN_KEY + ", st_astext(geom)"
 				+ " from " + SCHEMA_GADM + "." + TABLE_DISTRICTS + " where" + builder.toString());
 
 //		ResultSet set = statement.executeQuery("select vkz_nr, st_astext(geom) from gadm.berlin_vz;");
 		
-		MathTransform t = CRS.findMathTransform(CRS.decode("EPSG:4326",true), CRS.decode(configuration.getCrs(),true));
+		// This is needed to transform the WGS84 geometries into the specified CRS
+		MathTransform t = CRS.findMathTransform(CRS.decode("EPSG:4326",true), CRS.decode(configuration
+				.getCrs(),true));
 		
+		// A collection to temporarily store all geometries
+		List<Geometry> geometryCollection = new ArrayList<Geometry>();
+		
+		// Go through all the results
 		while(set.next()){
 			
 			//TODO attributes have to be added to the table
@@ -110,10 +143,13 @@ class OsmDbConnection {
 //				int municipalityType = set.getInt("");
 //				int regionType = set.getInt("");
 			
+			// Check if the wkb string returned is neither null nor empty, otherwise this would crash
 			if(g != null){
 				
 				if(!g.isEmpty()){
 					
+					// Create a new administrative unit and its geometry and add it to the
+					// geoinformation
 					AdministrativeUnit au = new AdministrativeUnit(key);
 					Geometry geometry = wktReader.read(g);
 					au.setGeometry(geometry);
@@ -123,11 +159,8 @@ class OsmDbConnection {
 //					au.setRegionType(regionType);
 					Geoinformation.getAdminUnits().put(key, au);
 					
-					if(Geoinformation.getCompleteGeometry() == null){
-						Geoinformation.setCompleteGeometry(geometry);
-					} else{
-						Geoinformation.getCompleteGeometry().union(geometry);
-					}
+					// Store all geometries inside a collection to get the survey area geometry in the end
+					geometryCollection.add(au.getGeometry());
 					
 				}
 				
@@ -135,26 +168,18 @@ class OsmDbConnection {
 			
 		}
 		
-		List<Geometry> geometryCollection = new ArrayList<>();
-		for(AdministrativeUnit au : Geoinformation.getAdminUnits().values()){
-			geometryCollection.add(au.getGeometry());
-		}
-		
+		// Get the survey area by building the bounding box of all geometries 
 		Geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection).getEnvelope());
-		Geometry copy = (Geometry) Geoinformation.getCompleteGeometry().clone();
-//		for(Coordinate c : copy.getCoordinates()){
-//			double temp = c.y;
-//			c.y = c.x;
-//			c.x = temp;
-//		}
-		this.boundingBox = JTS.transform(copy,t).getEnvelope();
+		this.boundingBox = JTS.transform((Geometry) Geoinformation.getCompleteGeometry().clone(), t)
+				.getEnvelope();
 		
+		// Close the result set and the statement
 		set.close();
 		statement.close();
 				
 	}
 	
-	public void readOsmData(Connection connection, Configuration configuration){
+	void readOsmData(Connection connection, Configuration configuration){
 
 		ct = TransformationFactory.getCoordinateTransformation("EPSG:4326", configuration.getCrs());
 		
