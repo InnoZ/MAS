@@ -59,7 +59,7 @@ public class GeometryUtils {
 	static enum geometryType{shell,hole};
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
-	// No instance needed!
+	// No instance!
 	private GeometryUtils(){};
 	
 	/**
@@ -137,7 +137,7 @@ public class GeometryUtils {
 								Double.parseDouble(parts[2])));
 						
 					}
-					//
+					
 				}
 				
 			}
@@ -183,7 +183,7 @@ public class GeometryUtils {
 	
 	/**
 	 * 
-	 * Creates an ESRI shape file from a  MATSim network.
+	 * Creates an ESRI shapefile of a  MATSim network.
 	 * 
 	 * @param network A MAtsim network.
 	 * @param shapefilePath The output directory for the shape file.
@@ -191,7 +191,7 @@ public class GeometryUtils {
 	 */
 	public static void writeNetwork2Shapefile(Network network, String shapefilePath, String crs){
 		
-		// Create a link feature collection and add the most important characteristics
+		// Create a polyline feature collection and add the most important characteristics
 		Collection<SimpleFeature> linkFeatures = new ArrayList<SimpleFeature>();
 		PolylineFeatureFactory linkFactory = new PolylineFeatureFactory.Builder().
 				setCrs(MGC.getCRS(crs)).
@@ -211,14 +211,18 @@ public class GeometryUtils {
 		// Go through all links, create features for each of them and add them to the feature 
 		// collection.
 		for (Link link : network.getLinks().values()) {
-			Coordinate fromNodeCoordinate = new Coordinate(link.getFromNode().getCoord().getX(), link.getFromNode().getCoord().getY());
-			Coordinate toNodeCoordinate = new Coordinate(link.getToNode().getCoord().getX(), link.getToNode().getCoord().getY());
+			Coordinate fromNodeCoordinate = new Coordinate(link.getFromNode().getCoord().getX(),
+					link.getFromNode().getCoord().getY());
+			Coordinate toNodeCoordinate = new Coordinate(link.getToNode().getCoord().getX(),
+					link.getToNode().getCoord().getY());
 			Coordinate linkCoordinate = new Coordinate(link.getCoord().getX(), link.getCoord().getY());
-			SimpleFeature ft = linkFactory.createPolyline(new Coordinate [] {fromNodeCoordinate, linkCoordinate, toNodeCoordinate},
+			SimpleFeature ft = linkFactory.createPolyline(new Coordinate [] {fromNodeCoordinate,
+					linkCoordinate, toNodeCoordinate},
 					new Object [] {link.getId().toString(), link.getFromNode().getId().toString(),
 					link.getToNode().getId().toString(), link.getLength(), ((LinkImpl)link).getType(),
-					link.getCapacity(), link.getFreespeed(), CollectionUtils.setToString(link.getAllowedModes()),
-					link.getNumberOfLanes(), ((LinkImpl)link).getOrigId()}, null);
+					link.getCapacity(), link.getFreespeed(), CollectionUtils.setToString(
+					link.getAllowedModes()), link.getNumberOfLanes(), ((LinkImpl)link).getOrigId()},
+					null);
 			linkFeatures.add(ft);
 		}
 		
@@ -235,14 +239,14 @@ public class GeometryUtils {
 			
 		}
 		
-		// Create a link feature collection
+		// Create a point feature collection
 		Collection<SimpleFeature> nodeFeatures = new ArrayList<>();
 		PointFeatureFactory pointFactory = new PointFeatureFactory.Builder().
 				setCrs(MGC.getCRS(crs)).
 				addAttribute("id", String.class).
 				create();
 
-		// Go through all links, create features for each of them and add them to the feature 
+		// Go through all nodes, create features for each of them and add them to the feature 
 		// collection.
 		for(Node node : network.getNodes().values()){
 			
@@ -267,8 +271,18 @@ public class GeometryUtils {
 		
 	}
 	
-	public static void writeFacilities2Shapefile(Collection<? extends ActivityFacility> facilities, String shapefile, String crs){
+	/**
+	 * 
+	 * Creates an ESRI shapefile of MATSim facilities.
+	 * 
+	 * @param facilities MATSim facilities
+	 * @param shapefile The output directory for the shape file.
+	 * @param crs The coordinate reference system used for the shape file's features.
+	 */
+	public static void writeFacilities2Shapefile(Collection<? extends ActivityFacility> facilities,
+			String shapefile, String crs){
 		
+		// Create a point feature collection and add some characteristics
 		Collection<SimpleFeature> features = new ArrayList<SimpleFeature>();
 		PointFeatureFactory factory = new PointFeatureFactory.Builder().
 				setCrs(MGC.getCRS(crs)).
@@ -277,6 +291,8 @@ public class GeometryUtils {
 				addAttribute("actType", String.class).
 				create();
 				
+		// Go through all facilities, create features for each of them and add them to the feature 
+		// collection.
 		for(ActivityFacility facility : facilities){
 			
 			Set<String> options = new HashSet<>();
@@ -288,12 +304,32 @@ public class GeometryUtils {
 			
 		}
 		
-		ShapeFileWriter.writeGeometries(features, shapefile);
+		// If the feature collection contains at least one element, write it to the specified
+		// location, else log an error.
+		if(features.size() > 0){
+			
+			ShapeFileWriter.writeGeometries(features, shapefile);
+			
+		} else {
+			
+			log.error("Point feature collection is empty and thus there is no file to write...");
+			log.info("Continuing anyways...");
+			
+		}
 		
 	}
 	
+	/**
+	 * 
+	 * Creates an ESRI shapefile of MATSim stop facilities.
+	 * 
+	 * @param facilities MATSim stop facilities.
+	 * @param shapefile The output directory for the shape file.
+	 * @param crs The coordinate reference system used for the shape file's features.
+	 */
 	public static void writeStopFacilities2Shapefile(Collection<? extends TransitStopFacility> facilities, String shapefile, String crs){
 		
+		// Create a point feature collection and add some characteristics
 		Collection<SimpleFeature> features = new ArrayList<SimpleFeature>();
 		PointFeatureFactory factory = new PointFeatureFactory.Builder().
 				setCrs(MGC.getCRS(crs)).
@@ -303,6 +339,8 @@ public class GeometryUtils {
 				addAttribute("linkId", String.class).
 				create();
 		
+		// Go through all stop facilities, create features for each of them and add them to the feature 
+		// collection.
 		for(TransitStopFacility facility : facilities){
 			
 			SimpleFeature feature = factory.createPoint(MGC.coord2Coordinate(facility.getCoord()),
@@ -313,13 +351,24 @@ public class GeometryUtils {
 			
 		}
 		
-		ShapeFileWriter.writeGeometries(features, shapefile + "/stops.shp");
+		// If the feature collection contains at least one element, write it to the specified
+		// location, else log an error.
+		if(features.size() > 0){
+			
+			ShapeFileWriter.writeGeometries(features, shapefile + "/stops.shp");
+			
+		} else {
+			
+			log.error("Point feature collection is empty and thus there is no file to write...");
+			log.info("Continuing anyways...");
+			
+		}
 		
 	}
 	
 	/**
 	 * 
-	 * Shoots a random {@link Coord} that lies inside the given geometry.
+	 * Shoots a random {@link Coord} that lies inside of the given geometry.
 	 * 
 	 * @param geometry The target geometry.
 	 * @param random The random object that mutates the coordinate.
@@ -352,7 +401,7 @@ public class GeometryUtils {
 	
 	/**
 	 *
-	 * Shoots a random {@link Coord} that lies inside the given geometry. Also, the last known
+	 * Shoots a random {@link Coord} that lies inside of the given geometry. Also, the last known
 	 * geometry of e.g. a travel chain must be given as well as the maximum distance between
 	 * this last and the next coordinate. 
 	 * 
@@ -378,11 +427,24 @@ public class GeometryUtils {
 		
 	}
 	
-	public static void createTextFileFromGeometries(String inputShapefile, String inputRegionTypesFile,
+	/**
+	 * 
+	 * Merges a given administrative boundaries shapefile and a region type csv file into a result
+	 * csv file. The classification is based on BBSR.</br>
+	 * 
+	 * I don't know if we need this method... Keep it for now /dhosse 05/16
+	 * 
+	 * @param inputShapefile The shapefile to parse
+	 * @param inputRegionTypesFile The list of the region types, sorted by their Gemeindekennzahl
+	 * @param outputFile The resulting csv
+	 */
+	public static void mergeGeometriesAndRegionTypesIntoCsv(String inputShapefile, String inputRegionTypesFile,
 			String outputFile){
-		
+
+		// Create a map for the region geometries (sorted by their GKZ)
 		Map<String, String> gkz2geometryString = new HashMap<String, String>();
-		
+
+		// Go through all features and add their geometries to the map
 		Collection<SimpleFeature> features = new ShapeFileReader().readFileAndInitialize(inputShapefile);
 		for(SimpleFeature feature : features){
 			
@@ -399,11 +461,12 @@ public class GeometryUtils {
 			}
 			
 		}
-		
+
+		// Read the csv file containing the information about the region types
+		// and store the information inside a map
 		int idxGKZ = 0;
 		int idxRtyp = 2;
 		int idxRtypD = 4;
-		
 		Map<String, Tuple<String, String>> gkz2RtypAndRtypD = new HashMap<>();
 		
 		AbstractCsvReader reader = new AbstractCsvReader(";",false) {
@@ -423,6 +486,7 @@ public class GeometryUtils {
 		
 		reader.read(inputRegionTypesFile);
 		
+		// In the end, write the output csv file
 		BufferedWriter writer = IOUtils.getBufferedWriter(outputFile);
 		
 		try {
@@ -440,7 +504,7 @@ public class GeometryUtils {
 				} else {
 					
 					log.warn("Could not find additional information for gkz " + key);
-					log.warn("No output will be produced!");
+					log.warn("Skipping this line!");
 					
 				}
 				
