@@ -76,6 +76,12 @@ public class MobilityDatabaseMain {
 				scenario.getConfig().scenario().setUseHouseholds(true);
 				((ScenarioImpl)scenario).createHouseholdsContainer();
 				
+				// If we want to explicitly model household's cars, enable it
+				if(configuration.isUsingCars()){
+					scenario.getConfig().scenario().setUseVehicles(true);
+					((ScenarioImpl)scenario).createVehicleContainer();
+				}
+				
 				// Generate a String set that stores the identifier(s) of the survey area regions
 				Set<String> ids = new HashSet<>();
 				for(String id : configuration.getSurveyAreaIds()){
@@ -105,8 +111,10 @@ public class MobilityDatabaseMain {
 						.getWorkingDirectory() + "plans.xml.gz");
 				new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration
 						.getWorkingDirectory() + "households.xml.gz");
-				new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration
-						.getWorkingDirectory() + "vehicles.xml.gz");
+				if(configuration.isUsingCars()){
+					new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration
+							.getWorkingDirectory() + "vehicles.xml.gz");
+				}
 				
 			} catch (JSchException | IOException | InstantiationException |
 					IllegalAccessException | ClassNotFoundException | SQLException |
