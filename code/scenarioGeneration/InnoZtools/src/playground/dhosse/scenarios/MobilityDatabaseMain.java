@@ -88,7 +88,8 @@ public class MobilityDatabaseMain {
 				Geoinformation.readGeodataFromDatabase(configuration, ids, scenario);
 				
 				// Create a MATSim network from OpenStreetMap data
-				NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(), configuration);
+				NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(),
+						configuration);
 //				nc.setSimplifyNetwork(true); TODO not implemented in matsim 0.7.0
 				nc.setCleanNetwork(true);
 				nc.setScaleMaxSpeed(true);
@@ -98,17 +99,18 @@ public class MobilityDatabaseMain {
 				PopulationCreator.run(configuration, scenario);
 				
 				// Dump scenario elements into working directory
-				new NetworkWriter(scenario.getNetwork()).write(configuration.getWorkingDirectory() +
-						"network.xml.gz");
-				new PopulationWriter(scenario.getPopulation()).write(configuration.getWorkingDirectory() +
-						"plans.xml.gz");
-				new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration.getWorkingDirectory() +
-						"households.xml.gz");
-				new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration.getWorkingDirectory() +
-						"vehicles.xml.gz");
+				new NetworkWriter(scenario.getNetwork()).write(configuration
+						.getWorkingDirectory() + "network.xml.gz");
+				new PopulationWriter(scenario.getPopulation()).write(configuration
+						.getWorkingDirectory() + "plans.xml.gz");
+				new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration
+						.getWorkingDirectory() + "households.xml.gz");
+				new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration
+						.getWorkingDirectory() + "vehicles.xml.gz");
 				
-			} catch (JSchException | IOException | InstantiationException | IllegalAccessException |
-					ClassNotFoundException | SQLException | ParseException | FactoryException e1) {
+			} catch (JSchException | IOException | InstantiationException |
+					IllegalAccessException | ClassNotFoundException | SQLException |
+					ParseException | FactoryException e1) {
 			
 				e1.printStackTrace();
 				
@@ -124,7 +126,8 @@ public class MobilityDatabaseMain {
 		
 		} else {
 			
-			throw new RuntimeException("You must pass a configuration file as runtime argument! Execution aborts...");
+			throw new RuntimeException("You must pass a configuration file as runtime argument!"
+					+ " Execution aborts...");
 			
 		}
 		

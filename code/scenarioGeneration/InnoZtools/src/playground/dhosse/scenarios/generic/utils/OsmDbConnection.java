@@ -142,11 +142,11 @@ class OsmDbConnection {
 		
 		Geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection).getEnvelope());
 		Geometry copy = (Geometry) Geoinformation.getCompleteGeometry().clone();
-		for(Coordinate c : copy.getCoordinates()){
-			double temp = c.y;
-			c.y = c.x;
-			c.x = temp;
-		}
+//		for(Coordinate c : copy.getCoordinates()){
+//			double temp = c.y;
+//			c.y = c.x;
+//			c.x = temp;
+//		}
 		this.boundingBox = JTS.transform(copy,t).getEnvelope();
 		
 		set.close();
