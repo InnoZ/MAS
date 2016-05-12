@@ -23,15 +23,15 @@ To install Java on a Windows system, just download the installation file of the 
 
 The installation of Java under a Linux distribution can either be done in the software center or in the terminal. To update e.g. OpenJDK, Version X you need to run
 
-> sudo apt-get install openjdk-X-jdk openjdk-X-source 
+`sudo apt-get install openjdk-X-jdk openjdk-X-source`
 
 If Ubuntu should not find the requested files, you need to add the ppa key with the following command
 
-> sudo add-apt-repository ppa:openjdk-r/ppa
+`sudo add-apt-repository ppa:openjdk-r/ppa'`
 
 After that, run
 
-> sudo apt-get update
+`sudo apt-get update`
 
 and execute the sudo apt-get install command again.
 
