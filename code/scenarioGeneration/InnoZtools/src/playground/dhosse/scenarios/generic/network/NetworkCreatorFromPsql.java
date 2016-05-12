@@ -13,12 +13,10 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.network.LinkImpl;
-import org.matsim.core.network.NetworkImpl;
 import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
@@ -73,7 +71,7 @@ public class NetworkCreatorFromPsql {
 	private static int nodeCounter = 0;
 	private static int linkCounter = 0;
 
-	private final Scenario scenario;
+	private final Network network;
 	private final CoordinateTransformation transform;
 	private final Configuration configuration;
 	private boolean scaleMaxSpeed = false;
@@ -91,9 +89,9 @@ public class NetworkCreatorFromPsql {
 	 */
 	static enum networkDetail{};
 
-	public NetworkCreatorFromPsql(final Scenario scenario, Configuration configuration){
+	public NetworkCreatorFromPsql(final Network network, Configuration configuration){
 		
-		this.scenario = scenario;
+		this.network = network;
 		this.transform = TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, configuration.getCrs());
 		this.configuration = configuration;
 		
@@ -180,13 +178,13 @@ public class NetworkCreatorFromPsql {
 			
 			if(this.simplifyNetworK){ //TODO not implemented in matsim-0.7.0
 				
-//				new NetworkSimplifier().run(scenario.getNetwork());
+//				new NetworkSimplifier().run(network);
 				
 			}
 			
 			if(this.cleanNetwork){
 			
-				new NetworkCleaner().run(scenario.getNetwork());
+				new NetworkCleaner().run(network);
 				
 			}
 			
@@ -266,8 +264,8 @@ public class NetworkCreatorFromPsql {
 		
 		log.info("Conversion statistics:");
 		log.info("OSM ways:     " + wayEntries.size());
-		log.info("MATSim nodes: " + scenario.getNetwork().getNodes().size());
-		log.info("MATSim links: " + scenario.getNetwork().getLinks().size());
+		log.info("MATSim nodes: " + network.getNodes().size());
+		log.info("MATSim links: " + network.getLinks().size());
 		
 	}
 	
@@ -408,7 +406,7 @@ public class NetworkCreatorFromPsql {
 			
 			if(!onewayReverse){
 				
-				Link link = scenario.getNetwork().getFactory().createLink(Id.createLinkId(linkCounter), fromNode, toNode);
+				Link link = network.getFactory().createLink(Id.createLinkId(linkCounter), fromNode, toNode);
 				link.setCapacity(capacity);
 				link.setFreespeed(freespeed);
 				link.setLength(length);
@@ -421,14 +419,14 @@ public class NetworkCreatorFromPsql {
 					
 				}
 				
-				scenario.getNetwork().addLink(link);
+				network.addLink(link);
 				linkCounter++;
 				
 			}
 			
 			if(!oneway){
 				
-				Link link = scenario.getNetwork().getFactory().createLink(Id.createLinkId(linkCounter), toNode, fromNode);
+				Link link = network.getFactory().createLink(Id.createLinkId(linkCounter), toNode, fromNode);
 				link.setCapacity(capacity);
 				link.setFreespeed(freespeed);
 				link.setLength(length);
@@ -441,7 +439,7 @@ public class NetworkCreatorFromPsql {
 					
 				}
 				
-				scenario.getNetwork().addLink(link);
+				network.addLink(link);
 				linkCounter++;
 				
 			}
@@ -454,8 +452,8 @@ public class NetworkCreatorFromPsql {
 		
 		Node node = null;
 		
-		node = scenario.getNetwork().getFactory().createNode(Id.createNodeId(nodeCounter), coord);
-		scenario.getNetwork().addNode(node);
+		node = network.getFactory().createNode(Id.createNodeId(nodeCounter), coord);
+		network.addNode(node);
 		nodeCounter++;
 		
 		return node;

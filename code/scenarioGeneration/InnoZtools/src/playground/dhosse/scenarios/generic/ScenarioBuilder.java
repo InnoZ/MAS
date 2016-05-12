@@ -54,7 +54,7 @@ public class ScenarioBuilder {
 		
 		log.info("########## network generation");
 		
-		NetworkCreatorFromPsql networkCreator = new NetworkCreatorFromPsql(scenario, configuration);
+		NetworkCreatorFromPsql networkCreator = new NetworkCreatorFromPsql(scenario.getNetwork(), configuration);
 		try {
 			networkCreator.create();
 		} catch (InstantiationException | IllegalAccessException
