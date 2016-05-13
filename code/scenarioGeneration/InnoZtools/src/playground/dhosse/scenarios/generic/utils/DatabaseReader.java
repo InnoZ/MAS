@@ -63,7 +63,7 @@ class DatabaseReader {
 	private final String TABLE_POINTS = "osm_point";
 	private final String BLAND = "cca_4";
 	private final String MUN_KEY = "cca_4";
-	private final String ST_ASTEXT = "st_asgeom";
+	private final String ST_ASTEXT = "st_astext";
 	private final String ATT_LANDUSE = "landuse";
 	private final String ATT_AMENITY = "amenity";
 	private final String ATT_LEISURE = "leisure";
