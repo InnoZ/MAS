@@ -74,7 +74,7 @@ public class DatabaseUpdater {
 			//instantiate a postgresql driver and establish a connection to the mobility database
 			Class.forName("org.postgresql.Driver").newInstance();
 			Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:" +
-					configuration.getLocalPort() + "/mobility_simulation",
+					configuration.getLocalPort() + "/simulated_mobility",
 					configuration.getDatabaseUsername(), configuration.getPassword());
 		
 			//if the connection...
