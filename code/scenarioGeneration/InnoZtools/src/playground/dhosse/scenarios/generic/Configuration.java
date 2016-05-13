@@ -37,6 +37,9 @@ public class Configuration {
 	private static final String DATABASE_USER = "databaseUser";
 	private static final String DATABASE_PASSWD = "password";
 	private static final String LOCAL_PORT = "localPort";
+	private static final String DB_SCHEMA_NAME = "databaseSchemaName";
+	private static final String WRITE_DB_OUTPUT = "writeTables";
+	private static final String WRITE_INTO_DATAHUB = "intoMobiliyDatahub";
 	
 	private static final String RANDOM_SEED = "randomSeed";
 	
@@ -64,6 +67,10 @@ public class Configuration {
 	private String query;
 	
 	private long randomSeed = 4711;
+
+	private boolean writeDatabaseTables = false;
+	private boolean writeIntoDatahub = false;
+	private String dbNameSpace;
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////	
 	
@@ -143,6 +150,18 @@ public class Configuration {
 					} else if(RANDOM_SEED.equals(lineParts[0])){
 						
 						this.randomSeed = Long.parseLong(lineParts[1]);
+						
+					} else if(DB_SCHEMA_NAME.equals(lineParts[0])){
+						
+						this.dbNameSpace = lineParts[1];
+						
+					} else if(WRITE_INTO_DATAHUB.equals(lineParts[0])){
+						
+						this.writeIntoDatahub = Boolean.parseBoolean(lineParts[1]);
+						
+					} else if(WRITE_DB_OUTPUT.equals(lineParts[0])){
+						
+						this.writeDatabaseTables = Boolean.parseBoolean(lineParts[1]);
 						
 					}
 					
@@ -247,6 +266,24 @@ public class Configuration {
 	@StringGetter("randomSeed")
 	public long getRandomSeed(){
 		return this.randomSeed;
+	}
+	
+	public String getDatabaseSchemaName(){
+		
+		return this.dbNameSpace;
+		
+	}
+	
+	public boolean isWritingDatabaseOutput(){
+		
+		return this.writeDatabaseTables;
+		
+	}
+	
+	public boolean isWritingIntoMobilityDatahub(){
+		
+		return this.writeIntoDatahub;
+		
 	}
 	
 	public void dumpSettings(){

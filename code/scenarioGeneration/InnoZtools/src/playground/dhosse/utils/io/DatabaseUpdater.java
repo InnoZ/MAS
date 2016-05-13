@@ -17,15 +17,9 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.network.MatsimNetworkReader;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.MatsimPopulationReader;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordImpl;
 import org.matsim.core.utils.io.IOUtils;
-import org.matsim.utils.objectattributes.ObjectAttributes;
-import org.matsim.utils.objectattributes.ObjectAttributesXmlReader;
 
 import playground.dhosse.scenarios.generic.Configuration;
 import playground.dhosse.scenarios.generic.utils.SshConnector;
@@ -40,28 +34,24 @@ import com.jcraft.jsch.JSchException;
  */
 public class DatabaseUpdater {
 
-	/*
-	 * 
-	 * scenario (plans, network)
-	 * scenario_desc
-	 * cs stations
-	 * 
-	 */
-	
 	private static final Logger log = Logger.getLogger(DatabaseUpdater.class);
-
+	
+	private Scenario scenario;
+	
 	/**
 	 * 
-	 * @param args </br>
-	 * 0:configuration file </br>
-	 * 1:network file </br>
-	 * 2:plans file </br>
-	 * 3:demographics
+	 * @param configuration The configuration file.
+	 * @param scenario The MATSim scenario containing
+	 * @param databaseSchemaName The identifier of the database namespace (schema).
+	 * @param intoMobilityDatahub Defines if the simulation data should be written into the MobilityDatahub
+	 * or into a local database
 	 * 
 	 */
-	public static void main(String args[]){
-
-		writeIntoDatabase(args);
+	public void update(Configuration configuration, Scenario scenario, String databaseSchemaName,
+			boolean intoMobilityDatahub){
+		
+		this.scenario = scenario;
+		this.writeIntoDatabase(configuration, databaseSchemaName, intoMobilityDatahub);
 		
 	}
 
@@ -71,27 +61,21 @@ public class DatabaseUpdater {
 	 * 
 	 * @param args
 	 */
-	public static void writeIntoDatabase(String args[]){
+	public void writeIntoDatabase(Configuration configuration, String databaseSchemaName,
+			boolean intoMobilityDatahub){
 		
 		try {
 			
-			//a configuration object needs to be instantiated
-			Configuration configuration = new Configuration(args[0]);
-			
-			//create a scenario and read in the network, plans and person attributes
-			Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-			new MatsimNetworkReader(scenario).readFile(args[1]);
-			new MatsimPopulationReader(scenario).readFile(args[2]);
-			ObjectAttributes attributes = new ObjectAttributes();
-			new ObjectAttributesXmlReader(attributes).parse(args[3]);
-			
-			//create ssh tunnel to the playground
-			SshConnector.connect(configuration);
+			//create ssh tunnel to the playground (if wanted)
+			if(intoMobilityDatahub){
+				SshConnector.connect(configuration);
+			}
 			
 			//instantiate a postgresql driver and establish a connection to the mobility database
 			Class.forName("org.postgresql.Driver").newInstance();
-			Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:" + configuration.getLocalPort() +
-					"/mobility_simulation", configuration.getDatabaseUsername(), configuration.getPassword());
+			Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:" +
+					configuration.getLocalPort() + "/mobility_simulation",
+					configuration.getDatabaseUsername(), configuration.getPassword());
 		
 			//if the connection...
 			if(connection != null){
@@ -99,16 +83,17 @@ public class DatabaseUpdater {
 				log.info("Connection to mobility database established.");
 				
 				//...could be established - proceed
-				processPersons(connection, scenario, attributes); //TODO these don't need to be updated for every scenario dump. on/off switch?
-				processPlans(connection, scenario);
-				processVehicles(connection, scenario.getNetwork(), args[4]);
+				//TODO these don't need to be updated for every scenario dump. on/off switch?
+				processPersons(connection, databaseSchemaName);
+				processPlans(connection, databaseSchemaName);
 				
 			}
 			
 			//after everything is finished, close the connection
 			connection.close();
 		
-		} catch (JSchException | IOException | InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
+		} catch (JSchException | IOException | InstantiationException | IllegalAccessException |
+				ClassNotFoundException | SQLException e) {
 			
 			e.printStackTrace();
 			
@@ -125,24 +110,25 @@ public class DatabaseUpdater {
 		
 	}
 
-	private static void processPersons(Connection connection, Scenario scenario, ObjectAttributes attributes) throws SQLException{
+	private void processPersons(Connection connection, String databaseSchemaName) throws SQLException{
 		
 		log.info("Creating persons table and inserting the values found in the given scenario...");
 		
 		Statement statement = connection.createStatement();
-		statement.executeUpdate("DROP TABLE IF EXISTS \"garmisch-partenkirchen\".persons;");
-		statement.executeUpdate("CREATE TABLE \"garmisch-partenkirchen\".persons(id character varying,"
-				+ "sex character varying,age integer,car_available character varying, has_driving_license boolean DEFAULT FALSE);");
-
-//		ProgressBar bar = new ProgressBar(scenario.getPopulation().getPersons().size());
 		
+		statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS " + databaseSchemaName + ";");
+		statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\".persons;");
+		statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\".persons(id character varying,"
+				+ "sex character varying,age integer,car_available character varying, has_driving_license"
+				+ " boolean DEFAULT FALSE);");
+
 		for(Person person : scenario.getPopulation().getPersons().values()){
 			
 			String id = person.getId().toString();
-			String sex = (String) attributes.getAttribute(id, "SEX");
-			String age = (String) attributes.getAttribute(id, "AGE");
-			String carAvail = (String) attributes.getAttribute(id, "CAR_AVAIL");
-			String hasLicense = (String) attributes.getAttribute(id, "LICENSE");
+			String sex = (String) scenario.getPopulation().getPersonAttributes().getAttribute(id, "SEX");
+			String age = (String) scenario.getPopulation().getPersonAttributes().getAttribute(id, "AGE");
+			String carAvail = (String) scenario.getPopulation().getPersonAttributes().getAttribute(id, "CAR_AVAIL");
+			String hasLicense = (String) scenario.getPopulation().getPersonAttributes().getAttribute(id, "LICENSE");
 			
 			if(sex == null) sex = "";
 			else if(sex.equals("0")) sex = "m";
@@ -156,10 +142,9 @@ public class DatabaseUpdater {
 			
 			if(hasLicense == null) hasLicense = "false";
 			
-			statement.executeUpdate("INSERT INTO \"garmisch-partenkirchen\".persons VALUES('"
-					+ id + "','" + sex + "'," + Integer.parseInt(age) + ",'" + carAvail + "'," + Boolean.parseBoolean(hasLicense) + ");");
-			
-//			bar.update();
+			statement.executeUpdate("INSERT INTO \"" + databaseSchemaName + "\".persons VALUES('"
+					+ id + "','" + sex + "'," + Integer.parseInt(age) + ",'" + carAvail + "',"
+					+ Boolean.parseBoolean(hasLicense) + ");");
 			
 		}
 		
@@ -169,18 +154,19 @@ public class DatabaseUpdater {
 		
 	}
 	
-	private static void processPlans(Connection connection, Scenario scenario) throws SQLException{
+	private void processPlans(Connection connection, String databaseSchemaName)
+			throws SQLException{
 		
 		log.info("Inserting trips from persons' selected plans into mobility database...");
 		
 		Statement statement = connection.createStatement();
-		statement.executeUpdate("DROP TABLE IF EXISTS \"garmisch-partenkirchen\".trips_base;");
-		statement.executeUpdate("CREATE TABLE \"garmisch-partenkirchen\".trips_base(person_id character varying,"
-				+ "trip_index integer, travel_time numeric, distance numeric, departure_time numeric, arrival_time numeric,"
-				+ "from_act_type character varying, from_x numeric, from_y numeric, to_act_type character varying, to_x numeric, to_y numeric,"
-				+ "main_mode character varying, access_time numeric, access_distance numeric, egress_time numeric, egress_distance numeric);");
-		
-//		ProgressBar bar = new ProgressBar(scenario.getPopulation().getPersons().size());
+		statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS " + databaseSchemaName + ";");
+		statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\".trips;");
+		statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\".trips(person_id character varying,"
+				+ "trip_index integer, travel_time numeric, distance numeric, departure_time numeric,"
+				+ " arrival_time numeric, from_act_type character varying, from_x numeric, from_y numeric,"
+				+ " to_act_type character varying, to_x numeric, to_y numeric, main_mode character varying,"
+				+ " access_time numeric, access_distance numeric, egress_time numeric, egress_distance numeric);");
 		
 		for(Person person : scenario.getPopulation().getPersons().values()){
 			
@@ -275,17 +261,15 @@ public class DatabaseUpdater {
 						egressDistance = "'NaN'";
 					}
 					
-					statement.executeUpdate("INSERT INTO \"garmisch-partenkirchen\".trips_base VALUES('"
-							+ personId + "'," + tripIndex + "," + travelTime + "," + distance + "," + startTime + "," +
-							endTime + ",'" + fromActType + "'," + fromX + "," + fromY + ",'" + toActType + "'," + toX + "," + toY + ",'" +
-							mainMode + "'," + accessTime + "," + accessDistance + "," + egressTime + "," + egressDistance +
-							");");
+					statement.executeUpdate("INSERT INTO \"" + databaseSchemaName + "\".trips VALUES('"
+							+ personId + "'," + tripIndex + "," + travelTime + "," + distance + "," +
+							startTime + "," + endTime + ",'" + fromActType + "'," + fromX + "," + fromY +
+							",'" + toActType + "'," + toX + "," + toY + ",'" + mainMode + "'," + accessTime +
+							"," + accessDistance + "," + egressTime + "," + egressDistance + ");");
 					
 				}
 				
 			}
-			
-//			bar.update();
 			
 		}
 		
@@ -343,15 +327,11 @@ public class DatabaseUpdater {
 		statement.executeUpdate("CREATE TABLE \"garmisch-partenkirchen\".carsharing_stations_extended(station_id character varying,"
 				+ "x numeric, y numeric, link_id character varying, name character varying, n_vehicles integer);");
 		
-//		ProgressBar bar = new ProgressBar(stations.size());
-		
 		for(CsStation station : stations){
 			
 			statement.executeUpdate("INSERT INTO \"garmisch-partenkirchen\".carsharing_stations_extended VALUES('"
 					+ station.id + "'," + station.x + "," + station.y + ",'" + station.linkId + "','" + station.name + "'," +
 					station.nVehicles + ");");
-			
-//			bar.update();
 			
 		}
 		

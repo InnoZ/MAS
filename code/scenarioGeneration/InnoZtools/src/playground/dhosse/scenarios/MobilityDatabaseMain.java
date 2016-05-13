@@ -16,6 +16,7 @@ import org.matsim.core.population.PopulationWriter;
 import org.matsim.core.scenario.ScenarioImpl;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.households.HouseholdsWriterV10;
+import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.matsim.vehicles.VehicleWriterV1;
 import org.opengis.referencing.FactoryException;
 
@@ -24,6 +25,7 @@ import playground.dhosse.scenarios.generic.network.NetworkCreatorFromPsql;
 import playground.dhosse.scenarios.generic.population.PopulationCreator;
 import playground.dhosse.scenarios.generic.utils.Geoinformation;
 import playground.dhosse.scenarios.generic.utils.SshConnector;
+import playground.dhosse.utils.io.DatabaseUpdater;
 
 import com.jcraft.jsch.JSchException;
 import com.vividsolutions.jts.io.ParseException;
@@ -111,9 +113,19 @@ public class MobilityDatabaseMain {
 						.getWorkingDirectory() + "plans.xml.gz");
 				new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration
 						.getWorkingDirectory() + "households.xml.gz");
+				new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes())
+					.writeFile(configuration.getWorkingDirectory() + "personAttributes.xml.gz");
 				if(configuration.isUsingCars()){
 					new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration
 							.getWorkingDirectory() + "vehicles.xml.gz");
+				}
+				
+				if(configuration.isWritingDatabaseOutput()){
+					
+					new DatabaseUpdater().update(configuration, scenario,
+							configuration.getDatabaseSchemaName(),
+							configuration.isWritingIntoMobilityDatahub());
+					
 				}
 				
 			} catch (JSchException | IOException | InstantiationException |

@@ -22,6 +22,7 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
@@ -62,11 +63,17 @@ class DatabaseReader {
 	private final String TABLE_POINTS = "osm_point";
 	private final String BLAND = "cca_4";
 	private final String MUN_KEY = "cca_4";
+	private final String ST_ASTEXT = "st_asgeom";
+	private final String ATT_LANDUSE = "landuse";
+	private final String ATT_AMENITY = "amenity";
+	private final String ATT_LEISURE = "leisure";
+	private final String ATT_SHOP = "shop";
 	/////////////////////////////////////////////////////////////////////////////////////////
 
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	private Geometry boundingBox;
 	private CoordinateTransformation ct;
+	private int counter = 0;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	/**
@@ -90,8 +97,9 @@ class DatabaseReader {
 	 * @throws MismatchedDimensionException
 	 * @throws TransformException
 	 */
-	void readAdminBorders(Connection connection, Configuration configuration, Set<String> ids) throws SQLException,
-		NoSuchAuthorityCodeException, FactoryException, ParseException, MismatchedDimensionException, TransformException{
+	void readAdminBorders(Connection connection, Configuration configuration, Set<String> ids)
+			throws SQLException, NoSuchAuthorityCodeException, FactoryException, ParseException,
+			MismatchedDimensionException, TransformException{
 
 		log.info("Reading administrative borders from database...");
 
@@ -119,14 +127,14 @@ class DatabaseReader {
 		}
 		
 		// Execute the query and store the returned valued inside a set.
-		ResultSet set = statement.executeQuery("select " + BLAND + "," + MUN_KEY + ", st_astext(geom)"
+		ResultSet set = statement.executeQuery("select " + BLAND + "," + MUN_KEY + ", " + ST_ASTEXT + "(geom)"
 				+ " from " + SCHEMA_GADM + "." + TABLE_DISTRICTS + " where" + builder.toString());
 
 //		ResultSet set = statement.executeQuery("select vkz_nr, st_astext(geom) from gadm.berlin_vz;");
 		
 		// This is needed to transform the WGS84 geometries into the specified CRS
-		MathTransform t = CRS.findMathTransform(CRS.decode("EPSG:4326",true), CRS.decode(configuration
-				.getCrs(),true));
+		MathTransform t = CRS.findMathTransform(CRS.decode(Geoinformation.AUTH_KEY_WGS84, true),
+				CRS.decode(configuration.getCrs(), true));
 		
 		// A collection to temporarily store all geometries
 		List<Geometry> geometryCollection = new ArrayList<Geometry>();
@@ -137,7 +145,7 @@ class DatabaseReader {
 			//TODO attributes have to be added to the table
 			String key = set.getString(MUN_KEY).substring(1);
 //			String key = set.getString("vkz_nr");
-			String g = set.getString("st_astext");
+			String g = set.getString(ST_ASTEXT);
 //			long bland = set.getLong(BLAND);
 //				int districtType = set.getInt("");
 //				int municipalityType = set.getInt("");
@@ -179,26 +187,42 @@ class DatabaseReader {
 				
 	}
 	
-	void readOsmData(Connection connection, Configuration configuration){
+	/**
+	 * 
+	 * This method reads OpenStreetMap landuse data from a database and puts it into the 
+	 * {@link Geoinformation} object.
+	 * 
+	 * @param connection The database connection
+	 * @param configuration The configuration parameters.
+	 * @throws FactoryException 
+	 * @throws NoSuchAuthorityCodeException 
+	 */
+	void readOsmData(Connection connection, Configuration configuration) throws NoSuchAuthorityCodeException,
+		FactoryException{
 
-		ct = TransformationFactory.getCoordinateTransformation("EPSG:4326", configuration.getCrs());
+		final CoordinateReferenceSystem fromCRS = CRS.decode(Geoinformation.AUTH_KEY_WGS84, true);
+		final CoordinateReferenceSystem toCRS = CRS.decode(configuration.getCrs(), true);
+		
+		this.ct = TransformationFactory.getCoordinateTransformation(fromCRS.toString(), toCRS.toString());
 		
 		log.info("Reading osm data...");
 		
 		try {
 			
+			// Read landuse geometries
 			readLanduseData(connection);
+			
+			// Read amenity geometries
 			readAmenities(connection);
 			
+			// If buildings should be considered, also read their geometries
 			if(configuration.isUsingBuildings()){
 				
 				readBuildings(connection);
 				
 			}
 				
-//			readPtStops(connection);
-			
-			log.info("...done.");
+			log.info("Done.");
 			
 		} catch (SQLException | ParseException e) {
 		
@@ -208,14 +232,18 @@ class DatabaseReader {
 		
 	}
 	
-	void readLanduseData(Connection connection){
+	/**
+	 * 
+	 * Reads OpenStreetMap landuse data from a database.
+	 * 
+	 * @param connection The database connection
+	 */
+	private void readLanduseData(Connection connection){
 		
 		log.info("Reading in landuse data...");
 		
 		try {
 
-//			getRelationBasedLanduseData(connection);
-//			getWayBasedLanduseData(connection);
 			//parse polygons for landuse data
 			getPolygonBasedLanduseData(connection);
 		
@@ -229,31 +257,45 @@ class DatabaseReader {
 		
 	}
 
-	void getPolygonBasedLanduseData(Connection connection) throws ParseException, SQLException {
+	/**
+	 * 
+	 * @param connection The database connection
+	 * @throws ParseException
+	 * @throws SQLException
+	 */
+	private void getPolygonBasedLanduseData(Connection connection) throws ParseException, SQLException {
 		
 		log.info("Processing polygon landuse data...");
 		
+		// Create a new statement to execute the sql query
 		Statement statement = connection.createStatement();
-		ResultSet set = statement.executeQuery("select landuse, amenity, leisure, shop, st_astext(way) from "
-				+ SCHEMA_OSM + "." + TABLE_POLYGONS + " where st_within(way,st_geomfromtext('" + //planet_osm_polygon
-				Geoinformation.getCompleteGeometry().toString() + "',4326))"
-						+ " and (landuse is not null or amenity is not null or "
-						+ "leisure is not null or shop is not null);");
+		// Execute the query and store the returned valued inside a set.
+		ResultSet set = statement.executeQuery("select landuse, amenity, leisure, shop, " + ST_ASTEXT
+				+ "(way) from " + SCHEMA_OSM + "." + TABLE_POLYGONS + " where st_within(way, st_geomfromtext('"
+				+ Geoinformation.getCompleteGeometry().toString() + "', 4326)) and (landuse is not null"
+				+ " or amenity is not null or leisure is not null or shop is not null);");
 		
+		// Go through all results
 		while(set.next()){
 			
-			Geometry geometry = wktReader.read(set.getString("st_astext"));
-			String landuse = set.getString("landuse");
-			String amenity = set.getString("amenity");
-			String leisure = set.getString("leisure");
-			String shop = set.getString("shop");
+			Geometry geometry = wktReader.read(set.getString(ST_ASTEXT));
+			String landuse = set.getString(ATT_LANDUSE);
+			String amenity = set.getString(ATT_AMENITY);
+			String leisure = set.getString(ATT_LEISURE);
+			String shop = set.getString(ATT_SHOP);
 			
 			if(amenity != null){
+				
 				landuse = amenity;
+				
 			} else if(leisure != null){
+				
 				landuse = leisure;
+				
 			} else if(shop != null){
+				
 				landuse = shop;
+				
 			}
 			
 			landuse = getLanduseType(landuse);
@@ -271,7 +313,8 @@ class DatabaseReader {
 		
 	}
 	
-	void getWayBasedLanduseData(Connection connection) throws SQLException{
+	@SuppressWarnings("unused")
+	private void getWayBasedLanduseData(Connection connection) throws SQLException{
 		
 		log.info("Processing way landuse data...");
 		
@@ -337,7 +380,8 @@ class DatabaseReader {
 			
 	}
 	
-	void getRelationBasedLanduseData(Connection connection) throws SQLException {
+	@SuppressWarnings("unused")
+	private void getRelationBasedLanduseData(Connection connection) throws SQLException {
 		
 		log.info("Processing relation landuse data...");
 		
@@ -519,7 +563,7 @@ class DatabaseReader {
 		
 	}
 	
-	void readAmenities(Connection connection) throws SQLException, ParseException{
+	private void readAmenities(Connection connection) throws SQLException, ParseException{
 		
 		log.info("Reading in amenities...");
 
@@ -569,8 +613,6 @@ class DatabaseReader {
 		
 	}
 	
-	private int counter = 0;
-	
 	private void addGeometry(String landuse, Geometry g){
 		
 		if(g != null){
@@ -582,13 +624,6 @@ class DatabaseReader {
 					if(au.getGeometry().contains(g) || au.getGeometry().touches(g) || au.getGeometry().intersects(g)){
 						
 						au.addLanduseGeometry(landuse, g);
-//						if(!landuse.equals(ActivityTypes.LEISURE)&&!landuse.equals("residential")){
-//							au.addLanduseGeometry(ActivityTypes.WORK, g);
-//						}
-//						if(!landuse.equals(ActivityTypes.LEISURE)&&!landuse.equals("residential")&&
-//								!landuse.equals(ActivityTypes.SHOPPING)){
-//							au.addLanduseGeometry(ActivityTypes.OTHER, g);
-//						}
 						
 						if(!Geoinformation.actType2QT.containsKey(landuse)){
 							
@@ -596,26 +631,12 @@ class DatabaseReader {
 									boundingBox.getCoordinates()[0].y, boundingBox.getCoordinates()[2].x, boundingBox.getCoordinates()[2].y));
 							
 						} 
-//						if(!Geoinformation.actType2QT.containsKey(ActivityTypes.WORK)){
-//							Geoinformation.actType2QT.put(ActivityTypes.WORK, new QuadTree<>(boundingBox.getCoordinates()[0].x,
-//									boundingBox.getCoordinates()[0].y, boundingBox.getCoordinates()[2].x, boundingBox.getCoordinates()[2].y));
-//						}
-//						if(!Geoinformation.actType2QT.containsKey(ActivityTypes.OTHER)){
-//							Geoinformation.actType2QT.put(ActivityTypes.OTHER, new QuadTree<>(boundingBox.getCoordinates()[0].x,
-//									boundingBox.getCoordinates()[0].y, boundingBox.getCoordinates()[2].x, boundingBox.getCoordinates()[2].y));
-//						}
 						
 						Coord c = ct.transform(MGC.point2Coord(g.getCentroid()));
 						
 						if(this.boundingBox.contains(MGC.coord2Point(c))){
 							
 							Geoinformation.actType2QT.get(landuse).put(c.getX(), c.getY(), g);
-//							if(!landuse.equals(ActivityTypes.LEISURE)&&!landuse.equals("residential")){
-//								Geoinformation.actType2QT.get(ActivityTypes.OTHER).put(c.getX(), c.getY(), g);
-//							}
-//							if(!landuse.equals(ActivityTypes.LEISURE)&&!landuse.equals("residential")){
-//								Geoinformation.actType2QT.get(ActivityTypes.WORK).put(c.getX(), c.getY(), g);
-//							}
 							
 						}
 						
@@ -710,7 +731,8 @@ class DatabaseReader {
 		
 	}
 	
-	public void readPtStops(Connection connection) throws SQLException, ParseException{
+	@SuppressWarnings("unused")
+	private void readPtStops(Connection connection) throws SQLException, ParseException{
 		
 		Statement statement = connection.createStatement();
 		ResultSet set = statement.executeQuery("select st_astext(way) from planet_osm_point where"
@@ -728,8 +750,6 @@ class DatabaseReader {
 					
 					//TODO set the buffer radius to whatever the search radius of the transit router is...
 					//default is 1000, so we will leave it like this for the time being
-//					Point point = MGC.coord2Point(this.ct.transform(MGC.point2Coord((Point)g)));
-					
 					ptStops.add(g.buffer(1000));
 					
 				}
@@ -770,17 +790,19 @@ class DatabaseReader {
 
 	private static String getTypeOfBuilding(String buildingTag){
 		
-		if(buildingTag.equals("apartments") || buildingTag.equals("hut") || buildingTag.equals("detached") || buildingTag.equals("house") || buildingTag.equals("semi") || buildingTag.equals("terrace")){
+		if(buildingTag.equals("apartments") || buildingTag.equals("hut") || buildingTag.equals("detached") || buildingTag.equals("house") || buildingTag.equals("semi")
+				|| buildingTag.equals("terrace")){
 			
 			return "residential";
 			
-		} else if(buildingTag.equals("barn") || buildingTag.equals("brewery") || buildingTag.equals("factory") || buildingTag.equals("office") || buildingTag.equals("warehouse")){
+		} else if(buildingTag.equals("barn") || buildingTag.equals("brewery") || buildingTag.equals("factory") || buildingTag.equals("office")
+				|| buildingTag.equals("warehouse")){
 			
 			return ActivityTypes.WORK;
 			
 		} else if(buildingTag.equals("castle") || buildingTag.equals("monument") || buildingTag.equals("palace")){
 			
-			//TODO
+			//TODO tourism
 			return "tourism";
 			
 		} else if(buildingTag.equals("church") || buildingTag.equals("city_hall") || buildingTag.equals("hall")){

@@ -43,6 +43,7 @@ import com.vividsolutions.jts.io.ParseException;
 public class Geoinformation {
 	
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
+	static final String AUTH_KEY_WGS84 = "EPSG:4326";
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
@@ -87,7 +88,7 @@ public class Geoinformation {
 	}
 	
 	/**
-	 * Imports administrative borders and mobility survey data from the mobility database.
+	 * Imports administrative borders and OpenStreetMap data from the mobility database.
 	 * 
 	 * 
 	 * @param configuration The configuration for the scenario generation process.
