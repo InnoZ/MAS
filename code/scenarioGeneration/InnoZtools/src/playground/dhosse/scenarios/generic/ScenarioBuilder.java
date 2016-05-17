@@ -36,11 +36,11 @@ public class ScenarioBuilder {
 		
 		Configuration configuration = new Configuration(args[0]);
 		
-		new File(configuration.getWorkingDirectory()).mkdirs();
+		new File(configuration.getOutputDirectory()).mkdirs();
 		
 		try {
 			
-			OutputDirectoryLogging.initLoggingWithOutputDirectory(configuration.getWorkingDirectory());
+			OutputDirectoryLogging.initLoggingWithOutputDirectory(configuration.getOutputDirectory());
 			
 		} catch (IOException e) {
 			

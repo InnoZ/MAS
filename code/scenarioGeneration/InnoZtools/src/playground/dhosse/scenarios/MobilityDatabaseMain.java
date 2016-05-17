@@ -60,14 +60,14 @@ public class MobilityDatabaseMain {
 				
 				// Mechanism that writes the log file into the working directory
 				OutputDirectoryLogging.initLoggingWithOutputDirectory(configuration
-						.getWorkingDirectory());
+						.getOutputDirectory());
 			
 				// Create a ssh tunnel to the playground
 				SshConnector.connect(configuration);
 			
 				// Dump scenario generation settings on the console and create the output directory
 				configuration.dumpSettings();
-				new File(configuration.getWorkingDirectory()).mkdirs();
+				new File(configuration.getOutputDirectory()).mkdirs();
 				
 				// Reset the random seed
 				MatsimRandom.reset(configuration.getRandomSeed());
@@ -108,16 +108,16 @@ public class MobilityDatabaseMain {
 				
 				// Dump scenario elements into working directory
 				new NetworkWriter(scenario.getNetwork()).write(configuration
-						.getWorkingDirectory() + "network.xml.gz");
+						.getOutputDirectory() + "network.xml.gz");
 				new PopulationWriter(scenario.getPopulation()).write(configuration
-						.getWorkingDirectory() + "plans.xml.gz");
+						.getOutputDirectory() + "plans.xml.gz");
 				new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration
-						.getWorkingDirectory() + "households.xml.gz");
+						.getOutputDirectory() + "households.xml.gz");
 				new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes())
-					.writeFile(configuration.getWorkingDirectory() + "personAttributes.xml.gz");
+					.writeFile(configuration.getOutputDirectory() + "personAttributes.xml.gz");
 				if(configuration.isUsingCars()){
 					new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration
-							.getWorkingDirectory() + "vehicles.xml.gz");
+							.getOutputDirectory() + "vehicles.xml.gz");
 				}
 				
 				if(configuration.isWritingDatabaseOutput()){

@@ -17,8 +17,8 @@ surveyAreaIds	09180
 coordinateSystem	EPSG:32632
 
 
-#Working directory (where the input and output files should be located) /dhosse
-workingDirectory	/home/dhosse/dessau/foo/
+#Output directory (where the output files are written to) /dhosse
+outputDirectory	/home/dhosse/dessau/foo/
 
 
 #The type of population you want to create. Possible values are "dummy","commuter","complete"

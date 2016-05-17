@@ -11,22 +11,24 @@ import org.matsim.core.utils.io.IOUtils;
 
 /**
  * 
+ * Class that holds all relevant parameters for the semi-automatic generation of a MATSim pre-base scenario.
+ * 
  * @author dhosse
  *
  */
 public class Configuration {
 
-	private static final Logger log = Logger.getLogger(Configuration.class);
-	public enum PopulationType{dummy,commuter,complete};
-	
-	//TAGS
+	//TAGS///////////////////////////////////////////////////////////////////////////////////
 	private static final String SEP = "\t";
 	private static final String COMMENT = "#";
+	/////////////////////////////////////////////////////////////////////////////////////////
 
-	//CONSTANTS///////////////////////////////////////////////////////////////////////////////////////
+	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
+	private static final Logger log = Logger.getLogger(Configuration.class);
+	
 	private static final String SURVEY_AREA_IDS = "surveyAreaIds";
 	private static final String CRS = "coordinateSystem";
-	private static final String WORKING_DIR = "workingDirectory";
+	private static final String OUTPUT_DIR = "outputDirectory";
 	private static final String POPULATION_TYPE = "populationType";
 	private static final String USE_BUILDINGS = "useBuildings";
 	
@@ -45,12 +47,12 @@ public class Configuration {
 	
 	private static final String RANDOM_SEED = "randomSeed";
 	private static final String OVERWRITE_FILES = "overwriteExistingFiles";
-	//////////////////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////
 	
-	//MEMBERS
+	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	private String[] surveyAreaIds;
 	private String crs;
-	private String workingDirectory;
+	private String outputDirectory;
 	private PopulationType popType;
 	
 	private boolean useHouseholds = false;
@@ -75,8 +77,16 @@ public class Configuration {
 	private String dbNameSpace;
 	
 	private boolean overwriteExistingFiles = false;
-	//////////////////////////////////////////////////////////////////////////////////////////////////	
 	
+	public enum PopulationType{dummy,commuter,complete};
+	/////////////////////////////////////////////////////////////////////////////////////////	
+	
+	/**
+	 * 
+	 * Creates a new configuration from the given file.
+	 * 
+	 * @param file Text file containing the configuration parameters.
+	 */
 	public Configuration(String file){
 		
 		readConfigurationFile(file);
@@ -84,6 +94,12 @@ public class Configuration {
 		
 	}
 	
+	/**
+	 * 
+	 * Reads in the given text file and initializes the parameters according to its content.
+	 * 
+	 * @param file Text file containing the configuration parameters.
+	 */
 	private void readConfigurationFile(String file){
 		
 		BufferedReader reader = IOUtils.getBufferedReader(file);
@@ -106,9 +122,9 @@ public class Configuration {
 						
 						this.crs = lineParts[1];
 						
-					} else if(WORKING_DIR.equals(lineParts[0])){
+					} else if(OUTPUT_DIR.equals(lineParts[0])){
 						
-						this.workingDirectory = lineParts[1];
+						this.outputDirectory = lineParts[1];
 						
 					} else if(POPULATION_TYPE.equals(lineParts[0])){
 						
@@ -185,13 +201,13 @@ public class Configuration {
 	}
 	
 	/**
-	 * Validates the configuration. Only errors that may cause exceptions are taken into account here.
+	 * Validates the configuration. Only errors that may eventually cause exceptions are taken into account here.
 	 */
 	private void validate(){
 		
 		boolean validationError = false;
-		
-		//TODO In fact, one may leave this empty. The resulting survey area would then be all of Germany...
+
+		// A survey area must be defined!
 		if(this.surveyAreaIds.length < 1){
 			
 			validationError = true;
@@ -200,6 +216,7 @@ public class Configuration {
 			
 		}
 		
+		// Non-generic cars can only be used along w/ households.
 		if(!this.useHouseholds && this.useCars){
 			
 			validationError = true;
@@ -207,12 +224,13 @@ public class Configuration {
 			
 		}
 		
-		File f = new File(this.workingDirectory);
+		// Check if the output directory exists and has files in it.
+		File f = new File(this.outputDirectory);
 		if(f.exists()){
 			
 			if(f.list().length > 0){
 				
-				log.warn("The output directory " + this.workingDirectory + " already exists and has files in it!");
+				log.warn("The output directory " + this.outputDirectory + " already exists and has files in it!");
 				
 				if(!this.overwriteExistingFiles){
 					
@@ -230,6 +248,7 @@ public class Configuration {
 			
 		}
 		
+		// If anything should cause the configuration to be invalid, abort!
 		if(validationError){
 			
 			throw new RuntimeException("Invalid configuration! Shutting down...");
@@ -246,8 +265,8 @@ public class Configuration {
 		return crs;
 	}
 
-	public String getWorkingDirectory() {
-		return workingDirectory;
+	public String getOutputDirectory() {
+		return outputDirectory;
 	}
 	
 	public PopulationType getPopulationType() {
@@ -317,12 +336,17 @@ public class Configuration {
 		
 	}
 	
+	/**
+	 * 
+	 * Dumps the configuration settings to the log.
+	 * 
+	 */
 	public void dumpSettings(){
 		
 		log.info("Dump of configuration settings:");
 		log.info("surveyAreaId:              " + CollectionUtils.arrayToString(this.surveyAreaIds));
 		log.info("coordinateReferenceSystem: " + this.crs);
-		log.info("workingDirectory:          " + this.workingDirectory);
+		log.info("workingDirectory:          " + this.outputDirectory);
 		log.info("populationType:            " + this.popType.name());
 		log.info("onlyWorkingDays:           " + this.onlyWorkingDays);
 		log.info("useBuildings:              " + this.useBuildings);
