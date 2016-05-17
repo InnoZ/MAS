@@ -139,8 +139,8 @@ public class MobilityDatabaseMain {
 			{
 				
 				//close the ssh tunnel and exit
-				System.exit(0);
 				OutputDirectoryLogging.closeOutputDirLogging();
+				System.exit(0);
 				
 			}
 		
