@@ -64,7 +64,7 @@ numberOfHouseholds	10000
 
 #############################################################################################################################################
 
-#This part refers to the MiD database
+#This part refers to the MobilityDatabase
 #Edit only if you know what you're doing! This part could eventually vanish from the configuration... /dhosse
 databaseUser	YYYYYYY
 password	XXXXXXX
