@@ -7,6 +7,7 @@
 
 #The id(s) of the survey area(s)
 #If unknown, look into table gadm.districts
+#seperate multiple entries with commas
 surveyAreaIds	09180
 #TODO: vicinity of survey area
 
