@@ -57,7 +57,7 @@ public class MobilityDatabaseMain {
 			Configuration configuration = new Configuration(args[0]);
 
 			try {
-			
+				
 				// Mechanism that writes the log file into the working directory
 				OutputDirectoryLogging.initLoggingWithOutputDirectory(configuration
 						.getWorkingDirectory());

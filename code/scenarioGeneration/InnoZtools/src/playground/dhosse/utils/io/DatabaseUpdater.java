@@ -2,6 +2,7 @@ package playground.dhosse.utils.io;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -22,9 +23,6 @@ import org.matsim.core.utils.geometry.CoordImpl;
 import org.matsim.core.utils.io.IOUtils;
 
 import playground.dhosse.scenarios.generic.Configuration;
-import playground.dhosse.scenarios.generic.utils.SshConnector;
-
-import com.jcraft.jsch.JSchException;
 
 /**
  * This class transfers MATSim simulation data into a postgreSQL database.
@@ -64,23 +62,56 @@ public class DatabaseUpdater {
 	public void writeIntoDatabase(Configuration configuration, String databaseSchemaName,
 			boolean intoMobilityDatahub){
 		
+		String dbName = null;
+		String dbUser = configuration.getDatabaseUsername();
+		String dbPassword = configuration.getPassword();
+		int localPort = configuration.getLocalPort();
+		
 		try {
 			
-			//create ssh tunnel to the playground (if wanted)
-			if(intoMobilityDatahub){
-				SshConnector.connect(configuration);
+			if(!intoMobilityDatahub){
+				
+				dbName = "innoz_simulation_development";
+				dbUser = "postgres";
+				dbPassword = "postgres";
+				localPort = 5432;
+				
+				StringBuffer output = new StringBuffer();
+				Process p;
+				
+				try {
+
+					p = Runtime.getRuntime().exec("psql -lqt");
+					p.waitFor();
+					BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+					String line = "";
+			        while ((line = br.readLine())!= null) {
+			            output.append(line + "\n");
+			        }
+					
+				} catch (IOException | InterruptedException e) {
+					
+					e.printStackTrace();
+					
+				}
+				
+				if(!output.toString().contains(dbName)){
+					
+					p = Runtime.getRuntime().exec("createdb -p 5432 -e " + dbName);
+					
+				}
+				
 			}
 			
 			//instantiate a postgresql driver and establish a connection to the mobility database
 			Class.forName("org.postgresql.Driver").newInstance();
 			Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:" +
-					configuration.getLocalPort() + "/simulated_mobility",
-					configuration.getDatabaseUsername(), configuration.getPassword());
+					localPort + "/" + dbName, dbUser, dbPassword);
 		
 			//if the connection...
 			if(connection != null){
 				
-				log.info("Connection to mobility database established.");
+				log.info("Connection to database established.");
 				
 				//...could be established - proceed
 				//TODO these don't need to be updated for every scenario dump. on/off switch?
@@ -92,19 +123,10 @@ public class DatabaseUpdater {
 			//after everything is finished, close the connection
 			connection.close();
 		
-		} catch (JSchException | IOException | InstantiationException | IllegalAccessException |
+		} catch (IOException | InstantiationException | IllegalAccessException |
 				ClassNotFoundException | SQLException e) {
 			
 			e.printStackTrace();
-			
-		}
-		
-		finally{
-
-			//this needs to be done because otherwise the ssh tunnel would stay open...
-			log.info("Closing SSH tunnel and exiting...");
-			
-			System.exit(0);
 			
 		}
 		
@@ -116,7 +138,7 @@ public class DatabaseUpdater {
 		
 		Statement statement = connection.createStatement();
 		
-		statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS " + databaseSchemaName + ";");
+		statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS \"" + databaseSchemaName + "\";");
 		statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\".persons;");
 		statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\".persons(id character varying,"
 				+ "sex character varying,age integer,car_available character varying, has_driving_license"
