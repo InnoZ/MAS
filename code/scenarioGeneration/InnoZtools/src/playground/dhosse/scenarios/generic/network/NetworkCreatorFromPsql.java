@@ -26,6 +26,7 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import playground.dhosse.scenarios.generic.Configuration;
 import playground.dhosse.scenarios.generic.utils.AdministrativeUnit;
 import playground.dhosse.scenarios.generic.utils.Geoinformation;
+import playground.dhosse.utils.NetworkSimplifier;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -51,8 +52,8 @@ public class NetworkCreatorFromPsql {
 	private static final String TAG_HIGHWAY = "highway";
 	private static final String TAG_ID = "osm_id";
 	private static final String TAG_JUNCTION = "junction";
-	private static final String TAG_LANES = "lanes";
-	private static final String TAG_MAXSPEED = "maxspeed";
+//	private static final String TAG_LANES = "lanes";
+//	private static final String TAG_MAXSPEED = "maxspeed";
 	private static final String TAG_ONEWAY = "oneway";
 
 	private static final String MOTORWAY = "motorway";
@@ -134,67 +135,58 @@ public class NetworkCreatorFromPsql {
 		WKTReader wktReader = new WKTReader();
 		Set<WayEntry> wayEntries = new HashSet<>();
 		
-//		try {
-			
-			log.info("Connection to mobility database...");
-		
-			Class.forName("org.postgresql.Driver").newInstance();
-			
-			Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:" + configuration.getLocalPort() + "/geodata",
-					configuration.getDatabaseUsername(), configuration.getPassword());
-		
-			if(connection != null){
-				
-				log.info("Connection establised.");
+		log.info("Connection to mobility database...");
 	
-				Statement statement = connection.createStatement();
-				ResultSet result = statement.executeQuery("select osm_id, access, highway, junction, oneway,"
-						+ " st_astext(way) from osm.osm_line where highway is not null and"
-						+ " st_within(way,st_geomfromtext('" + Geoinformation.getCompleteGeometry().toString() + "',4326));");//osm.osm_line
+		Class.forName("org.postgresql.Driver").newInstance();
+		
+		Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:" + configuration.getLocalPort() + "/geodata",
+				configuration.getDatabaseUsername(), configuration.getPassword());
+	
+		if(connection != null){
+			
+			log.info("Connection establised.");
+
+			Statement statement = connection.createStatement();
+			ResultSet result = statement.executeQuery("select osm_id, access, highway, junction, oneway,"
+					+ " st_astext(way) from osm.osm_line where highway is not null and"
+					+ " st_within(way,st_geomfromtext('" + Geoinformation.getCompleteGeometry().toString() + "',4326));");//osm.osm_line
+			
+			while(result.next()){
 				
-				while(result.next()){
-					
-					WayEntry entry = new WayEntry();
-					entry.osmId = result.getString(TAG_ID);
-					entry.accessTag = result.getString(TAG_ACCESS);
-					entry.highwayTag = result.getString(TAG_HIGHWAY);
-					entry.junctionTag = result.getString(TAG_JUNCTION);
+				WayEntry entry = new WayEntry();
+				entry.osmId = result.getString(TAG_ID);
+				entry.accessTag = result.getString(TAG_ACCESS);
+				entry.highwayTag = result.getString(TAG_HIGHWAY);
+				entry.junctionTag = result.getString(TAG_JUNCTION);
 //					entry.lanesTag = result.getString(TAG_LANES);
 //					entry.maxspeedTag = result.getString(TAG_MAXSPEED);
-					entry.onewayTag = result.getString(TAG_ONEWAY);
-					entry.geometry = wktReader.read(result.getString(TAG_GEOMETRY));
-					wayEntries.add(entry);
-					
-				}
-				
-				result.close();
-				statement.close();
+				entry.onewayTag = result.getString(TAG_ONEWAY);
+				entry.geometry = wktReader.read(result.getString(TAG_GEOMETRY));
+				wayEntries.add(entry);
 				
 			}
 			
-			connection.close();
+			result.close();
+			statement.close();
 			
-			processWayEntries(wayEntries);
-			
-			if(this.simplifyNetworK){ //TODO not implemented in matsim-0.7.0
-				
-//				new NetworkSimplifier().run(network);
-				
-			}
-			
-			if(this.cleanNetwork){
-			
-				new NetworkCleaner().run(network);
-				
-			}
-			
-//		} catch (InstantiationException | IllegalAccessException
-//				| ClassNotFoundException | SQLException | ParseException e) {
-//
-//			e.printStackTrace();
-//			
-//		}
+		}
 		
+		connection.close();
+		
+		processWayEntries(wayEntries);
+		
+		if(this.simplifyNetworK) {
+			
+			new NetworkSimplifier().run(network);
+			
+		}
+		
+		if(this.cleanNetwork){
+		
+			new NetworkCleaner().run(network);
+			
+		}
+			
 	}
 	
 	public void setHighwayDefaults(final String highwayType, final double lanesPerDirection, final double freespeed,
