@@ -70,6 +70,10 @@ databaseUser	YYYYYYY
 password	XXXXXXX
 localPort	3100
 
+#True means: existing data inside the working directory will be overwritten
+#Else, execution aborts
+overwriteExistingFiles	false
+
 #For writing database output:
 #Switch for enabling / disabling writing the simulation data into a database
 writeTables	false
