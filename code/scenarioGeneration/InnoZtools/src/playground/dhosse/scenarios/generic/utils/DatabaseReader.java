@@ -64,10 +64,21 @@ class DatabaseReader {
 	private final String BLAND = "cca_4";
 	private final String MUN_KEY = "cca_4";
 	private final String ST_ASTEXT = "st_astext";
+	private final String ST_GEOMFROMTEXT = "st_geomfromtext";
+	private final String ST_WITHIN = "st_within";
 	private final String ATT_LANDUSE = "landuse";
 	private final String ATT_AMENITY = "amenity";
 	private final String ATT_LEISURE = "leisure";
 	private final String ATT_SHOP = "shop";
+	private final String ATT_WAY = "way";
+	private final String ATT_ID = "id";
+	private final String ATT_NODES = "nodes";
+	private final String ATT_TAGS = "tags";
+	private final String ATT_PARTS = "parts";
+	private final String ATT_MEMBERS = "members";
+	private final String ATT_LON = "lon";
+	private final String ATT_LAT = "lat";
+	private final String ATT_BUILDING = "building";
 	/////////////////////////////////////////////////////////////////////////////////////////
 
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
@@ -244,7 +255,7 @@ class DatabaseReader {
 		
 		try {
 
-			//parse polygons for landuse data
+			// Parse polygons for landuse data
 			getPolygonBasedLanduseData(connection);
 		
 		} catch (SQLException | ParseException e) {
@@ -259,6 +270,8 @@ class DatabaseReader {
 
 	/**
 	 * 
+	 * Retrieves polygon OpenStreetMap data containing a landuse key.
+	 * 
 	 * @param connection The database connection
 	 * @throws ParseException
 	 * @throws SQLException
@@ -270,10 +283,10 @@ class DatabaseReader {
 		// Create a new statement to execute the sql query
 		Statement statement = connection.createStatement();
 		// Execute the query and store the returned valued inside a set.
-		ResultSet set = statement.executeQuery("select landuse, amenity, leisure, shop, " + ST_ASTEXT
-				+ "(way) from " + SCHEMA_OSM + "." + TABLE_POLYGONS + " where st_within(way, st_geomfromtext('"
-				+ Geoinformation.getCompleteGeometry().toString() + "', 4326)) and (landuse is not null"
-				+ " or amenity is not null or leisure is not null or shop is not null);");
+		ResultSet set = statement.executeQuery("select " + ATT_LANDUSE + ", " + ATT_AMENITY +  ", " + ATT_LEISURE + ", " + ATT_SHOP + ", "
+				+ ST_ASTEXT + "(" + ATT_WAY + ") from " + SCHEMA_OSM + "." + TABLE_POLYGONS + " where " + ST_WITHIN + "(" + ATT_WAY + ", "
+				+ ST_GEOMFROMTEXT + "('" + Geoinformation.getCompleteGeometry().toString() + "', 4326)) and (" + ATT_LANDUSE + " is not null"
+				+ " or " + ATT_AMENITY + " is not null or " + ATT_LEISURE + " is not null or " + ATT_SHOP + " is not null);");
 		
 		// Go through all results
 		while(set.next()){
@@ -320,12 +333,12 @@ class DatabaseReader {
 		
 		Statement statement = connection.createStatement();
 		
-		ResultSet set = statement.executeQuery("select id,nodes, tags from "
-				+ SCHEMA_OSM + "." + TABLE_WAYS + " where tags @> ARRAY['landuse'];");
+		ResultSet set = statement.executeQuery("select " + ATT_ID + ", " + ATT_NODES + ", " + ATT_TAGS + " from "
+				+ SCHEMA_OSM + "." + TABLE_WAYS + " where " + ATT_TAGS + " @> ARRAY['" + ATT_LANDUSE + "'];");
 		
 		while(set.next()){
 			
-			String[] tags = (String[])set.getArray("tags").getArray();
+			String[] tags = (String[])set.getArray(ATT_TAGS).getArray();
 			
 			String landuse = null;
 			int k = 0;
@@ -341,17 +354,17 @@ class DatabaseReader {
 
 				StringBuilder sb = new StringBuilder();
 				
-				Long[] nodes = (Long[])set.getArray("nodes").getArray();
+				Long[] nodes = (Long[])set.getArray(ATT_NODES).getArray();
 				
 				for(int i = 0; i < nodes.length; i++){
 					
 					if(i < nodes.length - 1){
 						
-						sb.append(" id = '" + nodes[i] + "' or");
+						sb.append(" " + ATT_ID + " = '" + nodes[i] + "' or");
 						
 					} else{
 						
-						sb.append(" id = '" + nodes[i] + "'");
+						sb.append(" " + ATT_ID + " = '" + nodes[i] + "'");
 						
 					}
 					
@@ -385,26 +398,26 @@ class DatabaseReader {
 		
 		log.info("Processing relation landuse data...");
 		
-		//parse relations for landuse tags to get multipolygon geometries
+		// Parse relations for landuse tags to get multipolygon geometries
 		Statement statement = connection.createStatement();
 			
-		ResultSet set = statement.executeQuery("select parts, members, tags from "
-				+ SCHEMA_OSM + "." + TABLE_RELATIONS + " where tags @> ARRAY['landuse'];");
+		ResultSet set = statement.executeQuery("select " + ATT_PARTS + ", " + ATT_MEMBERS + ", " + ATT_TAGS + " from "
+				+ SCHEMA_OSM + "." + TABLE_RELATIONS + " where " + ATT_TAGS + " @> ARRAY['" + ATT_LANDUSE + "'];");
 		
 		while(set.next()){
 			
 			StringBuilder sb = new StringBuilder();
 			
-			Long[] parts = (Long[])set.getArray("parts").getArray();
-			String[] tags = (String[])set.getArray("tags").getArray();
-			String[] members = (String[])set.getArray("members").getArray();
+			Long[] parts = (Long[])set.getArray(ATT_PARTS).getArray();
+			String[] tags = (String[])set.getArray(ATT_TAGS).getArray();
+			String[] members = (String[])set.getArray(ATT_MEMBERS).getArray();
 			
 			for(int i = 0; i < parts.length; i++){
 				
 				if(i < parts.length - 1){
-					sb.append(" id = '" + parts[i] + "' or");
+					sb.append(" " + ATT_ID + " = '" + parts[i] + "' or");
 				} else {
-					sb.append(" id = '" + parts[i] + "'");
+					sb.append(" " + ATT_ID + " = '" + parts[i] + "'");
 				}
 				
 			}
@@ -456,19 +469,19 @@ class DatabaseReader {
 			
 			StringBuilder sb = new StringBuilder();
 			
-			Long id = set.getLong("id");
+			Long id = set.getLong(ATT_ID);
 			
-			Long[] nodes = (Long[])set.getArray("nodes").getArray();
+			Long[] nodes = (Long[])set.getArray(ATT_NODES).getArray();
 			
 			for(int i = 0; i < nodes.length; i++){
 				
 				if(i < nodes.length - 1){
 					
-					sb.append(" id = '" + nodes[i] + "' or");
+					sb.append(" " + ATT_ID + " = '" + nodes[i] + "' or");
 					
 				} else{
 					
-					sb.append(" id = '" + nodes[i] + "'");
+					sb.append(" " + ATT_ID + " = '" + nodes[i] + "'");
 					
 				}
 				
@@ -498,7 +511,7 @@ class DatabaseReader {
 		
 		while(set.next()){
 			
-			Long id = set.getLong("id");
+			Long id = set.getLong(ATT_ID);
 			
 			int idx = 0;
 			for(int i = 0; i < nodes.length; i++){
@@ -512,8 +525,8 @@ class DatabaseReader {
 				
 			}
 			
-			double lon = set.getDouble("lon")/Math.pow(10, 7);
-			double lat = set.getDouble("lat")/Math.pow(10, 7);
+			double lon = set.getDouble(ATT_LON)/Math.pow(10, 7);
+			double lat = set.getDouble(ATT_LAT)/Math.pow(10, 7);
 			coordinates[idx] = new Coordinate(lon, lat);
 			coordMap.put(id, coordinates[idx]);
 			
@@ -568,19 +581,18 @@ class DatabaseReader {
 		log.info("Reading in amenities...");
 
 		Statement statement = connection.createStatement();
-		ResultSet set = statement.executeQuery("select st_astext(way), amenity, leisure, shop"
-				+ " from " + SCHEMA_OSM + "." + TABLE_POINTS + " where"
-				+ " st_within(way,st_geomfromtext('" +
-				Geoinformation.getCompleteGeometry().toString() + "',4326)) and ("
-						+ "amenity is not null or leisure is not null or shop is not null)");
+		ResultSet set = statement.executeQuery("select " + ST_ASTEXT + "(" + ATT_WAY + "), " + ATT_AMENITY + ", " + ATT_LEISURE + ", "
+				+ ATT_SHOP + " from " + SCHEMA_OSM + "." + TABLE_POINTS + " where " + ST_WITHIN + "(" + ATT_WAY + "," + ST_GEOMFROMTEXT
+				+ "('" + Geoinformation.getCompleteGeometry().toString() + "',4326)) and (" + ATT_AMENITY + " is not null or " 
+				+ ATT_LEISURE + " is not null or " + ATT_SHOP + " is not null)");
 		
 		while(set.next()){
 			
-			Geometry geometry = wktReader.read(set.getString("st_astext"));
+			Geometry geometry = wktReader.read(set.getString(ST_ASTEXT));
 			
-			String amenity = set.getString("amenity");
-			String leisure = set.getString("leisure");
-			String shop = set.getString("shop");
+			String amenity = set.getString(ATT_AMENITY);
+			String leisure = set.getString(ATT_LEISURE);
+			String shop = set.getString(ATT_SHOP);
 			
 			String landuse = null;
 			
@@ -674,16 +686,15 @@ class DatabaseReader {
 		WKTReader wktReader = new WKTReader();
 		
 		Statement statement = connection.createStatement();
-		String s = "select building, st_astext(way) from "
-				+ "planet_osm_polygon where st_within(way,st_geomfromtext('" +
-				Geoinformation.getCompleteGeometry().toString() + "',4326))"
-						+ " and building is not null";
+		String s = "select " + ATT_BUILDING + ", " + ST_ASTEXT + "(" + ATT_WAY + ") from " + SCHEMA_OSM + "." + TABLE_POLYGONS + " where "
+				+ ST_WITHIN + "(" + ATT_WAY + "," + ST_GEOMFROMTEXT + "('" + Geoinformation.getCompleteGeometry().toString() + "',4326))"
+				+ " and " + ATT_BUILDING + " is not null";
 		ResultSet set = statement.executeQuery(s);
 		
 		while(set.next()){
 			
-			Geometry geometry = wktReader.read(set.getString("st_astext"));
-			String building = set.getString("building");
+			Geometry geometry = wktReader.read(set.getString(ST_ASTEXT));
+			String building = set.getString(ATT_BUILDING);
 			
 			for(AdministrativeUnit au : Geoinformation.getAdminUnits().values()){
 				
@@ -735,14 +746,15 @@ class DatabaseReader {
 	private void readPtStops(Connection connection) throws SQLException, ParseException{
 		
 		Statement statement = connection.createStatement();
-		ResultSet set = statement.executeQuery("select st_astext(way) from planet_osm_point where"
-				+ " st_within(way,st_geomfromtext('" + Geoinformation.getCompleteGeometry().toString() + "',4326));");
+		ResultSet set = statement.executeQuery("select " + ST_ASTEXT + "(" + ATT_WAY + ") from " + SCHEMA_OSM + "." + TABLE_POINTS
+				+ " where " + ST_WITHIN + " (" + ATT_WAY + "," + ST_GEOMFROMTEXT + "('" + Geoinformation.getCompleteGeometry().toString()
+				+ "',4326));");
 		
 		Set<Geometry> ptStops = new HashSet<>();
 		
 		while(set.next()){
 			
-			Geometry g = wktReader.read(set.getString("st_astext"));
+			Geometry g = wktReader.read(set.getString(ST_ASTEXT));
 			
 			for(AdministrativeUnit au : Geoinformation.getAdminUnits().values()){
 				
