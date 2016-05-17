@@ -1,6 +1,7 @@
 package playground.dhosse.scenarios.generic;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
@@ -21,7 +22,8 @@ public class Configuration {
 	//TAGS
 	private static final String SEP = "\t";
 	private static final String COMMENT = "#";
-	
+
+	//CONSTANTS///////////////////////////////////////////////////////////////////////////////////////
 	private static final String SURVEY_AREA_IDS = "surveyAreaIds";
 	private static final String CRS = "coordinateSystem";
 	private static final String WORKING_DIR = "workingDirectory";
@@ -42,7 +44,7 @@ public class Configuration {
 	private static final String WRITE_INTO_DATAHUB = "intoMobiliyDatahub";
 	
 	private static final String RANDOM_SEED = "randomSeed";
-	
+	private static final String OVERWRITE_FILES = "overwriteExistingFiles";
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS
@@ -71,7 +73,8 @@ public class Configuration {
 	private boolean writeDatabaseTables = false;
 	private boolean writeIntoDatahub = false;
 	private String dbNameSpace;
-
+	
+	private boolean overwriteExistingFiles = false;
 	//////////////////////////////////////////////////////////////////////////////////////////////////	
 	
 	public Configuration(String file){
@@ -163,6 +166,10 @@ public class Configuration {
 						
 						this.writeDatabaseTables = Boolean.parseBoolean(lineParts[1]);
 						
+					} else if(OVERWRITE_FILES.equals(lineParts[0])){
+						
+						this.overwriteExistingFiles = Boolean.parseBoolean(lineParts[1]);
+						
 					}
 					
 				}
@@ -184,6 +191,7 @@ public class Configuration {
 		
 		boolean validationError = false;
 		
+		//TODO In fact, one may leave this empty. The resulting survey area would then be all of Germany...
 		if(this.surveyAreaIds.length < 1){
 			
 			validationError = true;
@@ -196,6 +204,29 @@ public class Configuration {
 			
 			validationError = true;
 			log.error("You disabled the use of households data but enabled cars. This won't work!");
+			
+		}
+		
+		File f = new File(this.workingDirectory);
+		if(f.exists()){
+			
+			if(f.list().length > 0){
+				
+				log.warn("The output directory " + this.workingDirectory + " already exists and has files in it!");
+				
+				if(!this.overwriteExistingFiles){
+					
+					log.error("Since you disabled overwriting of existing files, you must either delete existing files or pick another"
+							+ " output directory!");
+					validationError = true;
+					
+				} else {
+					
+					log.warn("All existing files will be overwritten!");
+					
+				}
+				
+			}
 			
 		}
 		
