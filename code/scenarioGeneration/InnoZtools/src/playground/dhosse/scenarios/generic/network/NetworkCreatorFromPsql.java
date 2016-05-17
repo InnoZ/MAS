@@ -46,7 +46,7 @@ public class NetworkCreatorFromPsql {
 	
 	private static final Logger log = Logger.getLogger(NetworkCreatorFromPsql.class);
 
-	//MEMBERS
+	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	private static final String TAG_ACCESS = "access";
 	private static final String TAG_GEOMETRY = "st_astext";
 	private static final String TAG_HIGHWAY = "highway";
@@ -55,7 +55,6 @@ public class NetworkCreatorFromPsql {
 //	private static final String TAG_LANES = "lanes";
 //	private static final String TAG_MAXSPEED = "maxspeed";
 	private static final String TAG_ONEWAY = "oneway";
-
 	private static final String MOTORWAY = "motorway";
 	private static final String MOTORWAY_LINK = "motorway_link";
 	private static final String TRUNK = "trunk";
@@ -69,17 +68,24 @@ public class NetworkCreatorFromPsql {
 	private static final String RESIDENTIAL = "residential";
 	private static final String LIVING_STREET = "living_street";
 	
-	private static int nodeCounter = 0;
-	private static int linkCounter = 0;
-
 	private final Network network;
 	private final CoordinateTransformation transform;
 	private final Configuration configuration;
+	/////////////////////////////////////////////////////////////////////////////////////////
+	
+	//MEMBERS////////////////////////////////////////////////////////////////////////////////	
+	private static int nodeCounter = 0;
+	private static int linkCounter = 0;
+
 	private boolean scaleMaxSpeed = false;
 	private boolean cleanNetwork = false;
 	private boolean simplifyNetworK = false;
 	
 	private Set<String> unknownTags = new HashSet<>();
+	
+	private Map<String, HighwayDefaults> highwayDefaults = new HashMap<String, HighwayDefaults>();
+
+	private Map<Coord,Node> coords2Nodes = new HashMap<Coord, Node>();
 	
 	//TODO what can you modify?
 	static enum modification{};
@@ -89,7 +95,13 @@ public class NetworkCreatorFromPsql {
 	 * 2)survey area or surrounding
 	 */
 	static enum networkDetail{};
-
+	/////////////////////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * 
+	 * @param network An empty MATSim network.
+	 * @param configuration The scenario generation configuration.
+	 */
 	public NetworkCreatorFromPsql(final Network network, Configuration configuration){
 		
 		this.network = network;
@@ -98,23 +110,50 @@ public class NetworkCreatorFromPsql {
 		
 	};
 	
+	/**
+	 * 
+	 * Setter for the network simplification variable.
+	 * 
+	 * @param b true / false
+	 */
 	public void setSimplifyNetwork(boolean b){
 		this.simplifyNetworK = b;
 	}
 	
+	/**
+	 * 
+	 * Setter for the network cleaning variable.
+	 * 
+	 * @param b true / false
+	 */
 	public void setCleanNetwork(boolean b){
 		this.cleanNetwork = b;
 	}
-	
+
+	/**
+	 * 
+	 * Setter for the scale maximum speed variable.
+	 * 
+	 * @param b true / false
+	 */
 	public void setScaleMaxSpeed(boolean b){
 		this.scaleMaxSpeed = b;
 	}
 	
-	
-	private Map<String, HighwayDefaults> highwayDefaults = new HashMap<String, HighwayDefaults>();
-	
+	/**
+	 * 
+	 * The main method of the {@code NetworkCreatorFromPsql}.
+	 * Via database connection OpenStreetMap road data is retrieved and converted into a MATSim network.
+	 * 
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 * @throws ParseException
+	 */
 	public void create() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, ParseException{
 		
+		// If highway defaults have been specified, use them. Else fall back to default values.
 		if(this.highwayDefaults.size() < 1){
 			
 			this.setHighwayDefaults(MOTORWAY, 2.0, 100/3.6, 1.2, 2000.0, true);
@@ -132,55 +171,57 @@ public class NetworkCreatorFromPsql {
 			
 		}
 		
+		// Initialize a WKTReader to convert geometry strings into geometries.
 		WKTReader wktReader = new WKTReader();
 		Set<WayEntry> wayEntries = new HashSet<>();
 		
-		log.info("Connection to mobility database...");
-	
 		Class.forName("org.postgresql.Driver").newInstance();
-		
 		Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:" + configuration.getLocalPort() + "/geodata",
 				configuration.getDatabaseUsername(), configuration.getPassword());
 	
 		if(connection != null){
-			
-			log.info("Connection establised.");
 
 			Statement statement = connection.createStatement();
 			ResultSet result = statement.executeQuery("select osm_id, access, highway, junction, oneway,"
 					+ " st_astext(way) from osm.osm_line where highway is not null and"
-					+ " st_within(way,st_geomfromtext('" + Geoinformation.getCompleteGeometry().toString() + "',4326));");//osm.osm_line
+					+ " st_within(way,st_geomfromtext('" + Geoinformation.getCompleteGeometry().toString() + "',4326));");
 			
 			while(result.next()){
 				
+				// Create a new way entry for each result
 				WayEntry entry = new WayEntry();
 				entry.osmId = result.getString(TAG_ID);
 				entry.accessTag = result.getString(TAG_ACCESS);
 				entry.highwayTag = result.getString(TAG_HIGHWAY);
 				entry.junctionTag = result.getString(TAG_JUNCTION);
-//					entry.lanesTag = result.getString(TAG_LANES);
-//					entry.maxspeedTag = result.getString(TAG_MAXSPEED);
+				//TODO add lanes and maxspeed as attributes into db table
+//				entry.lanesTag = result.getString(TAG_LANES);
+//				entry.maxspeedTag = result.getString(TAG_MAXSPEED);
 				entry.onewayTag = result.getString(TAG_ONEWAY);
 				entry.geometry = wktReader.read(result.getString(TAG_GEOMETRY));
 				wayEntries.add(entry);
 				
 			}
 			
+			// After all road data is retrieved, close the statement and the connection.
 			result.close();
 			statement.close();
 			
 		}
 		
 		connection.close();
-		
+
+		// Convert the way entries into a MATSim network
 		processWayEntries(wayEntries);
 		
+		// Simplify the network if needed
 		if(this.simplifyNetworK) {
 			
 			new NetworkSimplifier().run(network);
 			
 		}
 		
+		// Clean the network to avoid dead ends during simulation (clustered network)
 		if(this.cleanNetwork){
 		
 			new NetworkCleaner().run(network);
@@ -189,6 +230,17 @@ public class NetworkCreatorFromPsql {
 			
 	}
 	
+	/**
+	 * 
+	 * Setter for highway defaults.
+	 * 
+	 * @param highwayType The road type.
+	 * @param lanesPerDirection Number of lanes per direction.
+	 * @param freespeed Allowed free speed on this road type.
+	 * @param freespeedFactor Factor for scaling of free speed.
+	 * @param laneCapacity_vehPerHour The capacity of one lane on this road type per hour.
+	 * @param oneway Road type is only accessible in one direction or not.
+	 */
 	public void setHighwayDefaults(final String highwayType, final double lanesPerDirection, final double freespeed,
 			final double freespeedFactor, final double laneCapacity_vehPerHour, final boolean oneway){
 		
@@ -196,6 +248,16 @@ public class NetworkCreatorFromPsql {
 		
 	}
 	
+	/**
+	 * 
+	 * Setter for highway defaults. The one way attribute is set to false in this method.
+	 * 
+	 * @param highwayType The road type.
+	 * @param lanesPerDirection Number of lanes per direction.
+	 * @param freespeed Allowed free speed on this road type.
+	 * @param freespeedFactor Factor for scaling of free speed.
+	 * @param laneCapacity_vehPerHour The capacity of one lane on this road type per hour.
+	 */
 	public void setHighwayDefaults(final String highwayType, final double lanesPerDirection, final double freespeed,
 			final double freespeedFactor, final double laneCapacity_vehPerHour){
 		
@@ -205,7 +267,7 @@ public class NetworkCreatorFromPsql {
 	
 	/**
 	 * 
-	 * For later changes (e.g. additional modes, additional links)
+	 * Method to perform changes on an existing network (e.g. additional network modes, additional links).
 	 * 
 	 * @param network
 	 */
@@ -213,31 +275,45 @@ public class NetworkCreatorFromPsql {
 		
 	}
 	
+	/**
+	 * 
+	 * Transforms OSM ways into MATSim nodes and links and adds them to the network.
+	 * 
+	 * @param wayEntries The collection of entries for each OSM way.
+	 */
 	private void processWayEntries(Set<WayEntry> wayEntries){
 		
+		// Create a new geometry factory to create points for MATSim nodes
+		// This makes it easier to perform methods like contains
 		GeometryFactory gf = new GeometryFactory();
 		
+		// Iterate over all OSM ways
 		for(WayEntry entry : wayEntries){
 
-			//if access is restricted, we skip the way
+			// If access is restricted, we skip the way
 			if("no".equals(entry.accessTag)) continue;
 			
 			Coordinate[] coordinates = entry.geometry.getCoordinates();
 			
-			//calc length of the way
 			if(coordinates.length > 1){
 				
+				// Set the from coordinate initially and the current way length to zero
 				Coordinate from = coordinates[0];
 				double length = 0.;
 				Coordinate lastTo = from;
 				
+				// Go through all coordinates contained in the way
 				for(int i = 1; i < coordinates.length; i++){
 					
+					// Get the next coordinate in the sequence and calculate the length between it and the last coordinate
 					Coordinate next = coordinates[i];
-					length = CoordUtils.calcDistance(this.transform.transform(MGC.coordinate2Coord(lastTo)), this.transform.transform(MGC.coordinate2Coord(next)));
+					
+					length = CoordUtils.calcDistance(this.transform.transform(MGC.coordinate2Coord(lastTo)),
+							this.transform.transform(MGC.coordinate2Coord(next)));
 
 					for(AdministrativeUnit au : Geoinformation.getAdminUnits().values()){
-						
+
+						// If the coordinates are contained in the survey area, add a new link to the network
 						if(au.getGeometry().contains(gf.createPoint(lastTo)) ||
 								au.getGeometry().contains(gf.createPoint(next))){
 							//TODO make a difference between inner and outer au's (w/ respect to highway hierarchy)
@@ -246,6 +322,7 @@ public class NetworkCreatorFromPsql {
 						}
 						
 					}
+					//Update last visited coordinate in the sequence
 					lastTo = next;
 					
 				}
@@ -261,14 +338,21 @@ public class NetworkCreatorFromPsql {
 		
 	}
 	
-	private Map<Coord,Node> coords2Nodes = new HashMap<Coord, Node>();
-	
+	/**
+	 * 
+	 * The actual conversion from OSM into MATSim data.
+	 * 
+	 * @param entry The OSM way entry.
+	 * @param length The euclidean length of the link.
+	 * @param from The coordinate at the beginning of the link.
+	 * @param to The coordinate at the end of the link.
+	 */
 	private void createLink(WayEntry entry, double length, Coordinate from, Coordinate to){
 		
 		HighwayDefaults defaults = this.highwayDefaults.get(entry.highwayTag);
 		
-		//if there are defaults for the highway type of the current way, we proceed
-		//else the way is simply skipped
+		// If there are defaults for the highway type of the current way, we proceed
+		// Else the way is simply skipped
 		if(defaults != null){
 			
 			//set all values to default
@@ -279,7 +363,7 @@ public class NetworkCreatorFromPsql {
 			boolean oneway = defaults.oneway;
 			boolean onewayReverse = false;
 
-			//freespeed tag
+			// Handle the freespeed tag
 			String freespeedTag = entry.maxspeedTag;
 			
 			if(freespeedTag != null){
@@ -307,7 +391,7 @@ public class NetworkCreatorFromPsql {
 				
 			}
 			
-			//oneway tag
+			// Handle the oneway tag
 			if(entry.onewayTag != null){
 
 				if(entry.onewayTag.equals("yes") || entry.onewayTag.equals("true") || entry.onewayTag.equals("1")){
@@ -338,6 +422,7 @@ public class NetworkCreatorFromPsql {
 				
 			}
 			
+			// Handle the lanes tag.
 			String lanesTag = entry.lanesTag;
 			if(lanesTag != null){
 				
@@ -368,6 +453,7 @@ public class NetworkCreatorFromPsql {
 					
 			}
 			
+			// Set the link's capacity and the resulting freespeed (if it's meant to be scaled)
 			double capacity = lanesPerDirection * laneCapacity;
 			
 			if(this.scaleMaxSpeed){
@@ -376,19 +462,21 @@ public class NetworkCreatorFromPsql {
 				
 			}
 
+			// If a node already exists at the from location, use it as from node, else create a new one
 			Coord fromCoord = this.transform.transform(MGC.coordinate2Coord(from));
 			Node fromNode = null;
 			if(!coords2Nodes.containsKey(fromCoord)){
-				fromNode = setNode(fromCoord);
+				fromNode = createNode(fromCoord);
 				coords2Nodes.put(fromCoord, fromNode);
 			} else {
 				fromNode = coords2Nodes.get(fromCoord);
 			}
 			
+			// If a node already exists at the to location, use it as to node, else create a new one			
 			Coord toCoord = this.transform.transform(MGC.coordinate2Coord(to));
 			Node toNode = null;
 			if(!coords2Nodes.containsKey(toCoord)){
-				toNode = setNode(toCoord);
+				toNode = createNode(toCoord);
 				coords2Nodes.put(toCoord, toNode);
 			} else {
 				toNode = coords2Nodes.get(toCoord);
@@ -396,6 +484,7 @@ public class NetworkCreatorFromPsql {
 			
 			String origId = entry.osmId;
 			
+			// Create a link in one direction
 			if(!onewayReverse){
 				
 				Link link = network.getFactory().createLink(Id.createLinkId(linkCounter), fromNode, toNode);
@@ -416,6 +505,7 @@ public class NetworkCreatorFromPsql {
 				
 			}
 			
+			// If it's not a oneway link, create another link in the opposite direction
 			if(!oneway){
 				
 				Link link = network.getFactory().createLink(Id.createLinkId(linkCounter), toNode, fromNode);
@@ -440,7 +530,14 @@ public class NetworkCreatorFromPsql {
 		
 	}
 	
-	private Node setNode(Coord coord){
+	/**
+	 * 
+	 * Creates a new MATSim node.
+	 * 
+	 * @param coord The location of the node.
+	 * @return A MATSim node.
+	 */
+	private Node createNode(Coord coord){
 		
 		Node node = null;
 		
@@ -452,6 +549,13 @@ public class NetworkCreatorFromPsql {
 		
 	}
 
+	/**
+	 * 
+	 * Stores default values for link characteristics.
+	 * 
+	 * @author dhosse
+	 *
+	 */
 	static class HighwayDefaults{
 		
 		double freespeed;
@@ -470,6 +574,13 @@ public class NetworkCreatorFromPsql {
 		
 	}
 	
+	/**
+	 * 
+	 * Wrapper class that stores the OSM data of a way.
+	 * 
+	 * @author dhosse
+	 *
+	 */
 	static class WayEntry{
 		
 		String osmId;
