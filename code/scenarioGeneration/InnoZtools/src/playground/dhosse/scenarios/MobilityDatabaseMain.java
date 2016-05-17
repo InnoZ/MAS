@@ -98,7 +98,7 @@ public class MobilityDatabaseMain {
 				// Create a MATSim network from OpenStreetMap data
 				NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(),
 						configuration);
-//				nc.setSimplifyNetwork(true); TODO not implemented in matsim 0.7.0
+				nc.setSimplifyNetwork(true);
 				nc.setCleanNetwork(true);
 				nc.setScaleMaxSpeed(true);
 				nc.create();
