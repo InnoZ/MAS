@@ -43,7 +43,7 @@ public class Configuration {
 	private static final String LOCAL_PORT = "localPort";
 	private static final String DB_SCHEMA_NAME = "databaseSchemaName";
 	private static final String WRITE_DB_OUTPUT = "writeTables";
-	private static final String WRITE_INTO_DATAHUB = "intoMobiliyDatahub";
+	private static final String WRITE_INTO_DATAHUB = "intoMobilityDatahub";
 	
 	private static final String RANDOM_SEED = "randomSeed";
 	private static final String OVERWRITE_FILES = "overwriteExistingFiles";
