@@ -1,4 +1,4 @@
-package playground.dhosse.scenarioGeneration.population.io.surveys;
+package playground.dhosse.scenarioGeneration.population.surveys;
 
 public class SurveyPlanActivity implements SurveyPlanElement {
 

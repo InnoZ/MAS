@@ -1,4 +1,4 @@
-package playground.dhosse.scenarioGeneration.population.io.surveys;
+package playground.dhosse.scenarioGeneration.population.surveys;
 
 import java.util.HashSet;
 import java.util.Set;
