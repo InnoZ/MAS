@@ -29,18 +29,19 @@ public class Distribution {
 	private LeastCostPathCalculator lcpc;
 	private final Network network;
 	
-	public Distribution(final Network network, MiDParser parser, final CoordinateTransformation transformation){
+	public Distribution(final Network network, final Geoinformation geoinformation, MiDParser parser,
+			final CoordinateTransformation transformation){
 
 		this.network = network;
 		TravelDisutility tdis = new FreespeedTravelTimeAndDisutility(-6, 6, 0);
 		TravelTime ttime = new FreespeedTravelTimeAndDisutility(-6, 6, 0);
 		this.lcpc = new Dijkstra(network, tdis, ttime);
 		this.transformation = transformation;
-		this.create(parser);
+		this.create(parser, geoinformation);
 		
 	}
 	
-	private void create(MiDParser parser){
+	private void create(MiDParser parser, final Geoinformation geoinformation){
 		
 		String[] activityTypes = {ActivityTypes.WORK, ActivityTypes.EDUCATION, ActivityTypes.SHOPPING, ActivityTypes.LEISURE, ActivityTypes.OTHER};
 		String[] modes = {TransportMode.bike, TransportMode.car, TransportMode.pt, TransportMode.ride, TransportMode.walk};
@@ -49,11 +50,11 @@ public class Distribution {
 		
 		Map<String, Double> rowMinima = new HashMap<>();
 		
-		for(AdministrativeUnit u1 : Geoinformation.getAdminUnits().values()){
+		for(AdministrativeUnit u1 : geoinformation.getSurveyArea().values()){
 			
 			rowMinima.put(u1.getId(), Double.MAX_VALUE);
 			
-			for(AdministrativeUnit u2 : Geoinformation.getAdminUnits().values()){
+			for(AdministrativeUnit u2 : geoinformation.getSurveyArea().values()){
 				
 				double distance = 0d;
 
@@ -88,17 +89,17 @@ public class Distribution {
 			
 		}
 		
-		for(AdministrativeUnit u1 : Geoinformation.getAdminUnits().values()){
-			for(AdministrativeUnit u2 : Geoinformation.getAdminUnits().values()){
+		for(AdministrativeUnit u1 : geoinformation.getSurveyArea().values()){
+			for(AdministrativeUnit u2 : geoinformation.getSurveyArea().values()){
 				if(u1.equals(u2)){
 					distances.createEntry(u1.getId(), u2.getId(), rowMinima.get(u1.getId()) / 3 );
 				}
 			}
 		}
 		
-		for(AdministrativeUnit u1 : Geoinformation.getAdminUnits().values()){
+		for(AdministrativeUnit u1 : geoinformation.getSurveyArea().values()){
 			
-			for(AdministrativeUnit u2 : Geoinformation.getAdminUnits().values()){
+			for(AdministrativeUnit u2 : geoinformation.getSurveyArea().values()){
 				
 				for(String key : activityTypes){
 					

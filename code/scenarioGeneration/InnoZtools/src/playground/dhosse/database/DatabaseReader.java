@@ -15,7 +15,9 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -54,9 +56,9 @@ public class DatabaseReader {
 
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	private static final Logger log = Logger.getLogger(DatabaseReader.class);
-	private final GeometryFactory gFactory = new GeometryFactory(new PrecisionModel(
-			PrecisionModel.maximumPreciseValue));
-	private final WKTReader wktReader = new WKTReader();
+	private final GeometryFactory gFactory;
+	private final WKTReader wktReader;
+	private final Geoinformation geoinformation;
 	/////////////////////////////////////////////////////////////////////////////////////////
 
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
@@ -64,6 +66,68 @@ public class DatabaseReader {
 	private CoordinateTransformation ct;
 	private int counter = 0;
 	/////////////////////////////////////////////////////////////////////////////////////////
+	
+	public DatabaseReader(final Geoinformation geoinformation){
+		
+		this.gFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.maximumPreciseValue));
+		this.wktReader = new WKTReader();
+		this.geoinformation = geoinformation;
+		
+	}
+	
+	/**
+	 * Imports administrative borders and OpenStreetMap data from the mobility database.
+	 * 
+	 * 
+	 * @param configuration The configuration for the scenario generation process.
+	 * @param ids The survey area id(s).
+	 * @param scenario The MATSim scenario.
+	 */
+	public void readGeodataFromDatabase(Configuration configuration, Set<String> ids,
+			Scenario scenario, DatabaseReader dbConnection) {
+		
+		try {
+			
+			// Create a postgresql database connection
+			Class.forName("org.postgresql.Driver").newInstance();
+			Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:" +
+					configuration.getLocalPort() + "/geodata", configuration.getDatabaseUsername(),
+					configuration.getPassword());
+			
+			if(connection != null){
+
+				Log.info("Successfully connected with geodata database...");
+				
+				// Read the administrative borders that have one of the specified ids
+				dbConnection.readAdminBorders(connection, configuration, ids);
+				
+				// If no administrative units were created, we are unable to proceed
+				if(this.geoinformation.getSurveyArea().size() < 1){
+				
+					Log.error("No administrative boundaries were created!");
+					Log.error("Maybe the ids you specified don't exist in the database.");
+					throw new RuntimeException("Execution aborts...");
+					
+				}
+				
+				// Otherwise, read in the OSM data
+				dbConnection.readOsmData(connection, configuration);
+				
+			}
+			
+			// Close the connection when everything's done.
+			connection.close();
+			
+			Log.info("Done.");
+
+		} catch (SQLException | InstantiationException | IllegalAccessException | ClassNotFoundException | 
+				MismatchedDimensionException | FactoryException | ParseException | TransformException e) {
+
+			e.printStackTrace();
+			
+		}
+		
+	}
 	
 	/**
 	 * 
@@ -115,8 +179,6 @@ public class DatabaseReader {
 				+ DatabaseConstants.functions.st_astext.name() + "(" + DatabaseConstants.ATT_GEOM + ")" + " from "
 				+ DatabaseConstants.schemata.gadm.name() + "." + DatabaseConstants.tables.districts.name() + " where" + builder.toString());
 
-//		ResultSet set = statement.executeQuery("select vkz_nr, st_astext(geom) from gadm.berlin_vz;");
-		
 		// This is needed to transform the WGS84 geometries into the specified CRS
 		MathTransform t = CRS.findMathTransform(CRS.decode(Geoinformation.AUTH_KEY_WGS84, true),
 				CRS.decode(configuration.getCrs(), true));
@@ -129,7 +191,6 @@ public class DatabaseReader {
 			
 			//TODO attributes have to be added to the table
 			String key = set.getString(DatabaseConstants.MUN_KEY).substring(1);
-//			String key = set.getString("vkz_nr");
 			String g = set.getString(DatabaseConstants.functions.st_astext.name());
 //			long bland = set.getLong(BLAND);
 //				int districtType = set.getInt("");
@@ -150,7 +211,7 @@ public class DatabaseReader {
 //					au.setDistrictType(districtType);
 //					au.setMunicipalityType(municipalityType);
 //					au.setRegionType(regionType);
-					Geoinformation.getAdminUnits().put(key, au);
+					this.geoinformation.getSurveyArea().put(key, au);
 					
 					// Store all geometries inside a collection to get the survey area geometry in the end
 					geometryCollection.add(au.getGeometry());
@@ -162,8 +223,8 @@ public class DatabaseReader {
 		}
 		
 		// Get the survey area by building the bounding box of all geometries 
-		Geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection).getEnvelope());
-		this.boundingBox = JTS.transform((Geometry) Geoinformation.getCompleteGeometry().clone(), t)
+		this.geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection).getEnvelope());
+		this.boundingBox = JTS.transform((Geometry) this.geoinformation.getCompleteGeometry().clone(), t)
 				.getEnvelope();
 		
 		// Close the result set and the statement
@@ -261,9 +322,9 @@ public class DatabaseReader {
 				+ DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + ", " + DatabaseConstants.functions.st_astext.name() + "("
 				+ DatabaseConstants.ATT_WAY + ") from " + DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_polygon.name()
 				+ " where "	+ DatabaseConstants.functions.st_within.name() + "(" + DatabaseConstants.ATT_WAY + ", "
-				+ DatabaseConstants.functions.st_geomfromtext.name() + "('"	+ Geoinformation.getCompleteGeometry().toString() + "', 4326)) and ("
-				+ DatabaseConstants.ATT_LANDUSE + " is not null" + " or " + DatabaseConstants.ATT_AMENITY + " is not null or "
-				+ DatabaseConstants.ATT_LEISURE + " is not null or " + DatabaseConstants.ATT_SHOP + " is not null);");
+				+ DatabaseConstants.functions.st_geomfromtext.name() + "('"	+ this.geoinformation.getCompleteGeometry().toString()
+				+ "', 4326)) and (" + DatabaseConstants.ATT_LANDUSE + " is not null" + " or " + DatabaseConstants.ATT_AMENITY
+				+ " is not null or " + DatabaseConstants.ATT_LEISURE + " is not null or " + DatabaseConstants.ATT_SHOP + " is not null);");
 		
 		// Go through all results
 		while(set.next()){
@@ -566,7 +627,7 @@ public class DatabaseReader {
 				+ "), "	+ DatabaseConstants.ATT_AMENITY + ", " + DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + " from "
 				+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_point.name() + " where "
 				+ DatabaseConstants.functions.st_within + "(" + DatabaseConstants.ATT_WAY + "," + DatabaseConstants.functions.st_geomfromtext.name()
-				+ "('" + Geoinformation.getCompleteGeometry().toString() + "',4326)) and (" + DatabaseConstants.ATT_AMENITY
+				+ "('" + this.geoinformation.getCompleteGeometry().toString() + "',4326)) and (" + DatabaseConstants.ATT_AMENITY
 				+ " is not null or " + DatabaseConstants.ATT_LEISURE + " is not null or " + DatabaseConstants.ATT_SHOP + " is not null)");
 		
 		while(set.next()){
@@ -614,16 +675,16 @@ public class DatabaseReader {
 			
 			if(g.isValid()){
 
-				for(AdministrativeUnit au : Geoinformation.getAdminUnits().values()){
+				for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
 					
 					if(au.getGeometry().contains(g) || au.getGeometry().touches(g) || au.getGeometry().intersects(g)){
 						
 						au.addLanduseGeometry(landuse, g);
 						
-						if(Geoinformation.getQuadTreeForActType(landuse) == null){
+						if(this.geoinformation.getQuadTreeForActType(landuse) == null){
 							
 							Coordinate[] coordinates = boundingBox.getCoordinates();
-							Geoinformation.createQuadTreeForActType(landuse, new double[]{coordinates[0].x, coordinates[0].y,
+							this.geoinformation.createQuadTreeForActType(landuse, new double[]{coordinates[0].x, coordinates[0].y,
 									coordinates[2].x, coordinates[2].y});
 							
 						} 
@@ -632,7 +693,7 @@ public class DatabaseReader {
 						
 						if(this.boundingBox.contains(MGC.coord2Point(c))){
 							
-							Geoinformation.getQuadTreeForActType(landuse).put(c.getX(), c.getY(), g);
+							this.geoinformation.getQuadTreeForActType(landuse).put(c.getX(), c.getY(), g);
 							
 						}
 						
@@ -673,7 +734,7 @@ public class DatabaseReader {
 		String s = "select " + DatabaseConstants.ATT_BUILDING + ", " + DatabaseConstants.functions.st_astext.name() + "("
 				+ DatabaseConstants.ATT_WAY	+ ") from " + DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_polygon
 				+ " where " + DatabaseConstants.functions.st_within + "(" + DatabaseConstants.ATT_WAY + ","
-				+ DatabaseConstants.functions.st_geomfromtext.name() + "('" + Geoinformation.getCompleteGeometry().toString() + "',4326))"
+				+ DatabaseConstants.functions.st_geomfromtext.name() + "('" + this.geoinformation.getCompleteGeometry().toString() + "',4326))"
 				+ " and " + DatabaseConstants.ATT_BUILDING + " is not null";
 		ResultSet set = statement.executeQuery(s);
 		
@@ -682,7 +743,7 @@ public class DatabaseReader {
 			Geometry geometry = wktReader.read(set.getString(DatabaseConstants.functions.st_astext.name()));
 			String building = set.getString(DatabaseConstants.ATT_BUILDING);
 			
-			for(AdministrativeUnit au : Geoinformation.getAdminUnits().values()){
+			for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
 				
 				String landuse = getTypeOfBuilding(building);
 				
@@ -735,7 +796,7 @@ public class DatabaseReader {
 		ResultSet set = statement.executeQuery("select " + DatabaseConstants.functions.st_astext + "(" + DatabaseConstants.ATT_WAY
 				+ ") from "	+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_point.name() + " where "
 				+ DatabaseConstants.functions.st_within + " (" + DatabaseConstants.ATT_WAY + "," + DatabaseConstants.functions.st_geomfromtext.name()
-				+ "('" + Geoinformation.getCompleteGeometry().toString() + "',4326));");
+				+ "('" + this.geoinformation.getCompleteGeometry().toString() + "',4326));");
 		
 		Set<Geometry> ptStops = new HashSet<>();
 		
@@ -743,7 +804,7 @@ public class DatabaseReader {
 			
 			Geometry g = wktReader.read(set.getString(DatabaseConstants.functions.st_astext.name()));
 			
-			for(AdministrativeUnit au : Geoinformation.getAdminUnits().values()){
+			for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
 				
 				if(au.getGeometry().contains(g)){
 					
@@ -755,7 +816,7 @@ public class DatabaseReader {
 				
 			}
 			
-			Geoinformation.setCatchmentAreaPt(gFactory.buildGeometry(ptStops));
+			this.geoinformation.setCatchmentAreaPt(gFactory.buildGeometry(ptStops));
 			
 		}
 		
@@ -824,6 +885,8 @@ public class DatabaseReader {
 	
 	public Set<WayEntry> readOsmRoads(final Configuration configuration) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException, ParseException{
 		
+		log.info("Reading osm ways from database...");
+		
 		Set<WayEntry> wayEntries = new HashSet<>();
 		
 		Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
@@ -839,7 +902,7 @@ public class DatabaseReader {
 					+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_line.name() + " where "
 					+ DatabaseConstants.TAG_HIGHWAY + " is not null and " + DatabaseConstants.functions.st_within.name() + "("
 					+ DatabaseConstants.ATT_WAY + "," + DatabaseConstants.functions.st_geomfromtext.name() + "('"
-					+ Geoinformation.getCompleteGeometry().toString() + "',4326));");
+					+ this.geoinformation.getCompleteGeometry().toString() + "',4326));");
 			
 			while(result.next()){
 				
@@ -865,6 +928,8 @@ public class DatabaseReader {
 		}
 		
 		connection.close();
+		
+		log.info("Done.");
 		
 		return wayEntries;
 		

@@ -49,6 +49,7 @@ public class NetworkCreatorFromPsql {
 	private final Network network;
 	private final CoordinateTransformation transformation;
 	private final Configuration configuration;
+	private final Geoinformation geoinformation;
 	
 	public static final String MOTORWAY = "motorway";
 	public static final String MOTORWAY_LINK = "motorway_link";
@@ -97,9 +98,11 @@ public class NetworkCreatorFromPsql {
 	 * @throws FactoryException 
 	 * @throws NoSuchAuthorityCodeException 
 	 */
-	public NetworkCreatorFromPsql(final Network network, Configuration configuration) throws NoSuchAuthorityCodeException, FactoryException{
+	public NetworkCreatorFromPsql(final Network network, final Geoinformation geoinformation, Configuration configuration)
+			throws NoSuchAuthorityCodeException, FactoryException{
 		
 		this.network = network;
+		this.geoinformation = geoinformation;
 		
 		CoordinateReferenceSystem from = CRS.decode("EPSG:4326", true);
 		CoordinateReferenceSystem to = CRS.decode(configuration.getCrs(), true);
@@ -270,7 +273,7 @@ public class NetworkCreatorFromPsql {
 					length = CoordUtils.calcDistance(this.transformation.transform(MGC.coordinate2Coord(lastTo)),
 							this.transformation.transform(MGC.coordinate2Coord(next)));
 
-					for(AdministrativeUnit au : Geoinformation.getAdminUnits().values()){
+					for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
 
 						// If the coordinates are contained in the survey area, add a new link to the network
 						if(au.getGeometry().contains(gf.createPoint(lastTo)) ||

@@ -89,13 +89,15 @@ public class MobilityDatabaseMain {
 					
 				}
 				
-				DatabaseReader dbReader = new DatabaseReader();
-				
-				// Read everything concerning geodata (borders, landuse, buildings, ...)
-				Geoinformation.readGeodataFromDatabase(configuration, ids, scenario, dbReader);
+				// Container for geoinformation (admin borders, landuse)
+				Geoinformation geoinformation = new Geoinformation();
+
+				// A class that reads data from database tables into local containers
+				DatabaseReader dbReader = new DatabaseReader(geoinformation);
+				dbReader.readGeodataFromDatabase(configuration, ids, scenario, dbReader);
 				
 				// Create a MATSim network from OpenStreetMap data
-				NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(),
+				NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(), geoinformation,
 						configuration);
 				nc.setSimplifyNetwork(true);
 				nc.setCleanNetwork(true);
@@ -103,7 +105,7 @@ public class MobilityDatabaseMain {
 				nc.create(dbReader);
 				
 				// Create a MATSim population
-				PopulationCreator.run(configuration, scenario);
+				new PopulationCreator(geoinformation).run(configuration, scenario);
 				
 				// Dump scenario elements into working directory
 				new NetworkWriter(scenario.getNetwork()).write(configuration

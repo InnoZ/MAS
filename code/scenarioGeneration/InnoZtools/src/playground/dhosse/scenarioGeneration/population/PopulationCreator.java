@@ -101,6 +101,8 @@ public class PopulationCreator {
 	};
 	
 	private static final Logger log = Logger.getLogger(PopulationCreator.class);
+	
+	private final Geoinformation geoinformation;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 
@@ -126,7 +128,11 @@ public class PopulationCreator {
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
 	// No instance!
-	private PopulationCreator(){};
+	public PopulationCreator(final Geoinformation geoinformation){
+		
+		this.geoinformation = geoinformation;
+		
+	};
 	
 	/**
 	 * 
@@ -139,7 +145,7 @@ public class PopulationCreator {
 	 * @throws NoSuchAuthorityCodeException
 	 * @throws FactoryException
 	 */
-	public static void run(Configuration configuration, Scenario scenario) throws NoSuchAuthorityCodeException,
+	public void run(Configuration configuration, Scenario scenario) throws NoSuchAuthorityCodeException,
 		FactoryException {
 		
 		log.info("Creating population for MATSim scenario...");
@@ -185,14 +191,14 @@ public class PopulationCreator {
 	 * 
 	 * @param scenario The MATsim scenario eventually containing all of the information about network, demand etc.
 	 */
-	private static void createDummyPopulation(Scenario scenario){
+	private void createDummyPopulation(Scenario scenario){
 		
 		log.info("Creating a dummy population without any preferences...");
 		
 		// From each administrative unit to each administrative unit, create a certain amount of commuters
-		for(Entry<String,AdministrativeUnit> fromEntry : Geoinformation.getAdminUnits().entrySet()){
+		for(Entry<String,AdministrativeUnit> fromEntry : this.geoinformation.getSurveyArea().entrySet()){
 			
-			for(Entry<String,AdministrativeUnit> toEntry : Geoinformation.getAdminUnits().entrySet()){
+			for(Entry<String,AdministrativeUnit> toEntry : this.geoinformation.getSurveyArea().entrySet()){
 
 				//TODO maybe make the max number configurable...
 				for(int i = 0; i < 1000; i++){
@@ -259,7 +265,7 @@ public class PopulationCreator {
 	 * @param configuration The scenario generation configuration file.
 	 * @param scenario A Matsim scenario.
 	 */
-	private static void createCommuterPopulation(Configuration configuration, Scenario scenario){
+	private void createCommuterPopulation(Configuration configuration, Scenario scenario){
 		
 //		if(!configuration.getReverseCommuterFile().equals(null) &&
 //				!configuration.getCommuterFile().equals(null)){
@@ -304,7 +310,7 @@ public class PopulationCreator {
 	 * @param configuration The scenario generation configuration file.
 	 * @param scenario A MATSim scenario.
 	 */
-	private static void createCompletePopulation(Configuration configuration, Scenario scenario){
+	private void createCompletePopulation(Configuration configuration, Scenario scenario){
 		
 		// Run the survey data parser that stores all of the travel information
 		MiDParser parser = new MiDParser();
@@ -313,7 +319,7 @@ public class PopulationCreator {
 		
 		// Initialize the disutilities for traveling from each cell to each other cell
 		// to eventually get a gravitation model.
-		distribution = new Distribution(scenario.getNetwork(), parser, transformation);
+		distribution = new Distribution(scenario.getNetwork(), this.geoinformation, parser, transformation);
 		
 		// Choose the method for demand generation that has been specified in the configuration
 		if(configuration.isUsingHouseholds()){
@@ -336,7 +342,7 @@ public class PopulationCreator {
 	 * @param scenario A MATSim scenario.
 	 * @param parser The survey parser containing all of the information.
 	 */
-	private static void createHouseholds(Configuration configuration, Scenario scenario, SurveyDataContainer container){
+	private void createHouseholds(Configuration configuration, Scenario scenario, SurveyDataContainer container){
 		
 		// Get the MATSim population and initialize person attributes
 		Population population = scenario.getPopulation();
@@ -364,11 +370,11 @@ public class PopulationCreator {
 
 			currentHomeCell = null;
 			AdministrativeUnit au = null;
-			double r = random.nextDouble() * Geoinformation.getTotalWeightForLanduseKey("residential");
+			double r = random.nextDouble() * this.geoinformation.getTotalWeightForLanduseKey("residential");
 			
 			double r2 = 0.;
 			
-			for(AdministrativeUnit admin : Geoinformation.getAdminUnits().values()){
+			for(AdministrativeUnit admin : this.geoinformation.getSurveyArea().values()){
 				
 				r2 += admin.getWeightForKey("residential");
 				
@@ -485,7 +491,7 @@ public class PopulationCreator {
 	 * @param scenario The MATSim scenario.
 	 * @param parser The survey parser.
 	 */
-	private static void createPersons(Configuration configuration, Scenario scenario, SurveyDataContainer container){
+	private void createPersons(Configuration configuration, Scenario scenario, SurveyDataContainer container){
 		
 		// Get the MATSim population and initialize person attributes
 		Population population = scenario.getPopulation();
@@ -493,7 +499,7 @@ public class PopulationCreator {
 		scenario.addScenarioElement(PersonUtils.PERSON_ATTRIBUTES, personAttributes);
 		
 		// TODO this is not final and most likely won't work like that /dhosse, 05/16
-		for(AdministrativeUnit au : Geoinformation.getAdminUnits().values()){
+		for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
 			
 			double personalRandom = random.nextDouble();
 			
@@ -528,7 +534,7 @@ public class PopulationCreator {
 	 * @return A MATSim person with an initial daily plan.
 	 */
 	@SuppressWarnings("deprecation")
-	private static Person createPerson(SurveyPerson personTemplate, Population population,
+	private Person createPerson(SurveyPerson personTemplate, Population population,
 			ObjectAttributes personAttributes, double personalRandom, int i, Coord homeCoord) {
 
 		// Initialize main act location, last leg, last act cell and the coordinate of the last activity as null to avoid errors...
@@ -610,7 +616,7 @@ public class PopulationCreator {
 				
 				// Also, add all cells of which the sum of the distances between their centroid and the centroids of
 				// the home and the main act cell is less than twice the distance between the home and the main activity location-
-				for(AdministrativeUnit au : Geoinformation.getAdminUnits().values()){
+				for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
 					
 					double a = CoordUtils.calcDistance(transformation.transform(
 							MGC.point2Coord(currentHomeCell.getGeometry().getCentroid())),
@@ -682,7 +688,7 @@ public class PopulationCreator {
 	 * @param mpe The survey plan element (in this case: way)
 	 * @return
 	 */
-	private static Leg createLeg(Population population,
+	private Leg createLeg(Population population,
 			MiDPlanElement mpe) {
 		
 		MiDWay way = (MiDWay)mpe;
@@ -709,7 +715,7 @@ public class PopulationCreator {
 	 * @param personTemplate The survey person.
 	 * @return The administrative unit in which the activity most likely is located.
 	 */
-	private static AdministrativeUnit locateActivityInCell(String activityType, String mode, SurveyPerson personTemplate){
+	private AdministrativeUnit locateActivityInCell(String activityType, String mode, SurveyPerson personTemplate){
 		
 		return locateActivityInCell(null, activityType, mode, personTemplate, 0d);
 		
@@ -727,7 +733,7 @@ public class PopulationCreator {
 	 * @param distance The distance traveled between the last and the current activity.
 	 * @return
 	 */
-	private static AdministrativeUnit locateActivityInCell(String fromId, String activityType, String mode, SurveyPerson personTemplate, double distance){
+	private AdministrativeUnit locateActivityInCell(String fromId, String activityType, String mode, SurveyPerson personTemplate, double distance){
 		
 		Set<String> modes = new HashSet<String>();
 		
@@ -736,7 +742,7 @@ public class PopulationCreator {
 			// If the person walked, it most likely didn't leave the last cell (to avoid very long walk legs)
 			if(mode.equals(TransportMode.walk) && fromId != null){
 				
-				return Geoinformation.getAdminUnits().get(fromId);
+				return this.geoinformation.getSurveyArea().get(fromId);
 				
 			}
 			
@@ -782,7 +788,7 @@ public class PopulationCreator {
 		
 		if(adminUnits == null){
 			
-			adminUnits = Geoinformation.getAdminUnits().values();
+			adminUnits = this.geoinformation.getSurveyArea().values();
 			
 		}
 		
@@ -833,7 +839,7 @@ public class PopulationCreator {
 			
 			accumulatedWeight += entry.getValue();
 			if(r <= accumulatedWeight){
-				result = Geoinformation.getAdminUnits().get(entry.getKey());
+				result = this.geoinformation.getSurveyArea().get(entry.getKey());
 				break;
 			}
 			
@@ -852,7 +858,7 @@ public class PopulationCreator {
 	 * @param mpe The survey plan element (in this case: activity)
 	 * @return A MATSim activity.
 	 */
-	private static Activity createActivity(Population population, SurveyPerson personTemplate, MiDPlan templatePlan,
+	private Activity createActivity(Population population, SurveyPerson personTemplate, MiDPlan templatePlan,
 			MiDPlanElement mpe) {
 
 		AdministrativeUnit au = null;
@@ -975,7 +981,7 @@ public class PopulationCreator {
 	 * @param personTemplate The survey person.
 	 * @return A coordinate for the current activity.
 	 */
-	private static Coord shootLocationForActType(AdministrativeUnit au, String actType, double distance,
+	private Coord shootLocationForActType(AdministrativeUnit au, String actType, double distance,
 			MiDPlan templatePlan, String mode, SurveyPerson personTemplate) {
 
 		if(mode != null){
@@ -1025,7 +1031,7 @@ public class PopulationCreator {
 				
 			} else {
 				
-				Geometry area = Geoinformation.getQuadTreeForActType(actType).getClosest(lastActCoord.getX(), lastActCoord.getY());
+				Geometry area = this.geoinformation.getQuadTreeForActType(actType).getClosest(lastActCoord.getX(), lastActCoord.getY());
 				
 				return transformation.transform(GeometryUtils.shoot(area,random));
 				
@@ -1033,7 +1039,7 @@ public class PopulationCreator {
 		
 		} else {
 			
-			closest = (List<Geometry>) Geoinformation.getQuadTreeForActType(actType).getRing(lastActCoord.getX(),
+			closest = (List<Geometry>) this.geoinformation.getQuadTreeForActType(actType).getRing(lastActCoord.getX(),
 					lastActCoord.getY(), d * minFactor, d * maxFactor);
 			
 			if(!closest.isEmpty()){
@@ -1044,7 +1050,7 @@ public class PopulationCreator {
 				
 			} else {
 				
-				Geometry area = Geoinformation.getQuadTreeForActType(actType).getClosest(lastActCoord.getX(), lastActCoord.getY());
+				Geometry area = this.geoinformation.getQuadTreeForActType(actType).getClosest(lastActCoord.getX(), lastActCoord.getY());
 				
 				return transformation.transform(GeometryUtils.shoot(area,random));
 				

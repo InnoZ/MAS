@@ -1,27 +1,16 @@
 package playground.dhosse.scenarioGeneration.utils;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.jfree.util.Log;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
-import playground.dhosse.database.DatabaseReader;
-import playground.dhosse.scenarioGeneration.Configuration;
 import playground.dhosse.utils.QuadTree;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.ParseException;
 
 /**
  * 
@@ -48,15 +37,13 @@ public class Geoinformation {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
-	private static Map<String, AdministrativeUnit> adminUnits = new HashMap<>();
+	private static Map<String, AdministrativeUnit> surveyArea = new HashMap<String, AdministrativeUnit>();
+	private static Map<String, AdministrativeUnit> vicinity = new HashMap<String, AdministrativeUnit>();
 	private static Geometry completeGeometry;
 	protected static Map<String,QuadTree<Geometry>> actType2QT = new HashMap<>();
 	protected static Geometry catchmentAreaPt;
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
-	
-	//no instance!
-	private Geoinformation(){};
 	
 	/**
 	 * Reads the geometries of the specified id(s) from an ESRI shapefile into the
@@ -65,7 +52,7 @@ public class Geoinformation {
 	 * @param filename Input shapefile path.
 	 * @param ids The id's of the geometries we want to read in.
 	 */
-	public static void readGeodataFromShapefile(String filename, Set<String> ids){
+	public void readGeodataFromShapefile(String filename, Set<String> ids){
 		
 		// Read in the shapefile
 		Collection<SimpleFeature> features = new ShapeFileReader().readFileAndInitialize(filename);
@@ -80,63 +67,9 @@ public class Geoinformation {
 				
 				AdministrativeUnit au = new AdministrativeUnit(kennzahl);
 				au.setGeometry((Geometry)feature.getDefaultGeometry());
-				adminUnits.put(kennzahl, au);
+				surveyArea.put(kennzahl, au);
 				
 			}
-			
-		}
-		
-	}
-	
-	/**
-	 * Imports administrative borders and OpenStreetMap data from the mobility database.
-	 * 
-	 * 
-	 * @param configuration The configuration for the scenario generation process.
-	 * @param ids The survey area id(s).
-	 * @param scenario The MATSim scenario.
-	 */
-	public static void readGeodataFromDatabase(Configuration configuration, Set<String> ids,
-			Scenario scenario, DatabaseReader dbConnection) {
-		
-		try {
-			
-			// Create a postgresql database connection
-			Class.forName("org.postgresql.Driver").newInstance();
-			Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:" +
-					configuration.getLocalPort() + "/geodata", configuration.getDatabaseUsername(),
-					configuration.getPassword());
-			
-			if(connection != null){
-
-				Log.info("Successfully connected with geodata database...");
-				
-				// Read the administrative borders that have one of the specified ids
-				dbConnection.readAdminBorders(connection, configuration, ids);
-				
-				// If no administrative units were created, we are unable to proceed
-				if(adminUnits.size() < 1){
-				
-					Log.error("No administrative boundaries were created!");
-					Log.error("Maybe the ids you specified don't exist in the database.");
-					throw new RuntimeException("Execution aborts...");
-					
-				}
-				
-				// Otherwise, read in the OSM data
-				dbConnection.readOsmData(connection, configuration);
-				
-			}
-			
-			// Close the connection when everything's done.
-			connection.close();
-			
-			Log.info("Done.");
-
-		} catch (SQLException | InstantiationException | IllegalAccessException | ClassNotFoundException | 
-				MismatchedDimensionException | FactoryException | ParseException | TransformException e) {
-
-			e.printStackTrace();
 			
 		}
 		
@@ -151,7 +84,7 @@ public class Geoinformation {
 	 * @param filename Input shapefile path.
 	 * @param filterIds
 	 */
-	public static void readGeodataFromShapefileWithFilter(String filename, Set<String> filterIds){
+	public void readGeodataFromShapefileWithFilter(String filename, Set<String> filterIds){
 		
 		// Read in the shapefile
 		Collection<SimpleFeature> features = new ShapeFileReader().readFileAndInitialize(filename);
@@ -168,7 +101,7 @@ public class Geoinformation {
 	
 					AdministrativeUnit au = new AdministrativeUnit(kennzahl);
 					au.setGeometry((Geometry)feature.getDefaultGeometry());
-					adminUnits.put(kennzahl, au);
+					surveyArea.put(kennzahl, au);
 					break;
 					
 				}
@@ -186,11 +119,11 @@ public class Geoinformation {
 	 * @param key A string representing the landuse type of interest.
 	 * @return The total weight of the landuse geometries inside the survey area.
 	 */
-	public static double getTotalWeightForLanduseKey(String key){
+	public double getTotalWeightForLanduseKey(String key){
 		
 		double weight = 0.;
 		
-		for(AdministrativeUnit au : adminUnits.values()){
+		for(AdministrativeUnit au : surveyArea.values()){
 			
 			weight += au.getWeightForKey(key);
 			
@@ -200,43 +133,43 @@ public class Geoinformation {
 		
 	}
 	
-	public static Map<String, AdministrativeUnit> getAdminUnits(){
+	public Map<String, AdministrativeUnit> getSurveyArea(){
 		
-		return adminUnits;
+		return surveyArea;
 		
 	}
 	
-	public static Geometry getCompleteGeometry(){
+	public Geometry getCompleteGeometry(){
 		
 		return completeGeometry;
 		
 	}
 	
-	public static void setCompleteGeometry(Geometry g){
+	public void setCompleteGeometry(Geometry g){
 		
 		completeGeometry = g;
 		
 	}
 	
-	public static QuadTree<Geometry> getQuadTreeForActType(String actType){
+	public QuadTree<Geometry> getQuadTreeForActType(String actType){
 		
 		return actType2QT.get(actType);
 		
 	}
 	
-	public static void createQuadTreeForActType(String actType, double[] bounds){
+	public void createQuadTreeForActType(String actType, double[] bounds){
 		
 		actType2QT.put(actType, new QuadTree<Geometry>(bounds[0], bounds[1], bounds[2], bounds[3]));
 		
 	}
 	
-	public static Geometry getCatchmentAreaPt(){
+	public Geometry getCatchmentAreaPt(){
 		
 		return catchmentAreaPt;
 		
 	}
 	
-	public static void setCatchmentAreaPt(Geometry geometry){
+	public void setCatchmentAreaPt(Geometry geometry){
 		
 		catchmentAreaPt = geometry;
 		
