@@ -64,9 +64,9 @@ public class SshConnector {
 			panel.add(pwField);
 			String[] options = {"Ok","Cancel"};
 			int option = JOptionPane.showOptionDialog(null, panel, "Password, please", JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE,
-					null, options, options[1]);
+					null, options, options[0]);
 			
-			if(option == 1){
+			if(option == 0){
 				
 				return new String[]{textField.getText(), new String(pwField.getPassword())};
 				
