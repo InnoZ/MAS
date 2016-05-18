@@ -1,16 +1,13 @@
 package playground.dhosse.scenarioGeneration.network;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.geotools.referencing.CRS;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -22,18 +19,19 @@ import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.NoSuchAuthorityCodeException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import playground.dhosse.database.DatabaseConstants;
+import playground.dhosse.database.DatabaseReader;
 import playground.dhosse.scenarioGeneration.Configuration;
 import playground.dhosse.scenarioGeneration.utils.AdministrativeUnit;
 import playground.dhosse.scenarioGeneration.utils.Geoinformation;
 import playground.dhosse.utils.NetworkSimplifier;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
 
 /**
  * 
@@ -48,31 +46,22 @@ public class NetworkCreatorFromPsql {
 	private static final Logger log = Logger.getLogger(NetworkCreatorFromPsql.class);
 
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
-	private static final String TAG_ACCESS = "access";
-	private static final String TAG_GEOMETRY = "st_astext";
-	private static final String TAG_HIGHWAY = "highway";
-	private static final String TAG_ID = "osm_id";
-	private static final String TAG_JUNCTION = "junction";
-//	private static final String TAG_LANES = "lanes";
-//	private static final String TAG_MAXSPEED = "maxspeed";
-	private static final String TAG_ONEWAY = "oneway";
-	private static final String MOTORWAY = "motorway";
-	private static final String MOTORWAY_LINK = "motorway_link";
-	private static final String TRUNK = "trunk";
-	private static final String TRUNK_LINK = "trunk_link";
-	private static final String PRIMARY = "primary";
-	private static final String PRIMARY_LINK = "primary_link";
-	private static final String SECONDARY = "secondary";
-	private static final String TERTIARY = "tertiary";
-	private static final String MINOR = "minor";
-	private static final String UNCLASSIFIED = "unclassified";
-	private static final String RESIDENTIAL = "residential";
-	private static final String LIVING_STREET = "living_street";
-	private static final String TAG_OSM_ID = "osm_id";
-	
 	private final Network network;
-	private final CoordinateTransformation transform;
+	private final CoordinateTransformation transformation;
 	private final Configuration configuration;
+	
+	public static final String MOTORWAY = "motorway";
+	public static final String MOTORWAY_LINK = "motorway_link";
+	public static final String TRUNK = "trunk";
+	public static final String TRUNK_LINK = "trunk_link";
+	public static final String PRIMARY = "primary";
+	public static final String PRIMARY_LINK = "primary_link";
+	public static final String SECONDARY = "secondary";
+	public static final String TERTIARY = "tertiary";
+	public static final String MINOR = "minor";
+	public static final String UNCLASSIFIED = "unclassified";
+	public static final String RESIDENTIAL = "residential";
+	public static final String LIVING_STREET = "living_street";
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////	
@@ -105,11 +94,17 @@ public class NetworkCreatorFromPsql {
 	 * 
 	 * @param network An empty MATSim network.
 	 * @param configuration The scenario generation configuration.
+	 * @throws FactoryException 
+	 * @throws NoSuchAuthorityCodeException 
 	 */
-	public NetworkCreatorFromPsql(final Network network, Configuration configuration){
+	public NetworkCreatorFromPsql(final Network network, Configuration configuration) throws NoSuchAuthorityCodeException, FactoryException{
 		
 		this.network = network;
-		this.transform = TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, configuration.getCrs());
+		
+		CoordinateReferenceSystem from = CRS.decode("EPSG:4326", true);
+		CoordinateReferenceSystem to = CRS.decode(configuration.getCrs(), true);
+		this.transformation = TransformationFactory.getCoordinateTransformation(
+				from.toString(), to.toString());
 		this.configuration = configuration;
 		
 	};
@@ -155,7 +150,7 @@ public class NetworkCreatorFromPsql {
 	 * @throws SQLException
 	 * @throws ParseException
 	 */
-	public void create() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, ParseException{
+	public void create(DatabaseReader dbReader) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, ParseException{
 		
 		// If highway defaults have been specified, use them. Else fall back to default values.
 		if(this.highwayDefaults.size() < 1){
@@ -175,48 +170,8 @@ public class NetworkCreatorFromPsql {
 			
 		}
 		
-		// Initialize a WKTReader to convert geometry strings into geometries.
-		WKTReader wktReader = new WKTReader();
-		Set<WayEntry> wayEntries = new HashSet<>();
-		
-		Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
-		Connection connection = DriverManager.getConnection(DatabaseConstants.PSQL_PREFIX + configuration.getLocalPort() + "/"
-				+ DatabaseConstants.GEODATA_DB, configuration.getDatabaseUsername(), configuration.getPassword());
-	
-		if(connection != null){
-
-			Statement statement = connection.createStatement();
-			ResultSet result = statement.executeQuery("select " + TAG_OSM_ID + ", " + TAG_ACCESS + ", " + TAG_HIGHWAY + ", " + TAG_JUNCTION
-					+ ", " + TAG_ONEWAY + ", " + " st_astext(way) from osm.osm_line where highway is not null and"
-					+ " st_within(way,st_geomfromtext('" + Geoinformation.getCompleteGeometry().toString() + "',4326));");
-			
-			while(result.next()){
-				
-				// Create a new way entry for each result
-				WayEntry entry = new WayEntry();
-				entry.osmId = result.getString(TAG_ID);
-				entry.accessTag = result.getString(TAG_ACCESS);
-				entry.highwayTag = result.getString(TAG_HIGHWAY);
-				entry.junctionTag = result.getString(TAG_JUNCTION);
-				//TODO add lanes and maxspeed as attributes into db table
-//				entry.lanesTag = result.getString(TAG_LANES);
-//				entry.maxspeedTag = result.getString(TAG_MAXSPEED);
-				entry.onewayTag = result.getString(TAG_ONEWAY);
-				entry.geometry = wktReader.read(result.getString(TAG_GEOMETRY));
-				wayEntries.add(entry);
-				
-			}
-			
-			// After all road data is retrieved, close the statement and the connection.
-			result.close();
-			statement.close();
-			
-		}
-		
-		connection.close();
-
 		// Convert the way entries into a MATSim network
-		processWayEntries(wayEntries);
+		processWayEntries(dbReader.readOsmRoads(this.configuration));
 		
 		// Simplify the network if needed
 		if(this.simplifyNetworK) {
@@ -312,8 +267,8 @@ public class NetworkCreatorFromPsql {
 					// Get the next coordinate in the sequence and calculate the length between it and the last coordinate
 					Coordinate next = coordinates[i];
 					
-					length = CoordUtils.calcDistance(this.transform.transform(MGC.coordinate2Coord(lastTo)),
-							this.transform.transform(MGC.coordinate2Coord(next)));
+					length = CoordUtils.calcDistance(this.transformation.transform(MGC.coordinate2Coord(lastTo)),
+							this.transformation.transform(MGC.coordinate2Coord(next)));
 
 					for(AdministrativeUnit au : Geoinformation.getAdminUnits().values()){
 
@@ -467,7 +422,7 @@ public class NetworkCreatorFromPsql {
 			}
 
 			// If a node already exists at the from location, use it as from node, else create a new one
-			Coord fromCoord = this.transform.transform(MGC.coordinate2Coord(from));
+			Coord fromCoord = this.transformation.transform(MGC.coordinate2Coord(from));
 			Node fromNode = null;
 			if(!coords2Nodes.containsKey(fromCoord)){
 				fromNode = createNode(fromCoord);
@@ -477,7 +432,7 @@ public class NetworkCreatorFromPsql {
 			}
 			
 			// If a node already exists at the to location, use it as to node, else create a new one			
-			Coord toCoord = this.transform.transform(MGC.coordinate2Coord(to));
+			Coord toCoord = this.transformation.transform(MGC.coordinate2Coord(to));
 			Node toNode = null;
 			if(!coords2Nodes.containsKey(toCoord)){
 				toNode = createNode(toCoord);
@@ -575,28 +530,6 @@ public class NetworkCreatorFromPsql {
 			this.laneCapacity = laneCapacity;
 			this.oneway = oneway;
 		}
-		
-	}
-	
-	/**
-	 * 
-	 * Wrapper class that stores the OSM data of a way.
-	 * 
-	 * @author dhosse
-	 *
-	 */
-	static class WayEntry{
-		
-		String osmId;
-		
-		String accessTag;
-		String highwayTag;
-		String junctionTag;
-		String lanesTag;
-		String maxspeedTag;
-		String onewayTag;
-		
-		Geometry geometry;
 		
 	}
 	

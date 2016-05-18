@@ -17,6 +17,7 @@ import org.matsim.households.HouseholdsWriterV10;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.matsim.vehicles.VehicleWriterV1;
 
+import playground.dhosse.database.DatabaseReader;
 import playground.dhosse.database.DatabaseUpdater;
 import playground.dhosse.scenarioGeneration.network.NetworkCreatorFromPsql;
 import playground.dhosse.scenarioGeneration.population.PopulationCreator;
@@ -88,8 +89,10 @@ public class MobilityDatabaseMain {
 					
 				}
 				
+				DatabaseReader dbReader = new DatabaseReader();
+				
 				// Read everything concerning geodata (borders, landuse, buildings, ...)
-				Geoinformation.readGeodataFromDatabase(configuration, ids, scenario);
+				Geoinformation.readGeodataFromDatabase(configuration, ids, scenario, dbReader);
 				
 				// Create a MATSim network from OpenStreetMap data
 				NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(),
@@ -97,7 +100,7 @@ public class MobilityDatabaseMain {
 				nc.setSimplifyNetwork(true);
 				nc.setCleanNetwork(true);
 				nc.setScaleMaxSpeed(true);
-				nc.create();
+				nc.create(dbReader);
 				
 				// Create a MATSim population
 				PopulationCreator.run(configuration, scenario);

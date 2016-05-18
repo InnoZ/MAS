@@ -1,6 +1,7 @@
 package playground.dhosse.database;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -27,6 +28,7 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 import playground.dhosse.scenarioGeneration.Configuration;
+import playground.dhosse.scenarioGeneration.network.WayEntry;
 import playground.dhosse.scenarioGeneration.utils.ActivityTypes;
 import playground.dhosse.scenarioGeneration.utils.AdministrativeUnit;
 import playground.dhosse.scenarioGeneration.utils.Geoinformation;
@@ -817,6 +819,54 @@ public class DatabaseReader {
 		}
 		
 		return null;
+		
+	}
+	
+	public Set<WayEntry> readOsmRoads(final Configuration configuration) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException, ParseException{
+		
+		Set<WayEntry> wayEntries = new HashSet<>();
+		
+		Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
+		Connection connection = DriverManager.getConnection(DatabaseConstants.PSQL_PREFIX + configuration.getLocalPort() + "/"
+				+ DatabaseConstants.GEODATA_DB, configuration.getDatabaseUsername(), configuration.getPassword());
+	
+		if(connection != null){
+
+			Statement statement = connection.createStatement();
+			ResultSet result = statement.executeQuery("select " + DatabaseConstants.TAG_OSM_ID + ", " + DatabaseConstants.TAG_ACCESS + ", "
+					+ DatabaseConstants.TAG_HIGHWAY + ", " + DatabaseConstants.TAG_JUNCTION + ", " + DatabaseConstants.TAG_ONEWAY + ", "
+					+ DatabaseConstants.functions.st_astext.name() + "(" + DatabaseConstants.ATT_WAY + ") from "
+					+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_line.name() + " where "
+					+ DatabaseConstants.TAG_HIGHWAY + " is not null and " + DatabaseConstants.functions.st_within.name() + "("
+					+ DatabaseConstants.ATT_WAY + "," + DatabaseConstants.functions.st_geomfromtext.name() + "('"
+					+ Geoinformation.getCompleteGeometry().toString() + "',4326));");
+			
+			while(result.next()){
+				
+				// Create a new way entry for each result
+				WayEntry entry = new WayEntry();
+				entry.setOsmId(result.getString(DatabaseConstants.TAG_ID));
+				entry.setAccessTag(result.getString(DatabaseConstants.TAG_ACCESS));
+				entry.setHighwayTag(result.getString(DatabaseConstants.TAG_HIGHWAY));
+				entry.setJunctionTag(result.getString(DatabaseConstants.TAG_JUNCTION));
+				//TODO add lanes and maxspeed as attributes into db table
+//				entry.lanesTag = result.getString(TAG_LANES);
+//				entry.maxspeedTag = result.getString(TAG_MAXSPEED);
+				entry.setOnewayTag(result.getString(DatabaseConstants.TAG_ONEWAY));
+				entry.setGeometry(this.wktReader.read(result.getString(DatabaseConstants.TAG_GEOMETRY)));
+				wayEntries.add(entry);
+				
+			}
+			
+			// After all road data is retrieved, close the statement and the connection.
+			result.close();
+			statement.close();
+			
+		}
+		
+		connection.close();
+		
+		return wayEntries;
 		
 	}
 	

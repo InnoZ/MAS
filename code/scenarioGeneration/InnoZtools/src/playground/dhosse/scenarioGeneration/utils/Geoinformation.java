@@ -97,10 +97,7 @@ public class Geoinformation {
 	 * @param scenario The MATSim scenario.
 	 */
 	public static void readGeodataFromDatabase(Configuration configuration, Set<String> ids,
-			Scenario scenario) {
-		
-		// Create a new database connection
-		DatabaseReader dbConnection = new DatabaseReader();
+			Scenario scenario, DatabaseReader dbConnection) {
 		
 		try {
 			
