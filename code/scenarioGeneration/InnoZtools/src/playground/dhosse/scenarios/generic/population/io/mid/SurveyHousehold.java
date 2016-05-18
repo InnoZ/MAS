@@ -3,7 +3,7 @@ package playground.dhosse.scenarios.generic.population.io.mid;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MiDHousehold {
+public class SurveyHousehold {
 	
 	private String id;
 	
@@ -13,7 +13,7 @@ public class MiDHousehold {
 	
 	private final List<String> memberIds;
 	
-	public MiDHousehold(String id){
+	public SurveyHousehold(String id){
 		
 		this.id = id;
 		this.memberIds = new ArrayList<>();

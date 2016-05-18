@@ -14,7 +14,6 @@ import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.matrices.Matrix;
 
 import playground.dhosse.scenarios.generic.population.io.mid.MiDParser;
@@ -123,8 +122,8 @@ public class Distribution {
 							double distance = distances.getEntry(u1.getId(), u2.getId()).getValue();
 							double speed = Modes.getSpeedForMode(mode);
 							double weight = u2.getWeightForKey(key) + u2.getLanduseGeometries().get(key).size();
-							double avgDistance = parser.modeStats.get(mode).getMean();
-							double a = Math.exp((-6d / 3600d) * (distance / speed) * (distance / avgDistance));
+//							double avgDistance = parser.modeStats.get(mode).getMean();
+							double a = Math.exp((-6d / 3600d) * (distance / speed));
 							proba = weight * a;
 							
 						}

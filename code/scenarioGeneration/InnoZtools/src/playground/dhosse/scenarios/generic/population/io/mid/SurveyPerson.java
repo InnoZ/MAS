@@ -5,7 +5,7 @@ import java.util.List;
 
 import playground.dhosse.scenarios.generic.population.HashGenerator;
 
-public class MiDPerson {
+public class SurveyPerson {
 
 	private String id;
 	private String sex;
@@ -20,7 +20,7 @@ public class MiDPerson {
 	
 	private List<MiDPlan> plans;
 	
-	public MiDPerson(String id, String sex, String age, String carAvailable, String hasLicense, String isEmployed){
+	public SurveyPerson(String id, String sex, String age, String carAvailable, String hasLicense, String isEmployed){
 		
 		this.id = id;
 		this.sex = sex.equals(MiDConstants.SEX_MALE) ? "male" : "female";

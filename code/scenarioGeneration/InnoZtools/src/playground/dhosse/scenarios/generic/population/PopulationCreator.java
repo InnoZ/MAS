@@ -42,12 +42,13 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import playground.dhosse.scenarios.generic.Configuration;
 import playground.dhosse.scenarios.generic.population.io.mid.MiDActivity;
-import playground.dhosse.scenarios.generic.population.io.mid.MiDHousehold;
 import playground.dhosse.scenarios.generic.population.io.mid.MiDParser;
-import playground.dhosse.scenarios.generic.population.io.mid.MiDPerson;
 import playground.dhosse.scenarios.generic.population.io.mid.MiDPlan;
 import playground.dhosse.scenarios.generic.population.io.mid.MiDPlanElement;
 import playground.dhosse.scenarios.generic.population.io.mid.MiDWay;
+import playground.dhosse.scenarios.generic.population.io.mid.SurveyDataContainer;
+import playground.dhosse.scenarios.generic.population.io.mid.SurveyHousehold;
+import playground.dhosse.scenarios.generic.population.io.mid.SurveyPerson;
 import playground.dhosse.scenarios.generic.utils.ActivityTypes;
 import playground.dhosse.scenarios.generic.utils.AdministrativeUnit;
 import playground.dhosse.scenarios.generic.utils.Distribution;
@@ -77,10 +78,10 @@ public class PopulationCreator {
 	static final Random random = MatsimRandom.getLocalInstance();
 	
 	//Comparator that sorts households by their weights
-	static Comparator<MiDHousehold> householdComparator = new Comparator<MiDHousehold>() {
+	static Comparator<SurveyHousehold> householdComparator = new Comparator<SurveyHousehold>() {
 
 		@Override
-		public int compare(MiDHousehold o1, MiDHousehold o2) {
+		public int compare(SurveyHousehold o1, SurveyHousehold o2) {
 			return Double.compare(o1.getWeight(), o2.getWeight());
 		
 		}
@@ -307,7 +308,8 @@ public class PopulationCreator {
 		
 		// Run the survey data parser that stores all of the travel information
 		MiDParser parser = new MiDParser();
-		parser.run(configuration);
+		SurveyDataContainer container = new SurveyDataContainer();
+		parser.run(configuration, container);
 		
 		// Initialize the disutilities for traveling from each cell to each other cell
 		// to eventually get a gravitation model.
@@ -316,11 +318,11 @@ public class PopulationCreator {
 		// Choose the method for demand generation that has been specified in the configuration
 		if(configuration.isUsingHouseholds()){
 		
-			createHouseholds(configuration, scenario, parser);
+			createHouseholds(configuration, scenario, container);
 			
 		} else {
 			
-			createPersons(configuration, scenario, parser);
+			createPersons(configuration, scenario, container);
 			
 		}
 		
@@ -334,7 +336,7 @@ public class PopulationCreator {
 	 * @param scenario A MATSim scenario.
 	 * @param parser The survey parser containing all of the information.
 	 */
-	private static void createHouseholds(Configuration configuration, Scenario scenario, MiDParser parser){
+	private static void createHouseholds(Configuration configuration, Scenario scenario, SurveyDataContainer container){
 		
 		// Get the MATSim population and initialize person attributes
 		Population population = scenario.getPopulation();
@@ -349,8 +351,8 @@ public class PopulationCreator {
 		//os: 84218
 		
 		// Sort the households by their weight (according to the survey data)
-		List<MiDHousehold> households = new ArrayList<>();
-		households.addAll(parser.getHouseholds().values());
+		List<SurveyHousehold> households = new ArrayList<>();
+		households.addAll(container.getHouseholds().values());
 		Collections.sort(households, householdComparator);
 		
 		//TODO number of households in db table...
@@ -380,12 +382,12 @@ public class PopulationCreator {
 			}
 			
 			// Choose a template household (weighted, same method as above)
-			MiDHousehold template = null;
+			SurveyHousehold template = null;
 
 			double accumulatedWeight = 0.;
-			double rand = random.nextDouble() * parser.getSumOfHouseholdWeights();
+			double rand = random.nextDouble() * container.getSumOfHouseholdWeights();
 			
-			for(MiDHousehold hh : households){
+			for(SurveyHousehold hh : households){
 				
 				accumulatedWeight += hh.getWeight();
 				if(accumulatedWeight >= rand){
@@ -438,7 +440,7 @@ public class PopulationCreator {
 			for(int j = 0; j < nPersons; j++){
 				
 				String personId = template.getMemberIds().get(j);
-				MiDPerson templatePerson = parser.getPersons().get(personId);
+				SurveyPerson templatePerson = container.getPersons().get(personId);
 				
 				Person person = createPerson(templatePerson, population, personAttributes, random.nextDouble(),
 						population.getPersons().size(), homeLocation);
@@ -483,7 +485,7 @@ public class PopulationCreator {
 	 * @param scenario The MATSim scenario.
 	 * @param parser The survey parser.
 	 */
-	private static void createPersons(Configuration configuration, Scenario scenario, MiDParser parser){
+	private static void createPersons(Configuration configuration, Scenario scenario, SurveyDataContainer container){
 		
 		// Get the MATSim population and initialize person attributes
 		Population population = scenario.getPopulation();
@@ -495,8 +497,8 @@ public class PopulationCreator {
 			
 			double personalRandom = random.nextDouble();
 			
-			Map<String,MiDPerson> templatePersons = parser.getPersons();
-			MiDPerson personTemplate = null;
+			Map<String,SurveyPerson> templatePersons = container.getPersons();
+			SurveyPerson personTemplate = null;
 			
 			personTemplate = PersonUtils.getTemplate(templatePersons,
 					personalRandom * PersonUtils.getTotalWeight(templatePersons.values()));
@@ -526,7 +528,7 @@ public class PopulationCreator {
 	 * @return A MATSim person with an initial daily plan.
 	 */
 	@SuppressWarnings("deprecation")
-	private static Person createPerson(MiDPerson personTemplate, Population population,
+	private static Person createPerson(SurveyPerson personTemplate, Population population,
 			ObjectAttributes personAttributes, double personalRandom, int i, Coord homeCoord) {
 
 		// Initialize main act location, last leg, last act cell and the coordinate of the last activity as null to avoid errors...
@@ -535,7 +537,6 @@ public class PopulationCreator {
 		lastActCoord = null;
 		lastActCell = null;
 		currentSearchSpace = null;
-		
 		
 		// Create a new MATSim person and an empty plan
 		Person person = population.getFactory().createPerson(Id.createPersonId(currentHomeCell.getId() + "_" + personTemplate.getId() + "_" + i));
@@ -708,7 +709,7 @@ public class PopulationCreator {
 	 * @param personTemplate The survey person.
 	 * @return The administrative unit in which the activity most likely is located.
 	 */
-	private static AdministrativeUnit locateActivityInCell(String activityType, String mode, MiDPerson personTemplate){
+	private static AdministrativeUnit locateActivityInCell(String activityType, String mode, SurveyPerson personTemplate){
 		
 		return locateActivityInCell(null, activityType, mode, personTemplate, 0d);
 		
@@ -716,7 +717,7 @@ public class PopulationCreator {
 
 	/**
 	 * 
-	 * Same method as {@link #locateActivityInCell(String, String, MiDPerson)}, only that this method locates an activity of a sequence
+	 * Same method as {@link #locateActivityInCell(String, String, SurveyPerson)}, only that this method locates an activity of a sequence
 	 * where the last activity and the distance traveled between the two locations is known.
 	 * 
 	 * @param fromId The identifier of the last administrative unit.
@@ -726,7 +727,7 @@ public class PopulationCreator {
 	 * @param distance The distance traveled between the last and the current activity.
 	 * @return
 	 */
-	private static AdministrativeUnit locateActivityInCell(String fromId, String activityType, String mode, MiDPerson personTemplate, double distance){
+	private static AdministrativeUnit locateActivityInCell(String fromId, String activityType, String mode, SurveyPerson personTemplate, double distance){
 		
 		Set<String> modes = new HashSet<String>();
 		
@@ -851,7 +852,7 @@ public class PopulationCreator {
 	 * @param mpe The survey plan element (in this case: activity)
 	 * @return A MATSim activity.
 	 */
-	private static Activity createActivity(Population population, MiDPerson personTemplate, MiDPlan templatePlan,
+	private static Activity createActivity(Population population, SurveyPerson personTemplate, MiDPlan templatePlan,
 			MiDPlanElement mpe) {
 
 		AdministrativeUnit au = null;
@@ -975,7 +976,7 @@ public class PopulationCreator {
 	 * @return A coordinate for the current activity.
 	 */
 	private static Coord shootLocationForActType(AdministrativeUnit au, String actType, double distance,
-			MiDPlan templatePlan, String mode, MiDPerson personTemplate) {
+			MiDPlan templatePlan, String mode, SurveyPerson personTemplate) {
 
 		if(mode != null){
 			

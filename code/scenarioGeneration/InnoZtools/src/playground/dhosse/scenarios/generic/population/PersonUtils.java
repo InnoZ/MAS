@@ -7,7 +7,7 @@ import java.util.Random;
 
 import org.matsim.api.core.v01.population.Person;
 
-import playground.dhosse.scenarios.generic.population.io.mid.MiDPerson;
+import playground.dhosse.scenarios.generic.population.io.mid.SurveyPerson;
 import playground.dhosse.scenarios.generic.utils.ActivityTypes;
 
 public class PersonUtils {
@@ -51,11 +51,11 @@ public class PersonUtils {
 		
 	}
 	
-	public static MiDPerson getTemplate(Map<String, MiDPerson> templatePersons, double personalRandom){
+	public static SurveyPerson getTemplate(Map<String, SurveyPerson> templatePersons, double personalRandom){
 		
 		double accumulatedWeight = 0.;
 		
-		for(MiDPerson person : templatePersons.values()){
+		for(SurveyPerson person : templatePersons.values()){
 			
 			accumulatedWeight += person.getWeight();
 			
@@ -72,11 +72,11 @@ public class PersonUtils {
 		
 	}
 	
-	public static double getTotalWeight(Collection<MiDPerson> collection){
+	public static double getTotalWeight(Collection<SurveyPerson> collection){
 		
 		double weight = 0;
 		
-		for(MiDPerson p : collection){
+		for(SurveyPerson p : collection){
 		
 			weight += p.getWeight();
 			

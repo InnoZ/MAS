@@ -7,11 +7,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -38,22 +36,7 @@ public class MiDParser {
 
 	private static final Logger log = Logger.getLogger(MiDParser.class);
 	
-	private Map<String, List<MiDPerson>> midPersonsClassified = new HashMap<>();
-	
-	private Map<String, MiDHousehold> midHouseholds = new HashMap<>();
-	private Map<String, MiDPerson> midPersons = new HashMap<>();
-
-	private Map<Integer, Map<String, MiDHousehold>> midHouseholdsBySize = new HashMap<>();
-	private Map<Integer, Double> householdsWeightsBySize = new HashMap<>();
-	
-	private double sumHouseholdWeight = 0.;
-	private double sumPersonWeight = 0.;
-	
-	public Map<String, RecursiveStatsContainer> modeStats = new HashMap<>();
-	
-	public Map<String, Hydrograph> activityTypeHydrographs = new HashMap<>();
-	
-	public void run(Configuration configuration){
+	public void run(Configuration configuration, SurveyDataContainer container){
 		
 		try {
 			
@@ -69,18 +52,18 @@ public class MiDParser {
 					
 					log.info("Creating MiD households...");
 					
-					parseHouseholdsDatabase(connection, configuration.getSqlQuery());
+					parseHouseholdsDatabase(connection, configuration.getSqlQuery(), container);
 					
 				}
 				
 				log.info("Creating MiD persons...");
 				
 				parsePersonsDatabase(connection, configuration.getSqlQuery(), configuration.isUsingHouseholds(),
-						configuration.isOnlyUsingWorkingDays());
+						configuration.isOnlyUsingWorkingDays(), container);
 				
 				log.info("Creating MiD ways...");
 				
-				parseWaysDatabase(connection, configuration.isOnlyUsingWorkingDays());
+				parseWaysDatabase(connection, configuration.isOnlyUsingWorkingDays(), container);
 				
 				connection.close();
 				
@@ -98,7 +81,7 @@ public class MiDParser {
 		
 	}
 	
-	private void parseHouseholdsDatabase(Connection connection, String query) throws RuntimeException, SQLException{
+	private void parseHouseholdsDatabase(Connection connection, String query, SurveyDataContainer container) throws RuntimeException, SQLException{
 		
 		Statement statement = connection.createStatement();
 	
@@ -107,7 +90,7 @@ public class MiDParser {
 		while(set.next()){
 			
 			String hhId = set.getString(MiDConstants.HOUSEHOLD_ID);
-			MiDHousehold hh = new MiDHousehold(hhId);
+			SurveyHousehold hh = new SurveyHousehold(hhId);
 			
 			hh.setWeight(set.getDouble(MiDConstants.HOUSEHOLD_WEIGHT));
 			
@@ -116,15 +99,15 @@ public class MiDParser {
 			
 			hh.setNCars(set.getDouble(MiDConstants.HOUSEHOLD_NCARS));
 			
-			this.midHouseholds.put(hhId, hh);
-			this.sumHouseholdWeight += hh.getWeight();
+			container.getHouseholds().put(hhId, hh);
+			container.incrementSumOfHouseholdWeigtsBy(hh.getWeight());
 
 		}
 		
 		set.close();
 		statement.close();
 		
-		if(this.midHouseholds.isEmpty()){
+		if(container.getHouseholds().isEmpty()){
 			
 			log.warn("The selected query \"" + query + "\" yielded no results...");
 			log.warn("This eventually results in no population.");
@@ -132,7 +115,7 @@ public class MiDParser {
 			
 		} else {
 			
-			log.info("Created " + this.midHouseholds.size() + " households from MiD database.");
+			log.info("Created " + container.getHouseholds().size() + " households from MiD database.");
 			
 		}
 		
@@ -150,7 +133,7 @@ public class MiDParser {
 	 * 
 	 */
 	private void parsePersonsDatabase(Connection connection, String query, boolean isUsingHouseholds,
-			boolean onlyWorkingDays) throws SQLException{
+			boolean onlyWorkingDays, SurveyDataContainer container) throws SQLException{
 		
 		Statement statement = connection.createStatement();
 
@@ -184,50 +167,50 @@ public class MiDParser {
 			int personGroup = set.getInt(MiDConstants.PERSON_GROUP_12);
 			int phase = set.getInt(MiDConstants.PERSON_LIFE_PHASE);
 			
-			MiDPerson person = new MiDPerson(hhId + personId, sex, age, carAvail, license, employed);
+			SurveyPerson person = new SurveyPerson(hhId + personId, sex, age, carAvail, license, employed);
 			person.setWeight(personWeight);
 			person.setPersonGroup(personGroup);
 			person.setLifePhase(phase);
 			
 			if(isUsingHouseholds){
 				
-				if(!this.midHouseholds.containsKey(hhId)){
+				if(!container.getHouseholds().containsKey(hhId)){
 					
 					continue;
 					
 				} else {
 					
-					this.midHouseholds.get(hhId).getMemberIds().add(person.getId());
+					container.getHouseholds().get(hhId).getMemberIds().add(person.getId());
 					
 				}
 				
 			}
 			
-			if(!this.midPersons.containsKey(person.getId())){
+			if(!container.getPersons().containsKey(person.getId())){
 			
-				this.midPersons.put(person.getId(), person);
+				container.getPersons().put(person.getId(), person);
 				
 			}
 			
 			//generate person hash in order to classify the current person
 			String hash = HashGenerator.generateAgeGroupHash(person);
 			
-			if(!this.midPersonsClassified.containsKey(hash)){
+			if(!container.getPersonsByGroup().containsKey(hash)){
 				
-				this.midPersonsClassified.put(hash, new ArrayList<MiDPerson>());
+				container.getPersonsByGroup().put(hash, new ArrayList<SurveyPerson>());
 				
 			}
 			
-			this.midPersonsClassified.get(hash).add(person);
+			container.getPersonsByGroup().get(hash).add(person);
 			
-			this.sumPersonWeight += set.getDouble(MiDConstants.PERSON_WEIGHT);
+			container.incrementSumOfPersonWeightsBy(set.getDouble(MiDConstants.PERSON_WEIGHT));
 			
 		}
 		
 		set.close();
 		statement.close();
 		
-		if(this.midPersons.isEmpty()){
+		if(container.getPersons().isEmpty()){
 
 			log.warn("The selected query \"" + query + "\" yielded no results...");
 			log.warn("This eventually results in no population.");
@@ -235,13 +218,13 @@ public class MiDParser {
 			
 		} else {
 			
-			log.info("Created " + this.midPersons.size() + " persons from MiD database.");
+			log.info("Created " + container.getPersons().size() + " persons from MiD database.");
 			
 		}
 		
 	}
 	
-	private void parseWaysDatabase(Connection connection, boolean onlyWorkingDays) throws SQLException {
+	private void parseWaysDatabase(Connection connection, boolean onlyWorkingDays, SurveyDataContainer container) throws SQLException {
 		
 		Statement statement = connection.createStatement();
 
@@ -263,7 +246,7 @@ public class MiDParser {
 			
 			String hhId = set.getString(MiDConstants.HOUSEHOLD_ID);
 			String personId = set.getString(MiDConstants.PERSON_ID);
-			MiDPerson person = this.midPersons.get(hhId + personId);
+			SurveyPerson person = container.getPersons().get(hhId + personId);
 			
 			if(person != null){
 			
@@ -304,11 +287,11 @@ public class MiDParser {
 				int endDate = set.getInt(MiDConstants.EN_DAT);
 				double travelDistance = 1000 * set.getDouble(MiDConstants.WAY_DISTANCE);
 				
-				if(!this.modeStats.containsKey(mainMode)){
-					this.modeStats.put(mainMode, new RecursiveStatsContainer());
+				if(!container.getModeStatsContainer().containsKey(mainMode)){
+					container.getModeStatsContainer().put(mainMode, new RecursiveStatsContainer());
 				}
 				
-				this.modeStats.get(mainMode).handleNewEntry(travelDistance);
+				container.getModeStatsContainer().get(mainMode).handleNewEntry(travelDistance);
 				
 				//if the way ends on the next day, add 24 hrs to the departure / arrival time
 				if(startDate != 0){
@@ -396,14 +379,14 @@ public class MiDParser {
 						
 					}
 					
-					if(!this.activityTypeHydrographs.containsKey(actType)){
-						this.activityTypeHydrographs.put(actType, new Hydrograph(actType));
+					if(!container.getActivityTypeHydrographs().containsKey(actType)){
+						container.getActivityTypeHydrographs().put(actType, new Hydrograph(actType));
 					}
 					if(!Double.isNaN(startHour)){
-						this.activityTypeHydrographs.get(actType).handleEntry(startHour, 1);
+						container.getActivityTypeHydrographs().get(actType).handleEntry(startHour, 1);
 					}
 					
-					addWayAndActivity(plan, way, actType, id);
+					addWayAndActivity(plan, way, actType, id, container);
 					if(endPoint == 5){
 						id += 2;
 					}
@@ -423,14 +406,18 @@ public class MiDParser {
 		
 		set.close();
 		statement.close();
-		
-		postprocessData();
-		
+
 		log.info("Created " + counter + " ways from MiD database.");
+		
+		postprocessData(container);
+		
+		log.info("Conversion statistics:");
+		log.info("#Households in survey: " + container.getHouseholds().size());
+		log.info("#Persons in survey:    " + container.getPersons().size());
 		
 	}
 	
-	private void addWayAndActivity(MiDPlan plan, MiDWay way, String actType, int id) throws SQLException{
+	private void addWayAndActivity(MiDPlan plan, MiDWay way, String actType, int id, SurveyDataContainer container) throws SQLException{
 		
 		MiDActivity activity = new MiDActivity(actType);
 		
@@ -439,10 +426,10 @@ public class MiDParser {
 		MiDActivity previousAct = ((MiDActivity)plan.getPlanElements().get(plan.getPlanElements().size()-1));
 		previousAct.setEndTime(way.getStartTime());
 		
-		if(!this.activityTypeHydrographs.containsKey(previousAct.getActType())){
-			this.activityTypeHydrographs.put(previousAct.getActType(), new Hydrograph(previousAct.getActType()));
+		if(!container.getActivityTypeHydrographs().containsKey(previousAct.getActType())){
+			container.getActivityTypeHydrographs().put(previousAct.getActType(), new Hydrograph(previousAct.getActType()));
 		}
-		this.activityTypeHydrographs.get(previousAct.getActType()
+		container.getActivityTypeHydrographs().get(previousAct.getActType()
 				).handleDurationEntry(previousAct.getEndTime() - previousAct.getStartTime());
 		
 		//set start time of current activity to	
@@ -457,20 +444,20 @@ public class MiDParser {
 		
 	}
 	
-	private void postprocessData(){
+	private void postprocessData(SurveyDataContainer container){
 
-		if(!this.midHouseholds.isEmpty()){
+		if(!container.getHouseholds().isEmpty()){
 			
 			Set<String> emptyHouseholdIds = new HashSet<>();
 			Set<String> personsToRemove = new HashSet<>();
 			
-			for(MiDHousehold household : this.midHouseholds.values()){
+			for(SurveyHousehold household : container.getHouseholds().values()){
 
 				for(Iterator<String> it = household.getMemberIds().iterator(); it.hasNext();){
 					
 					String pid = it.next();
 					
-					if(!this.postprocessPerson(this.midPersons.get(pid))){
+					if(!this.postprocessPerson(container.getPersons().get(pid))){
 						it.remove();
 					}
 					
@@ -482,18 +469,18 @@ public class MiDParser {
 			}
 			
 			for(String s : personsToRemove){
-				this.sumPersonWeight -= this.midPersons.get(s).getWeight();
-				this.midPersons.remove(s);
+				container.incrementSumOfPersonWeightsBy(-container.getPersons().get(s).getWeight());
+				container.getPersons().remove(s);
 			}
 			
 			for(String s : emptyHouseholdIds){
-				this.sumHouseholdWeight -= this.midHouseholds.get(s).getWeight();
-				this.midHouseholds.remove(s);
+				container.incrementSumOfHouseholdWeigtsBy(-container.getHouseholds().get(s).getWeight());
+				container.getHouseholds().remove(s);
 			}
 			
 		} else {
 			
-			for(MiDPerson person : this.midPersons.values()){
+			for(SurveyPerson person : container.getPersons().values()){
 				
 				this.postprocessPerson(person);
 				
@@ -503,7 +490,7 @@ public class MiDParser {
 		
 	}
 	
-	private boolean postprocessPerson(MiDPerson person){
+	private boolean postprocessPerson(SurveyPerson person){
 		
 		if(person != null){
 			
@@ -806,34 +793,6 @@ public class MiDParser {
 		
 		}
 		
-	}
-	
-	public Map<String, MiDHousehold> getHouseholds(){
-		return this.midHouseholds;
-	}
-	
-	public Map<String, MiDPerson> getPersons(){
-		return this.midPersons;
-	}
-	
-	public Map<String, List<MiDPerson>> getClassifiedPersons(){
-		return this.midPersonsClassified;
-	}
-	
-	public double getSumOfHouseholdWeights(){
-		return this.sumHouseholdWeight;
-	}
-	
-	public double getSumOfPersonWeights(){
-		return this.sumPersonWeight;
-	}
-	
-	public Map<String,MiDHousehold> getHouseholdsBySize(int size){
-		return this.midHouseholdsBySize.get(size);
-	}
-	
-	public double getSumWeightBySize(int size){
-		return this.householdsWeightsBySize.get(size);
 	}
 	
 	private int setActPriority(String type){
