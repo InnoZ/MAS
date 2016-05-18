@@ -12,19 +12,13 @@ public final class DatabaseConstants {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//DATABASE-SPECIFIC CONSTANTS////////////////////////////////////////////////////////////
-	public static final String SCHEMA_GADM = "gadm";
-	public static final String TABLE_DISTRICTS = "districts";
-	public static final String SCHEMA_OSM = "osm";
-	public static final String TABLE_RELATIONS = "planet_osm_rels";
-	public static final String TABLE_WAYS = "osm_ways";
-	public static final String TABLE_NODES = "osm_nodes";
-	public static final String TABLE_POLYGONS = "osm_polygon";
-	public static final String TABLE_POINTS = "osm_point";
+	public enum schemata { gadm, osm };
+	public enum tables { districts, osm_nodes, osm_point, osm_polygon, osm_rels, osm_ways };
+
+	public enum functions { st_astext, st_geomfromtext, st_within };
+	
 	public static final String BLAND = "cca_4";
 	public static final String MUN_KEY = "cca_4";
-	public static final String ST_ASTEXT = "st_astext";
-	public static final String ST_GEOMFROMTEXT = "st_geomfromtext";
-	public static final String ST_WITHIN = "st_within";
 	public static final String ATT_LANDUSE = "landuse";
 	public static final String ATT_AMENITY = "amenity";
 	public static final String ATT_LEISURE = "leisure";
