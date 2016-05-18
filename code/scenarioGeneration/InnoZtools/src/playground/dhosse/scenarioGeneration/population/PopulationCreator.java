@@ -75,10 +75,11 @@ import com.vividsolutions.jts.geom.Geometry;
 public class PopulationCreator {
 
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
-	static final Random random = MatsimRandom.getLocalInstance();
+	private final Random random = MatsimRandom.getLocalInstance();
+	private final Geoinformation geoinformation;
 	
 	//Comparator that sorts households by their weights
-	static Comparator<SurveyHousehold> householdComparator = new Comparator<SurveyHousehold>() {
+	private Comparator<SurveyHousehold> householdComparator = new Comparator<SurveyHousehold>() {
 
 		@Override
 		public int compare(SurveyHousehold o1, SurveyHousehold o2) {
@@ -88,21 +89,7 @@ public class PopulationCreator {
 		
 	};
 	
-	//Comparator that sorts geometries by their weights
-	static Comparator<Geometry> geometryComparator = new Comparator<Geometry>() {
-
-		@Override
-		public int compare(Geometry o1, Geometry o2) {
-
-			return Double.compare(o1.getArea(), o2.getArea());
-		
-		}
-		
-	};
-	
 	private static final Logger log = Logger.getLogger(PopulationCreator.class);
-	
-	private final Geoinformation geoinformation;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 
@@ -110,24 +97,23 @@ public class PopulationCreator {
 	private static CoordinateTransformation transformation;
 	static Distribution distribution;
 	
-	private static Coord currentHomeLocation = null;
-	private static Coord currentMainActLocation = null;
-	private static MiDWay lastLeg = null;
-	private static Coord lastActCoord = null;
-	static double c = 0d;
-	static AdministrativeUnit currentHomeCell;
-	static AdministrativeUnit currentMainActCell;
-	static List<AdministrativeUnit> currentSearchSpace;
-	static AdministrativeUnit lastActCell = null;
-	
-	static <T extends Comparable<? super T>> List<T> asSortedList(Collection<T> c) {
-	  List<T> list = new ArrayList<T>(c);
-	  java.util.Collections.sort(list);
-	  return list;
-	}
+	private Coord currentHomeLocation = null;
+	private Coord currentMainActLocation = null;
+	private MiDWay lastLeg = null;
+	private Coord lastActCoord = null;
+	private double c = 0d;
+	private AdministrativeUnit currentHomeCell;
+	private AdministrativeUnit currentMainActCell;
+	private List<AdministrativeUnit> currentSearchSpace;
+	private AdministrativeUnit lastActCell = null;
 	/////////////////////////////////////////////////////////////////////////////////////////	
-	
-	// No instance!
+
+	/**
+	 * 
+	 * Constructor.
+	 * 
+	 * @param geoinformation The geoinformation container.
+	 */
 	public PopulationCreator(final Geoinformation geoinformation){
 		
 		this.geoinformation = geoinformation;
@@ -260,7 +246,9 @@ public class PopulationCreator {
 	 * <li>home
 	 * </ol>
 	 * 
-	 * The home and work locations are chosen according to landuse data and a gravitation model.
+	 * The home and work locations are chosen according to landuse data and a gravitation model.</br>
+	 * 
+	 * At the moment, this method is a stub and does nothing. dhosse 05/16
 	 * 
 	 * @param configuration The scenario generation configuration file.
 	 * @param scenario A Matsim scenario.
@@ -349,19 +337,11 @@ public class PopulationCreator {
 		ObjectAttributes personAttributes = new ObjectAttributes();
 		scenario.addScenarioElement(PersonUtils.PERSON_ATTRIBUTES, personAttributes);
 		
-		//TODO number of households...
-		//nhh hb 308705
-		//nhh gap 36531
-		//berlin: 1966000
-		//dessau-rosslau: 45106
-		//os: 84218
-		
 		// Sort the households by their weight (according to the survey data)
 		List<SurveyHousehold> households = new ArrayList<>();
 		households.addAll(container.getHouseholds().values());
 		Collections.sort(households, householdComparator);
 		
-		//TODO number of households in db table...
 		// Choose a home cell for the household
 		// Initialize a pseudo-random number and iterate over all administrative units.
 		// Accumulate their weights and as soon as the random number is smaller or equal to the accumulated weight
@@ -992,6 +972,7 @@ public class PopulationCreator {
 				distance = 500 + random.nextInt(1001);
 				
 			}
+
 		}
 		
 		// Divide the distance by the beeline distance factor and set boundaries for maximum and minimum distance traveled
@@ -999,25 +980,8 @@ public class PopulationCreator {
 		double minFactor = 0.75;
 		double maxFactor = 1.25;
 		
-		//TODO widerstandskurve statt d aus survey
 		// Get all landuse geometries of the current activity type within the given administrative unit
 		List<Geometry> closest = au.getLanduseGeometries().get(actType);
-//		
-//		if(au.equals(currentMainActCell)){
-//			
-//			closest = currentMainActCell.getLanduseGeometries().get(actType);
-//			
-//			if(closest != null){
-//
-//				int index = random.nextInt(closest.size());
-//				Geometry area = closest.get(index);
-//				return transformation.transform(GeometryUtils.shoot(area,random));
-//				
-//			}
-//			
-//		}
-//		
-//		closest = au.getLanduseGeometries().get(actType);
 		
 		// If there were any landuse geometries found, randomly choose one of the geometries.
 		// Else pick the landuse geometry closest to the last activity coordinate.
