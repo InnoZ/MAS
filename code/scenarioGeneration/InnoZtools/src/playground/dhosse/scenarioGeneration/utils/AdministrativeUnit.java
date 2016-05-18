@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.matsim.core.utils.collections.Tuple;
-
 import com.vividsolutions.jts.geom.Geometry;
 
 public class AdministrativeUnit {

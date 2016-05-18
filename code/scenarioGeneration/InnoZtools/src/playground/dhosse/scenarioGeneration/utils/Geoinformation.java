@@ -37,13 +37,20 @@ public class Geoinformation {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
-	private static Map<String, AdministrativeUnit> surveyArea = new HashMap<String, AdministrativeUnit>();
-	private static Map<String, AdministrativeUnit> vicinity = new HashMap<String, AdministrativeUnit>();
-	private static Geometry completeGeometry;
-	protected static Map<String,QuadTree<Geometry>> actType2QT = new HashMap<>();
-	protected static Geometry catchmentAreaPt;
+	private Map<String, AdministrativeUnit> surveyArea;
+	private Map<String, AdministrativeUnit> vicinity;
+	private Geometry completeGeometry;
+	protected Map<String,QuadTree<Geometry>> actType2QT;
+	protected Geometry catchmentAreaPt;
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
+	public Geoinformation(){
+		
+		this.surveyArea = new HashMap<String, AdministrativeUnit>();
+		this.vicinity = new HashMap<String, AdministrativeUnit>();
+		this.actType2QT = new HashMap<String, QuadTree<Geometry>>();
+		
+	}
 	
 	/**
 	 * Reads the geometries of the specified id(s) from an ESRI shapefile into the
@@ -136,6 +143,12 @@ public class Geoinformation {
 	public Map<String, AdministrativeUnit> getSurveyArea(){
 		
 		return surveyArea;
+		
+	}
+	
+	public Map<String, AdministrativeUnit> getVicinity(){
+		
+		return vicinity;
 		
 	}
 	
