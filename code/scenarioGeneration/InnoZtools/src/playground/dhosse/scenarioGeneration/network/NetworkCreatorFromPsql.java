@@ -23,6 +23,7 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
+import playground.dhosse.database.DatabaseConstants;
 import playground.dhosse.scenarioGeneration.Configuration;
 import playground.dhosse.scenarioGeneration.utils.AdministrativeUnit;
 import playground.dhosse.scenarioGeneration.utils.Geoinformation;
@@ -67,6 +68,7 @@ public class NetworkCreatorFromPsql {
 	private static final String UNCLASSIFIED = "unclassified";
 	private static final String RESIDENTIAL = "residential";
 	private static final String LIVING_STREET = "living_street";
+	private static final String TAG_OSM_ID = "osm_id";
 	
 	private final Network network;
 	private final CoordinateTransformation transform;
@@ -98,6 +100,8 @@ public class NetworkCreatorFromPsql {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	/**
+	 * 
+	 * Constructor.
 	 * 
 	 * @param network An empty MATSim network.
 	 * @param configuration The scenario generation configuration.
@@ -175,15 +179,15 @@ public class NetworkCreatorFromPsql {
 		WKTReader wktReader = new WKTReader();
 		Set<WayEntry> wayEntries = new HashSet<>();
 		
-		Class.forName("org.postgresql.Driver").newInstance();
-		Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:" + configuration.getLocalPort() + "/geodata",
-				configuration.getDatabaseUsername(), configuration.getPassword());
+		Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
+		Connection connection = DriverManager.getConnection(DatabaseConstants.PSQL_PREFIX + configuration.getLocalPort() + "/"
+				+ DatabaseConstants.GEODATA_DB, configuration.getDatabaseUsername(), configuration.getPassword());
 	
 		if(connection != null){
 
 			Statement statement = connection.createStatement();
-			ResultSet result = statement.executeQuery("select osm_id, access, highway, junction, oneway,"
-					+ " st_astext(way) from osm.osm_line where highway is not null and"
+			ResultSet result = statement.executeQuery("select " + TAG_OSM_ID + ", " + TAG_ACCESS + ", " + TAG_HIGHWAY + ", " + TAG_JUNCTION
+					+ ", " + TAG_ONEWAY + ", " + " st_astext(way) from osm.osm_line where highway is not null and"
 					+ " st_within(way,st_geomfromtext('" + Geoinformation.getCompleteGeometry().toString() + "',4326));");
 			
 			while(result.next()){

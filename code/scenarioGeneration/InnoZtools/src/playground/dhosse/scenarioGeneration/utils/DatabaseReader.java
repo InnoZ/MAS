@@ -26,6 +26,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
+import playground.dhosse.database.DatabaseConstants;
 import playground.dhosse.scenarioGeneration.Configuration;
 import playground.dhosse.utils.QuadTree;
 import playground.dhosse.utils.osm.OsmKey2ActivityType;
@@ -53,32 +54,6 @@ class DatabaseReader {
 	private final GeometryFactory gFactory = new GeometryFactory(new PrecisionModel(
 			PrecisionModel.maximumPreciseValue));
 	private final WKTReader wktReader = new WKTReader();
-	private final String SCHEMA_GADM = "gadm";
-	private final String TABLE_DISTRICTS = "districts";
-	private final String SCHEMA_OSM = "osm";
-	private final String TABLE_RELATIONS = "planet_osm_rels";
-	private final String TABLE_WAYS = "osm_ways";
-	private final String TABLE_NODES = "osm_nodes";
-	private final String TABLE_POLYGONS = "osm_polygon";
-	private final String TABLE_POINTS = "osm_point";
-	private final String BLAND = "cca_4";
-	private final String MUN_KEY = "cca_4";
-	private final String ST_ASTEXT = "st_astext";
-	private final String ST_GEOMFROMTEXT = "st_geomfromtext";
-	private final String ST_WITHIN = "st_within";
-	private final String ATT_LANDUSE = "landuse";
-	private final String ATT_AMENITY = "amenity";
-	private final String ATT_LEISURE = "leisure";
-	private final String ATT_SHOP = "shop";
-	private final String ATT_WAY = "way";
-	private final String ATT_ID = "id";
-	private final String ATT_NODES = "nodes";
-	private final String ATT_TAGS = "tags";
-	private final String ATT_PARTS = "parts";
-	private final String ATT_MEMBERS = "members";
-	private final String ATT_LON = "lon";
-	private final String ATT_LAT = "lat";
-	private final String ATT_BUILDING = "building";
 	/////////////////////////////////////////////////////////////////////////////////////////
 
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
@@ -125,11 +100,11 @@ class DatabaseReader {
 
 			if(i < ids.size() - 1){
 				
-				builder.append(" " + MUN_KEY + " like '" + id + "%' OR");
+				builder.append(" " + DatabaseConstants.MUN_KEY + " like '" + id + "%' OR");
 				
 			} else {
 				
-				builder.append(" " + MUN_KEY + " like '" + id + "%'");
+				builder.append(" " + DatabaseConstants.MUN_KEY + " like '" + id + "%'");
 				
 			}
 			
@@ -138,8 +113,9 @@ class DatabaseReader {
 		}
 		
 		// Execute the query and store the returned valued inside a set.
-		ResultSet set = statement.executeQuery("select " + BLAND + "," + MUN_KEY + ", " + ST_ASTEXT + "(geom)"
-				+ " from " + SCHEMA_GADM + "." + TABLE_DISTRICTS + " where" + builder.toString());
+		ResultSet set = statement.executeQuery("select " + DatabaseConstants.BLAND + "," + DatabaseConstants.MUN_KEY + ", "
+				+ DatabaseConstants.ST_ASTEXT + "(" + DatabaseConstants.ATT_GEOM + ")" + " from " + DatabaseConstants.SCHEMA_GADM + "."
+				+ DatabaseConstants.TABLE_DISTRICTS + " where" + builder.toString());
 
 //		ResultSet set = statement.executeQuery("select vkz_nr, st_astext(geom) from gadm.berlin_vz;");
 		
@@ -154,9 +130,9 @@ class DatabaseReader {
 		while(set.next()){
 			
 			//TODO attributes have to be added to the table
-			String key = set.getString(MUN_KEY).substring(1);
+			String key = set.getString(DatabaseConstants.MUN_KEY).substring(1);
 //			String key = set.getString("vkz_nr");
-			String g = set.getString(ST_ASTEXT);
+			String g = set.getString(DatabaseConstants.ST_ASTEXT);
 //			long bland = set.getLong(BLAND);
 //				int districtType = set.getInt("");
 //				int municipalityType = set.getInt("");
@@ -283,19 +259,22 @@ class DatabaseReader {
 		// Create a new statement to execute the sql query
 		Statement statement = connection.createStatement();
 		// Execute the query and store the returned valued inside a set.
-		ResultSet set = statement.executeQuery("select " + ATT_LANDUSE + ", " + ATT_AMENITY +  ", " + ATT_LEISURE + ", " + ATT_SHOP + ", "
-				+ ST_ASTEXT + "(" + ATT_WAY + ") from " + SCHEMA_OSM + "." + TABLE_POLYGONS + " where " + ST_WITHIN + "(" + ATT_WAY + ", "
-				+ ST_GEOMFROMTEXT + "('" + Geoinformation.getCompleteGeometry().toString() + "', 4326)) and (" + ATT_LANDUSE + " is not null"
-				+ " or " + ATT_AMENITY + " is not null or " + ATT_LEISURE + " is not null or " + ATT_SHOP + " is not null);");
+		ResultSet set = statement.executeQuery("select " + DatabaseConstants.ATT_LANDUSE + ", " + DatabaseConstants.ATT_AMENITY +  ", "
+				+ DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + ", " + DatabaseConstants.ST_ASTEXT + "("
+				+ DatabaseConstants.ATT_WAY + ") from " + DatabaseConstants.SCHEMA_OSM + "." + DatabaseConstants.TABLE_POLYGONS + " where "
+				+ DatabaseConstants.ST_WITHIN + "(" + DatabaseConstants.ATT_WAY + ", " + DatabaseConstants.ST_GEOMFROMTEXT + "('"
+				+ Geoinformation.getCompleteGeometry().toString() + "', 4326)) and (" + DatabaseConstants.ATT_LANDUSE + " is not null"
+				+ " or " + DatabaseConstants.ATT_AMENITY + " is not null or " + DatabaseConstants.ATT_LEISURE + " is not null or "
+				+ DatabaseConstants.ATT_SHOP + " is not null);");
 		
 		// Go through all results
 		while(set.next()){
 			
-			Geometry geometry = wktReader.read(set.getString(ST_ASTEXT));
-			String landuse = set.getString(ATT_LANDUSE);
-			String amenity = set.getString(ATT_AMENITY);
-			String leisure = set.getString(ATT_LEISURE);
-			String shop = set.getString(ATT_SHOP);
+			Geometry geometry = wktReader.read(set.getString(DatabaseConstants.ST_ASTEXT));
+			String landuse = set.getString(DatabaseConstants.ATT_LANDUSE);
+			String amenity = set.getString(DatabaseConstants.ATT_AMENITY);
+			String leisure = set.getString(DatabaseConstants.ATT_LEISURE);
+			String shop = set.getString(DatabaseConstants.ATT_SHOP);
 			
 			if(amenity != null){
 				
@@ -333,12 +312,13 @@ class DatabaseReader {
 		
 		Statement statement = connection.createStatement();
 		
-		ResultSet set = statement.executeQuery("select " + ATT_ID + ", " + ATT_NODES + ", " + ATT_TAGS + " from "
-				+ SCHEMA_OSM + "." + TABLE_WAYS + " where " + ATT_TAGS + " @> ARRAY['" + ATT_LANDUSE + "'];");
+		ResultSet set = statement.executeQuery("select " + DatabaseConstants.ATT_ID + ", " + DatabaseConstants.ATT_NODES + ", "
+				+ DatabaseConstants.ATT_TAGS + " from " + DatabaseConstants.SCHEMA_OSM + "." + DatabaseConstants.TABLE_WAYS + " where "
+				+ DatabaseConstants.ATT_TAGS + " @> ARRAY['" + DatabaseConstants.ATT_LANDUSE + "'];");
 		
 		while(set.next()){
 			
-			String[] tags = (String[])set.getArray(ATT_TAGS).getArray();
+			String[] tags = (String[])set.getArray(DatabaseConstants.ATT_TAGS).getArray();
 			
 			String landuse = null;
 			int k = 0;
@@ -354,17 +334,17 @@ class DatabaseReader {
 
 				StringBuilder sb = new StringBuilder();
 				
-				Long[] nodes = (Long[])set.getArray(ATT_NODES).getArray();
+				Long[] nodes = (Long[])set.getArray(DatabaseConstants.ATT_NODES).getArray();
 				
 				for(int i = 0; i < nodes.length; i++){
 					
 					if(i < nodes.length - 1){
 						
-						sb.append(" " + ATT_ID + " = '" + nodes[i] + "' or");
+						sb.append(" " + DatabaseConstants.ATT_ID + " = '" + nodes[i] + "' or");
 						
 					} else{
 						
-						sb.append(" " + ATT_ID + " = '" + nodes[i] + "'");
+						sb.append(" " + DatabaseConstants.ATT_ID + " = '" + nodes[i] + "'");
 						
 					}
 					
@@ -401,23 +381,24 @@ class DatabaseReader {
 		// Parse relations for landuse tags to get multipolygon geometries
 		Statement statement = connection.createStatement();
 			
-		ResultSet set = statement.executeQuery("select " + ATT_PARTS + ", " + ATT_MEMBERS + ", " + ATT_TAGS + " from "
-				+ SCHEMA_OSM + "." + TABLE_RELATIONS + " where " + ATT_TAGS + " @> ARRAY['" + ATT_LANDUSE + "'];");
+		ResultSet set = statement.executeQuery("select " + DatabaseConstants.ATT_PARTS + ", " + DatabaseConstants.ATT_MEMBERS + ", "
+				+ DatabaseConstants.ATT_TAGS + " from " + DatabaseConstants.SCHEMA_OSM + "." + DatabaseConstants.TABLE_RELATIONS +
+				" where " + DatabaseConstants.ATT_TAGS + " @> ARRAY['" + DatabaseConstants.ATT_LANDUSE + "'];");
 		
 		while(set.next()){
 			
 			StringBuilder sb = new StringBuilder();
 			
-			Long[] parts = (Long[])set.getArray(ATT_PARTS).getArray();
-			String[] tags = (String[])set.getArray(ATT_TAGS).getArray();
-			String[] members = (String[])set.getArray(ATT_MEMBERS).getArray();
+			Long[] parts = (Long[])set.getArray(DatabaseConstants.ATT_PARTS).getArray();
+			String[] tags = (String[])set.getArray(DatabaseConstants.ATT_TAGS).getArray();
+			String[] members = (String[])set.getArray(DatabaseConstants.ATT_MEMBERS).getArray();
 			
 			for(int i = 0; i < parts.length; i++){
 				
 				if(i < parts.length - 1){
-					sb.append(" " + ATT_ID + " = '" + parts[i] + "' or");
+					sb.append(" " + DatabaseConstants.ATT_ID + " = '" + parts[i] + "' or");
 				} else {
-					sb.append(" " + ATT_ID + " = '" + parts[i] + "'");
+					sb.append(" " + DatabaseConstants.ATT_ID + " = '" + parts[i] + "'");
 				}
 				
 			}
@@ -461,7 +442,8 @@ class DatabaseReader {
 	private Map<Long,LinearRing> getAffiliatedWays(Connection connection, String arguments) throws SQLException{
 
 		Statement statement = connection.createStatement();
-		ResultSet set = statement.executeQuery("select * from " + SCHEMA_OSM + "." + TABLE_WAYS + " where" + arguments);
+		ResultSet set = statement.executeQuery("select * from " + DatabaseConstants.SCHEMA_OSM + "." + DatabaseConstants.TABLE_WAYS
+				+ " where" + arguments);
 		
 		Map<Long, LinearRing> linearRingSet = new HashMap<>();
 		
@@ -469,19 +451,19 @@ class DatabaseReader {
 			
 			StringBuilder sb = new StringBuilder();
 			
-			Long id = set.getLong(ATT_ID);
+			Long id = set.getLong(DatabaseConstants.ATT_ID);
 			
-			Long[] nodes = (Long[])set.getArray(ATT_NODES).getArray();
+			Long[] nodes = (Long[])set.getArray(DatabaseConstants.ATT_NODES).getArray();
 			
 			for(int i = 0; i < nodes.length; i++){
 				
 				if(i < nodes.length - 1){
 					
-					sb.append(" " + ATT_ID + " = '" + nodes[i] + "' or");
+					sb.append(" " + DatabaseConstants.ATT_ID + " = '" + nodes[i] + "' or");
 					
 				} else{
 					
-					sb.append(" " + ATT_ID + " = '" + nodes[i] + "'");
+					sb.append(" " + DatabaseConstants.ATT_ID + " = '" + nodes[i] + "'");
 					
 				}
 				
@@ -501,7 +483,8 @@ class DatabaseReader {
 	private LinearRing createLinearRing(Connection connection, String arguments, Long[] nodes) throws SQLException{
 		
 		Statement statement = connection.createStatement();
-		ResultSet set = statement.executeQuery("select * from " + SCHEMA_OSM + "." + TABLE_NODES + " where" + arguments);
+		ResultSet set = statement.executeQuery("select * from " + DatabaseConstants.SCHEMA_OSM + "." + DatabaseConstants.TABLE_NODES
+				+ " where" + arguments);
 		
 		Coordinate[] coordinates = new Coordinate[nodes.length];
 		
@@ -511,7 +494,7 @@ class DatabaseReader {
 		
 		while(set.next()){
 			
-			Long id = set.getLong(ATT_ID);
+			Long id = set.getLong(DatabaseConstants.ATT_ID);
 			
 			int idx = 0;
 			for(int i = 0; i < nodes.length; i++){
@@ -525,8 +508,8 @@ class DatabaseReader {
 				
 			}
 			
-			double lon = set.getDouble(ATT_LON)/Math.pow(10, 7);
-			double lat = set.getDouble(ATT_LAT)/Math.pow(10, 7);
+			double lon = set.getDouble(DatabaseConstants.ATT_LON)/Math.pow(10, 7);
+			double lat = set.getDouble(DatabaseConstants.ATT_LAT)/Math.pow(10, 7);
 			coordinates[idx] = new Coordinate(lon, lat);
 			coordMap.put(id, coordinates[idx]);
 			
@@ -581,18 +564,20 @@ class DatabaseReader {
 		log.info("Reading in amenities...");
 
 		Statement statement = connection.createStatement();
-		ResultSet set = statement.executeQuery("select " + ST_ASTEXT + "(" + ATT_WAY + "), " + ATT_AMENITY + ", " + ATT_LEISURE + ", "
-				+ ATT_SHOP + " from " + SCHEMA_OSM + "." + TABLE_POINTS + " where " + ST_WITHIN + "(" + ATT_WAY + "," + ST_GEOMFROMTEXT
-				+ "('" + Geoinformation.getCompleteGeometry().toString() + "',4326)) and (" + ATT_AMENITY + " is not null or " 
-				+ ATT_LEISURE + " is not null or " + ATT_SHOP + " is not null)");
+		ResultSet set = statement.executeQuery("select " + DatabaseConstants.ST_ASTEXT + "(" + DatabaseConstants.ATT_WAY + "), " +
+				DatabaseConstants.ATT_AMENITY + ", " + DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + " from "
+				+ DatabaseConstants.SCHEMA_OSM + "." + DatabaseConstants.TABLE_POINTS + " where " + DatabaseConstants.ST_WITHIN + "("
+				+ DatabaseConstants.ATT_WAY + "," + DatabaseConstants.ST_GEOMFROMTEXT + "('" +
+				Geoinformation.getCompleteGeometry().toString() + "',4326)) and (" + DatabaseConstants.ATT_AMENITY + " is not null or " 
+				+ DatabaseConstants.ATT_LEISURE + " is not null or " + DatabaseConstants.ATT_SHOP + " is not null)");
 		
 		while(set.next()){
 			
-			Geometry geometry = wktReader.read(set.getString(ST_ASTEXT));
+			Geometry geometry = wktReader.read(set.getString(DatabaseConstants.ST_ASTEXT));
 			
-			String amenity = set.getString(ATT_AMENITY);
-			String leisure = set.getString(ATT_LEISURE);
-			String shop = set.getString(ATT_SHOP);
+			String amenity = set.getString(DatabaseConstants.ATT_AMENITY);
+			String leisure = set.getString(DatabaseConstants.ATT_LEISURE);
+			String shop = set.getString(DatabaseConstants.ATT_SHOP);
 			
 			String landuse = null;
 			
@@ -686,15 +671,16 @@ class DatabaseReader {
 		WKTReader wktReader = new WKTReader();
 		
 		Statement statement = connection.createStatement();
-		String s = "select " + ATT_BUILDING + ", " + ST_ASTEXT + "(" + ATT_WAY + ") from " + SCHEMA_OSM + "." + TABLE_POLYGONS + " where "
-				+ ST_WITHIN + "(" + ATT_WAY + "," + ST_GEOMFROMTEXT + "('" + Geoinformation.getCompleteGeometry().toString() + "',4326))"
-				+ " and " + ATT_BUILDING + " is not null";
+		String s = "select " + DatabaseConstants.ATT_BUILDING + ", " + DatabaseConstants.ST_ASTEXT + "(" + DatabaseConstants.ATT_WAY
+				+ ") from " + DatabaseConstants.SCHEMA_OSM + "." + DatabaseConstants.TABLE_POLYGONS + " where "	+
+				DatabaseConstants.ST_WITHIN + "(" + DatabaseConstants.ATT_WAY + "," + DatabaseConstants.ST_GEOMFROMTEXT +
+				"('" + Geoinformation.getCompleteGeometry().toString() + "',4326))"	+ " and " + DatabaseConstants.ATT_BUILDING + " is not null";
 		ResultSet set = statement.executeQuery(s);
 		
 		while(set.next()){
 			
-			Geometry geometry = wktReader.read(set.getString(ST_ASTEXT));
-			String building = set.getString(ATT_BUILDING);
+			Geometry geometry = wktReader.read(set.getString(DatabaseConstants.ST_ASTEXT));
+			String building = set.getString(DatabaseConstants.ATT_BUILDING);
 			
 			for(AdministrativeUnit au : Geoinformation.getAdminUnits().values()){
 				
@@ -746,15 +732,16 @@ class DatabaseReader {
 	private void readPtStops(Connection connection) throws SQLException, ParseException{
 		
 		Statement statement = connection.createStatement();
-		ResultSet set = statement.executeQuery("select " + ST_ASTEXT + "(" + ATT_WAY + ") from " + SCHEMA_OSM + "." + TABLE_POINTS
-				+ " where " + ST_WITHIN + " (" + ATT_WAY + "," + ST_GEOMFROMTEXT + "('" + Geoinformation.getCompleteGeometry().toString()
+		ResultSet set = statement.executeQuery("select " + DatabaseConstants.ST_ASTEXT + "(" + DatabaseConstants.ATT_WAY + ") from "
+				+ DatabaseConstants.SCHEMA_OSM + "." + DatabaseConstants.TABLE_POINTS + " where " + DatabaseConstants.ST_WITHIN + " ("
+				+ DatabaseConstants.ATT_WAY + "," + DatabaseConstants.ST_GEOMFROMTEXT + "('" + Geoinformation.getCompleteGeometry().toString()
 				+ "',4326));");
 		
 		Set<Geometry> ptStops = new HashSet<>();
 		
 		while(set.next()){
 			
-			Geometry g = wktReader.read(set.getString(ST_ASTEXT));
+			Geometry g = wktReader.read(set.getString(DatabaseConstants.ST_ASTEXT));
 			
 			for(AdministrativeUnit au : Geoinformation.getAdminUnits().values()){
 				
