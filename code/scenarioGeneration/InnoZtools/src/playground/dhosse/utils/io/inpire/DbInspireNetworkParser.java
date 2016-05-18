@@ -31,7 +31,7 @@ import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.xml.sax.Attributes;
 
-import playground.dhosse.scenarios.generic.utils.Modes;
+import playground.dhosse.scenarioGeneration.utils.Modes;
 import playground.dhosse.utils.GeometryUtils;
 
 /**

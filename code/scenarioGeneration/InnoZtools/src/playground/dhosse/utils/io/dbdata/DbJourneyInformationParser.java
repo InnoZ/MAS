@@ -25,7 +25,7 @@ import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
 import org.xml.sax.Attributes;
 
-import playground.dhosse.scenarios.generic.utils.Modes;
+import playground.dhosse.scenarioGeneration.utils.Modes;
 
 /**
  * Parses a given journey information file provided by the Deutsche Bahn
