@@ -1,9 +1,7 @@
 package playground.dhosse.scenarioGeneration.population;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.matsim.api.core.v01.population.Person;
 
@@ -68,7 +66,6 @@ public class PersonUtils {
 		}
 		
 		return null;
-//		return templatePersons.values().get(new Random().nextInt(templatePersons.size()));
 		
 	}
 	
