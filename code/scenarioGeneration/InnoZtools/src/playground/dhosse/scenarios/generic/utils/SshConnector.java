@@ -1,9 +1,13 @@
 package playground.dhosse.scenarios.generic.utils;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Properties;
+
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
 
@@ -21,12 +25,9 @@ public class SshConnector {
 		
 		log.info("Trying to establish ssh tunnel to mobility database server...");
 		
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		
-		System.out.println("Enter user name for ssh tunnel: ");
-		String sshuser = br.readLine();
-		System.out.println("Enter your password: ");
-		String sshpassword = br.readLine();
+		String[] sshData = PasswordDialog.run();
+		String sshuser = sshData[0];
+		String sshpassword = sshData[1];
 		String sshhost = "playground";
 		String remoteHost = "localhost";
 		int nLocalPort = configuration.getLocalPort();
@@ -45,6 +46,33 @@ public class SshConnector {
 	    session.setPortForwardingL(nLocalPort, remoteHost, nRemotePort);
 	    
 	    log.info("Ssh tunnel established.");
+		
+	}
+
+	private static class PasswordDialog{
+
+		static String[] run(){
+
+			JPanel panel = new JPanel();
+			JLabel user = new JLabel("Enter your ssh user name:");
+			JTextField textField = new JTextField(20);
+			JLabel label = new JLabel("Enter your ssh password:");
+			JPasswordField pwField = new JPasswordField(20);
+			panel.add(user);
+			panel.add(textField);
+			panel.add(label);
+			panel.add(pwField);
+			String[] options = {"Ok","Cancel"};
+			int option = JOptionPane.showOptionDialog(null, panel, "Password, please", JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE,
+					null, options, options[1]);
+			
+			if(option == 1){
+				
+				return new String[]{textField.getText(), new String(pwField.getPassword())};
+				
+			} else return null;
+			
+		}
 		
 	}
 	
