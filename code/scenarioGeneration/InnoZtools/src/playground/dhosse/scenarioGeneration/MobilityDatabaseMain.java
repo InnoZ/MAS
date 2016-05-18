@@ -1,8 +1,6 @@
 package playground.dhosse.scenarioGeneration;
 
 import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,16 +16,12 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.households.HouseholdsWriterV10;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.matsim.vehicles.VehicleWriterV1;
-import org.opengis.referencing.FactoryException;
 
 import playground.dhosse.scenarioGeneration.network.NetworkCreatorFromPsql;
 import playground.dhosse.scenarioGeneration.population.PopulationCreator;
 import playground.dhosse.scenarioGeneration.utils.Geoinformation;
 import playground.dhosse.scenarioGeneration.utils.SshConnector;
 import playground.dhosse.utils.io.DatabaseUpdater;
-
-import com.jcraft.jsch.JSchException;
-import com.vividsolutions.jts.io.ParseException;
 
 /**
  * 
@@ -130,9 +124,7 @@ public class MobilityDatabaseMain {
 					
 				}
 				
-			} catch (JSchException | IOException | InstantiationException |
-					IllegalAccessException | ClassNotFoundException | SQLException |
-					ParseException | FactoryException e1) {
+			} catch (Exception e1) {
 			
 				e1.printStackTrace();
 				
