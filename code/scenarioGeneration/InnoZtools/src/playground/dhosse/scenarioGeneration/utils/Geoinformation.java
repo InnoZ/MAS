@@ -16,6 +16,7 @@ import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
+import playground.dhosse.database.DatabaseReader;
 import playground.dhosse.scenarioGeneration.Configuration;
 import playground.dhosse.utils.QuadTree;
 
@@ -43,7 +44,7 @@ import com.vividsolutions.jts.io.ParseException;
 public class Geoinformation {
 	
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
-	static final String AUTH_KEY_WGS84 = "EPSG:4326";
+	public static final String AUTH_KEY_WGS84 = "EPSG:4326";
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
@@ -226,9 +227,21 @@ public class Geoinformation {
 		
 	}
 	
+	public static void createQuadTreeForActType(String actType, double[] bounds){
+		
+		actType2QT.put(actType, new QuadTree<Geometry>(bounds[0], bounds[1], bounds[2], bounds[3]));
+		
+	}
+	
 	public static Geometry getCatchmentAreaPt(){
 		
 		return catchmentAreaPt;
+		
+	}
+	
+	public static void setCatchmentAreaPt(Geometry geometry){
+		
+		catchmentAreaPt = geometry;
 		
 	}
 	

@@ -1,4 +1,4 @@
-package playground.dhosse.scenarioGeneration.utils;
+package playground.dhosse.database;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -26,9 +26,10 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
-import playground.dhosse.database.DatabaseConstants;
 import playground.dhosse.scenarioGeneration.Configuration;
-import playground.dhosse.utils.QuadTree;
+import playground.dhosse.scenarioGeneration.utils.ActivityTypes;
+import playground.dhosse.scenarioGeneration.utils.AdministrativeUnit;
+import playground.dhosse.scenarioGeneration.utils.Geoinformation;
 import playground.dhosse.utils.osm.OsmKey2ActivityType;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -47,7 +48,7 @@ import com.vividsolutions.jts.io.WKTReader;
  * @author dhosse
  *
  */
-class DatabaseReader {
+public class DatabaseReader {
 
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	private static final Logger log = Logger.getLogger(DatabaseReader.class);
@@ -61,11 +62,6 @@ class DatabaseReader {
 	private CoordinateTransformation ct;
 	private int counter = 0;
 	/////////////////////////////////////////////////////////////////////////////////////////
-	
-	/**
-	 * Std. constructor
-	 */
-	DatabaseReader(){}
 	
 	/**
 	 * 
@@ -83,7 +79,7 @@ class DatabaseReader {
 	 * @throws MismatchedDimensionException
 	 * @throws TransformException
 	 */
-	void readAdminBorders(Connection connection, Configuration configuration, Set<String> ids)
+	public void readAdminBorders(Connection connection, Configuration configuration, Set<String> ids)
 			throws SQLException, NoSuchAuthorityCodeException, FactoryException, ParseException,
 			MismatchedDimensionException, TransformException{
 
@@ -184,7 +180,7 @@ class DatabaseReader {
 	 * @throws FactoryException 
 	 * @throws NoSuchAuthorityCodeException 
 	 */
-	void readOsmData(Connection connection, Configuration configuration) throws NoSuchAuthorityCodeException,
+	public void readOsmData(Connection connection, Configuration configuration) throws NoSuchAuthorityCodeException,
 		FactoryException{
 
 		final CoordinateReferenceSystem fromCRS = CRS.decode(Geoinformation.AUTH_KEY_WGS84, true);
@@ -622,10 +618,11 @@ class DatabaseReader {
 						
 						au.addLanduseGeometry(landuse, g);
 						
-						if(!Geoinformation.actType2QT.containsKey(landuse)){
+						if(Geoinformation.getQuadTreeForActType(landuse) == null){
 							
-							Geoinformation.actType2QT.put(landuse, new QuadTree<>(boundingBox.getCoordinates()[0].x,
-									boundingBox.getCoordinates()[0].y, boundingBox.getCoordinates()[2].x, boundingBox.getCoordinates()[2].y));
+							Coordinate[] coordinates = boundingBox.getCoordinates();
+							Geoinformation.createQuadTreeForActType(landuse, new double[]{coordinates[0].x, coordinates[0].y,
+									coordinates[2].x, coordinates[2].y});
 							
 						} 
 						
@@ -633,7 +630,7 @@ class DatabaseReader {
 						
 						if(this.boundingBox.contains(MGC.coord2Point(c))){
 							
-							Geoinformation.actType2QT.get(landuse).put(c.getX(), c.getY(), g);
+							Geoinformation.getQuadTreeForActType(landuse).put(c.getX(), c.getY(), g);
 							
 						}
 						
@@ -756,7 +753,7 @@ class DatabaseReader {
 				
 			}
 			
-			Geoinformation.catchmentAreaPt = gFactory.buildGeometry(ptStops);
+			Geoinformation.setCatchmentAreaPt(gFactory.buildGeometry(ptStops));
 			
 		}
 		

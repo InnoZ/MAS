@@ -1,4 +1,4 @@
-package playground.dhosse.utils.io;
+package playground.dhosse.database;
 
 import java.io.BufferedReader;
 import java.io.IOException;

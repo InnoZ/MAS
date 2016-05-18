@@ -17,11 +17,11 @@ import org.matsim.households.HouseholdsWriterV10;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.matsim.vehicles.VehicleWriterV1;
 
+import playground.dhosse.database.DatabaseUpdater;
 import playground.dhosse.scenarioGeneration.network.NetworkCreatorFromPsql;
 import playground.dhosse.scenarioGeneration.population.PopulationCreator;
 import playground.dhosse.scenarioGeneration.utils.Geoinformation;
 import playground.dhosse.scenarioGeneration.utils.SshConnector;
-import playground.dhosse.utils.io.DatabaseUpdater;
 
 /**
  * 
