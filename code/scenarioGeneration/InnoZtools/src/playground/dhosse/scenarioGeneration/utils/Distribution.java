@@ -16,7 +16,7 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.matrices.Matrix;
 
-import playground.dhosse.scenarioGeneration.population.io.mid.MiDParser;
+import playground.dhosse.database.MiDParser;
 
 public class Distribution {
 

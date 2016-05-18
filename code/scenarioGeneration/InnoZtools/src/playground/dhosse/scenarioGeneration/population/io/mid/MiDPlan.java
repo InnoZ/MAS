@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import playground.dhosse.scenarioGeneration.population.io.mid.MiDParser.Subtour;
+import playground.dhosse.database.MiDParser.Subtour;
 
 public class MiDPlan {
 
@@ -123,6 +123,12 @@ public class MiDPlan {
 	
 	public void setMainActIndex(int i){
 		this.mainActIndex = i;
+	}
+	
+	public boolean homeIndexIsSet(){
+		
+		return this.setHomeIndex;
+		
 	}
 	
 }

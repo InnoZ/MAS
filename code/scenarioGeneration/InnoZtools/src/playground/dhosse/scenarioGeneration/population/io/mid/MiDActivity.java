@@ -61,7 +61,7 @@ public class MiDActivity implements MiDPlanElement {
 		this.inHomeCell = b;
 	}
 	
-	protected void setId(int i){
+	public void setId(int i){
 		this.id = i;
 	}
 

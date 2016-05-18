@@ -40,9 +40,9 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import playground.dhosse.database.MiDParser;
 import playground.dhosse.scenarioGeneration.Configuration;
 import playground.dhosse.scenarioGeneration.population.io.mid.MiDActivity;
-import playground.dhosse.scenarioGeneration.population.io.mid.MiDParser;
 import playground.dhosse.scenarioGeneration.population.io.mid.MiDPlan;
 import playground.dhosse.scenarioGeneration.population.io.mid.MiDPlanElement;
 import playground.dhosse.scenarioGeneration.population.io.mid.MiDWay;

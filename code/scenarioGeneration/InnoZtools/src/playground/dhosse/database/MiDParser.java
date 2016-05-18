@@ -1,4 +1,4 @@
-package playground.dhosse.scenarioGeneration.population.io.mid;
+package playground.dhosse.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,9 +17,17 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.misc.Time;
 
+import playground.dhosse.database.MiDParser.Subtour.subtourType;
 import playground.dhosse.scenarioGeneration.Configuration;
 import playground.dhosse.scenarioGeneration.population.HashGenerator;
-import playground.dhosse.scenarioGeneration.population.io.mid.MiDParser.Subtour.subtourType;
+import playground.dhosse.scenarioGeneration.population.io.mid.MiDActivity;
+import playground.dhosse.scenarioGeneration.population.io.mid.MiDConstants;
+import playground.dhosse.scenarioGeneration.population.io.mid.MiDPlan;
+import playground.dhosse.scenarioGeneration.population.io.mid.MiDPlanElement;
+import playground.dhosse.scenarioGeneration.population.io.mid.MiDWay;
+import playground.dhosse.scenarioGeneration.population.io.mid.SurveyDataContainer;
+import playground.dhosse.scenarioGeneration.population.io.mid.SurveyHousehold;
+import playground.dhosse.scenarioGeneration.population.io.mid.SurveyPerson;
 import playground.dhosse.scenarioGeneration.utils.ActivityTypes;
 import playground.dhosse.scenarioGeneration.utils.Hydrograph;
 import playground.dhosse.utils.RecursiveStatsContainer;
@@ -336,7 +344,7 @@ public class MiDParser {
 				int id = plan.getPlanElements().size() + 1;
 				
 				if(actType.equals(ActivityTypes.HOME)){
-					if(!plan.setHomeIndex){
+					if(!plan.homeIndexIsSet()){
 						plan.setHomeIndex(id);
 					} else{
 						id = plan.getHomeIndex();

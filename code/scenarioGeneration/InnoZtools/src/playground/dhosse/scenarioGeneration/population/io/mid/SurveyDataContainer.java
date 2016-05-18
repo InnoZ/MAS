@@ -51,7 +51,7 @@ public class SurveyDataContainer {
 		
 	}
 	
-	void incrementSumOfHouseholdWeigtsBy(double d){
+	public void incrementSumOfHouseholdWeigtsBy(double d){
 		
 		this.sumOfHouseholdWeights += d;
 		
@@ -63,7 +63,7 @@ public class SurveyDataContainer {
 		
 	}
 	
-	void incrementSumOfPersonWeightsBy(double d){
+	public void incrementSumOfPersonWeightsBy(double d){
 		
 		this.sumOfPersonWeights += d;
 		
