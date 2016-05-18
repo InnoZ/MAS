@@ -42,10 +42,10 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import playground.dhosse.database.MiDParser;
 import playground.dhosse.scenarioGeneration.Configuration;
-import playground.dhosse.scenarioGeneration.population.io.mid.MiDActivity;
-import playground.dhosse.scenarioGeneration.population.io.mid.MiDPlan;
-import playground.dhosse.scenarioGeneration.population.io.mid.MiDPlanElement;
-import playground.dhosse.scenarioGeneration.population.io.mid.MiDWay;
+import playground.dhosse.scenarioGeneration.population.io.mid.SurveyPlanActivity;
+import playground.dhosse.scenarioGeneration.population.io.mid.SurveyPlan;
+import playground.dhosse.scenarioGeneration.population.io.mid.SurveyPlanElement;
+import playground.dhosse.scenarioGeneration.population.io.mid.SurveyPlanWay;
 import playground.dhosse.scenarioGeneration.population.io.mid.SurveyDataContainer;
 import playground.dhosse.scenarioGeneration.population.io.mid.SurveyHousehold;
 import playground.dhosse.scenarioGeneration.population.io.mid.SurveyPerson;
@@ -99,7 +99,7 @@ public class PopulationCreator {
 	
 	private Coord currentHomeLocation = null;
 	private Coord currentMainActLocation = null;
-	private MiDWay lastLeg = null;
+	private SurveyPlanWay lastLeg = null;
 	private Coord lastActCoord = null;
 	private double c = 0d;
 	private AdministrativeUnit currentHomeCell;
@@ -542,7 +542,7 @@ public class PopulationCreator {
 		if(personTemplate.getPlans().size() > 0){
 
 			// Select a template plan from the mid survey to create a matsim plan
-			MiDPlan templatePlan = null;
+			SurveyPlan templatePlan = null;
 			
 			// If there is only one plan, make it the template
 			if(personTemplate.getPlans().size() < 2){
@@ -555,7 +555,7 @@ public class PopulationCreator {
 				double planRandom = personalRandom * personTemplate.getWeightOfAllPlans();
 				double accumulatedWeight = 0.;
 				
-				for(MiDPlan p : personTemplate.getPlans()){
+				for(SurveyPlan p : personTemplate.getPlans()){
 					
 					accumulatedWeight += p.getWeigt();
 					
@@ -580,8 +580,8 @@ public class PopulationCreator {
 				
 				// Locate the main activity according to the distribution that was computed before			
 				String mainMode = templatePlan.getMainActIndex() > 0 ? 
-						((MiDWay)templatePlan.getPlanElements().get(templatePlan.getMainActIndex()-1)).getMainMode() :
-							((MiDWay)templatePlan.getPlanElements().get(1)).getMainMode();
+						((SurveyPlanWay)templatePlan.getPlanElements().get(templatePlan.getMainActIndex()-1)).getMainMode() :
+							((SurveyPlanWay)templatePlan.getPlanElements().get(1)).getMainMode();
 				currentMainActCell = locateActivityInCell(templatePlan.getMainActType(), mainMode, personTemplate);
 				
 				currentMainActLocation = shootLocationForActType(currentMainActCell, templatePlan.getMainActType(),
@@ -616,9 +616,9 @@ public class PopulationCreator {
 				// Create a MATSim plan element for each survey plan element and add them to the MATSim plan
 				for(int j = 0; j < templatePlan.getPlanElements().size(); j++){
 					
-					MiDPlanElement mpe = templatePlan.getPlanElements().get(j);
+					SurveyPlanElement mpe = templatePlan.getPlanElements().get(j);
 					
-					if(mpe instanceof MiDActivity){
+					if(mpe instanceof SurveyPlanActivity){
 						
 						plan.addActivity(createActivity(population, personTemplate, templatePlan, mpe));
 						
@@ -669,9 +669,9 @@ public class PopulationCreator {
 	 * @return
 	 */
 	private Leg createLeg(Population population,
-			MiDPlanElement mpe) {
+			SurveyPlanElement mpe) {
 		
-		MiDWay way = (MiDWay)mpe;
+		SurveyPlanWay way = (SurveyPlanWay)mpe;
 		String mode = way.getMainMode();
 		double departure = way.getStartTime();
 		double ttime = way.getEndTime() - departure;
@@ -838,13 +838,13 @@ public class PopulationCreator {
 	 * @param mpe The survey plan element (in this case: activity)
 	 * @return A MATSim activity.
 	 */
-	private Activity createActivity(Population population, SurveyPerson personTemplate, MiDPlan templatePlan,
-			MiDPlanElement mpe) {
+	private Activity createActivity(Population population, SurveyPerson personTemplate, SurveyPlan templatePlan,
+			SurveyPlanElement mpe) {
 
 		AdministrativeUnit au = null;
 		
 		// Initialize the activity type and the start and end time
-		MiDActivity act = (MiDActivity)mpe;
+		SurveyPlanActivity act = (SurveyPlanActivity)mpe;
 		String type = act.getActType();
 		double start = act.getStartTime();
 		double end = act.getEndTime();
@@ -962,7 +962,7 @@ public class PopulationCreator {
 	 * @return A coordinate for the current activity.
 	 */
 	private Coord shootLocationForActType(AdministrativeUnit au, String actType, double distance,
-			MiDPlan templatePlan, String mode, SurveyPerson personTemplate) {
+			SurveyPlan templatePlan, String mode, SurveyPerson personTemplate) {
 
 		if(mode != null){
 			

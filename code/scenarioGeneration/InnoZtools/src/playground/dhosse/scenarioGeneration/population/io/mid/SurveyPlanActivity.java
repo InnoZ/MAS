@@ -1,6 +1,6 @@
 package playground.dhosse.scenarioGeneration.population.io.mid;
 
-public class MiDActivity implements MiDPlanElement {
+public class SurveyPlanActivity implements SurveyPlanElement {
 
 	private int id = 0;
 	
@@ -12,7 +12,7 @@ public class MiDActivity implements MiDPlanElement {
 	
 	private int priority;
 	
-	public MiDActivity(String actType){
+	public SurveyPlanActivity(String actType){
 		this.actType = actType;
 	}
 	

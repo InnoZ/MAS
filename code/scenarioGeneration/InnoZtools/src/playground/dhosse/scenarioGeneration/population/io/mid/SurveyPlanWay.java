@@ -3,7 +3,7 @@ package playground.dhosse.scenarioGeneration.population.io.mid;
 import java.util.HashSet;
 import java.util.Set;
 
-public class MiDWay implements MiDPlanElement {
+public class SurveyPlanWay implements SurveyPlanElement {
 
 	private int id;
 	private double weight;
@@ -16,7 +16,7 @@ public class MiDWay implements MiDPlanElement {
 	private double travelDistance;
 	private boolean roundTrip;
 	
-	public MiDWay(int id){
+	public SurveyPlanWay(int id){
 		
 		this.id = id;
 		this.modes = new HashSet<>();

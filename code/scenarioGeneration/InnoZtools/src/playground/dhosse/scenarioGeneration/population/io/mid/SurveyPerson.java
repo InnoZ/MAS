@@ -18,7 +18,7 @@ public class SurveyPerson {
 	private int lifePhase;
 	private double weightOfAllPlans = 0.;
 	
-	private List<MiDPlan> plans;
+	private List<SurveyPlan> plans;
 	
 	public SurveyPerson(String id, String sex, String age, String carAvailable, String hasLicense, String isEmployed){
 		
@@ -83,7 +83,7 @@ public class SurveyPerson {
 		
 	}
 
-	public List<MiDPlan> getPlans() {
+	public List<SurveyPlan> getPlans() {
 		return plans;
 	}
 

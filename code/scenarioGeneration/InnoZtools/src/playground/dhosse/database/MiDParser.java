@@ -20,11 +20,11 @@ import org.matsim.core.utils.misc.Time;
 import playground.dhosse.database.MiDParser.Subtour.subtourType;
 import playground.dhosse.scenarioGeneration.Configuration;
 import playground.dhosse.scenarioGeneration.population.HashGenerator;
-import playground.dhosse.scenarioGeneration.population.io.mid.MiDActivity;
+import playground.dhosse.scenarioGeneration.population.io.mid.SurveyPlanActivity;
 import playground.dhosse.scenarioGeneration.population.io.mid.MiDConstants;
-import playground.dhosse.scenarioGeneration.population.io.mid.MiDPlan;
-import playground.dhosse.scenarioGeneration.population.io.mid.MiDPlanElement;
-import playground.dhosse.scenarioGeneration.population.io.mid.MiDWay;
+import playground.dhosse.scenarioGeneration.population.io.mid.SurveyPlan;
+import playground.dhosse.scenarioGeneration.population.io.mid.SurveyPlanElement;
+import playground.dhosse.scenarioGeneration.population.io.mid.SurveyPlanWay;
 import playground.dhosse.scenarioGeneration.population.io.mid.SurveyDataContainer;
 import playground.dhosse.scenarioGeneration.population.io.mid.SurveyHousehold;
 import playground.dhosse.scenarioGeneration.population.io.mid.SurveyPerson;
@@ -258,7 +258,7 @@ public class MiDParser {
 			
 			if(person != null){
 			
-			MiDPlan plan = null;
+			SurveyPlan plan = null;
 			
 			int currentWayIdx = set.getInt(MiDConstants.WAY_ID_SORTED);
 			
@@ -268,7 +268,7 @@ public class MiDParser {
 			if(currentWayIdx < lastWayIdx || currentWayIdx >= 100 ||
 					!lastPersonId.equals(person.getId())){
 				
-				plan = new MiDPlan();
+				plan = new SurveyPlan();
 				person.getPlans().add(plan);
 				
 			} else {
@@ -313,7 +313,7 @@ public class MiDParser {
 
 				//create a new way and set the main mode, mode combination
 				//and departure / arrival time
-				MiDWay way = new MiDWay(currentWayIdx);
+				SurveyPlanWay way = new SurveyPlanWay(currentWayIdx);
 				way.setMainMode(mainMode);
 				way.setModes(modes);
 				way.setStartTime(startTime);
@@ -327,7 +327,7 @@ public class MiDParser {
 					
 					//add the source activity
 					double firstActType = set.getDouble(MiDConstants.START_POINT);
-					MiDActivity firstAct = new MiDActivity(handleActTypeAtStart(firstActType));
+					SurveyPlanActivity firstAct = new SurveyPlanActivity(handleActTypeAtStart(firstActType));
 					if(firstAct.getActType().equals(ActivityTypes.HOME)){
 						plan.setHomeIndex(0);
 					}
@@ -357,7 +357,7 @@ public class MiDParser {
 				
 					if(plan.getPlanElements().size() > 2){
 						
-						actType = ((MiDActivity)plan.getPlanElements().get(plan.getPlanElements()
+						actType = ((SurveyPlanActivity)plan.getPlanElements().get(plan.getPlanElements()
 								.size() - 3)).getActType();
 						id -= 2;
 						
@@ -425,13 +425,13 @@ public class MiDParser {
 		
 	}
 	
-	private void addWayAndActivity(MiDPlan plan, MiDWay way, String actType, int id, SurveyDataContainer container) throws SQLException{
+	private void addWayAndActivity(SurveyPlan plan, SurveyPlanWay way, String actType, int id, SurveyDataContainer container) throws SQLException{
 		
-		MiDActivity activity = new MiDActivity(actType);
+		SurveyPlanActivity activity = new SurveyPlanActivity(actType);
 		
 		//set end time of last activity in plan to
 		//the departure time of the current way
-		MiDActivity previousAct = ((MiDActivity)plan.getPlanElements().get(plan.getPlanElements().size()-1));
+		SurveyPlanActivity previousAct = ((SurveyPlanActivity)plan.getPlanElements().get(plan.getPlanElements().size()-1));
 		previousAct.setEndTime(way.getStartTime());
 		
 		if(!container.getActivityTypeHydrographs().containsKey(previousAct.getActType())){
@@ -506,12 +506,12 @@ public class MiDParser {
 			
 			if(person.getPlans().size() < 1) return false;
 			
-			for(MiDPlan plan : person.getPlans()){
+			for(SurveyPlan plan : person.getPlans()){
 				
 				person.incrementPlansWeight(plan.getWeigt());
 
-				MiDActivity firstAct = (MiDActivity) plan.getPlanElements().get(0);
-				MiDActivity lastAct = (MiDActivity) plan.getPlanElements().get(plan.getPlanElements().size()-1);
+				SurveyPlanActivity firstAct = (SurveyPlanActivity) plan.getPlanElements().get(0);
+				SurveyPlanActivity lastAct = (SurveyPlanActivity) plan.getPlanElements().get(plan.getPlanElements().size()-1);
 				
 				plan.setFirstActEqualsLastAct(firstAct.getActType().equals(lastAct.getActType()));
 				
@@ -523,13 +523,13 @@ public class MiDParser {
 					
 				}
 				
-				MiDActivity mainAct = null;
+				SurveyPlanActivity mainAct = null;
 				
-				for(MiDPlanElement pe : plan.getPlanElements()){
+				for(SurveyPlanElement pe : plan.getPlanElements()){
 					
-					if(pe instanceof MiDActivity){
+					if(pe instanceof SurveyPlanActivity){
 						
-						MiDActivity activity = (MiDActivity)pe;
+						SurveyPlanActivity activity = (SurveyPlanActivity)pe;
 						
 						if(mainAct != null){
 							
@@ -543,7 +543,7 @@ public class MiDParser {
 						
 					} else {
 						
-						MiDWay way = (MiDWay)pe;
+						SurveyPlanWay way = (SurveyPlanWay)pe;
 						
 						if(way.getTravelDistance() > plan.getLongestLeg()){
 							plan.setLongestLeg(way.getTravelDistance());
@@ -569,11 +569,11 @@ public class MiDParser {
 				plan.setMainActId(mainAct.getId());
 				plan.setMainActIndex(plan.getPlanElements().indexOf(mainAct));
 				
-				for(MiDPlanElement pe : plan.getPlanElements()){
+				for(SurveyPlanElement pe : plan.getPlanElements()){
 					
-					if(pe instanceof MiDActivity){
+					if(pe instanceof SurveyPlanActivity){
 						
-						MiDActivity act = (MiDActivity)pe;
+						SurveyPlanActivity act = (SurveyPlanActivity)pe;
 						
 						if(act.getActType().equals(plan.getMainActType()) && act.getId() != plan.getMainActId()){
 							
@@ -600,9 +600,9 @@ public class MiDParser {
 					
 				}
 				
-				for(MiDPlanElement pe : plan.getPlanElements()){
-					if(pe instanceof MiDActivity){
-						MiDActivity act = (MiDActivity)pe;
+				for(SurveyPlanElement pe : plan.getPlanElements()){
+					if(pe instanceof SurveyPlanActivity){
+						SurveyPlanActivity act = (SurveyPlanActivity)pe;
 						if(act.getId() == plan.getMainActId()){
 							breakpoints.add(plan.getPlanElements().indexOf(pe));
 						}
@@ -615,8 +615,8 @@ public class MiDParser {
 				
 				for(int i = 0; i < breakpointsList.size() - 1; i++){
 					
-					MiDActivity act1 = (MiDActivity) plan.getPlanElements().get(breakpointsList.get(i));
-					MiDActivity act2 = (MiDActivity) plan.getPlanElements().get(breakpointsList.get(i + 1));
+					SurveyPlanActivity act1 = (SurveyPlanActivity) plan.getPlanElements().get(breakpointsList.get(i));
+					SurveyPlanActivity act2 = (SurveyPlanActivity) plan.getPlanElements().get(breakpointsList.get(i + 1));
 
 					Subtour subtour = new Subtour(breakpointsList.get(i), breakpointsList.get(i+1));
 					
@@ -647,7 +647,7 @@ public class MiDParser {
 		
 	}
 	
-	private MiDActivity evaluateActTypes(MiDActivity activity, MiDActivity currentMainAct){
+	private SurveyPlanActivity evaluateActTypes(SurveyPlanActivity activity, SurveyPlanActivity currentMainAct){
 		
 		if(activity.getPriority() < currentMainAct.getPriority()){
 			
@@ -659,7 +659,7 @@ public class MiDParser {
 		
 	}
 	
-	private List<Subtour> createSubtours(MiDPlan plan){
+	private List<Subtour> createSubtours(SurveyPlan plan){
 		
 		List<Subtour> subtours = new ArrayList<>();
 		
@@ -669,13 +669,13 @@ public class MiDParser {
 			
 			Integer destinationId = null;
 			
-			for(MiDPlanElement pe : plan.getPlanElements()){
+			for(SurveyPlanElement pe : plan.getPlanElements()){
 				
-				if(pe instanceof MiDWay){
+				if(pe instanceof SurveyPlanWay){
 					
-					MiDActivity from = (MiDActivity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)-1);
+					SurveyPlanActivity from = (SurveyPlanActivity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)-1);
 					
-					MiDActivity to = (MiDActivity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)+1);
+					SurveyPlanActivity to = (SurveyPlanActivity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)+1);
 					
 					originIds.add(from.getId());
 					originIds.add(null);

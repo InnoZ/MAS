@@ -6,9 +6,9 @@ import java.util.List;
 
 import playground.dhosse.database.MiDParser.Subtour;
 
-public class MiDPlan {
+public class SurveyPlan {
 
-	private LinkedList<MiDPlanElement> planElements;
+	private LinkedList<SurveyPlanElement> planElements;
 	private int dayOfTheWeek;
 	private double weight = 0d;
 	
@@ -24,14 +24,14 @@ public class MiDPlan {
 	
 	private double longestLeg = 0.;
 	
-	public MiDPlan(){
+	public SurveyPlan(){
 		
 		this.planElements = new LinkedList<>();
 		this.subtours = new ArrayList<Subtour>();
 		
 	}
 
-	public LinkedList<MiDPlanElement> getPlanElements() {
+	public LinkedList<SurveyPlanElement> getPlanElements() {
 		
 		return this.planElements;
 		
@@ -110,7 +110,7 @@ public class MiDPlan {
 	
 	public void setFirstActEqualsLastAct(boolean b){
 		this.firstActEqualsLastAct = b;
-		((MiDActivity)this.planElements.get(this.planElements.size()-1)).setId(this.planElements.get(0).getId());
+		((SurveyPlanActivity)this.planElements.get(this.planElements.size()-1)).setId(this.planElements.get(0).getId());
 	}
 	
 	public boolean firstActEqualsLastAct(){
