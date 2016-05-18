@@ -34,15 +34,14 @@ public final class DatabaseConstants {
 	public static final String ATT_BUILDING = "building";
 	public static final String ATT_GEOM = "geom";
 	
-	public static final String TAG_ACCESS = "access";
-	public static final String TAG_GEOMETRY = "st_astext";
-	public static final String TAG_HIGHWAY = "highway";
-	public static final String TAG_ID = "osm_id";
-	public static final String TAG_JUNCTION = "junction";
+	public static final String ATT_ACCESS = "access";
+	public static final String ATT_GEOMETRY = "st_astext";
+	public static final String ATT_HIGHWAY = "highway";
+	public static final String ATT_OSM_ID = "osm_id";
+	public static final String ATT_JUNCTION = "junction";
 //	public static final String TAG_LANES = "lanes";
 //	public static final String TAG_MAXSPEED = "maxspeed";
-	public static final String TAG_ONEWAY = "oneway";
-	public static final String TAG_OSM_ID = "osm_id";
+	public static final String ATT_ONEWAY = "oneway";
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 }

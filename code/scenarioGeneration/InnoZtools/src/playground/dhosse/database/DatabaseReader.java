@@ -371,7 +371,7 @@ public class DatabaseReader {
 		
 		Statement statement = connection.createStatement();
 		
-		ResultSet set = statement.executeQuery("select " + DatabaseConstants.ATT_ID + ", " + DatabaseConstants.ATT_NODES + ", "
+		ResultSet set = statement.executeQuery("select " + DatabaseConstants.ATT_OSM_ID + ", " + DatabaseConstants.ATT_NODES + ", "
 				+ DatabaseConstants.ATT_TAGS + " from " + DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_ways.name() +
 				" where " + DatabaseConstants.ATT_TAGS + " @> ARRAY['" + DatabaseConstants.ATT_LANDUSE + "'];");
 		
@@ -399,11 +399,11 @@ public class DatabaseReader {
 					
 					if(i < nodes.length - 1){
 						
-						sb.append(" " + DatabaseConstants.ATT_ID + " = '" + nodes[i] + "' or");
+						sb.append(" " + DatabaseConstants.ATT_OSM_ID + " = '" + nodes[i] + "' or");
 						
 					} else{
 						
-						sb.append(" " + DatabaseConstants.ATT_ID + " = '" + nodes[i] + "'");
+						sb.append(" " + DatabaseConstants.ATT_OSM_ID + " = '" + nodes[i] + "'");
 						
 					}
 					
@@ -455,9 +455,9 @@ public class DatabaseReader {
 			for(int i = 0; i < parts.length; i++){
 				
 				if(i < parts.length - 1){
-					sb.append(" " + DatabaseConstants.ATT_ID + " = '" + parts[i] + "' or");
+					sb.append(" " + DatabaseConstants.ATT_OSM_ID + " = '" + parts[i] + "' or");
 				} else {
-					sb.append(" " + DatabaseConstants.ATT_ID + " = '" + parts[i] + "'");
+					sb.append(" " + DatabaseConstants.ATT_OSM_ID + " = '" + parts[i] + "'");
 				}
 				
 			}
@@ -510,7 +510,7 @@ public class DatabaseReader {
 			
 			StringBuilder sb = new StringBuilder();
 			
-			Long id = set.getLong(DatabaseConstants.ATT_ID);
+			Long id = set.getLong(DatabaseConstants.ATT_OSM_ID);
 			
 			Long[] nodes = (Long[])set.getArray(DatabaseConstants.ATT_NODES).getArray();
 			
@@ -518,11 +518,11 @@ public class DatabaseReader {
 				
 				if(i < nodes.length - 1){
 					
-					sb.append(" " + DatabaseConstants.ATT_ID + " = '" + nodes[i] + "' or");
+					sb.append(" " + DatabaseConstants.ATT_OSM_ID + " = '" + nodes[i] + "' or");
 					
 				} else{
 					
-					sb.append(" " + DatabaseConstants.ATT_ID + " = '" + nodes[i] + "'");
+					sb.append(" " + DatabaseConstants.ATT_OSM_ID + " = '" + nodes[i] + "'");
 					
 				}
 				
@@ -553,7 +553,7 @@ public class DatabaseReader {
 		
 		while(set.next()){
 			
-			Long id = set.getLong(DatabaseConstants.ATT_ID);
+			Long id = set.getLong(DatabaseConstants.ATT_OSM_ID);
 			
 			int idx = 0;
 			for(int i = 0; i < nodes.length; i++){
@@ -896,11 +896,11 @@ public class DatabaseReader {
 		if(connection != null){
 
 			Statement statement = connection.createStatement();
-			ResultSet result = statement.executeQuery("select " + DatabaseConstants.TAG_OSM_ID + ", " + DatabaseConstants.TAG_ACCESS + ", "
-					+ DatabaseConstants.TAG_HIGHWAY + ", " + DatabaseConstants.TAG_JUNCTION + ", " + DatabaseConstants.TAG_ONEWAY + ", "
+			ResultSet result = statement.executeQuery("select " + DatabaseConstants.ATT_OSM_ID + ", " + DatabaseConstants.ATT_ACCESS + ", "
+					+ DatabaseConstants.ATT_HIGHWAY + ", " + DatabaseConstants.ATT_JUNCTION + ", " + DatabaseConstants.ATT_ONEWAY + ", "
 					+ DatabaseConstants.functions.st_astext.name() + "(" + DatabaseConstants.ATT_WAY + ") from "
 					+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_line.name() + " where "
-					+ DatabaseConstants.TAG_HIGHWAY + " is not null and " + DatabaseConstants.functions.st_within.name() + "("
+					+ DatabaseConstants.ATT_HIGHWAY + " is not null and " + DatabaseConstants.functions.st_within.name() + "("
 					+ DatabaseConstants.ATT_WAY + "," + DatabaseConstants.functions.st_geomfromtext.name() + "('"
 					+ this.geoinformation.getCompleteGeometry().toString() + "',4326));");
 			
@@ -908,15 +908,15 @@ public class DatabaseReader {
 				
 				// Create a new way entry for each result
 				WayEntry entry = new WayEntry();
-				entry.setOsmId(result.getString(DatabaseConstants.TAG_ID));
-				entry.setAccessTag(result.getString(DatabaseConstants.TAG_ACCESS));
-				entry.setHighwayTag(result.getString(DatabaseConstants.TAG_HIGHWAY));
-				entry.setJunctionTag(result.getString(DatabaseConstants.TAG_JUNCTION));
+				entry.setOsmId(result.getString(DatabaseConstants.ATT_OSM_ID));
+				entry.setAccessTag(result.getString(DatabaseConstants.ATT_ACCESS));
+				entry.setHighwayTag(result.getString(DatabaseConstants.ATT_HIGHWAY));
+				entry.setJunctionTag(result.getString(DatabaseConstants.ATT_JUNCTION));
 				//TODO add lanes and maxspeed as attributes into db table
 //				entry.lanesTag = result.getString(TAG_LANES);
 //				entry.maxspeedTag = result.getString(TAG_MAXSPEED);
-				entry.setOnewayTag(result.getString(DatabaseConstants.TAG_ONEWAY));
-				entry.setGeometry(this.wktReader.read(result.getString(DatabaseConstants.TAG_GEOMETRY)));
+				entry.setOnewayTag(result.getString(DatabaseConstants.ATT_ONEWAY));
+				entry.setGeometry(this.wktReader.read(result.getString(DatabaseConstants.ATT_GEOMETRY)));
 				wayEntries.add(entry);
 				
 			}
