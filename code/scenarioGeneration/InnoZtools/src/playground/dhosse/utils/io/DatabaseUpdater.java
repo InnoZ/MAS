@@ -62,7 +62,7 @@ public class DatabaseUpdater {
 	public void writeIntoDatabase(Configuration configuration, String databaseSchemaName,
 			boolean intoMobilityDatahub){
 		
-		String dbName = null;
+		String dbName = "simulated_mobility";
 		String dbUser = configuration.getDatabaseUsername();
 		String dbPassword = configuration.getPassword();
 		int localPort = configuration.getLocalPort();
