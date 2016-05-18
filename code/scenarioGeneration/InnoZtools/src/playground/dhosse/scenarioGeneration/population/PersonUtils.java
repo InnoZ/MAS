@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.matsim.api.core.v01.population.Person;
 
-import playground.dhosse.scenarioGeneration.population.io.mid.SurveyPerson;
+import playground.dhosse.scenarioGeneration.population.io.surveys.SurveyPerson;
 import playground.dhosse.scenarioGeneration.utils.ActivityTypes;
 
 public class PersonUtils {

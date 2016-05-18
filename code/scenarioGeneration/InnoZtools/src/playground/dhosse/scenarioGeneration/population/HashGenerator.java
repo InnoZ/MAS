@@ -1,6 +1,6 @@
 package playground.dhosse.scenarioGeneration.population;
 
-import playground.dhosse.scenarioGeneration.population.io.mid.SurveyPerson;
+import playground.dhosse.scenarioGeneration.population.io.surveys.SurveyPerson;
 
 public class HashGenerator {
 	
