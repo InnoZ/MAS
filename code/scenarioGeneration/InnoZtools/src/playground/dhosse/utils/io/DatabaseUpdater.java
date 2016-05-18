@@ -182,7 +182,7 @@ public class DatabaseUpdater {
 		log.info("Inserting trips from persons' selected plans into mobility database...");
 		
 		Statement statement = connection.createStatement();
-		statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS " + databaseSchemaName + ";");
+		statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS \"" + databaseSchemaName + "\";");
 		statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\".trips;");
 		statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\".trips(person_id character varying,"
 				+ "trip_index integer, travel_time numeric, distance numeric, departure_time numeric,"
@@ -209,7 +209,7 @@ public class DatabaseUpdater {
 					String personId = person.getId().toString();
 					String tripIndex = Integer.toString(tripCounter);
 					String travelTime = Double.toString(leg.getTravelTime());
-					String distance = Double.toString(leg.getRoute().getDistance());
+					String distance = leg.getRoute() != null ? Double.toString(leg.getRoute().getDistance()): "0";
 					String startTime = Double.toString(fromAct.getEndTime());
 					String endTime = Double.toString(fromAct.getEndTime() + leg.getTravelTime());
 					String fromActType = getActType(fromAct);
