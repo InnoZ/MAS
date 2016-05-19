@@ -156,7 +156,7 @@ public class DatabaseUpdater {
 
 		// Create the schema only if it doesn't exist already
 		statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS \"" + databaseSchemaName + "\";");
-		// Drop all old tables
+		// Drop the old table
 		statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\".persons;");
 		// Create a new database table
 		statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\".persons(id character varying,"
@@ -195,20 +195,32 @@ public class DatabaseUpdater {
 			
 		}
 		
+		// Close the statement after all persons have been processed
 		statement.close();
 		
 		log.info("Done.");
 		
 	}
 	
+	/**
+	 * 
+	 * Creates a database table containing all trips of all persons' selected plans.
+	 * 
+	 * @param connection The database connection.
+	 * @param databaseSchemaName
+	 * @throws SQLException
+	 */
 	private void processPlans(Connection connection, String databaseSchemaName)
 			throws SQLException{
 		
 		log.info("Inserting trips from persons' selected plans into database...");
 		
 		Statement statement = connection.createStatement();
+		// Create the schema only if it doesn't exist already
 		statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS \"" + databaseSchemaName + "\";");
+		// Drop the old table
 		statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\".trips;");
+		// Create a new database table
 		statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\".trips(person_id character varying,"
 				+ "trip_index integer, travel_time numeric, distance numeric, departure_time numeric,"
 				+ " arrival_time numeric, from_act_type character varying, from_x numeric, from_y numeric,"
@@ -220,6 +232,7 @@ public class DatabaseUpdater {
 			int tripCounter = 1;
 			Plan plan = person.getSelectedPlan();
 			
+			// Process all plan elements and write the legs into the database
 			for(int i = 0; i < plan.getPlanElements().size(); i++){
 				
 				PlanElement pe = plan.getPlanElements().get(i);
@@ -249,6 +262,7 @@ public class DatabaseUpdater {
 					String egressTime = "0";
 					String egressDistance = "0";
 					
+					// If the mode is "transit walk" check if it's an access or egress leg
 					if(leg.getMode().equals("transit_walk")){
 						
 						if(toAct.getType().equals("pt interaction")){
@@ -320,12 +334,21 @@ public class DatabaseUpdater {
 			
 		}
 		
+		// Close the statement after all trips have been processed
 		statement.close();
 		
 		log.info("Done.");
 		
 	}
 	
+	/**
+	 * 
+	 * Identifies the activity type of the MATSim activity. This is useful since sometimes, activity types are classified and named by their
+	 * typical duration, e.g. home10.0 for a 10 hrs home activity.
+	 * 
+	 * @param activity The MATSim activity
+	 * @return
+	 */
 	private static String getActType(Activity activity){
 		
 		if(activity.getType().contains("home")){
@@ -342,6 +365,16 @@ public class DatabaseUpdater {
 		
 	}
 	
+	/**
+	 * 
+	 * Writes car sharing stations into a database.
+	 * 
+	 * @param connection
+	 * @param network
+	 * @param vehicleLocationsFile
+	 * @throws IOException
+	 * @throws SQLException
+	 */
 	private static void processVehicles(Connection connection, Network network, String vehicleLocationsFile) throws IOException, SQLException{
 
 		log.info("Inserting carsharing vehicle locations into mobility database...");
