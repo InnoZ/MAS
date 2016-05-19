@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.matsim.core.config.experimental.ReflectiveConfigGroup.StringGetter;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.io.IOUtils;
 
@@ -247,91 +246,211 @@ public class Configuration {
 		
 	}
 	
+	/**
+	 * 
+	 * Getter for survey area ids.
+	 * 
+	 * @return String array of the survey area id(s)
+	 */
 	public String[] getSurveyAreaIds() {
 		return this.surveyAreaIds;
 	}
 
+	/**
+	 * 
+	 * Getter for coordinate reference system.
+	 * 
+	 * @return String representation of the CRS.
+	 */
 	public String getCrs() {
-		return crs;
+		return this.crs;
 	}
 
+	/**
+	 * 
+	 * Getter for the output directory path.
+	 * 
+	 * @return System path to the output directory.
+	 */
 	public String getOutputDirectory() {
 		return outputDirectory;
 	}
 	
+	/**
+	 * 
+	 * Getter for the demand generation method.
+	 * 
+	 * @return The chosen type of population to generate.
+	 */
 	public PopulationType getPopulationType() {
 		return this.popType;
 	}
 	
+	/**
+	 * 
+	 * Getter for the {@code useHouseholds} parameter.
+	 * 
+	 * @return {@code True} if households are used in demand generation, {@code false} otherwise.
+	 */
 	public boolean isUsingHouseholds(){
 		return this.useHouseholds;
 	}
 	
+	/**
+	 * 
+	 * Getter for the database user name.
+	 * 
+	 * @return The user name for the MobilityDatahub connection.
+	 */
 	public String getDatabaseUsername(){
 		return this.databaseUser;
 	}
 	
-	void setDatabaseUser(String user){
+	/**
+	 * 
+	 * Setter for the database user name.
+	 * 
+	 * @param user The user name for the MobilityDatahub connection.
+	 */
+	void setDatabaseUser(String user){ //package
 		
 		this.databaseUser = user;
 		
 	}
 	
+	/**
+	 * 
+	 * Getter for the database password.
+	 * 
+	 * @return The user's password for the MobilityDatahub connection.
+	 */
 	public String getDatabasePassword(){
 		return this.userPassword;
 	}
 	
-	void setDatabasePassword(String password){
+	/**
+	 * 
+	 * Setter for the database password.
+	 * 
+	 * @param password The password for the MobilityDatahub connection.
+	 */
+	void setDatabasePassword(String password){ //package
 		
 		this.userPassword = password;
 		
 	}
 
+	/**
+	 * 
+	 * Getter for the SQL query to be executed for demand generation.
+	 * 
+	 * @return String representation of the SQL query.
+	 */
 	public String getSqlQuery() {
 		return query;
 	}
 	
+	/**
+	 * 
+	 * Getter for the {@code isOnlyUsingWorkingDays} parameter.
+	 * 
+	 * @return {@code True} if only working days should be considered in demand generation, {@code false} otherwise.
+	 */
 	public boolean isOnlyUsingWorkingDays(){
 		return this.onlyWorkingDays;
 	}
 	
+	/**
+	 * 
+	 * Getter for the {@code isUsingCars} parameter.
+	 * 
+	 * @return {@code True} if vehicles from mobility surveys should be used, {@code false} otherwise (= generic vehicles}.
+	 */
 	public boolean isUsingCars(){
 		return this.useCars;
 	}
 	
+	/**
+	 * 
+	 * Getter for the {@code isUsingBuildings} parameter.
+	 * 
+	 * @return {@code True} if buildings should be used to locate activities, {@code false} otherwise (= only landuse data).
+	 */
 	public boolean isUsingBuildings(){
 		return this.useBuildings;
 	}
 	
+	/**
+	 * 
+	 * Getter for the port number of the ssh local host.
+	 * 
+	 * @return The local port number.
+	 */
 	public int getLocalPort(){
 		return this.localPort;
 	}
 	
+	/**
+	 * 
+	 * Getter for the port number of the ssh remote host.
+	 * 
+	 * @return The remote port number.
+	 */
 	public int getRemotePort(){
 		return this.remotePort;
 	}
 	
+	/**
+	 * 
+	 * Getter for the number of households in the survey area.
+	 * 
+	 * @return The number of households.
+	 */
 	public int getNumberOfHouseholds(){
 		return this.numberOfHouseholds;
 	}
-	
-	@StringGetter("randomSeed")
+
+	/**
+	 * 
+	 * Getter for the random seed used for the random number generator.
+	 * 
+	 * @return The random seed.
+	 */
 	public long getRandomSeed(){
 		return this.randomSeed;
 	}
 	
+	/**
+	 * 
+	 * Getter for the namespace of the database tables containing the scenario generation results.
+	 * 
+	 * @return The namespace (schema name).
+	 */
 	public String getDatabaseSchemaName(){
 		
 		return this.dbNameSpace;
 		
 	}
 	
+	/**
+	 * 
+	 * Getter for the {@code writeDatabaseTables} parameter.
+	 * 
+	 * @return {@code True} if the pre-base scenario data should be written into database tables, {@code false} otherwise.
+	 */
 	public boolean isWritingDatabaseOutput(){
 		
 		return this.writeDatabaseTables;
 		
 	}
 	
+	/**
+	 * 
+	 * Getter for the {@code writeIntoDatahub} parameter.
+	 * 
+	 * @return {@code True} if the pre-base scenario data should be written into the MobilityDatahub. {@code False} means, they're written
+	 * into a local database.
+	 */
 	public boolean isWritingIntoMobilityDatahub(){
 		
 		return this.writeIntoDatahub;
