@@ -1,0 +1,23 @@
+<project>
+
+	<target name="clean">
+		<delete dir="build"/>
+		<delete file="InnoZscenarioGeneration.jar"/>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="build/classes"/>
+		<javac srcdir="../code/scenarioGeneration/InnoZtools/src" destdir="build/classes/">
+			<classpath>
+				<pathelement path="jsch-0.1.53.jar"/>
+				<pathelement path="postgresql-9.3-1104.jdbc4.jar"/>
+				<pathelement path="../../../matsim0.7.0/matsim-0.7.0/matsim-0.7.0.jar"/>
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="jar">
+		<jar destfile="InnoZscenarioGeneration.jar" basedir="build/classes"/>
+	</target>
+
+</project>

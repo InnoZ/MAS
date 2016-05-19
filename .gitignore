@@ -3,5 +3,6 @@ input/**/*
 output/**/*
 #ignore auto-generated binaries
 code/scenarioGeneration/InnoZtools/bin/*
+libraries/build/*
 # ignore temp files:
 *~
