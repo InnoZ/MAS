@@ -94,7 +94,7 @@ public class MobilityDatabaseMain {
 
 				// A class that reads data from database tables into local containers
 				DatabaseReader dbReader = new DatabaseReader(geoinformation);
-				dbReader.readGeodataFromDatabase(configuration, ids, scenario, dbReader);
+				dbReader.readGeodataFromDatabase(configuration, ids, scenario);
 				
 				// Create a MATSim network from OpenStreetMap data
 				NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(), geoinformation,

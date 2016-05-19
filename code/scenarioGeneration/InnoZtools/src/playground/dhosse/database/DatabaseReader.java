@@ -66,9 +66,16 @@ public class DatabaseReader {
 	private CoordinateTransformation ct;
 	private int counter = 0;
 	/////////////////////////////////////////////////////////////////////////////////////////
-	
+
+	/**
+	 * 
+	 * Constructor.
+	 * 
+	 * @param geoinformation The geoinformation container.
+	 */
 	public DatabaseReader(final Geoinformation geoinformation){
 		
+		// Initialize all final fields
 		this.gFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.maximumPreciseValue));
 		this.wktReader = new WKTReader();
 		this.geoinformation = geoinformation;
@@ -84,7 +91,7 @@ public class DatabaseReader {
 	 * @param scenario The MATSim scenario.
 	 */
 	public void readGeodataFromDatabase(Configuration configuration, Set<String> ids,
-			Scenario scenario, DatabaseReader dbConnection) {
+			Scenario scenario) {
 		
 		try {
 			
@@ -99,9 +106,11 @@ public class DatabaseReader {
 				Log.info("Successfully connected with geodata database...");
 				
 				// Read the administrative borders that have one of the specified ids
-				dbConnection.readAdminBorders(connection, configuration, ids);
+				// TODO Vicinity... /dhosse 05/16
+				this.readAdminBorders(connection, configuration, ids);
 				
 				// If no administrative units were created, we are unable to proceed
+				// The process would probably finish, but no network or population would be created
 				if(this.geoinformation.getSurveyArea().size() < 1){
 				
 					Log.error("No administrative boundaries were created!");
@@ -111,7 +120,7 @@ public class DatabaseReader {
 				}
 				
 				// Otherwise, read in the OSM data
-				dbConnection.readOsmData(connection, configuration);
+				this.readOsmData(connection, configuration);
 				
 			}
 			
@@ -145,7 +154,7 @@ public class DatabaseReader {
 	 * @throws MismatchedDimensionException
 	 * @throws TransformException
 	 */
-	public void readAdminBorders(Connection connection, Configuration configuration, Set<String> ids)
+	private void readAdminBorders(Connection connection, Configuration configuration, Set<String> ids)
 			throws SQLException, NoSuchAuthorityCodeException, FactoryException, ParseException,
 			MismatchedDimensionException, TransformException{
 
@@ -243,7 +252,7 @@ public class DatabaseReader {
 	 * @throws FactoryException 
 	 * @throws NoSuchAuthorityCodeException 
 	 */
-	public void readOsmData(Connection connection, Configuration configuration) throws NoSuchAuthorityCodeException,
+	private void readOsmData(Connection connection, Configuration configuration) throws NoSuchAuthorityCodeException,
 		FactoryException{
 
 		final CoordinateReferenceSystem fromCRS = CRS.decode(Geoinformation.AUTH_KEY_WGS84, true);
@@ -335,6 +344,7 @@ public class DatabaseReader {
 			String leisure = set.getString(DatabaseConstants.ATT_LEISURE);
 			String shop = set.getString(DatabaseConstants.ATT_SHOP);
 			
+			// Set the landuse type by checking the amenity, leisure and shop tags
 			if(amenity != null){
 				
 				landuse = amenity;
@@ -348,22 +358,32 @@ public class DatabaseReader {
 				landuse = shop;
 				
 			}
-			
+
+			// Convert the osm landuse tag into a MATSim activity type
 			landuse = getLanduseType(landuse);
 			
 			if(landuse != null){
 				
+				// Add the landuse geometry to the geoinformation if we have a valid activity option for it
 				addGeometry(landuse, geometry);
 				
 			}
 			
 		}
 		
+		// Close everything in the end
 		set.close();
 		statement.close();
 		
 	}
 	
+	/**
+	 * 
+	 * Retrieves landuse data stored in OSM way elements.
+	 * 
+	 * @param connection The database connection
+	 * @throws SQLException
+	 */
 	@SuppressWarnings("unused")
 	private void getWayBasedLanduseData(Connection connection) throws SQLException{
 		
@@ -586,6 +606,13 @@ public class DatabaseReader {
 		
 	}
 	
+	/**
+	 * 
+	 * Creates a MATSim activity type from a given OSM landuse tag.
+	 * 
+	 * @param landuseTag The tag for the landuse.
+	 * @return An activity type that can be used in MATSim.
+	 */
 	private static String getLanduseType(String landuseTag){
 		
 		if(landuseTag.equals("college") || landuseTag.equals("school") || landuseTag.equals("university")){
@@ -618,10 +645,20 @@ public class DatabaseReader {
 		
 	}
 	
+	/**
+	 * 
+	 * Retrieves amenities and adds them to the geoinformation.
+	 * 
+	 * @param connection The database connection
+	 * @throws SQLException
+	 * @throws ParseException
+	 */
 	private void readAmenities(Connection connection) throws SQLException, ParseException{
 		
 		log.info("Reading in amenities...");
 
+		// Create a statement and execute an SQL query to retrieve all amenities that have a tag containing a shopping, leisure or any
+		// other activity.
 		Statement statement = connection.createStatement();
 		ResultSet set = statement.executeQuery("select " + DatabaseConstants.functions.st_astext.name() + "(" + DatabaseConstants.ATT_WAY
 				+ "), "	+ DatabaseConstants.ATT_AMENITY + ", " + DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + " from "
@@ -640,6 +677,7 @@ public class DatabaseReader {
 			
 			String landuse = null;
 			
+			// Set the landuse type by checking the amenity, leisure and shop tags
 			if(amenity != null){
 				
 				landuse = amenity;
@@ -653,34 +691,48 @@ public class DatabaseReader {
 				landuse = shop;
 				
 			}
-			
+
+			// Convert the OSM landuse tag into a MATSim activity type
 			String actType = getAmenityType(landuse);
 			
 			if(actType != null){
 
+				// Add the landuse geometry to the geoinformation if we have a valid activity option for it
 				addGeometry(actType, geometry);
 				
 			}
 			
 		}
 		
+		// Close everything in the end
 		set.close();
 		statement.close();
 		
 	}
 	
+	/**
+	 * 
+	 * Adds a landuse geometry to the geoinformationo container.
+	 * 
+	 * @param landuse The MATSim activity option that can be performed at this location.
+	 * @param g The geometry of the activity location.
+	 */
 	private void addGeometry(String landuse, Geometry g){
 		
+		// Check if the geometry is not null
 		if(g != null){
 			
+			// Check if the geometry is valid (e.g. not intersecting itself)
 			if(g.isValid()){
 
 				for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
-					
+
+					// Add the landuse geometry to the administrative unit containing it or skip it if it's outside of the survey area
 					if(au.getGeometry().contains(g) || au.getGeometry().touches(g) || au.getGeometry().intersects(g)){
 						
 						au.addLanduseGeometry(landuse, g);
 						
+						// If we don't have a quad tree for this activity type already, create a new one
 						if(this.geoinformation.getQuadTreeForActType(landuse) == null){
 							
 							Coordinate[] coordinates = boundingBox.getCoordinates();
@@ -689,6 +741,7 @@ public class DatabaseReader {
 							
 						} 
 						
+						// Add the landuse geometry's centroid as new quad tree entry
 						Coord c = ct.transform(MGC.point2Coord(g.getCentroid()));
 						
 						if(this.boundingBox.contains(MGC.coord2Point(c))){
@@ -703,6 +756,7 @@ public class DatabaseReader {
 				
 			} else {
 				
+				// Warnings counter for invalid geometries
 				if(counter <= 5){
 					
 					log.warn("Invalid geometry! Skipping this entry...");
@@ -822,6 +876,13 @@ public class DatabaseReader {
 		
 	}
 	
+	/**
+	 * 
+	 * Creates a MATSim activity type from a given OSM amenity tag.
+	 * 
+	 * @param tag The OSM amenity tag.
+	 * @return A MATsim activity type.
+	 */
 	private static String getAmenityType(String tag){
 		
 		if(OsmKey2ActivityType.education.contains(tag)){
@@ -883,18 +944,33 @@ public class DatabaseReader {
 		
 	}
 	
+	/**
+	 * 
+	 * Parses the OSM database for road objects and return them as a set for generating a MATSim network. 
+	 * 
+	 * @param configuration The scenario generation configuration file.
+	 * @return A set of OSM way entries.
+	 * @throws SQLException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws ClassNotFoundException
+	 * @throws ParseException
+	 */
 	public Set<WayEntry> readOsmRoads(final Configuration configuration) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException, ParseException{
 		
 		log.info("Reading osm ways from database...");
 		
+		// Initialize an empty set
 		Set<WayEntry> wayEntries = new HashSet<>();
-		
+
+		// COnnect to the geodata database
 		Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
 		Connection connection = DriverManager.getConnection(DatabaseConstants.PSQL_PREFIX + configuration.getLocalPort() + "/"
 				+ DatabaseConstants.GEODATA_DB, configuration.getDatabaseUsername(), configuration.getPassword());
 	
 		if(connection != null){
 
+			// Create a new statement and execute an SQL query to retrieve OSM road data
 			Statement statement = connection.createStatement();
 			ResultSet result = statement.executeQuery("select " + DatabaseConstants.ATT_OSM_ID + ", " + DatabaseConstants.ATT_ACCESS + ", "
 					+ DatabaseConstants.ATT_HIGHWAY + ", " + DatabaseConstants.ATT_JUNCTION + ", " + DatabaseConstants.ATT_ONEWAY + ", "
@@ -906,7 +982,7 @@ public class DatabaseReader {
 			
 			while(result.next()){
 				
-				// Create a new way entry for each result
+				// Create a new way entry for each result and set its attributes according to the table entries
 				WayEntry entry = new WayEntry();
 				entry.setOsmId(result.getString(DatabaseConstants.ATT_OSM_ID));
 				entry.setAccessTag(result.getString(DatabaseConstants.ATT_ACCESS));
@@ -916,7 +992,7 @@ public class DatabaseReader {
 //				entry.lanesTag = result.getString(TAG_LANES);
 //				entry.maxspeedTag = result.getString(TAG_MAXSPEED);
 				entry.setOnewayTag(result.getString(DatabaseConstants.ATT_ONEWAY));
-				entry.setGeometry(this.wktReader.read(result.getString(DatabaseConstants.ATT_GEOMETRY)));
+				entry.setGeometry(this.wktReader.read(result.getString(DatabaseConstants.functions.st_astext.name())));
 				wayEntries.add(entry);
 				
 			}
