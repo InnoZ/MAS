@@ -25,8 +25,8 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import playground.dhosse.config.Configuration;
 import playground.dhosse.database.DatabaseReader;
-import playground.dhosse.scenarioGeneration.utils.AdministrativeUnit;
-import playground.dhosse.scenarioGeneration.utils.Geoinformation;
+import playground.dhosse.scenarioGeneration.geoinformation.AdministrativeUnit;
+import playground.dhosse.scenarioGeneration.geoinformation.Geoinformation;
 import playground.dhosse.utils.NetworkSimplifier;
 
 import com.vividsolutions.jts.geom.Coordinate;

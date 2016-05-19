@@ -30,10 +30,10 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 import playground.dhosse.config.Configuration;
+import playground.dhosse.scenarioGeneration.geoinformation.AdministrativeUnit;
+import playground.dhosse.scenarioGeneration.geoinformation.Geoinformation;
 import playground.dhosse.scenarioGeneration.network.WayEntry;
 import playground.dhosse.scenarioGeneration.utils.ActivityTypes;
-import playground.dhosse.scenarioGeneration.utils.AdministrativeUnit;
-import playground.dhosse.scenarioGeneration.utils.Geoinformation;
 import playground.dhosse.utils.osm.OsmKey2ActivityType;
 
 import com.vividsolutions.jts.geom.Coordinate;

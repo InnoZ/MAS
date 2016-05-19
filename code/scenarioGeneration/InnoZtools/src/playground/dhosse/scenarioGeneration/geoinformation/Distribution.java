@@ -1,4 +1,4 @@
-package playground.dhosse.scenarioGeneration.utils;
+package playground.dhosse.scenarioGeneration.geoinformation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +17,8 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.matrices.Matrix;
 
 import playground.dhosse.database.MidDatabaseParser;
+import playground.dhosse.scenarioGeneration.utils.ActivityTypes;
+import playground.dhosse.scenarioGeneration.utils.Modes;
 
 public class Distribution {
 

@@ -1,4 +1,4 @@
-package playground.dhosse.scenarioGeneration.utils;
+package playground.dhosse.run;
 
 import org.matsim.core.config.groups.StrategyConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;

@@ -42,6 +42,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import playground.dhosse.config.Configuration;
 import playground.dhosse.database.MidDatabaseParser;
+import playground.dhosse.scenarioGeneration.geoinformation.AdministrativeUnit;
+import playground.dhosse.scenarioGeneration.geoinformation.Distribution;
+import playground.dhosse.scenarioGeneration.geoinformation.Geoinformation;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyDataContainer;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyHousehold;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyPerson;
@@ -51,9 +54,6 @@ import playground.dhosse.scenarioGeneration.population.surveys.SurveyPlanElement
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyPlanWay;
 import playground.dhosse.scenarioGeneration.population.utils.PersonUtils;
 import playground.dhosse.scenarioGeneration.utils.ActivityTypes;
-import playground.dhosse.scenarioGeneration.utils.AdministrativeUnit;
-import playground.dhosse.scenarioGeneration.utils.Distribution;
-import playground.dhosse.scenarioGeneration.utils.Geoinformation;
 import playground.dhosse.utils.GeometryUtils;
 
 import com.vividsolutions.jts.geom.Geometry;

@@ -22,10 +22,10 @@ import playground.dhosse.config.Configuration;
 import playground.dhosse.config.SshConnector;
 import playground.dhosse.database.DatabaseReader;
 import playground.dhosse.database.DatabaseUpdater;
+import playground.dhosse.scenarioGeneration.geoinformation.Geoinformation;
 import playground.dhosse.scenarioGeneration.network.NetworkCreatorFromPsql;
 import playground.dhosse.scenarioGeneration.population.PopulationCreator;
 import playground.dhosse.scenarioGeneration.population.utils.PersonUtils;
-import playground.dhosse.scenarioGeneration.utils.Geoinformation;
 
 /**
  * 

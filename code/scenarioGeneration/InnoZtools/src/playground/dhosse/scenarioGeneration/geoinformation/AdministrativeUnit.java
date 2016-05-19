@@ -1,4 +1,4 @@
-package playground.dhosse.scenarioGeneration.utils;
+package playground.dhosse.scenarioGeneration.geoinformation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
