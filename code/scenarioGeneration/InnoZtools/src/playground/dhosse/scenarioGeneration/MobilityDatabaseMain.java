@@ -14,6 +14,7 @@ import org.matsim.core.population.PopulationWriter;
 import org.matsim.core.scenario.ScenarioImpl;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.households.HouseholdsWriterV10;
+import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.matsim.vehicles.VehicleWriterV1;
 
@@ -23,6 +24,7 @@ import playground.dhosse.database.DatabaseReader;
 import playground.dhosse.database.DatabaseUpdater;
 import playground.dhosse.scenarioGeneration.network.NetworkCreatorFromPsql;
 import playground.dhosse.scenarioGeneration.population.PopulationCreator;
+import playground.dhosse.scenarioGeneration.population.utils.PersonUtils;
 import playground.dhosse.scenarioGeneration.utils.Geoinformation;
 
 /**
@@ -115,7 +117,7 @@ public class MobilityDatabaseMain {
 						.getOutputDirectory() + "plans.xml.gz");
 				new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration
 						.getOutputDirectory() + "households.xml.gz");
-				new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes())
+				new ObjectAttributesXmlWriter((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES))
 					.writeFile(configuration.getOutputDirectory() + "personAttributes.xml.gz");
 				if(configuration.isUsingCars()){
 					new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration

@@ -21,8 +21,10 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.geometry.CoordImpl;
 import org.matsim.core.utils.io.IOUtils;
+import org.matsim.utils.objectattributes.ObjectAttributes;
 
 import playground.dhosse.config.Configuration;
+import playground.dhosse.scenarioGeneration.population.utils.PersonUtils;
 
 /**
  * This class transfers MATSim simulation data into a postgreSQL database.
@@ -57,12 +59,15 @@ public class DatabaseUpdater {
 	 * 
 	 * Write MATSim simulation output into the mobility database.
 	 * 
-	 * @param args
+	 * @param configuration The scenario generation configuration.
+	 * @param databaseSchemaName The schema name (namespace) of the database tables to be written.
+	 * @param intoMobilityDatahub Defines if the MATSim data should be written directly into the MobilityDatahub or into a local database.
 	 */
 	public void writeIntoDatabase(Configuration configuration, String databaseSchemaName,
 			boolean intoMobilityDatahub){
 		
-		String dbName = "simulated_mobility";
+		// Initialize database, user, password and port for the MobilityDatahub
+		String dbName = DatabaseConstants.SIMULATIONS_DB;
 		String dbUser = configuration.getDatabaseUsername();
 		String dbPassword = configuration.getDatabasePassword();
 		int localPort = configuration.getLocalPort();
@@ -71,9 +76,10 @@ public class DatabaseUpdater {
 			
 			if(!intoMobilityDatahub){
 				
-				dbName = "innoz_simulation_development";
-				dbUser = "postgres";
-				dbPassword = "postgres";
+				// Change these parameters if the tables are only written into a local database
+				dbName = DatabaseConstants.SIMULATIONS_DB_LOCAL;
+				dbUser = DatabaseConstants.DEFAULT_USER;
+				dbPassword = DatabaseConstants.DEFAULT_PASSWORD;
 				localPort = 5432;
 				
 				StringBuffer output = new StringBuffer();
@@ -81,6 +87,7 @@ public class DatabaseUpdater {
 				
 				try {
 
+					// Check, if the simulations database exists locally
 					p = Runtime.getRuntime().exec("psql -lqt");
 					p.waitFor();
 					BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -97,30 +104,31 @@ public class DatabaseUpdater {
 				
 				if(!output.toString().contains(dbName)){
 					
+					// Create a new local database if it doesn't exist already
 					p = Runtime.getRuntime().exec("createdb -p 5432 -e " + dbName);
 					
 				}
 				
 			}
 			
-			//instantiate a postgresql driver and establish a connection to the mobility database
+			// Instantiate a postgreSQL driver and establish a connection to the database
 			Class.forName("org.postgresql.Driver").newInstance();
 			Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:" +
 					localPort + "/" + dbName, dbUser, dbPassword);
 		
-			//if the connection...
+			// If the connection...
 			if(connection != null){
 				
 				log.info("Connection to database established.");
 				
-				//...could be established - proceed
-				//TODO these don't need to be updated for every scenario dump. on/off switch?
+				// ...could be established - proceed
+				//TODO Persons don't need to be updated for every scenario dump. on/off switch?
 				processPersons(connection, databaseSchemaName);
 				processPlans(connection, databaseSchemaName);
 				
 			}
 			
-			//after everything is finished, close the connection
+			// After everything is finished, close the connection
 			connection.close();
 		
 		} catch (IOException | InstantiationException | IllegalAccessException |
@@ -132,41 +140,58 @@ public class DatabaseUpdater {
 		
 	}
 
+	/**
+	 * 
+	 * Creates a database table containing all persons in the MATSim population.
+	 * 
+	 * @param connection The database connection.
+	 * @param databaseSchemaName The schema name (namespace) of the database tables to be written.
+	 * @throws SQLException
+	 */
 	private void processPersons(Connection connection, String databaseSchemaName) throws SQLException{
 		
 		log.info("Creating persons table and inserting the values found in the given scenario...");
 		
 		Statement statement = connection.createStatement();
-		
-		statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS \"" + databaseSchemaName + "\";");
-		statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\".persons;");
-		statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\".persons(id character varying,"
-				+ "sex character varying,age integer,car_available character varying, has_driving_license"
-				+ " boolean DEFAULT FALSE);");
 
+		// Create the schema only if it doesn't exist already
+		statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS \"" + databaseSchemaName + "\";");
+		// Drop all old tables
+		statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\".persons;");
+		// Create a new database table
+		statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\".persons(id character varying,"
+				+ "sex character varying,age integer,car_available boolean DEFAULT FALSE, has_driving_license"
+				+ " boolean DEFAULT FALSE, is_emplyed boolean DEFAULT FALSE);");
+
+		// Write new columns for all persons in the MATSim population
 		for(Person person : scenario.getPopulation().getPersons().values()){
 			
 			String id = person.getId().toString();
-			String sex = (String) scenario.getPopulation().getPersonAttributes().getAttribute(id, "SEX");
-			String age = (String) scenario.getPopulation().getPersonAttributes().getAttribute(id, "AGE");
-			String carAvail = (String) scenario.getPopulation().getPersonAttributes().getAttribute(id, "CAR_AVAIL");
-			String hasLicense = (String) scenario.getPopulation().getPersonAttributes().getAttribute(id, "LICENSE");
+			String sex = (String) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_SEX);
+			Integer age = (Integer) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_AGE);
+			String carAvail = (String ) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_CAR_AVAIL);
+			String hasLicense = (String) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_LICENSE);
+			Boolean isEmployed = (Boolean) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_EMPLOYED);
 			
 			if(sex == null) sex = "";
 			else if(sex.equals("0")) sex = "m";
 			else if(sex.equals("1")) sex = "f";
 			
-			if(age == null) age = "-1";
+			if(age == null) age = -1;
 			
-			if(carAvail == null) carAvail = "never";
-			else if(carAvail.equals("true")) carAvail = "always";
-			else if(carAvail.equals("false")) carAvail = "never";
+			if(carAvail == null) carAvail = "false";
+			else if(carAvail.equals("always") || carAvail.equals("sometimes")) carAvail = "true";
+			else if(carAvail.equals("never")) carAvail = "false";
 			
 			if(hasLicense == null) hasLicense = "false";
+			else if(hasLicense.equals("yes")) hasLicense = "true";
+			else if(hasLicense.equals("no")) hasLicense = "false";
+			
+			if(isEmployed == null) isEmployed = false;
 			
 			statement.executeUpdate("INSERT INTO \"" + databaseSchemaName + "\".persons VALUES('"
-					+ id + "','" + sex + "'," + Integer.parseInt(age) + ",'" + carAvail + "',"
-					+ Boolean.parseBoolean(hasLicense) + ");");
+					+ id + "','" + sex + "'," + age + ",'" + Boolean.parseBoolean(carAvail) + "'," + Boolean.parseBoolean(hasLicense)
+					+ "," + isEmployed + ");");
 			
 		}
 		
@@ -179,7 +204,7 @@ public class DatabaseUpdater {
 	private void processPlans(Connection connection, String databaseSchemaName)
 			throws SQLException{
 		
-		log.info("Inserting trips from persons' selected plans into mobility database...");
+		log.info("Inserting trips from persons' selected plans into database...");
 		
 		Statement statement = connection.createStatement();
 		statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS \"" + databaseSchemaName + "\";");

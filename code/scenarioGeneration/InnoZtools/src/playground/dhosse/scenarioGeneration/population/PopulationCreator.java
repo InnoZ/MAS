@@ -530,14 +530,19 @@ public class PopulationCreator {
 		Plan plan = population.getFactory().createPlan();
 		
 		// Set the person's attributes (sex, age, employed, license, car availability) according to what was reported in the survey
-		personAttributes.putAttribute(person.getId().toString(), PersonUtils.ATT_SEX, personTemplate.getSex());
-		personAttributes.putAttribute(person.getId().toString(), PersonUtils.ATT_AGE, personTemplate.getAge());
+		playground.dhosse.utils.PersonUtils.setSex(person, personTemplate.getSex());
 		playground.dhosse.utils.PersonUtils.setAge(person, personTemplate.getAge());
 		playground.dhosse.utils.PersonUtils.setEmployed(person, personTemplate.isEmployed());
 		String carAvail = personTemplate.getCarAvailable() ? "always" : "never";
 		playground.dhosse.utils.PersonUtils.setCarAvail(person, carAvail);
 		String hasLicense = personTemplate.hasLicense() ? "yes" : "no";
 		playground.dhosse.utils.PersonUtils.setLicence(person, hasLicense);
+		
+		personAttributes.putAttribute(person.getId().toString(), PersonUtils.ATT_SEX, personTemplate.getSex());
+		personAttributes.putAttribute(person.getId().toString(), PersonUtils.ATT_AGE, personTemplate.getAge());
+		personAttributes.putAttribute(person.getId().toString(), PersonUtils.ATT_EMPLOYED, personTemplate.isEmployed());
+		personAttributes.putAttribute(person.getId().toString(), PersonUtils.ATT_CAR_AVAIL, carAvail);
+		personAttributes.putAttribute(person.getId().toString(), PersonUtils.ATT_LICENSE, hasLicense);
 		
 		// Check if there are any plans for the person (if it is a mobile person)
 		if(personTemplate.getPlans().size() > 0){

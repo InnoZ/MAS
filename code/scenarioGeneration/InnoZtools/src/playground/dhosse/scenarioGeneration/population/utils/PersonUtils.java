@@ -18,6 +18,9 @@ public class PersonUtils {
 	
 	public static final String ATT_AGE = "age";
 	public static final String ATT_SEX = "sex";
+	public static final String ATT_EMPLOYED = "isEmployed";
+	public static final String ATT_CAR_AVAIL = "carAvail";
+	public static final String ATT_LICENSE = "hasLicense";
 
 	public static String getEducationalActTypeForPerson(Person person){
 		
