@@ -1,4 +1,4 @@
-package playground.dhosse.scenarioGeneration.population.io.commuters;
+package playground.dhosse.scenarioGeneration.population.commuters;
 
 import java.io.BufferedReader;
 import java.io.IOException;

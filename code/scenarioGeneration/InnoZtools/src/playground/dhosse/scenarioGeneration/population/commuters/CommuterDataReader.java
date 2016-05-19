@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.dhosse.scenarioGeneration.population.io.commuters;
+package playground.dhosse.scenarioGeneration.population.commuters;
 
 import java.io.BufferedReader;
 import java.io.File;
