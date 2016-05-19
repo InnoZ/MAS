@@ -19,7 +19,6 @@ import org.matsim.core.utils.misc.Time;
 
 import playground.dhosse.database.MiDParser.Subtour.subtourType;
 import playground.dhosse.scenarioGeneration.Configuration;
-import playground.dhosse.scenarioGeneration.population.HashGenerator;
 import playground.dhosse.scenarioGeneration.population.surveys.MiDConstants;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyDataContainer;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyHousehold;
@@ -28,6 +27,7 @@ import playground.dhosse.scenarioGeneration.population.surveys.SurveyPlan;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyPlanActivity;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyPlanElement;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyPlanWay;
+import playground.dhosse.scenarioGeneration.population.utils.HashGenerator;
 import playground.dhosse.scenarioGeneration.utils.ActivityTypes;
 import playground.dhosse.scenarioGeneration.utils.Hydrograph;
 import playground.dhosse.utils.RecursiveStatsContainer;

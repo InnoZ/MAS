@@ -1,4 +1,4 @@
-package playground.dhosse.scenarioGeneration.population;
+package playground.dhosse.scenarioGeneration.population.utils;
 
 import java.util.Collection;
 import java.util.Map;
@@ -14,10 +14,10 @@ public class PersonUtils {
 	static final String ADULT = "adult";
 	static final String PENSIONER = "pensioner";
 	
-	static final String PERSON_ATTRIBUTES = "personAttributes";
+	public static final String PERSON_ATTRIBUTES = "personAttributes";
 	
-	static final String ATT_AGE = "age";
-	static final String ATT_SEX = "sex";
+	public static final String ATT_AGE = "age";
+	public static final String ATT_SEX = "sex";
 
 	public static String getEducationalActTypeForPerson(Person person){
 		

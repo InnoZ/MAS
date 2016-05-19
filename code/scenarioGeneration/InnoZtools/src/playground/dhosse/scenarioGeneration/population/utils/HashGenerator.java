@@ -1,4 +1,4 @@
-package playground.dhosse.scenarioGeneration.population;
+package playground.dhosse.scenarioGeneration.population.utils;
 
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyPerson;
 

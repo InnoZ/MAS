@@ -3,7 +3,7 @@ package playground.dhosse.scenarioGeneration.population.surveys;
 import java.util.ArrayList;
 import java.util.List;
 
-import playground.dhosse.scenarioGeneration.population.HashGenerator;
+import playground.dhosse.scenarioGeneration.population.utils.HashGenerator;
 
 public class SurveyPerson {
 

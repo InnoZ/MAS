@@ -49,6 +49,7 @@ import playground.dhosse.scenarioGeneration.population.surveys.SurveyPlan;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyPlanActivity;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyPlanElement;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyPlanWay;
+import playground.dhosse.scenarioGeneration.population.utils.PersonUtils;
 import playground.dhosse.scenarioGeneration.utils.ActivityTypes;
 import playground.dhosse.scenarioGeneration.utils.AdministrativeUnit;
 import playground.dhosse.scenarioGeneration.utils.Distribution;
