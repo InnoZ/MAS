@@ -1,4 +1,4 @@
-package playground.dhosse.utils.io.inpire;
+package playground.dhosse.scenarioGeneration.transit;
 
 import java.util.HashMap;
 import java.util.HashSet;

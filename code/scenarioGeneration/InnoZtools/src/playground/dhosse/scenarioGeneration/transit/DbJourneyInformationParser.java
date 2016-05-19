@@ -1,4 +1,4 @@
-package playground.dhosse.utils.io.dbdata;
+package playground.dhosse.scenarioGeneration.transit;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
