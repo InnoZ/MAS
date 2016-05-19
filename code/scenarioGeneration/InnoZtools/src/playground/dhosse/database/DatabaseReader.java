@@ -192,7 +192,7 @@ public class DatabaseReader {
 			//TODO attributes have to be added to the table
 			String key = set.getString(DatabaseConstants.MUN_KEY).substring(1);
 			String g = set.getString(DatabaseConstants.functions.st_astext.name());
-//			long bland = set.getLong(BLAND);
+			int bland = set.getInt(DatabaseConstants.BLAND);
 //				int districtType = set.getInt("");
 //				int municipalityType = set.getInt("");
 //				int regionType = set.getInt("");
@@ -207,7 +207,7 @@ public class DatabaseReader {
 					AdministrativeUnit au = new AdministrativeUnit(key);
 					Geometry geometry = wktReader.read(g);
 					au.setGeometry(geometry);
-//					au.setBland((int)bland);
+					au.setBland((int)bland);
 //					au.setDistrictType(districtType);
 //					au.setMunicipalityType(municipalityType);
 //					au.setRegionType(regionType);
