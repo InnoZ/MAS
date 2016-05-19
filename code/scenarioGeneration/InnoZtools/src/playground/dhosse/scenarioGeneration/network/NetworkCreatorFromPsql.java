@@ -86,7 +86,7 @@ public class NetworkCreatorFromPsql {
 	 * 1)sample size
 	 * 2)survey area or surrounding
 	 */
-	static enum networkDetail{};
+	private int levelOfDetail = 6;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	/**
@@ -153,23 +153,13 @@ public class NetworkCreatorFromPsql {
 	 * @throws SQLException
 	 * @throws ParseException
 	 */
-	public void create(DatabaseReader dbReader) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, ParseException{
+	public void create(DatabaseReader dbReader) throws InstantiationException, IllegalAccessException, ClassNotFoundException,
+		SQLException, ParseException{
 		
 		// If highway defaults have been specified, use them. Else fall back to default values.
 		if(this.highwayDefaults.size() < 1){
-			
-			this.setHighwayDefaults(MOTORWAY, 2.0, 100/3.6, 1.2, 2000.0, true);
-			this.setHighwayDefaults(MOTORWAY_LINK, 1,  60.0/3.6, 1.2, 1500, true);
-			this.setHighwayDefaults(TRUNK, 1,  80.0/3.6, 0.5, 1000);
-			this.setHighwayDefaults(TRUNK_LINK, 1,  60.0/3.6, 0.5, 1500);
-			this.setHighwayDefaults(PRIMARY, 1,  50.0/3.6, 0.5, 1000);
-			this.setHighwayDefaults(PRIMARY_LINK, 1,  50.0/3.6, 0.5, 1000);
-			this.setHighwayDefaults(SECONDARY, 1,  50.0/3.6, 0.5, 1000);
-			this.setHighwayDefaults(TERTIARY, 1,  30.0/3.6, 0.8,  600);
-			this.setHighwayDefaults(MINOR, 1,  30.0/3.6, 0.8,  600);
-			this.setHighwayDefaults(UNCLASSIFIED, 1,  30.0/3.6, 0.8,  600);
-			this.setHighwayDefaults(RESIDENTIAL, 1,  30.0/3.6, 0.6,  600);
-			this.setHighwayDefaults(LIVING_STREET, 1,  15.0/3.6, 1.0,  600);
+
+			this.setHighwayDefaultsAccordingToLevelOfDetail();
 			
 		}
 		
@@ -190,6 +180,38 @@ public class NetworkCreatorFromPsql {
 			
 		}
 			
+	}
+
+	/**
+	 * 
+	 * The main method of the {@code NetworkCreatorFromPsql}.
+	 * Via database connection OpenStreetMap road data is retrieved and converted into a MATSim network.
+	 * 
+	 * In addition, you can set the level of detail for the network (default value is "6"). The lower hierarchies contain the higher
+	 * hierarchies' highway types)
+	 * <ul>
+	 * <li>1: motorways
+	 * <li>2: trunk roads
+	 * <li>3: primary roads
+	 * <li>4: secondary roads
+	 * <li>5: tertiary roads
+	 * <li>6: residential roads (minor, unclassified, residential, living street)
+	 * </ul>
+	 * 
+	 * @param dbReader
+	 * @param levelOfDetail
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 * @throws ParseException
+	 */
+	public void create(DatabaseReader dbReader, int levelOfDetail) throws InstantiationException, IllegalAccessException,
+		ClassNotFoundException, SQLException, ParseException{
+		
+		this.levelOfDetail = levelOfDetail;
+		this.create(dbReader);
+		
 	}
 	
 	/**
@@ -224,6 +246,48 @@ public class NetworkCreatorFromPsql {
 			final double freespeedFactor, final double laneCapacity_vehPerHour){
 		
 		this.setHighwayDefaults(highwayType, lanesPerDirection, freespeed, freespeedFactor, laneCapacity_vehPerHour, false);
+		
+	}
+	
+	private void setHighwayDefaultsAccordingToLevelOfDetail(){
+
+		this.setHighwayDefaults(MOTORWAY, 2.0, 100/3.6, 1.2, 2000.0, true);
+		this.setHighwayDefaults(MOTORWAY_LINK, 1,  60.0/3.6, 1.2, 1500, true);
+		
+		if(this.levelOfDetail > 1){
+			
+			this.setHighwayDefaults(TRUNK, 1,  80.0/3.6, 0.5, 1000);
+			this.setHighwayDefaults(TRUNK_LINK, 1,  60.0/3.6, 0.5, 1500);
+			
+			if(this.levelOfDetail > 2){
+				
+				this.setHighwayDefaults(PRIMARY, 1,  50.0/3.6, 0.5, 1000);
+				this.setHighwayDefaults(PRIMARY_LINK, 1,  50.0/3.6, 0.5, 1000);
+				
+				if(this.levelOfDetail > 3){
+					
+					this.setHighwayDefaults(SECONDARY, 1,  50.0/3.6, 0.5, 1000);
+					
+					if(this.levelOfDetail > 4){
+						
+						this.setHighwayDefaults(TERTIARY, 1,  30.0/3.6, 0.8,  600);
+						
+						if(this.levelOfDetail > 5){
+							
+							this.setHighwayDefaults(MINOR, 1,  30.0/3.6, 0.8,  600);
+							this.setHighwayDefaults(UNCLASSIFIED, 1,  30.0/3.6, 0.8,  600);
+							this.setHighwayDefaults(RESIDENTIAL, 1,  30.0/3.6, 0.6,  600);
+							this.setHighwayDefaults(LIVING_STREET, 1,  15.0/3.6, 1.0,  600);
+							
+						}
+						
+					}
+					
+				}
+				
+			}
+			
+		}
 		
 	}
 	
