@@ -17,7 +17,7 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.misc.Time;
 
-import playground.dhosse.database.MiDParser.Subtour.subtourType;
+import playground.dhosse.database.MidDatabaseParser.Subtour.subtourType;
 import playground.dhosse.scenarioGeneration.Configuration;
 import playground.dhosse.scenarioGeneration.population.surveys.MiDConstants;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyDataContainer;
@@ -40,9 +40,9 @@ import playground.dhosse.utils.RecursiveStatsContainer;
  * @author dhosse
  *
  */
-public class MiDParser {
+public class MidDatabaseParser {
 
-	private static final Logger log = Logger.getLogger(MiDParser.class);
+	private static final Logger log = Logger.getLogger(MidDatabaseParser.class);
 	
 	public void run(Configuration configuration, SurveyDataContainer container){
 		

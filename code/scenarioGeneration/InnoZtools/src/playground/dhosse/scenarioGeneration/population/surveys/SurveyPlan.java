@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import playground.dhosse.database.MiDParser.Subtour;
+import playground.dhosse.database.MidDatabaseParser.Subtour;
 
 public class SurveyPlan {
 

@@ -40,7 +40,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import playground.dhosse.database.MiDParser;
+import playground.dhosse.database.MidDatabaseParser;
 import playground.dhosse.scenarioGeneration.Configuration;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyDataContainer;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyHousehold;
@@ -302,7 +302,7 @@ public class PopulationCreator {
 	private void createCompletePopulation(Configuration configuration, Scenario scenario){
 		
 		// Run the survey data parser that stores all of the travel information
-		MiDParser parser = new MiDParser();
+		MidDatabaseParser parser = new MidDatabaseParser();
 		SurveyDataContainer container = new SurveyDataContainer();
 		parser.run(configuration, container);
 		
@@ -465,7 +465,7 @@ public class PopulationCreator {
 	
 	/**
 	 * 
-	 * Creates an initial demand on person level. This means, it's not more detailed than {@link #createHouseholds(Configuration, Scenario, MiDParser)} 
+	 * Creates an initial demand on person level. This means, it's not more detailed than {@link #createHouseholds(Configuration, Scenario, MidDatabaseParser)} 
 	 * but completely ignores households and locates every person individually in the survey area.
 	 * 
 	 * @param configuration The scenario generation configuration file.

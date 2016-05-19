@@ -16,7 +16,7 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.matrices.Matrix;
 
-import playground.dhosse.database.MiDParser;
+import playground.dhosse.database.MidDatabaseParser;
 
 public class Distribution {
 
@@ -29,7 +29,7 @@ public class Distribution {
 	private LeastCostPathCalculator lcpc;
 	private final Network network;
 	
-	public Distribution(final Network network, final Geoinformation geoinformation, MiDParser parser,
+	public Distribution(final Network network, final Geoinformation geoinformation, MidDatabaseParser parser,
 			final CoordinateTransformation transformation){
 
 		this.network = network;
@@ -41,7 +41,7 @@ public class Distribution {
 		
 	}
 	
-	private void create(MiDParser parser, final Geoinformation geoinformation){
+	private void create(MidDatabaseParser parser, final Geoinformation geoinformation){
 		
 		String[] activityTypes = {ActivityTypes.WORK, ActivityTypes.EDUCATION, ActivityTypes.SHOPPING, ActivityTypes.LEISURE, ActivityTypes.OTHER};
 		String[] modes = {TransportMode.bike, TransportMode.car, TransportMode.pt, TransportMode.ride, TransportMode.walk};
