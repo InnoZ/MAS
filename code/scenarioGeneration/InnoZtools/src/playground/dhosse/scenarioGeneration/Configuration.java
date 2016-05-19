@@ -38,8 +38,6 @@ public class Configuration {
 	private static final String SQL_QUERY_MID = "midQuery"; //TODO find a way to remove this!
 	private static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
 	
-	private static final String DATABASE_USER = "databaseUser";
-	private static final String DATABASE_PASSWD = "password";
 	private static final String LOCAL_PORT = "localPort";
 	private static final String DB_SCHEMA_NAME = "databaseSchemaName";
 	private static final String WRITE_DB_OUTPUT = "writeTables";
@@ -133,14 +131,6 @@ public class Configuration {
 					} else if(USE_HOUSEHOLDS.equals(lineParts[0])){
 						
 						this.useHouseholds = Boolean.parseBoolean(lineParts[1]);
-						
-					} else if(DATABASE_USER.equals(lineParts[0])){
-						
-						this.databaseUser = lineParts[1];
-						
-					} else if(DATABASE_PASSWD.equals(lineParts[0])){
-						
-						this.userPassword = lineParts[1];
 						
 					} else if(SQL_QUERY_MID.equals(lineParts[0])){
 						
@@ -281,8 +271,20 @@ public class Configuration {
 		return this.databaseUser;
 	}
 	
-	public String getPassword(){
+	void setDatabaseUser(String user){
+		
+		this.databaseUser = user;
+		
+	}
+	
+	public String getDatabasePassword(){
 		return this.userPassword;
+	}
+	
+	void setDatabasePassword(String password){
+		
+		this.userPassword = password;
+		
 	}
 
 	public String getSqlQuery() {

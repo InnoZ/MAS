@@ -52,7 +52,7 @@ public class MidDatabaseParser {
 			
 			Class.forName("org.postgresql.Driver").newInstance();
 			Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:" + configuration.getLocalPort() +
-					"/surveyed_mobility", configuration.getDatabaseUsername(), configuration.getPassword());
+					"/surveyed_mobility", configuration.getDatabaseUsername(), configuration.getDatabasePassword());
 		
 			if(connection != null){
 				

@@ -1,5 +1,6 @@
-package playground.dhosse.scenarioGeneration.utils;
+package playground.dhosse.scenarioGeneration;
 
+import java.awt.GridLayout;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -7,11 +8,11 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import org.apache.log4j.Logger;
-
-import playground.dhosse.scenarioGeneration.Configuration;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -28,6 +29,8 @@ public class SshConnector {
 		String[] sshData = PasswordDialog.run();
 		String sshuser = sshData[0];
 		String sshpassword = sshData[1];
+		configuration.setDatabaseUser(sshData[2]);
+		configuration.setDatabasePassword(sshData[3]);
 		String sshhost = "playground";
 		String remoteHost = "localhost";
 		int nLocalPort = configuration.getLocalPort();
@@ -54,21 +57,38 @@ public class SshConnector {
 		static String[] run(){
 
 			JPanel panel = new JPanel();
-			JLabel user = new JLabel("Enter your ssh user name:");
-			JTextField textField = new JTextField(20);
-			JLabel label = new JLabel("Enter your ssh password:");
-			JPasswordField pwField = new JPasswordField(20);
-			panel.add(user);
-			panel.add(textField);
-			panel.add(label);
-			panel.add(pwField);
+			panel.setLayout(new GridLayout(3, 1));
+			
+			JPanel sshPanel = new JPanel();
+			JLabel sshUser = new JLabel("Enter your ssh user name:");
+			sshPanel.add(sshUser);
+			JTextField sshTextField = new JTextField(20);
+			sshPanel.add(sshTextField);
+			JLabel sshPassword = new JLabel("Enter your ssh password:");
+			sshPanel.add(sshPassword);
+			JPasswordField sshPasswordField = new JPasswordField(20);
+			sshPanel.add(sshPasswordField);
+			
+			JPanel dbPanel = new JPanel();
+			dbPanel.add(new JLabel("Enter your MobilityDatabase user name:"));
+			JTextField dbTextField = new JTextField(20);
+			dbPanel.add(dbTextField);
+			dbPanel.add(new JLabel("Enter your MobilityDatabse password:"));
+			JPasswordField dbPasswordField = new JPasswordField(20);
+			dbPanel.add(dbPasswordField);
+			
+			panel.add(sshPanel);
+			panel.add(new JSeparator(SwingConstants.HORIZONTAL));
+			panel.add(dbPanel);
+			
 			String[] options = {"Ok","Cancel"};
-			int option = JOptionPane.showOptionDialog(null, panel, "Password, please", JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE,
+			int option = JOptionPane.showOptionDialog(null, panel, "User verification", JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE,
 					null, options, options[0]);
 			
 			if(option == 0){
 				
-				return new String[]{textField.getText(), new String(pwField.getPassword())};
+				return new String[]{sshTextField.getText(), new String(sshPasswordField.getPassword()), dbTextField.getText(),
+						new String(dbPasswordField.getPassword())};
 				
 			} else return null;
 			

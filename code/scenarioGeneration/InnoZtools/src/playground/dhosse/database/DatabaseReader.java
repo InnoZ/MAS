@@ -99,7 +99,7 @@ public class DatabaseReader {
 			Class.forName("org.postgresql.Driver").newInstance();
 			Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:" +
 					configuration.getLocalPort() + "/geodata", configuration.getDatabaseUsername(),
-					configuration.getPassword());
+					configuration.getDatabasePassword());
 			
 			if(connection != null){
 
@@ -966,7 +966,7 @@ public class DatabaseReader {
 		// COnnect to the geodata database
 		Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
 		Connection connection = DriverManager.getConnection(DatabaseConstants.PSQL_PREFIX + configuration.getLocalPort() + "/"
-				+ DatabaseConstants.GEODATA_DB, configuration.getDatabaseUsername(), configuration.getPassword());
+				+ DatabaseConstants.GEODATA_DB, configuration.getDatabaseUsername(), configuration.getDatabasePassword());
 	
 		if(connection != null){
 

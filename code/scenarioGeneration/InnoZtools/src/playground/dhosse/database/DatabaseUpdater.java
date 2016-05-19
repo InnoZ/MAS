@@ -64,7 +64,7 @@ public class DatabaseUpdater {
 		
 		String dbName = "simulated_mobility";
 		String dbUser = configuration.getDatabaseUsername();
-		String dbPassword = configuration.getPassword();
+		String dbPassword = configuration.getDatabasePassword();
 		int localPort = configuration.getLocalPort();
 		
 		try {
