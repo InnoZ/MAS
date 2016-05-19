@@ -30,7 +30,7 @@ import playground.dhosse.scenarioGeneration.population.surveys.SurveyPlanWay;
 import playground.dhosse.scenarioGeneration.population.utils.HashGenerator;
 import playground.dhosse.scenarioGeneration.utils.ActivityTypes;
 import playground.dhosse.scenarioGeneration.utils.Hydrograph;
-import playground.dhosse.utils.RecursiveStatsContainer;
+import playground.dhosse.utils.matsim.RecursiveStatsContainer;
 
 /**
  * 

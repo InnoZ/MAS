@@ -27,7 +27,7 @@ import playground.dhosse.config.Configuration;
 import playground.dhosse.database.DatabaseReader;
 import playground.dhosse.scenarioGeneration.geoinformation.AdministrativeUnit;
 import playground.dhosse.scenarioGeneration.geoinformation.Geoinformation;
-import playground.dhosse.utils.NetworkSimplifier;
+import playground.dhosse.utils.matsim.NetworkSimplifier;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;

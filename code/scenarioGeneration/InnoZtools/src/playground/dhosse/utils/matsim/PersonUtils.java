@@ -1,4 +1,4 @@
-package playground.dhosse.utils;
+package playground.dhosse.utils.matsim;
 
 import java.util.Iterator;
 import java.util.TreeSet;

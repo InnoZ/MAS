@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import playground.dhosse.scenarioGeneration.utils.Hydrograph;
-import playground.dhosse.utils.RecursiveStatsContainer;
+import playground.dhosse.utils.matsim.RecursiveStatsContainer;
 
 /**
  * 

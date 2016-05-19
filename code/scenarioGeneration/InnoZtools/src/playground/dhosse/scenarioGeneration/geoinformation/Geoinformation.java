@@ -8,7 +8,7 @@ import java.util.Set;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 
-import playground.dhosse.utils.QuadTree;
+import playground.dhosse.utils.matsim.QuadTree;
 
 import com.vividsolutions.jts.geom.Geometry;
 

@@ -5,7 +5,7 @@ import java.util.TreeMap;
 
 import org.matsim.core.gbl.MatsimRandom;
 
-import playground.dhosse.utils.RecursiveStatsContainer;
+import playground.dhosse.utils.matsim.RecursiveStatsContainer;
 
 public class Hydrograph {
 

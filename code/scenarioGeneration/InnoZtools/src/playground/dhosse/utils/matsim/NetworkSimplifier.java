@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.dhosse.utils;
+package playground.dhosse.utils.matsim;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;

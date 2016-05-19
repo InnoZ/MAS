@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.dhosse.utils;
+package playground.dhosse.utils.matsim;
 
 import java.io.Serializable;
 import java.util.*;

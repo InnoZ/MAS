@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.dhosse.utils;
+package playground.dhosse.utils.matsim;
 
 /**
  * Provides arithmetic mean, standard deviation, and Min/Max.
