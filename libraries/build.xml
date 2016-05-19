@@ -16,8 +16,18 @@
 		</javac>
 	</target>
 
+	<target name="test">
+		<junit printsummary="on" haltonerror="yes" haltonfailure="yes" fork="true">
+			<batchtest>
+				<fileset dir="../code/scenarioGeneration/InnoZtools/test" includes="/opt/eclipse/plugins"/>
+			</batchtest>
+		</junit>
+	</target>
+
 	<target name="jar">
 		<jar destfile="InnoZscenarioGeneration.jar" basedir="build/classes"/>
 	</target>
+
+	<target name="build" depends="clean,test,compile,jar"/>
 
 </project>
