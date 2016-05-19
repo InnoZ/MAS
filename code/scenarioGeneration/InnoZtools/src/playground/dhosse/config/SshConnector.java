@@ -1,4 +1,4 @@
-package playground.dhosse.scenarioGeneration;
+package playground.dhosse.config;
 
 import java.awt.GridLayout;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package playground.dhosse.scenarioGeneration;
+package playground.dhosse.config;
 
 import java.io.BufferedReader;
 import java.io.File;

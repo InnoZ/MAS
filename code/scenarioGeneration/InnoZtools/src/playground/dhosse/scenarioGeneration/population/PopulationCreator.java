@@ -40,8 +40,8 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import playground.dhosse.config.Configuration;
 import playground.dhosse.database.MidDatabaseParser;
-import playground.dhosse.scenarioGeneration.Configuration;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyDataContainer;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyHousehold;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyPerson;

@@ -22,7 +22,7 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.geometry.CoordImpl;
 import org.matsim.core.utils.io.IOUtils;
 
-import playground.dhosse.scenarioGeneration.Configuration;
+import playground.dhosse.config.Configuration;
 
 /**
  * This class transfers MATSim simulation data into a postgreSQL database.

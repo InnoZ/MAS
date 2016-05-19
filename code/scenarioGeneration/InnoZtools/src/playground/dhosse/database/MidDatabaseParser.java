@@ -17,8 +17,8 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.misc.Time;
 
+import playground.dhosse.config.Configuration;
 import playground.dhosse.database.MidDatabaseParser.Subtour.subtourType;
-import playground.dhosse.scenarioGeneration.Configuration;
 import playground.dhosse.scenarioGeneration.population.surveys.MiDConstants;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyDataContainer;
 import playground.dhosse.scenarioGeneration.population.surveys.SurveyHousehold;

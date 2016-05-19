@@ -23,8 +23,8 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import playground.dhosse.config.Configuration;
 import playground.dhosse.database.DatabaseReader;
-import playground.dhosse.scenarioGeneration.Configuration;
 import playground.dhosse.scenarioGeneration.utils.AdministrativeUnit;
 import playground.dhosse.scenarioGeneration.utils.Geoinformation;
 import playground.dhosse.utils.NetworkSimplifier;

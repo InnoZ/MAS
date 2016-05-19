@@ -29,7 +29,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
-import playground.dhosse.scenarioGeneration.Configuration;
+import playground.dhosse.config.Configuration;
 import playground.dhosse.scenarioGeneration.network.WayEntry;
 import playground.dhosse.scenarioGeneration.utils.ActivityTypes;
 import playground.dhosse.scenarioGeneration.utils.AdministrativeUnit;

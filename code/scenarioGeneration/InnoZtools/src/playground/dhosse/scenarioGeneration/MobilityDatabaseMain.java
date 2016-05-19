@@ -17,6 +17,8 @@ import org.matsim.households.HouseholdsWriterV10;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.matsim.vehicles.VehicleWriterV1;
 
+import playground.dhosse.config.Configuration;
+import playground.dhosse.config.SshConnector;
 import playground.dhosse.database.DatabaseReader;
 import playground.dhosse.database.DatabaseUpdater;
 import playground.dhosse.scenarioGeneration.network.NetworkCreatorFromPsql;
