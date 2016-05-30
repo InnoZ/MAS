@@ -23,15 +23,14 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import playground.dhosse.config.Configuration;
-import playground.dhosse.database.DatabaseReader;
-import playground.dhosse.scenarioGeneration.geoinformation.AdministrativeUnit;
-import playground.dhosse.scenarioGeneration.geoinformation.Geoinformation;
-import playground.dhosse.utils.matsim.NetworkSimplifier;
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
+
+import playground.dhosse.config.Configuration;
+import playground.dhosse.database.DatabaseReader;
+import playground.dhosse.scenarioGeneration.geoinformation.Geoinformation;
+import playground.dhosse.utils.matsim.NetworkSimplifier;
 
 /**
  * 
@@ -225,10 +224,11 @@ public class NetworkCreatorFromPsql {
 	 * @param laneCapacity_vehPerHour The capacity of one lane on this road type per hour.
 	 * @param oneway Road type is only accessible in one direction or not.
 	 */
-	public void setHighwayDefaults(final String highwayType, final double lanesPerDirection, final double freespeed,
+	public void setHighwayDefaults(final int hierarchyLevel, final String highwayType, final double lanesPerDirection, final double freespeed,
 			final double freespeedFactor, final double laneCapacity_vehPerHour, final boolean oneway){
 		
-		this.highwayDefaults.put(highwayType, new HighwayDefaults(freespeed, freespeedFactor, lanesPerDirection, laneCapacity_vehPerHour, oneway));
+		this.highwayDefaults.put(highwayType, new HighwayDefaults(hierarchyLevel, freespeed, freespeedFactor, lanesPerDirection,
+				laneCapacity_vehPerHour, oneway));
 		
 	}
 	
@@ -242,42 +242,42 @@ public class NetworkCreatorFromPsql {
 	 * @param freespeedFactor Factor for scaling of free speed.
 	 * @param laneCapacity_vehPerHour The capacity of one lane on this road type per hour.
 	 */
-	public void setHighwayDefaults(final String highwayType, final double lanesPerDirection, final double freespeed,
+	public void setHighwayDefaults(final int hierarchyLevel, final String highwayType, final double lanesPerDirection, final double freespeed,
 			final double freespeedFactor, final double laneCapacity_vehPerHour){
 		
-		this.setHighwayDefaults(highwayType, lanesPerDirection, freespeed, freespeedFactor, laneCapacity_vehPerHour, false);
+		this.setHighwayDefaults(hierarchyLevel, highwayType, lanesPerDirection, freespeed, freespeedFactor, laneCapacity_vehPerHour, false);
 		
 	}
 	
 	private void setHighwayDefaultsAccordingToLevelOfDetail(){
 
-		this.setHighwayDefaults(MOTORWAY, 2.0, 100/3.6, 1.2, 2000.0, true);
-		this.setHighwayDefaults(MOTORWAY_LINK, 1,  60.0/3.6, 1.2, 1500, true);
+		this.setHighwayDefaults(1, MOTORWAY, 2.0, 100/3.6, 1.2, 2000.0, true);
+		this.setHighwayDefaults(1, MOTORWAY_LINK, 1,  60.0/3.6, 1.2, 1500, true);
 		
 		if(this.levelOfDetail > 1){
 			
-			this.setHighwayDefaults(TRUNK, 1,  80.0/3.6, 0.5, 1000);
-			this.setHighwayDefaults(TRUNK_LINK, 1,  60.0/3.6, 0.5, 1500);
+			this.setHighwayDefaults(2, TRUNK, 1,  80.0/3.6, 0.5, 1000);
+			this.setHighwayDefaults(2, TRUNK_LINK, 1,  60.0/3.6, 0.5, 1500);
 			
 			if(this.levelOfDetail > 2){
 				
-				this.setHighwayDefaults(PRIMARY, 1,  50.0/3.6, 0.5, 1000);
-				this.setHighwayDefaults(PRIMARY_LINK, 1,  50.0/3.6, 0.5, 1000);
+				this.setHighwayDefaults(3, PRIMARY, 1,  50.0/3.6, 0.5, 1000);
+				this.setHighwayDefaults(3, PRIMARY_LINK, 1,  50.0/3.6, 0.5, 1000);
 				
 				if(this.levelOfDetail > 3){
 					
-					this.setHighwayDefaults(SECONDARY, 1,  50.0/3.6, 0.5, 1000);
+					this.setHighwayDefaults(4, SECONDARY, 1,  50.0/3.6, 0.5, 1000);
 					
 					if(this.levelOfDetail > 4){
 						
-						this.setHighwayDefaults(TERTIARY, 1,  30.0/3.6, 0.8,  600);
+						this.setHighwayDefaults(5, TERTIARY, 1,  30.0/3.6, 0.8,  600);
 						
 						if(this.levelOfDetail > 5){
 							
-							this.setHighwayDefaults(MINOR, 1,  30.0/3.6, 0.8,  600);
-							this.setHighwayDefaults(UNCLASSIFIED, 1,  30.0/3.6, 0.8,  600);
-							this.setHighwayDefaults(RESIDENTIAL, 1,  30.0/3.6, 0.6,  600);
-							this.setHighwayDefaults(LIVING_STREET, 1,  15.0/3.6, 1.0,  600);
+							this.setHighwayDefaults(6, MINOR, 1,  30.0/3.6, 0.8,  600);
+							this.setHighwayDefaults(6, UNCLASSIFIED, 1,  30.0/3.6, 0.8,  600);
+							this.setHighwayDefaults(6, RESIDENTIAL, 1,  30.0/3.6, 0.6,  600);
+							this.setHighwayDefaults(6, LIVING_STREET, 1,  15.0/3.6, 1.0,  600);
 							
 						}
 						
@@ -337,17 +337,24 @@ public class NetworkCreatorFromPsql {
 					length = CoordUtils.calcDistance(this.transformation.transform(MGC.coordinate2Coord(lastTo)),
 							this.transformation.transform(MGC.coordinate2Coord(next)));
 
-					for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
+//					for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
 
-						// If the coordinates are contained in the survey area, add a new link to the network
-						if(au.getGeometry().contains(gf.createPoint(lastTo)) ||
-								au.getGeometry().contains(gf.createPoint(next))){
-							//TODO make a difference between inner and outer au's (w/ respect to highway hierarchy)
-							createLink(entry, length, lastTo, next);
-							break;
-						}
+					boolean inSurveyArea = true;
+					// If the coordinates are contained in the survey area, add a new link to the network
+					if(!this.geoinformation.getSurveyAreaBoundingBox().contains(gf.createPoint(lastTo)) &&
+							!this.geoinformation.getSurveyAreaBoundingBox().contains(gf.createPoint(next))){
+						
+						inSurveyArea = false;
 						
 					}
+						
+					createLink(entry, length, lastTo, next, inSurveyArea);
+							//TODO make a difference between inner and outer au's (w/ respect to highway hierarchy)
+							
+//							break;
+//						}
+						
+//					}
 					//Update last visited coordinate in the sequence
 					lastTo = next;
 					
@@ -373,13 +380,19 @@ public class NetworkCreatorFromPsql {
 	 * @param from The coordinate at the beginning of the link.
 	 * @param to The coordinate at the end of the link.
 	 */
-	private void createLink(WayEntry entry, double length, Coordinate from, Coordinate to){
+	private void createLink(WayEntry entry, double length, Coordinate from, Coordinate to, boolean inSurveyArea){
 		
 		HighwayDefaults defaults = this.highwayDefaults.get(entry.highwayTag);
 		
 		// If there are defaults for the highway type of the current way, we proceed
 		// Else the way is simply skipped
 		if(defaults != null){
+			
+			if(!inSurveyArea){
+				if(defaults.hierarchyLevel > this.levelOfDetail - 2){
+					return;
+				}
+			}
 			
 			//set all values to default
 			double freespeed = defaults.freespeed;
@@ -584,13 +597,16 @@ public class NetworkCreatorFromPsql {
 	 */
 	static class HighwayDefaults{
 		
+		int hierarchyLevel;
 		double freespeed;
 		double freespeedFactor;
 		double lanesPerDirection;
 		double laneCapacity;
 		boolean oneway;
 		
-		HighwayDefaults(double freespeed, double freespeedFactor, double lanesPerDirection, double laneCapacity, boolean oneway){
+		HighwayDefaults(int hierarchyLevel, double freespeed, double freespeedFactor, double lanesPerDirection, double laneCapacity, 
+				boolean oneway){
+			this.hierarchyLevel = hierarchyLevel;
 			this.freespeed = freespeed;
 			this.freespeedFactor = freespeedFactor;
 			this.lanesPerDirection = lanesPerDirection;

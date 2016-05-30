@@ -13,6 +13,7 @@ import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.PopulationWriter;
 import org.matsim.core.scenario.ScenarioImpl;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.households.HouseholdsWriterV10;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
@@ -84,20 +85,12 @@ public class MobilityDatabaseMain {
 					((ScenarioImpl)scenario).createVehicleContainer();
 				}
 				
-				// Generate a String set that stores the identifier(s) of the survey area regions
-				Set<String> ids = new HashSet<>();
-				for(String id : configuration.getSurveyAreaIds()){
-					
-					ids.add(id);
-					
-				}
-				
 				// Container for geoinformation (admin borders, landuse)
 				Geoinformation geoinformation = new Geoinformation();
 
 				// A class that reads data from database tables into local containers
 				DatabaseReader dbReader = new DatabaseReader(geoinformation);
-				dbReader.readGeodataFromDatabase(configuration, ids, scenario);
+				dbReader.readGeodataFromDatabase(configuration, configuration.getSurveyAreaIds(), configuration.getVicinityIds(), scenario);
 				
 				// Create a MATSim network from OpenStreetMap data
 				NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(), geoinformation,

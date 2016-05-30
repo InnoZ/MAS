@@ -13,15 +13,20 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.geotools.data.shapefile.shp.ShapefileWriter;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.gbl.Gbl;
+import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.core.utils.gis.PolygonFeatureFactory;
+import org.matsim.core.utils.gis.ShapeFileWriter;
+import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
@@ -34,6 +39,7 @@ import playground.dhosse.scenarioGeneration.geoinformation.AdministrativeUnit;
 import playground.dhosse.scenarioGeneration.geoinformation.Geoinformation;
 import playground.dhosse.scenarioGeneration.network.WayEntry;
 import playground.dhosse.scenarioGeneration.utils.ActivityTypes;
+import playground.dhosse.utils.GeometryUtils;
 import playground.dhosse.utils.osm.OsmKey2ActivityType;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -87,11 +93,12 @@ public class DatabaseReader {
 	 * 
 	 * 
 	 * @param configuration The configuration for the scenario generation process.
-	 * @param ids The survey area id(s).
+	 * @param surveyAreaIdsString The survey area id(s).
+	 * @param vicinityIdsString The vicinity area id(s).
 	 * @param scenario The MATSim scenario.
 	 */
-	public void readGeodataFromDatabase(Configuration configuration, Set<String> ids,
-			Scenario scenario) {
+	public void readGeodataFromDatabase(Configuration configuration, String surveyAreaIdsString, 
+			String vicinityIdsString, Scenario scenario) {
 		
 		try {
 			
@@ -107,7 +114,7 @@ public class DatabaseReader {
 				
 				// Read the administrative borders that have one of the specified ids
 				// TODO Vicinity... /dhosse 05/16
-				this.readAdminBorders(connection, configuration, ids);
+				this.readAdminBorders(connection, configuration, surveyAreaIdsString, vicinityIdsString);
 				
 				// If no administrative units were created, we are unable to proceed
 				// The process would probably finish, but no network or population would be created
@@ -145,7 +152,7 @@ public class DatabaseReader {
 	 * 
 	 * @param connection The database connection
 	 * @param configuration The configuration parameters.
-	 * @param ids The ids of the administrative border we want to have the geometries of.
+	 * @param surveyAreaIds The ids of the administrative border we want to have the geometries of.
 	 * 
 	 * @throws SQLException
 	 * @throws NoSuchAuthorityCodeException
@@ -154,12 +161,46 @@ public class DatabaseReader {
 	 * @throws MismatchedDimensionException
 	 * @throws TransformException
 	 */
-	private void readAdminBorders(Connection connection, Configuration configuration, Set<String> ids)
+	private void readAdminBorders(Connection connection, Configuration configuration, String surveyAreaIdsString,
+			String vicinityIdsString)
 			throws SQLException, NoSuchAuthorityCodeException, FactoryException, ParseException,
-			MismatchedDimensionException, TransformException{
+			MismatchedDimensionException, TransformException {
 
 		log.info("Reading administrative borders from database...");
 
+		// A collection to temporarily store all geometries
+		List<Geometry> geometryCollection = new ArrayList<Geometry>();
+		
+		getAndAddGeodataFromIdSet(connection, configuration, CollectionUtils.stringToSet(surveyAreaIdsString), geometryCollection, true);
+		this.geoinformation.setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection).getEnvelope());
+		if(vicinityIdsString != null){
+			getAndAddGeodataFromIdSet(connection, configuration, CollectionUtils.stringToSet(vicinityIdsString), geometryCollection, false);
+			this.geoinformation.setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection).getEnvelope());
+		}
+		
+		// This is needed to transform the WGS84 geometries into the specified CRS
+		MathTransform t = CRS.findMathTransform(CRS.decode(Geoinformation.AUTH_KEY_WGS84, true),
+				CRS.decode(configuration.getCrs(), true));
+		
+		// Get the survey area by building the bounding box of all geometries 
+		this.geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection).getEnvelope());
+		
+		this.boundingBox = JTS.transform((Geometry) this.geoinformation.getCompleteGeometry().clone(), t)
+				.getEnvelope();
+		
+//		PolygonFeatureFactory pf = new PolygonFeatureFactory.Builder()
+//				.addAttribute("id", String.class)
+//				.create();
+//		List<SimpleFeature> features = new ArrayList<>();
+//		features.add(pf.createPolygon(this.geoinformation.getCompleteGeometry().getCoordinates()));
+//		ShapeFileWriter.writeGeometries(features, "/home/danielhosse/dessau/foo/geometry.shp");
+		
+	}
+	
+	private void getAndAddGeodataFromIdSet(Connection connection, Configuration configuration, Set<String> ids,
+			List<Geometry> geometryCollection, boolean surveyArea) throws SQLException, NoSuchAuthorityCodeException,
+			FactoryException, ParseException, MismatchedDimensionException, TransformException{
+		
 		// Create a new statement to execute the sql query
 		Statement statement = connection.createStatement();
 		StringBuilder builder = new StringBuilder();
@@ -188,13 +229,6 @@ public class DatabaseReader {
 				+ DatabaseConstants.functions.st_astext.name() + "(" + DatabaseConstants.ATT_GEOM + ")" + " from "
 				+ DatabaseConstants.schemata.gadm.name() + "." + DatabaseConstants.tables.districts.name() + " where" + builder.toString());
 
-		// This is needed to transform the WGS84 geometries into the specified CRS
-		MathTransform t = CRS.findMathTransform(CRS.decode(Geoinformation.AUTH_KEY_WGS84, true),
-				CRS.decode(configuration.getCrs(), true));
-		
-		// A collection to temporarily store all geometries
-		List<Geometry> geometryCollection = new ArrayList<Geometry>();
-		
 		// Go through all the results
 		while(set.next()){
 			
@@ -202,9 +236,9 @@ public class DatabaseReader {
 			String key = set.getString(DatabaseConstants.MUN_KEY).substring(1);
 			String g = set.getString(DatabaseConstants.functions.st_astext.name());
 			int bland = set.getInt(DatabaseConstants.BLAND);
-//				int districtType = set.getInt("");
-//				int municipalityType = set.getInt("");
-//				int regionType = set.getInt("");
+//			int districtType = set.getInt("");
+//			int municipalityType = set.getInt("");
+//			int regionType = set.getInt("");
 			
 			// Check if the wkb string returned is neither null nor empty, otherwise this would crash
 			if(g != null){
@@ -220,7 +254,11 @@ public class DatabaseReader {
 //					au.setDistrictType(districtType);
 //					au.setMunicipalityType(municipalityType);
 //					au.setRegionType(regionType);
-					this.geoinformation.getSurveyArea().put(key, au);
+					if(surveyArea){
+						this.geoinformation.getSurveyArea().put(key, au);
+					} else {
+						this.geoinformation.getVicinity().put(key, au);
+					}
 					
 					// Store all geometries inside a collection to get the survey area geometry in the end
 					geometryCollection.add(au.getGeometry());
@@ -231,15 +269,10 @@ public class DatabaseReader {
 			
 		}
 		
-		// Get the survey area by building the bounding box of all geometries 
-		this.geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection).getEnvelope());
-		this.boundingBox = JTS.transform((Geometry) this.geoinformation.getCompleteGeometry().clone(), t)
-				.getEnvelope();
-		
 		// Close the result set and the statement
 		set.close();
 		statement.close();
-				
+		
 	}
 	
 	/**

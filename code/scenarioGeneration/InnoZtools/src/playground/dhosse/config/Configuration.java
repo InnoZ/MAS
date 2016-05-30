@@ -26,6 +26,7 @@ public class Configuration {
 	private static final Logger log = Logger.getLogger(Configuration.class);
 	
 	private static final String SURVEY_AREA_IDS = "surveyAreaIds";
+	private static final String VICINITY_IDS = "vicinityIds";
 	private static final String CRS = "coordinateSystem";
 	private static final String OUTPUT_DIR = "outputDirectory";
 	private static final String POPULATION_TYPE = "populationType";
@@ -47,7 +48,8 @@ public class Configuration {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
-	private String[] surveyAreaIds;
+	private String surveyAreaIds;
+	private String vicinityIds;
 	private String crs;
 	private String outputDirectory;
 	private PopulationType popType;
@@ -113,7 +115,11 @@ public class Configuration {
 					
 					if(SURVEY_AREA_IDS.equals(lineParts[0])){
 						
-						this.surveyAreaIds = lineParts[1].split(",");
+						this.surveyAreaIds = lineParts[1];
+						
+					} else if(VICINITY_IDS.equals(lineParts[0])){
+						
+						this.vicinityIds = lineParts[1];
 						
 					} else if(CRS.equals(lineParts[0])){
 						
@@ -197,7 +203,7 @@ public class Configuration {
 		boolean validationError = false;
 
 		// A survey area must be defined!
-		if(this.surveyAreaIds.length < 1){
+		if(this.surveyAreaIds.isEmpty()){
 			
 			validationError = true;
 			log.error("You must specify at least one survey area by its id!");
@@ -250,10 +256,20 @@ public class Configuration {
 	 * 
 	 * Getter for survey area ids.
 	 * 
-	 * @return String array of the survey area id(s)
+	 * @return Comma-separated string of the survey area id(s)
 	 */
-	public String[] getSurveyAreaIds() {
+	public String getSurveyAreaIds() {
 		return this.surveyAreaIds;
+	}
+	
+	/**
+	 * 
+	 * Getter for vicinity of the survey area.
+	 * 
+	 * @return Comma-separated string of the vicinity id(s)
+	 */
+	public String getVicinityIds() {
+		return this.vicinityIds;
 	}
 
 	/**
@@ -465,7 +481,8 @@ public class Configuration {
 	public void dumpSettings(){
 		
 		log.info("Dump of configuration settings:");
-		log.info("surveyAreaId:              " + CollectionUtils.arrayToString(this.surveyAreaIds));
+		log.info("surveyAreaId(s):           " + this.surveyAreaIds);
+		log.info("vicinityId(s):             " + this.vicinityIds);
 		log.info("coordinateReferenceSystem: " + this.crs);
 		log.info("workingDirectory:          " + this.outputDirectory);
 		log.info("populationType:            " + this.popType.name());

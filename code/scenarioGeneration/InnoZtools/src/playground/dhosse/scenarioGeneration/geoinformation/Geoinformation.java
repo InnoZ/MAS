@@ -39,6 +39,8 @@ public class Geoinformation {
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	private Map<String, AdministrativeUnit> surveyArea;
 	private Map<String, AdministrativeUnit> vicinity;
+	private Geometry surveyAreaBoundingBox;
+	private Geometry vicinityBoundingBox;
 	private Geometry completeGeometry;
 	protected Map<String,QuadTree<Geometry>> actType2QT;
 	protected Geometry catchmentAreaPt;
@@ -149,6 +151,26 @@ public class Geoinformation {
 	public Map<String, AdministrativeUnit> getVicinity(){
 		
 		return vicinity;
+		
+	}
+	
+	public void setSurveyAreaBoundingBox(Geometry g){
+		this.surveyAreaBoundingBox = g;
+	}
+	
+	public Geometry getSurveyAreaBoundingBox(){
+		
+		return this.surveyAreaBoundingBox;
+		
+	}
+	
+	public void setVicinityBoundingBox(Geometry g){
+		this.vicinityBoundingBox = g;
+	}
+	
+	public Geometry getVicinityBoundingBox(){
+		
+		return this.vicinityBoundingBox;
 		
 	}
 	
