@@ -30,6 +30,7 @@ public class Configuration {
 	private static final String CRS = "coordinateSystem";
 	private static final String OUTPUT_DIR = "outputDirectory";
 	private static final String POPULATION_TYPE = "populationType";
+	private static final String SCALE_FACTOR = "scaleFactor";
 	private static final String USE_BUILDINGS = "useBuildings";
 	
 	private static final String ONLY_WORKING_DAYS = "onlyWorkingDays";
@@ -69,7 +70,9 @@ public class Configuration {
 	
 	private String query;
 	
-	private long randomSeed = 4711;
+	private long randomSeed = 4711L;
+	
+	private double scaleFactor = 1.0d;
 
 	private boolean writeDatabaseTables = false;
 	private boolean writeIntoDatahub = false;
@@ -180,6 +183,10 @@ public class Configuration {
 					} else if(OVERWRITE_FILES.equals(lineParts[0])){
 						
 						this.overwriteExistingFiles = Boolean.parseBoolean(lineParts[1]);
+						
+					} else if(SCALE_FACTOR.equals(lineParts[0])){
+						
+						this.scaleFactor = Double.parseDouble(lineParts[1]);
 						
 					}
 					
@@ -471,6 +478,18 @@ public class Configuration {
 		
 		return this.writeIntoDatahub;
 		
+	}
+	
+	/**
+	 * 
+	 * Getter for the {@code scaleFactor} parameter.
+	 * 
+	 * @return The factor for scaling demand and supply.
+	 */
+	public double getScaleFactor(){
+		
+		return this.scaleFactor;
+	
 	}
 	
 	/**

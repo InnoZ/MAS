@@ -67,7 +67,7 @@ public class NetworkCreatorFromPsql {
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////	
 	private static int nodeCounter = 0;
 	private static int linkCounter = 0;
-
+	
 	private boolean scaleMaxSpeed = false;
 	private boolean cleanNetwork = false;
 	private boolean simplifyNetworK = false;
@@ -493,7 +493,7 @@ public class NetworkCreatorFromPsql {
 			}
 			
 			// Set the link's capacity and the resulting freespeed (if it's meant to be scaled)
-			double capacity = lanesPerDirection * laneCapacity;
+			double capacity = lanesPerDirection * laneCapacity * this.configuration.getScaleFactor();
 			
 			if(this.scaleMaxSpeed){
 				

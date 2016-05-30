@@ -347,7 +347,7 @@ public class PopulationCreator {
 		// Initialize a pseudo-random number and iterate over all administrative units.
 		// Accumulate their weights and as soon as the random number is smaller or equal to the accumulated weight
 		// pick the current admin unit.
-		for(int i = 0; i < configuration.getNumberOfHouseholds(); i++){
+		for(int i = 0; i < configuration.getNumberOfHouseholds() * configuration.getScaleFactor(); i++){
 
 			currentHomeCell = null;
 			AdministrativeUnit au = null;
@@ -491,7 +491,7 @@ public class PopulationCreator {
 					personalRandom * PersonUtils.getTotalWeight(templatePersons.values()));
 			
 			//TODO: number of inhabitants for admin units
-			for(int i = 0; i < 10000; i++){
+			for(int i = 0; i < 10000 * configuration.getScaleFactor(); i++){
 				
 				population.addPerson(createPerson(personTemplate, population, personAttributes, personalRandom, i, null));
 				
