@@ -8,8 +8,9 @@
 #The id(s) of the survey area(s)
 #If unknown, look into table gadm.districts
 #seperate multiple entries with commas
-surveyAreaIds	09180
+surveyAreaIds	0000
 #TODO: vicinity of survey area
+vicinityIds	0001,0002
 
 
 #The coordinate system used (automatically by selecting a survey area? In most cases UTM32N and UTM33N will be used) /dhosse
@@ -18,7 +19,7 @@ coordinateSystem	EPSG:32632
 
 
 #Output directory (where the output files are written to) /dhosse
-outputDirectory	/home/dhosse/dessau/foo/
+outputDirectory	/dir/subdir/foo/
 
 
 #The type of population you want to create. Possible values are "dummy","commuter","complete"
@@ -57,10 +58,10 @@ onlyWorkingDays	true
 useVehicles	false
 
 #The query could be automated by selecting the bbsr district type directly from geodata. //dhosse
-midQuery	select * from mid2008.households_raw where bland=9 and rtypd7=6
+midQuery	select * from mid2008.households_raw where bland=3 and rtypd7=3
 
 #THIS SHOULD VANISH
-numberOfHouseholds	10000
+numberOfHouseholds	84218
 
 #############################################################################################################################################
 
