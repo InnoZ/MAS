@@ -601,8 +601,11 @@ public class PopulationCreator {
 				c = CoordUtils.calcDistance(currentHomeLocation, currentMainActLocation);
 				
 				// Also, add all cells of which the sum of the distances between their centroid and the centroids of
-				// the home and the main act cell is less than twice the distance between the home and the main activity location-
-				for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
+				// the home and the main act cell is less than twice the distance between the home and the main activity location
+				List<AdministrativeUnit> adminUnits = new ArrayList<>();
+				adminUnits.addAll(this.geoinformation.getSurveyArea().values());
+				adminUnits.addAll(this.geoinformation.getVicinity().values());
+				for(AdministrativeUnit au : adminUnits){
 					
 					double a = CoordUtils.calcDistance(transformation.transform(
 							MGC.point2Coord(currentHomeCell.getGeometry().getCentroid())),
@@ -761,7 +764,7 @@ public class PopulationCreator {
 		
 		// Set the search space to the person's search space if it's not null.
 		// Else consider the whole survey area.
-		Collection<AdministrativeUnit> adminUnits = null;
+		List<AdministrativeUnit> adminUnits = null;
 		if(currentSearchSpace != null){
 			
 			if(currentSearchSpace.size() > 0){
@@ -774,7 +777,9 @@ public class PopulationCreator {
 		
 		if(adminUnits == null){
 			
-			adminUnits = this.geoinformation.getSurveyArea().values();
+			adminUnits = new ArrayList<AdministrativeUnit>();
+			adminUnits.addAll(this.geoinformation.getSurveyArea().values());
+			adminUnits.addAll(this.geoinformation.getVicinity().values());
 			
 		}
 		
@@ -826,6 +831,9 @@ public class PopulationCreator {
 			accumulatedWeight += entry.getValue();
 			if(r <= accumulatedWeight){
 				result = this.geoinformation.getSurveyArea().get(entry.getKey());
+				if(result == null){
+					result = this.geoinformation.getVicinity().get(entry.getKey());
+				}
 				break;
 			}
 			

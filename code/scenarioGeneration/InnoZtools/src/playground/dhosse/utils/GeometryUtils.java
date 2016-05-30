@@ -18,6 +18,10 @@ import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.network.LinkImpl;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.collections.Tuple;
@@ -32,14 +36,14 @@ import org.matsim.facilities.ActivityFacility;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.opengis.feature.simple.SimpleFeature;
 
-import playground.dhosse.utils.io.AbstractCsvReader;
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+
+import playground.dhosse.utils.io.AbstractCsvReader;
 
 /**
  * 
@@ -516,6 +520,51 @@ public class GeometryUtils {
 		} catch (IOException e) {
 
 			e.printStackTrace();
+			
+		}
+		
+	}
+	
+	public static void writeActivityLocationsToShapefile(final Population population, String shapefile, String crs){
+		
+		// Create a point feature collection and add some characteristics
+		Collection<SimpleFeature> features = new ArrayList<SimpleFeature>();
+		PointFeatureFactory factory = new PointFeatureFactory.Builder().
+				setCrs(MGC.getCRS(crs)).
+				setName("acts").
+				addAttribute("personId", String.class).
+				addAttribute("actType", String.class).
+				create();
+		
+		// Go through all stop facilities, create features for each of them and add them to the feature 
+		// collection.
+		for(Person person : population.getPersons().values()){
+			
+			for(PlanElement pe : person.getSelectedPlan().getPlanElements()){
+				
+				if(pe instanceof Activity){
+					
+					SimpleFeature feature = factory.createPoint(MGC.coord2Coordinate(((Activity)pe).getCoord()),
+							new Object[]{person.getId().toString(), ((Activity)pe).getType()},
+							null);
+					features.add(feature);
+					
+				}
+				
+			}
+			
+		}
+		
+		// If the feature collection contains at least one element, write it to the specified
+		// location, else log an error.
+		if(features.size() > 0){
+			
+			ShapeFileWriter.writeGeometries(features, shapefile + "acts.shp");
+			
+		} else {
+			
+			log.error("Point feature collection is empty and thus there is no file to write...");
+			log.info("Continuing anyways...");
 			
 		}
 		

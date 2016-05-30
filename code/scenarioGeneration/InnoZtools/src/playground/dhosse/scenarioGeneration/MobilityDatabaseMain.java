@@ -1,8 +1,6 @@
 package playground.dhosse.scenarioGeneration;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
@@ -13,7 +11,6 @@ import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.PopulationWriter;
 import org.matsim.core.scenario.ScenarioImpl;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.households.HouseholdsWriterV10;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
@@ -130,6 +127,7 @@ public class MobilityDatabaseMain {
 				e1.printStackTrace();
 				
 			}
+			
 			finally
 			{
 				

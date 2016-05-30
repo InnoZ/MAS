@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.geotools.data.shapefile.shp.ShapefileWriter;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.jfree.util.Log;
@@ -24,23 +23,12 @@ import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.matsim.core.utils.gis.PolygonFeatureFactory;
-import org.matsim.core.utils.gis.ShapeFileWriter;
-import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-
-import playground.dhosse.config.Configuration;
-import playground.dhosse.scenarioGeneration.geoinformation.AdministrativeUnit;
-import playground.dhosse.scenarioGeneration.geoinformation.Geoinformation;
-import playground.dhosse.scenarioGeneration.network.WayEntry;
-import playground.dhosse.scenarioGeneration.utils.ActivityTypes;
-import playground.dhosse.utils.GeometryUtils;
-import playground.dhosse.utils.osm.OsmKey2ActivityType;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -49,6 +37,13 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
+
+import playground.dhosse.config.Configuration;
+import playground.dhosse.scenarioGeneration.geoinformation.AdministrativeUnit;
+import playground.dhosse.scenarioGeneration.geoinformation.Geoinformation;
+import playground.dhosse.scenarioGeneration.network.WayEntry;
+import playground.dhosse.scenarioGeneration.utils.ActivityTypes;
+import playground.dhosse.utils.osm.OsmKey2ActivityType;
 
 /**
  * 
@@ -752,13 +747,17 @@ public class DatabaseReader {
 	 */
 	private void addGeometry(String landuse, Geometry g){
 		
+		List<AdministrativeUnit> adminUnits = new ArrayList<>();
+		adminUnits.addAll(this.geoinformation.getSurveyArea().values());
+		adminUnits.addAll(this.geoinformation.getVicinity().values());
+		
 		// Check if the geometry is not null
 		if(g != null){
 			
 			// Check if the geometry is valid (e.g. not intersecting itself)
 			if(g.isValid()){
 
-				for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
+				for(AdministrativeUnit au : adminUnits){
 
 					// Add the landuse geometry to the administrative unit containing it or skip it if it's outside of the survey area
 					if(au.getGeometry().contains(g) || au.getGeometry().touches(g) || au.getGeometry().intersects(g)){

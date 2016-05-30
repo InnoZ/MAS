@@ -52,11 +52,15 @@ public class Distribution {
 		
 		Map<String, Double> rowMinima = new HashMap<>();
 		
-		for(AdministrativeUnit u1 : geoinformation.getSurveyArea().values()){
+		Map<String, AdministrativeUnit> adminUnits = new HashMap<>();
+		adminUnits.putAll(geoinformation.getSurveyArea());
+		adminUnits.putAll(geoinformation.getVicinity());
+		
+		for(AdministrativeUnit u1 : adminUnits.values()){
 			
 			rowMinima.put(u1.getId(), Double.MAX_VALUE);
 			
-			for(AdministrativeUnit u2 : geoinformation.getSurveyArea().values()){
+			for(AdministrativeUnit u2 : adminUnits.values()){
 				
 				double distance = 0d;
 
@@ -91,17 +95,17 @@ public class Distribution {
 			
 		}
 		
-		for(AdministrativeUnit u1 : geoinformation.getSurveyArea().values()){
-			for(AdministrativeUnit u2 : geoinformation.getSurveyArea().values()){
+		for(AdministrativeUnit u1 : adminUnits.values()){
+			for(AdministrativeUnit u2 : adminUnits.values()){
 				if(u1.equals(u2)){
 					distances.createEntry(u1.getId(), u2.getId(), rowMinima.get(u1.getId()) / 3 );
 				}
 			}
 		}
 		
-		for(AdministrativeUnit u1 : geoinformation.getSurveyArea().values()){
+		for(AdministrativeUnit u1 : adminUnits.values()){
 			
-			for(AdministrativeUnit u2 : geoinformation.getSurveyArea().values()){
+			for(AdministrativeUnit u2 : adminUnits.values()){
 				
 				for(String key : activityTypes){
 					
