@@ -43,7 +43,7 @@ public class BbsrDataReader {
 		
 		for(String key : geoinformation.getAdminUnits().keySet()){
 			
-			String subKey = key.length() > 8 ? key.substring(0, 5) : key.substring(0, 4);
+			String subKey = key.length() > 7 ? key.substring(0, 5) : key.substring(0, 4);
 			AdministrativeUnit unit = geoinformation.getAdminUnits().get(key);
 			
 			int regionType = this.key2Type.get(subKey);

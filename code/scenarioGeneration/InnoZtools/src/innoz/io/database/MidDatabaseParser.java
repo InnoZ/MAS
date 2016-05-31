@@ -123,7 +123,7 @@ public class MidDatabaseParser {
 			
 			Integer bland = entry.getKey();
 			
-			q += "bland = " + bland + " and (rtypd7 = ";
+			q += "bland = " + bland + " and (rtypd7=";
 
 			int cnt = 0;
 			
@@ -133,7 +133,7 @@ public class MidDatabaseParser {
 				
 				if(cnt < entry.getValue().size()){
 
-					q += i + " or ";
+					q += i + " or rtypd7=";
 					
 				} else {
 					

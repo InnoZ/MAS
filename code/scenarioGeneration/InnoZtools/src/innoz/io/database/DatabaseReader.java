@@ -231,7 +231,8 @@ public class DatabaseReader {
 		while(set.next()){
 			
 			//TODO attributes have to be added to the table
-			String key = set.getString(DatabaseConstants.MUN_KEY).substring(1);
+			String key = set.getString(DatabaseConstants.MUN_KEY);
+			if(key.startsWith("0")) key = key.substring(1);
 			String g = set.getString(DatabaseConstants.functions.st_astext.name());
 			int bland = set.getInt(DatabaseConstants.BLAND);
 //			int districtType = set.getInt("");
