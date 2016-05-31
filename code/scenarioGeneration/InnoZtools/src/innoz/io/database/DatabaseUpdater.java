@@ -1,4 +1,4 @@
-package innoz.database;
+package innoz.io.database;
 
 import java.io.BufferedReader;
 import java.io.IOException;

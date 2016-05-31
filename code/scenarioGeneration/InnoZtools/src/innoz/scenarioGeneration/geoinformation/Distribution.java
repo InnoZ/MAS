@@ -16,7 +16,7 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.matrices.Matrix;
 
-import innoz.database.MidDatabaseParser;
+import innoz.io.database.MidDatabaseParser;
 import innoz.scenarioGeneration.utils.ActivityTypes;
 import innoz.scenarioGeneration.utils.Modes;
 

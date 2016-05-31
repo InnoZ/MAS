@@ -1,4 +1,4 @@
-package innoz.database;
+package innoz.io.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -18,7 +18,7 @@ import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.misc.Time;
 
 import innoz.config.Configuration;
-import innoz.database.MidDatabaseParser.Subtour.subtourType;
+import innoz.io.database.MidDatabaseParser.Subtour.subtourType;
 import innoz.scenarioGeneration.population.surveys.MiDConstants;
 import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
 import innoz.scenarioGeneration.population.surveys.SurveyHousehold;

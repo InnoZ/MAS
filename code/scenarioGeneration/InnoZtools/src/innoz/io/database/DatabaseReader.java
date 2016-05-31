@@ -1,4 +1,12 @@
-package innoz.database;
+package innoz.io.database;
+
+import innoz.config.Configuration;
+import innoz.io.BbsrDataReader;
+import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
+import innoz.scenarioGeneration.geoinformation.Geoinformation;
+import innoz.scenarioGeneration.network.WayEntry;
+import innoz.scenarioGeneration.utils.ActivityTypes;
+import innoz.utils.osm.OsmKey2ActivityType;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -37,13 +45,6 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
-
-import innoz.config.Configuration;
-import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
-import innoz.scenarioGeneration.geoinformation.Geoinformation;
-import innoz.scenarioGeneration.network.WayEntry;
-import innoz.scenarioGeneration.utils.ActivityTypes;
-import innoz.utils.osm.OsmKey2ActivityType;
 
 /**
  * 
@@ -120,6 +121,8 @@ public class DatabaseReader {
 					throw new RuntimeException("Execution aborts...");
 					
 				}
+				
+				new BbsrDataReader().read(this.geoinformation);
 				
 				// Otherwise, read in the OSM data
 				this.readOsmData(connection, configuration);
@@ -254,6 +257,7 @@ public class DatabaseReader {
 					} else {
 						this.geoinformation.getVicinity().put(key, au);
 					}
+					this.geoinformation.getAdminUnits().put(key, au);
 					
 					// Store all geometries inside a collection to get the survey area geometry in the end
 					geometryCollection.add(au.getGeometry());

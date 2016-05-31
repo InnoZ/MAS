@@ -13,13 +13,8 @@ public class AdministrativeUnit {
 	
 	private Integer bland;
 	private Integer regionType;
-	private Integer districtType;
-	private Integer municipalityType;
 	
 	private int nInhabitants;
-	private double pChild;
-	private double pAdult;
-	private double pPensioner;
 	
 	private Geometry geometry;
 	
@@ -51,30 +46,6 @@ public class AdministrativeUnit {
 	public void setRegionType(Integer regionType) {
 		
 		this.regionType = regionType;
-		
-	}
-
-	public Integer getDistrictType() {
-		
-		return this.districtType;
-		
-	}
-
-	public void setDistrictType(Integer districtType) {
-		
-		this.districtType = districtType;
-		
-	}
-
-	public Integer getMunicipalityType() {
-		
-		return this.municipalityType;
-		
-	}
-
-	public void setMunicipalityType(Integer municipalityType) {
-		
-		this.municipalityType = municipalityType;
 		
 	}
 
@@ -112,18 +83,6 @@ public class AdministrativeUnit {
 	
 	public int getNumberOfInhabitants(){
 		return this.nInhabitants;
-	}
-
-	public double getpChild() {
-		return pChild;
-	}
-
-	public double getpAdult() {
-		return pAdult;
-	}
-
-	public double getpPensioner() {
-		return pPensioner;
 	}
 	
 	public void setBland(int bland){

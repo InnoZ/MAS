@@ -1,7 +1,7 @@
 package innoz.scenarioGeneration.population;
 
 import innoz.config.Configuration;
-import innoz.database.MidDatabaseParser;
+import innoz.io.database.MidDatabaseParser;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.geoinformation.Distribution;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;

@@ -20,8 +20,8 @@ import org.matsim.vehicles.VehicleWriterV1;
 
 import innoz.config.Configuration;
 import innoz.config.SshConnector;
-import innoz.database.DatabaseReader;
-import innoz.database.DatabaseUpdater;
+import innoz.io.database.DatabaseReader;
+import innoz.io.database.DatabaseUpdater;
 import innoz.scenarioGeneration.config.InitialConfigCreator;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.network.NetworkCreatorFromPsql;

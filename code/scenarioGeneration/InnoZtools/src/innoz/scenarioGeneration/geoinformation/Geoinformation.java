@@ -39,6 +39,7 @@ public class Geoinformation {
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	private Map<String, AdministrativeUnit> surveyArea;
 	private Map<String, AdministrativeUnit> vicinity;
+	private Map<String, AdministrativeUnit> adminUnits;
 	private Geometry surveyAreaBoundingBox;
 	private Geometry vicinityBoundingBox;
 	private Geometry completeGeometry;
@@ -50,6 +51,7 @@ public class Geoinformation {
 		
 		this.surveyArea = new HashMap<String, AdministrativeUnit>();
 		this.vicinity = new HashMap<String, AdministrativeUnit>();
+		this.adminUnits = new HashMap<String, AdministrativeUnit>();
 		this.actType2QT = new HashMap<String, QuadTree<Geometry>>();
 		
 	}
@@ -139,6 +141,12 @@ public class Geoinformation {
 		}
 		
 		return weight;
+		
+	}
+	
+	public Map<String, AdministrativeUnit> getAdminUnits(){
+		
+		return this.adminUnits;
 		
 	}
 	

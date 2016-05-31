@@ -28,7 +28,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 
 import innoz.config.Configuration;
-import innoz.database.DatabaseReader;
+import innoz.io.database.DatabaseReader;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.utils.matsim.NetworkSimplifier;
 

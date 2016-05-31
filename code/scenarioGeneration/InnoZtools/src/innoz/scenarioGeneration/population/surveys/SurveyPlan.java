@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import innoz.database.MidDatabaseParser.Subtour;
+import innoz.io.database.MidDatabaseParser.Subtour;
 
 public class SurveyPlan {
 
