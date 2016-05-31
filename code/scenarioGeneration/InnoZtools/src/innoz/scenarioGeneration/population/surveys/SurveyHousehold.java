@@ -12,11 +12,13 @@ public class SurveyHousehold {
 	private double weight;
 	
 	private final List<String> memberIds;
+	private final List<String> vehicleIds;
 	
 	public SurveyHousehold(String id){
 		
 		this.id = id;
-		this.memberIds = new ArrayList<>();
+		this.memberIds = new ArrayList<String>();
+		this.vehicleIds = new ArrayList<String>();
 
 	}
 
@@ -34,13 +36,7 @@ public class SurveyHousehold {
 	
 	public double getNCars(){
 		
-		return this.nCars;
-		
-	}
-	
-	public void setNCars(double n){
-		
-		this.nCars = n;
+		return this.vehicleIds.size();
 		
 	}
 	
@@ -60,6 +56,10 @@ public class SurveyHousehold {
 		
 		return this.memberIds;
 		
+	}
+	
+	public List<String> getVehicleIds(){
+		return this.vehicleIds;
 	}
 
 	public double getWeight() {

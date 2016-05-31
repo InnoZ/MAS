@@ -1,11 +1,12 @@
 package innoz.scenarioGeneration.population.surveys;
 
+import innoz.config.Configuration;
+import innoz.scenarioGeneration.utils.Hydrograph;
+import innoz.utils.matsim.RecursiveStatsContainer;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import innoz.scenarioGeneration.utils.Hydrograph;
-import innoz.utils.matsim.RecursiveStatsContainer;
 
 /**
  * 
@@ -18,6 +19,7 @@ public class SurveyDataContainer {
 
 	private Map<String, SurveyHousehold> households;
 	private Map<String, SurveyPerson> persons;
+	private Map<String, SurveyVehicle> vehicles;
 	
 	private Map<String, ArrayList<SurveyPerson>> classifiedPersons;
 	
@@ -27,9 +29,14 @@ public class SurveyDataContainer {
 	private Map<String, RecursiveStatsContainer> modeStatsContainer;
 	private Map<String, Hydrograph> activityTypeHydrographs;
 	
-	public SurveyDataContainer(){
+	public SurveyDataContainer(final Configuration configuration){
 		
-		this.households = new HashMap<String, SurveyHousehold>();
+		if(configuration.isUsingHouseholds()){
+			this.households = new HashMap<String, SurveyHousehold>();
+		}
+		if(configuration.isUsingVehicles()){
+			this.vehicles = new HashMap<String, SurveyVehicle>();
+		}
 		this.persons = new HashMap<String, SurveyPerson>();
 		this.classifiedPersons = new HashMap<String, ArrayList<SurveyPerson>>();
 		this.sumOfHouseholdWeights = 0.0d;
@@ -48,6 +55,12 @@ public class SurveyDataContainer {
 	public Map<String, SurveyPerson> getPersons(){
 		
 		return this.persons;
+		
+	}
+	
+	public Map<String, SurveyVehicle> getVehicles(){
+		
+		return this.vehicles;
 		
 	}
 	

@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.io.IOUtils;
 
 /**
@@ -35,7 +34,7 @@ public class Configuration {
 	
 	private static final String ONLY_WORKING_DAYS = "onlyWorkingDays";
 	private static final String USE_HOUSEHOLDS = "useHouseholds";
-	private static final String USE_CARS = "useCars";
+	private static final String USE_VEHICLES = "useVehicles";
 	private static final String SQL_QUERY_MID = "midQuery"; //TODO find a way to remove this!
 	private static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
 	
@@ -56,7 +55,7 @@ public class Configuration {
 	private PopulationType popType;
 	
 	private boolean useHouseholds = false;
-	private boolean useCars = false;
+	private boolean useVehicles = false;
 	private boolean onlyWorkingDays = false;
 	private boolean useBuildings = false;
 	
@@ -148,9 +147,9 @@ public class Configuration {
 						
 						this.onlyWorkingDays = Boolean.parseBoolean(lineParts[1]);
 						
-					} else if(USE_CARS.equals(lineParts[0])){
+					} else if(USE_VEHICLES.equals(lineParts[0])){
 						
-						this.useCars = Boolean.parseBoolean(lineParts[1]);
+						this.useVehicles = Boolean.parseBoolean(lineParts[1]);
 						
 					} else if(USE_BUILDINGS.equals(lineParts[0])){
 						
@@ -219,7 +218,7 @@ public class Configuration {
 		}
 		
 		// Non-generic cars can only be used along w/ households.
-		if(!this.useHouseholds && this.useCars){
+		if(!this.useHouseholds && this.useVehicles){
 			
 			validationError = true;
 			log.error("You disabled the use of households data but enabled cars. This won't work!");
@@ -389,8 +388,8 @@ public class Configuration {
 	 * 
 	 * @return {@code True} if vehicles from mobility surveys should be used, {@code false} otherwise (= generic vehicles}.
 	 */
-	public boolean isUsingCars(){
-		return this.useCars;
+	public boolean isUsingVehicles(){
+		return this.useVehicles;
 	}
 	
 	/**
@@ -508,7 +507,7 @@ public class Configuration {
 		log.info("onlyWorkingDays:           " + this.onlyWorkingDays);
 		log.info("useBuildings:              " + this.useBuildings);
 		log.info("useMiDHouseholds:          " + this.useHouseholds);
-		log.info("useMiDVehicles:            " + this.useCars);
+		log.info("useMiDVehicles:            " + this.useVehicles);
 		
 	}
 	

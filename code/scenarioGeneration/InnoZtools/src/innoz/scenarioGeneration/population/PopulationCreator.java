@@ -1,7 +1,24 @@
 package innoz.scenarioGeneration.population;
 
+import innoz.config.Configuration;
+import innoz.database.MidDatabaseParser;
+import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
+import innoz.scenarioGeneration.geoinformation.Distribution;
+import innoz.scenarioGeneration.geoinformation.Geoinformation;
+import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
+import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
+import innoz.scenarioGeneration.population.surveys.SurveyPerson;
+import innoz.scenarioGeneration.population.surveys.SurveyPlan;
+import innoz.scenarioGeneration.population.surveys.SurveyPlanActivity;
+import innoz.scenarioGeneration.population.surveys.SurveyPlanElement;
+import innoz.scenarioGeneration.population.surveys.SurveyPlanWay;
+import innoz.scenarioGeneration.population.surveys.SurveyVehicle;
+import innoz.scenarioGeneration.population.utils.PersonUtils;
+import innoz.scenarioGeneration.utils.ActivityTypes;
+import innoz.scenarioGeneration.vehicles.VehicleTypes;
+import innoz.utils.GeometryUtils;
+
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -36,27 +53,12 @@ import org.matsim.households.Income.IncomePeriod;
 import org.matsim.households.IncomeImpl;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.vehicles.Vehicle;
+import org.matsim.vehicles.VehicleType;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import innoz.config.Configuration;
-import innoz.database.MidDatabaseParser;
-import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
-import innoz.scenarioGeneration.geoinformation.Distribution;
-import innoz.scenarioGeneration.geoinformation.Geoinformation;
-import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
-import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
-import innoz.scenarioGeneration.population.surveys.SurveyPerson;
-import innoz.scenarioGeneration.population.surveys.SurveyPlan;
-import innoz.scenarioGeneration.population.surveys.SurveyPlanActivity;
-import innoz.scenarioGeneration.population.surveys.SurveyPlanElement;
-import innoz.scenarioGeneration.population.surveys.SurveyPlanWay;
-import innoz.scenarioGeneration.population.utils.PersonUtils;
-import innoz.scenarioGeneration.utils.ActivityTypes;
-import innoz.utils.GeometryUtils;
 
 /**
  * 
@@ -303,7 +305,7 @@ public class PopulationCreator {
 		
 		// Run the survey data parser that stores all of the travel information
 		MidDatabaseParser parser = new MidDatabaseParser();
-		SurveyDataContainer container = new SurveyDataContainer();
+		SurveyDataContainer container = new SurveyDataContainer(configuration);
 		parser.run(configuration, container);
 		
 		// Initialize the disutilities for traveling from each cell to each other cell
@@ -332,6 +334,8 @@ public class PopulationCreator {
 	 * @param parser The survey parser containing all of the information.
 	 */
 	private void createHouseholds(Configuration configuration, Scenario scenario, SurveyDataContainer container){
+
+		int vehicleCounter = 0;
 		
 		// Get the MATSim population and initialize person attributes
 		Population population = scenario.getPopulation();
@@ -443,13 +447,29 @@ public class PopulationCreator {
 			}
 			
 			// If we model non-generic cars, create all cars that were reported in the survey and add them to the household
-			if(configuration.isUsingCars()){
-
-				for(int k = 0; k < template.getNCars(); k++){
+			if(configuration.isUsingVehicles()){
+				
+				for(String vid : template.getVehicleIds()){
 					
-					Vehicle vehicle = scenario.getVehicles().getFactory().createVehicle(Id.create(template.getId() +
-							"_v_" + k, Vehicle.class), null);
+					SurveyVehicle v = container.getVehicles().get(vid);
+					
+					VehicleType type = VehicleTypes.getVehicleTypeForKey(v.getKbaClass(), v.getFuelType());
+					
+					if(!scenario.getVehicles().getVehicleTypes().containsKey(type.getId())){
+						scenario.getVehicles().addVehicleType(type);
+					}
+					
+					Vehicle vehicle = scenario.getVehicles().getFactory().createVehicle(Id.create(template.getId() + "_" + vid +
+							"_" + v.getFuelType().name() + "_" + vehicleCounter, Vehicle.class), type);
 					scenario.getVehicles().addVehicle(vehicle);
+					vehicleCounter++;
+					
+					if(household.getVehicleIds() == null){
+						
+						((HouseholdImpl)household).setVehicleIds(new ArrayList<Id<Vehicle>>());
+						
+					}
+					
 					household.getVehicleIds().add(vehicle.getId());
 					
 				}

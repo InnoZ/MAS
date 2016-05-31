@@ -20,6 +20,14 @@ public class InitialConfigCreator {
 		// Plans config group
 		config.plans().setInputFile(configuration.getOutputDirectory() + "plans.xml.gz");
 		config.plans().setInputPersonAttributeFile(configuration.getOutputDirectory() + "personAttributes.xml.gz");
+	
+		// If households are used, adapt the parameters that define the usage in MATSim
+		if(configuration.isUsingHouseholds()){
+			
+			config.scenario().setUseHouseholds(true);
+			config.households().setInputFile(configuration.getOutputDirectory() + "households.xml.gz");
+			
+		}
 		
 		// Add activity types to the scoring parameters
 		addBasicActivityParams(config);
@@ -27,6 +35,15 @@ public class InitialConfigCreator {
 		// QSim config group
 		config.qsim().setFlowCapFactor(configuration.getScaleFactor());
 		config.qsim().setStorageCapFactor(configuration.getScaleFactor());
+
+		// If non-generic vehicles are used, adapt the parameters that define the usage in MATSim
+		if(configuration.isUsingVehicles()){
+			
+			config.scenario().setUseVehicles(true);
+			config.qsim().setUseDefaultVehicles(false);
+			config.vehicles().setVehiclesFile(configuration.getOutputDirectory() + "vehicles.xml.gz");
+			
+		}
 		
 		return config;
 		

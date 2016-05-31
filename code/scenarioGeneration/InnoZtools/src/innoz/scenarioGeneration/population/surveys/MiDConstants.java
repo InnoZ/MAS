@@ -190,4 +190,9 @@ public class MiDConstants {
 	
 	//travels
 	
+	//cars
+	public static final String VEHICLE_ID = "vmid";
+	public static final String VEHICLE_FUEL = "h048";
+	public static final String SEG_KBA = "seg_kba";
+	
 }

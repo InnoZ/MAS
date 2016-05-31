@@ -27,6 +27,7 @@ import innoz.scenarioGeneration.population.surveys.SurveyPlan;
 import innoz.scenarioGeneration.population.surveys.SurveyPlanActivity;
 import innoz.scenarioGeneration.population.surveys.SurveyPlanElement;
 import innoz.scenarioGeneration.population.surveys.SurveyPlanWay;
+import innoz.scenarioGeneration.population.surveys.SurveyVehicle;
 import innoz.scenarioGeneration.population.utils.HashGenerator;
 import innoz.scenarioGeneration.utils.ActivityTypes;
 import innoz.scenarioGeneration.utils.Hydrograph;
@@ -73,6 +74,19 @@ public class MidDatabaseParser {
 				
 				parseWaysDatabase(connection, configuration.isOnlyUsingWorkingDays(), container);
 				
+				if(configuration.isUsingVehicles()){
+				
+					log.info("Creating MiD cars...");
+					
+					parseVehiclesDatabase(connection, container);
+					
+				}
+				
+				log.info("Conversion statistics:");
+				log.info("#Households in survey: " + container.getHouseholds().size());
+				log.info("#Persons in survey   : " + container.getPersons().size());
+				log.info("#Vehicles in survey  : " + container.getVehicles().size());
+				
 				connection.close();
 				
 			} else {
@@ -104,8 +118,6 @@ public class MidDatabaseParser {
 			
 			double income = set.getDouble(MiDConstants.HOUSEHOLD_INCOME);
 			hh.setIncome(handleHouseholdIncome(income));
-			
-			hh.setNCars(set.getDouble(MiDConstants.HOUSEHOLD_NCARS));
 			
 			container.getHouseholds().put(hhId, hh);
 			container.incrementSumOfHouseholdWeigtsBy(hh.getWeight());
@@ -419,9 +431,43 @@ public class MidDatabaseParser {
 		
 		postprocessData(container);
 		
-		log.info("Conversion statistics:");
-		log.info("#Households in survey: " + container.getHouseholds().size());
-		log.info("#Persons in survey:    " + container.getPersons().size());
+	}
+	
+	private void parseVehiclesDatabase(Connection connection, SurveyDataContainer container) throws SQLException{
+		
+		Statement statement = connection.createStatement();
+		
+		String query = "select * from mid2008.cars_raw";
+		
+		ResultSet results = statement.executeQuery(query);
+		
+		while(results.next()){
+			
+			String hhid = results.getString(MiDConstants.HOUSEHOLD_ID);
+			String vid = results.getString(MiDConstants.VEHICLE_ID);
+			int fuelType = results.getInt(MiDConstants.VEHICLE_FUEL);
+			int kbaClass = results.getInt(MiDConstants.SEG_KBA);
+			
+			SurveyHousehold household = container.getHouseholds().get(hhid);
+			
+			if(household != null){
+				
+				if(fuelType <= 5 || kbaClass <= 12){
+					
+					SurveyVehicle vehicle = new SurveyVehicle(vid);
+					vehicle.setFuelType(fuelType);
+					vehicle.setKbaClass(kbaClass);
+					household.getVehicleIds().add(vid);
+					container.getVehicles().put(vid, vehicle);
+					
+				}
+				
+			}
+			
+		}
+		
+		results.close();
+		statement.close();
 		
 	}
 	

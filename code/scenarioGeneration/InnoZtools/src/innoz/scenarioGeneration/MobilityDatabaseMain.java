@@ -5,7 +5,9 @@ import java.io.File;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.NetworkWriter;
+import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.PopulationWriter;
@@ -20,6 +22,7 @@ import innoz.config.Configuration;
 import innoz.config.SshConnector;
 import innoz.database.DatabaseReader;
 import innoz.database.DatabaseUpdater;
+import innoz.scenarioGeneration.config.InitialConfigCreator;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.network.NetworkCreatorFromPsql;
 import innoz.scenarioGeneration.population.PopulationCreator;
@@ -77,7 +80,7 @@ public class MobilityDatabaseMain {
 				((ScenarioImpl)scenario).createHouseholdsContainer();
 				
 				// If we want to explicitly model household's cars, enable it
-				if(configuration.isUsingCars()){
+				if(configuration.isUsingVehicles()){
 					scenario.getConfig().scenario().setUseVehicles(true);
 					((ScenarioImpl)scenario).createVehicleContainer();
 				}
@@ -87,7 +90,8 @@ public class MobilityDatabaseMain {
 
 				// A class that reads data from database tables into local containers
 				DatabaseReader dbReader = new DatabaseReader(geoinformation);
-				dbReader.readGeodataFromDatabase(configuration, configuration.getSurveyAreaIds(), configuration.getVicinityIds(), scenario);
+				dbReader.readGeodataFromDatabase(configuration, configuration.getSurveyAreaIds(),
+						configuration.getVicinityIds(), scenario);
 				
 				// Create a MATSim network from OpenStreetMap data
 				NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(), geoinformation,
@@ -100,18 +104,30 @@ public class MobilityDatabaseMain {
 				// Create a MATSim population
 				new PopulationCreator(geoinformation).run(configuration, scenario);
 				
-				// Dump scenario elements into working directory
+				// Create an initial MATSim config file and write it into the output directory
+				Config config = InitialConfigCreator.create(configuration);
+				new ConfigWriter(config).write(configuration.getOutputDirectory() + "config.xml.gz");
+				
+				// Dump scenario elements into the output directory
 				new NetworkWriter(scenario.getNetwork()).write(configuration
 						.getOutputDirectory() + "network.xml.gz");
 				new PopulationWriter(scenario.getPopulation()).write(configuration
 						.getOutputDirectory() + "plans.xml.gz");
-				new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration
-						.getOutputDirectory() + "households.xml.gz");
 				new ObjectAttributesXmlWriter((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES))
-					.writeFile(configuration.getOutputDirectory() + "personAttributes.xml.gz");
-				if(configuration.isUsingCars()){
+						.writeFile(configuration.getOutputDirectory() + "personAttributes.xml.gz");
+				
+				if(configuration.isUsingHouseholds()){
+					
+					new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration
+							.getOutputDirectory() + "households.xml.gz");
+					
+				}
+				
+				if(configuration.isUsingVehicles()){
+
 					new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration
 							.getOutputDirectory() + "vehicles.xml.gz");
+					
 				}
 				
 				if(configuration.isWritingDatabaseOutput()){
