@@ -3,7 +3,9 @@ input/**/*
 output/**/*
 #ignore auto-generated binaries
 code/scenarioGeneration/InnoZtools/bin/*
+#ignore user-specific classpaths
 code/scenarioGeneration/InnoZtools/.classpath
+#ingore build files from jar generation
 libraries/build/*
 # ignore temp files:
 *~
