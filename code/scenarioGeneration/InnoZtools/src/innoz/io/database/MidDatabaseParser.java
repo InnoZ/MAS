@@ -64,13 +64,13 @@ public class MidDatabaseParser {
 					
 					log.info("Creating MiD households...");
 					
-					parseHouseholdsDatabase(connection, geoinformation, configuration.getSqlQuery(), container);
+					parseHouseholdsDatabase(connection, geoinformation, container);
 					
 				}
 				
 				log.info("Creating MiD persons...");
 				
-				parsePersonsDatabase(connection, configuration.getSqlQuery(), configuration.isUsingHouseholds(),
+				parsePersonsDatabase(connection, configuration.isUsingHouseholds(),
 						configuration.isOnlyUsingWorkingDays(), container);
 				
 				log.info("Creating MiD ways...");
@@ -108,7 +108,8 @@ public class MidDatabaseParser {
 		
 	}
 	
-	private void parseHouseholdsDatabase(Connection connection, Geoinformation geoinformation, String query, SurveyDataContainer container) throws RuntimeException, SQLException{
+	private void parseHouseholdsDatabase(Connection connection, Geoinformation geoinformation,
+			SurveyDataContainer container) throws RuntimeException, SQLException{
 		
 		Statement statement = connection.createStatement();
 	
@@ -183,7 +184,7 @@ public class MidDatabaseParser {
 		
 		if(container.getHouseholds().isEmpty()){
 			
-			log.warn("The selected query \"" + query + "\" yielded no results...");
+			log.warn("The query \"" + q + "\" yielded no results...");
 			log.warn("This eventually results in no population.");
 			log.warn("Continuing anyway");
 			
@@ -206,24 +207,21 @@ public class MidDatabaseParser {
 	 * @throws SQLException 
 	 * 
 	 */
-	private void parsePersonsDatabase(Connection connection, String query, boolean isUsingHouseholds,
-			boolean onlyWorkingDays, SurveyDataContainer container) throws SQLException{
+	private void parsePersonsDatabase(Connection connection, boolean isUsingHouseholds, boolean onlyWorkingDays,
+			SurveyDataContainer container) throws SQLException{
 		
 		Statement statement = connection.createStatement();
 
 		ResultSet set = null;
+		String q = null;
 		
 		if(isUsingHouseholds){
 			
-			String q = "select * from mid2008.persons_raw";
+			q = "select * from mid2008.persons_raw";
 			if(onlyWorkingDays){
 				q += " where stichtag < 6";
 			}
 			set = statement.executeQuery(q);
-			
-		} else {
-			
-			set = statement.executeQuery(query);
 			
 		}
 		
@@ -286,7 +284,7 @@ public class MidDatabaseParser {
 		
 		if(container.getPersons().isEmpty()){
 
-			log.warn("The selected query \"" + query + "\" yielded no results...");
+			log.warn("The selected query \"" + q + "\" yielded no results...");
 			log.warn("This eventually results in no population.");
 			log.warn("Continuing anyway");
 			

@@ -35,7 +35,6 @@ public class Configuration {
 	private static final String ONLY_WORKING_DAYS = "onlyWorkingDays";
 	private static final String USE_HOUSEHOLDS = "useHouseholds";
 	private static final String USE_VEHICLES = "useVehicles";
-	private static final String SQL_QUERY_MID = "midQuery"; //TODO find a way to remove this!
 	private static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
 	
 	private static final String LOCAL_PORT = "localPort";
@@ -66,8 +65,6 @@ public class Configuration {
 	
 	private String databaseUser;
 	private String userPassword;
-	
-	private String query;
 	
 	private long randomSeed = 4711L;
 	
@@ -138,10 +135,6 @@ public class Configuration {
 					} else if(USE_HOUSEHOLDS.equals(lineParts[0])){
 						
 						this.useHouseholds = Boolean.parseBoolean(lineParts[1]);
-						
-					} else if(SQL_QUERY_MID.equals(lineParts[0])){
-						
-						this.query = lineParts[1];
 						
 					} else if(ONLY_WORKING_DAYS.equals(lineParts[0])){
 						
@@ -362,16 +355,6 @@ public class Configuration {
 		
 	}
 
-	/**
-	 * 
-	 * Getter for the SQL query to be executed for demand generation.
-	 * 
-	 * @return String representation of the SQL query.
-	 */
-	public String getSqlQuery() {
-		return query;
-	}
-	
 	/**
 	 * 
 	 * Getter for the {@code isOnlyUsingWorkingDays} parameter.
