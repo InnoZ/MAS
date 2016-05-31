@@ -7,6 +7,9 @@ import innoz.utils.matsim.RecursiveStatsContainer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
+import org.matsim.core.utils.collections.Tuple;
 
 /**
  * 
@@ -21,6 +24,8 @@ public class SurveyDataContainer {
 	private Map<String, SurveyPerson> persons;
 	private Map<String, SurveyVehicle> vehicles;
 	
+	private Map<Tuple<Integer, Integer>, Set<String>> state2Households;
+	
 	private Map<String, ArrayList<SurveyPerson>> classifiedPersons;
 	
 	private double sumOfHouseholdWeights;
@@ -34,15 +39,19 @@ public class SurveyDataContainer {
 		if(configuration.isUsingHouseholds()){
 			this.households = new HashMap<String, SurveyHousehold>();
 		}
+		
 		if(configuration.isUsingVehicles()){
 			this.vehicles = new HashMap<String, SurveyVehicle>();
 		}
+		
 		this.persons = new HashMap<String, SurveyPerson>();
 		this.classifiedPersons = new HashMap<String, ArrayList<SurveyPerson>>();
 		this.sumOfHouseholdWeights = 0.0d;
 		this.sumOfPersonWeights = 0.0d;
 		this.modeStatsContainer = new HashMap<String, RecursiveStatsContainer>();
 		this.activityTypeHydrographs = new HashMap<String, Hydrograph>();
+		
+		this.state2Households = new HashMap<Tuple<Integer, Integer>, Set<String>>();
 		
 	}
 	
@@ -103,6 +112,32 @@ public class SurveyDataContainer {
 	public Map<String, Hydrograph> getActivityTypeHydrographs(){
 		
 		return this.activityTypeHydrographs;
+		
+	}
+	
+	public Map<Tuple<Integer,Integer>,Set<String>> getStateId2Households(){
+		return this.state2Households;
+	}
+	
+	public Set<String> getHouseholdsForState(int stateId, int rtyp){
+		
+		return this.state2Households.get(new Tuple<Integer, Integer>(stateId, rtyp));
+		
+	}
+	
+	public double getWeightForHouseholdsInState(int stateId, int rtyp){
+		
+		double w = 0;
+		
+		for(String hhId : this.state2Households.get(new Tuple<Integer, Integer>(stateId, rtyp))){
+
+			if(this.households.get(hhId)!=null){
+				w += this.households.get(hhId).getWeight();
+			}
+			
+		}
+		
+		return w;
 		
 	}
 	

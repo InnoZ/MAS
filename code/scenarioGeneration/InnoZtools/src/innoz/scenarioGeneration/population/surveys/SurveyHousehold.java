@@ -7,7 +7,6 @@ public class SurveyHousehold {
 	
 	private String id;
 	
-	private double nCars;
 	private double hhIncome;
 	private double weight;
 	

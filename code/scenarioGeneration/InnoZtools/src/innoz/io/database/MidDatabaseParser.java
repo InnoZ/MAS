@@ -1,24 +1,8 @@
 package innoz.io.database;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.TransportMode;
-import org.matsim.core.utils.collections.CollectionUtils;
-import org.matsim.core.utils.misc.Time;
-
 import innoz.config.Configuration;
 import innoz.io.database.MidDatabaseParser.Subtour.subtourType;
+import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.population.surveys.MiDConstants;
 import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
 import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
@@ -33,6 +17,25 @@ import innoz.scenarioGeneration.utils.ActivityTypes;
 import innoz.scenarioGeneration.utils.Hydrograph;
 import innoz.utils.matsim.RecursiveStatsContainer;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.core.utils.collections.CollectionUtils;
+import org.matsim.core.utils.collections.Tuple;
+import org.matsim.core.utils.misc.Time;
+
 /**
  * 
  * "Parser" for postgreSQL database tables containing MiD survey data.
@@ -45,7 +48,7 @@ public class MidDatabaseParser {
 
 	private static final Logger log = Logger.getLogger(MidDatabaseParser.class);
 	
-	public void run(Configuration configuration, SurveyDataContainer container){
+	public void run(Configuration configuration, SurveyDataContainer container, Geoinformation geoinformation){
 		
 		try {
 			
@@ -61,7 +64,7 @@ public class MidDatabaseParser {
 					
 					log.info("Creating MiD households...");
 					
-					parseHouseholdsDatabase(connection, configuration.getSqlQuery(), container);
+					parseHouseholdsDatabase(connection, geoinformation, configuration.getSqlQuery(), container);
 					
 				}
 				
@@ -85,7 +88,9 @@ public class MidDatabaseParser {
 				log.info("Conversion statistics:");
 				log.info("#Households in survey: " + container.getHouseholds().size());
 				log.info("#Persons in survey   : " + container.getPersons().size());
-				log.info("#Vehicles in survey  : " + container.getVehicles().size());
+				if(configuration.isUsingVehicles()){
+					log.info("#Vehicles in survey  : " + container.getVehicles().size());
+				}
 				
 				connection.close();
 				
@@ -103,11 +108,51 @@ public class MidDatabaseParser {
 		
 	}
 	
-	private void parseHouseholdsDatabase(Connection connection, String query, SurveyDataContainer container) throws RuntimeException, SQLException{
+	private void parseHouseholdsDatabase(Connection connection, Geoinformation geoinformation, String query, SurveyDataContainer container) throws RuntimeException, SQLException{
 		
 		Statement statement = connection.createStatement();
 	
-		ResultSet set = statement.executeQuery(query);
+		String q = "select * from mid2008.households_raw where (";
+		
+		int cntOut = 0;
+		
+		for(Entry<Integer, Set<Integer>> entry : geoinformation.getStateId2RegionTypes().entrySet()){
+
+			cntOut++;
+			
+			Integer bland = entry.getKey();
+			
+			q += "bland = " + bland + " and (rtypd7 = ";
+
+			int cnt = 0;
+			
+			for(Integer i : entry.getValue()){
+
+				cnt++;
+				
+				if(cnt < entry.getValue().size()){
+
+					q += i + " or ";
+					
+				} else {
+					
+					q += i + "))";
+					
+				}
+				
+			}
+			
+			if(cntOut < geoinformation.getStateId2RegionTypes().size()){
+				
+				q += " or (";
+				
+			}
+			
+		}
+		
+		q += ";";
+		
+		ResultSet set = statement.executeQuery(q);
 		
 		while(set.next()){
 			
@@ -121,6 +166,15 @@ public class MidDatabaseParser {
 			
 			container.getHouseholds().put(hhId, hh);
 			container.incrementSumOfHouseholdWeigtsBy(hh.getWeight());
+			
+			int bland = set.getInt(MiDConstants.BUNDESLAND);
+			int rtyp = set.getInt(MiDConstants.REGION_TYPE_DIFF);
+			
+			if(container.getHouseholdsForState(bland, rtyp) == null){
+				container.getStateId2Households().put(new Tuple<Integer, Integer>(bland, rtyp), new HashSet<String>());
+			}
+			
+			container.getStateId2Households().get(new Tuple<Integer,Integer>(bland,rtyp)).add(hhId);
 
 		}
 		

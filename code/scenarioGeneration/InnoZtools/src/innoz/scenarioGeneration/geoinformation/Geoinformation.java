@@ -2,6 +2,7 @@ package innoz.scenarioGeneration.geoinformation;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,6 +41,10 @@ public class Geoinformation {
 	private Map<String, AdministrativeUnit> surveyArea;
 	private Map<String, AdministrativeUnit> vicinity;
 	private Map<String, AdministrativeUnit> adminUnits;
+	
+	private Set<Integer> states;
+	private Map<Integer, Set<Integer>> stateToRegionType;
+	
 	private Geometry surveyAreaBoundingBox;
 	private Geometry vicinityBoundingBox;
 	private Geometry completeGeometry;
@@ -53,6 +58,9 @@ public class Geoinformation {
 		this.vicinity = new HashMap<String, AdministrativeUnit>();
 		this.adminUnits = new HashMap<String, AdministrativeUnit>();
 		this.actType2QT = new HashMap<String, QuadTree<Geometry>>();
+		
+		this.states = new HashSet<Integer>();
+		this.stateToRegionType = new HashMap<Integer, Set<Integer>>();
 		
 	}
 	
@@ -216,6 +224,14 @@ public class Geoinformation {
 		
 		catchmentAreaPt = geometry;
 		
+	}
+	
+	public Set<Integer> getStatesSet(){
+		return this.states;
+	}
+	
+	public Map<Integer,Set<Integer>> getStateId2RegionTypes(){
+		return this.stateToRegionType;
 	}
 	
 }

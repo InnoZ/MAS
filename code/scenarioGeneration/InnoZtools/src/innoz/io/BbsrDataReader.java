@@ -1,9 +1,11 @@
 package innoz.io;
 
+import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.utils.io.AbstractCsvReader;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class BbsrDataReader {
@@ -42,8 +44,21 @@ public class BbsrDataReader {
 		for(String key : geoinformation.getAdminUnits().keySet()){
 			
 			String subKey = key.length() > 8 ? key.substring(0, 5) : key.substring(0, 4);
+			AdministrativeUnit unit = geoinformation.getAdminUnits().get(key);
 			
-			geoinformation.getAdminUnits().get(key).setRegionType(this.key2Type.get(subKey));
+			int regionType = this.key2Type.get(subKey);
+			
+			unit.setRegionType(regionType);
+			
+			geoinformation.getStatesSet().add(unit.getBland());
+			
+			if(!geoinformation.getStateId2RegionTypes().containsKey(unit.getBland())){
+			
+				geoinformation.getStateId2RegionTypes().put(unit.getBland(), new HashSet<Integer>());
+				
+			}
+			
+			geoinformation.getStateId2RegionTypes().get(unit.getBland()).add(this.key2Type.get(subKey));
 			
 		}
 		

@@ -306,7 +306,7 @@ public class PopulationCreator {
 		// Run the survey data parser that stores all of the travel information
 		MidDatabaseParser parser = new MidDatabaseParser();
 		SurveyDataContainer container = new SurveyDataContainer(configuration);
-		parser.run(configuration, container);
+		parser.run(configuration, container, this.geoinformation);
 		
 		// Initialize the disutilities for traveling from each cell to each other cell
 		// to eventually get a gravitation model.
@@ -375,16 +375,29 @@ public class PopulationCreator {
 			// Choose a template household (weighted, same method as above)
 			SurveyHousehold template = null;
 
-			double accumulatedWeight = 0.;
-			double rand = random.nextDouble() * container.getSumOfHouseholdWeights();
+			int blandId = 0;
+			int rtyp = 0;
+			for(AdministrativeUnit unit : this.geoinformation.getSurveyArea().values()){
+				blandId = unit.getBland();
+				rtyp = unit.getRegionType();
+			}
 			
-			for(SurveyHousehold hh : households){
+			double accumulatedWeight = 0.;
+			double rand = random.nextDouble() * container.getWeightForHouseholdsInState(blandId, rtyp);
+			
+			for(String hhId : container.getHouseholdsForState(blandId, rtyp)){
 				
-				accumulatedWeight += hh.getWeight();
-				if(accumulatedWeight >= rand){
+				SurveyHousehold hh = container.getHouseholds().get(hhId);
+				
+				if(hh != null){
 					
-					template = hh;
-					break;
+					accumulatedWeight += hh.getWeight();
+					if(accumulatedWeight >= rand){
+						
+						template = hh;
+						break;
+						
+					}
 					
 				}
 				
