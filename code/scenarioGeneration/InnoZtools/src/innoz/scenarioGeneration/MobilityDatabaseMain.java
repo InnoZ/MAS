@@ -1,6 +1,19 @@
 package innoz.scenarioGeneration;
 
+import innoz.config.Configuration;
+import innoz.config.SshConnector;
+import innoz.io.database.DatabaseReader;
+import innoz.io.database.DatabaseUpdater;
+import innoz.scenarioGeneration.config.InitialConfigCreator;
+import innoz.scenarioGeneration.geoinformation.Geoinformation;
+import innoz.scenarioGeneration.network.NetworkCreatorFromPsql;
+import innoz.scenarioGeneration.population.PopulationCreator;
+import innoz.scenarioGeneration.population.utils.PersonUtils;
+
 import java.io.File;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
@@ -17,16 +30,10 @@ import org.matsim.households.HouseholdsWriterV10;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.matsim.vehicles.VehicleWriterV1;
+import org.opengis.referencing.FactoryException;
 
-import innoz.config.Configuration;
-import innoz.config.SshConnector;
-import innoz.io.database.DatabaseReader;
-import innoz.io.database.DatabaseUpdater;
-import innoz.scenarioGeneration.config.InitialConfigCreator;
-import innoz.scenarioGeneration.geoinformation.Geoinformation;
-import innoz.scenarioGeneration.network.NetworkCreatorFromPsql;
-import innoz.scenarioGeneration.population.PopulationCreator;
-import innoz.scenarioGeneration.population.utils.PersonUtils;
+import com.jcraft.jsch.JSchException;
+import com.vividsolutions.jts.io.ParseException;
 
 /**
  * 
@@ -138,9 +145,17 @@ public class MobilityDatabaseMain {
 					
 				}
 				
-			} catch (Exception e1) {
-			
-				e1.printStackTrace();
+			} catch (UnknownHostException e){
+				
+				log.error("Could not connect to Mobility DataHub.");
+				log.error("Maybe wrong remote host name or no intranet connection.");
+				e.printStackTrace();
+				
+			} catch (IOException | JSchException | FactoryException | InstantiationException |
+					IllegalAccessException | ClassNotFoundException | SQLException |
+					ParseException e) {
+
+				e.printStackTrace();
 				
 			}
 			
