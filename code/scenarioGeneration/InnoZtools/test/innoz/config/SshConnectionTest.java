@@ -1,34 +1,25 @@
 package innoz.config;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
 
 import com.jcraft.jsch.JSchException;
 
 public class SshConnectionTest {
 
+	/**
+	 * 
+	 * Tests the {@code SshConnector} for exceptions.
+	 * 
+	 * @throws JSchException If any problem with the ssh connection should occur, e.g.
+	 * wrong host name, wrong user name or password.
+	 */
 	@Test
-	public void testSshConnection(){
-		
-		try {
+	public void testSshConnectionForException() throws JSchException{
 		
 			String sshUser = "innoz";
-			String sshPassword = "Winter_2016";
+			String sshPassword = "Winter2015!";
 			
 			SshConnector.connect(sshUser, sshPassword, 3200, 22);
-			
-		} catch (JSchException e) {
-			
-			e.printStackTrace();
-			
-		}
-		
-		finally{
-			
-			assertTrue(SshConnector.session != null);
-			
-		}
 		
 	}
 	
