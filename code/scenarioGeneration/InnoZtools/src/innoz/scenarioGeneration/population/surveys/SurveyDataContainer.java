@@ -25,6 +25,7 @@ public class SurveyDataContainer {
 	private Map<String, SurveyVehicle> vehicles;
 	
 	private Map<Tuple<Integer, Integer>, Set<String>> state2Households;
+	private Map<Tuple<Integer, Integer>, Double> stateAndRegionType2HouseholdWeights;
 	
 	private Map<String, ArrayList<SurveyPerson>> classifiedPersons;
 	
@@ -52,6 +53,7 @@ public class SurveyDataContainer {
 		this.activityTypeHydrographs = new HashMap<String, Hydrograph>();
 		
 		this.state2Households = new HashMap<Tuple<Integer, Integer>, Set<String>>();
+		this.stateAndRegionType2HouseholdWeights = new HashMap<Tuple<Integer,Integer>, Double>();
 		
 	}
 	
@@ -126,18 +128,26 @@ public class SurveyDataContainer {
 	}
 	
 	public double getWeightForHouseholdsInState(int stateId, int rtyp){
-		
-		double w = 0;
-		
-		for(String hhId : this.state2Households.get(new Tuple<Integer, Integer>(stateId, rtyp))){
 
-			if(this.households.get(hhId)!=null){
-				w += this.households.get(hhId).getWeight();
+		if(this.stateAndRegionType2HouseholdWeights.get(new Tuple<Integer, Integer>(stateId, rtyp)) == null){
+			
+			double w = 0;
+			
+			for(String hhId : this.state2Households.get(new Tuple<Integer, Integer>(stateId, rtyp))){
+
+				if(this.households.get(hhId)!=null){
+					
+					w += this.households.get(hhId).getWeight();
+					
+				}
+				
 			}
+			
+			this.stateAndRegionType2HouseholdWeights.put(new Tuple<Integer, Integer>(stateId, rtyp), w);
 			
 		}
 		
-		return w;
+		return this.stateAndRegionType2HouseholdWeights.get(new Tuple<Integer, Integer>(stateId, rtyp));
 		
 	}
 	
