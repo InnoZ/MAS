@@ -59,6 +59,8 @@ public class Configuration {
 	
 	int numberOfHouseholds = 0;
 	
+	String sshUser;
+	String sshPassword;
 	String databaseUser;
 	String userPassword;
 	
@@ -95,6 +97,8 @@ public class Configuration {
 		validate();
 		
 	}
+	
+	Configuration(){};
 	
 	/**
 	 * Validates the configuration. Only errors that may eventually cause exceptions are taken into account here.

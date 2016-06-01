@@ -29,6 +29,7 @@ import com.jcraft.jsch.Session;
 public class SshConnector {
 
 	private static final Logger log = Logger.getLogger(SshConnector.class);
+	static Session session;
 	
 	public static void connect(Configuration configuration) throws JSchException, IOException{
 		
@@ -51,7 +52,7 @@ public class SshConnector {
 		final JSch jsch = new JSch();
 
 		// Start a new session with the predefined settings
-		Session session = jsch.getSession(sshuser, sshhost);
+		session = jsch.getSession(sshuser, sshhost);
 		session.setPassword(sshpassword);
 		
 		final Properties config = new Properties();
@@ -62,6 +63,29 @@ public class SshConnector {
 	    session.setPortForwardingL(nLocalPort, remoteHost, nRemotePort);
 	    
 	    log.info("Ssh tunnel established.");
+		
+	}
+	
+	static void connect(String sshUser, String sshPassword, int localPort, int remotePort) throws JSchException{
+		
+		// Set hosts and ports for the connection
+		String sshhost = "playground";
+		String remoteHost = "localhost";
+		int nLocalPort = localPort;
+		int nRemotePort = remotePort;
+		
+		final JSch jsch = new JSch();
+
+		// Start a new session with the predefined settings
+		session = jsch.getSession(sshUser, sshhost);
+		session.setPassword(sshPassword);
+		
+		final Properties config = new Properties();
+	    config.put( "StrictHostKeyChecking", "no" );
+	    session.setConfig( config );
+	    
+	    session.connect();
+	    session.setPortForwardingL(nLocalPort, remoteHost, nRemotePort);
 		
 	}
 
