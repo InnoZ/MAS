@@ -4,6 +4,7 @@ import innoz.config.Configuration;
 import innoz.io.database.MidDatabaseParser;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.geoinformation.Distribution;
+import innoz.scenarioGeneration.geoinformation.District;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
 import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
@@ -185,52 +186,56 @@ public class PopulationCreator {
 		log.info("Creating a dummy population without any preferences...");
 		
 		// From each administrative unit to each administrative unit, create a certain amount of commuters
-		for(Entry<String,AdministrativeUnit> fromEntry : this.geoinformation.getSurveyArea().entrySet()){
-			
-			for(Entry<String,AdministrativeUnit> toEntry : this.geoinformation.getSurveyArea().entrySet()){
+		for(District d : this.geoinformation.getAdminUnits().values()){
 
-				//TODO maybe make the max number configurable...
-				for(int i = 0; i < 1000; i++){
+			for(Entry<String,AdministrativeUnit> fromEntry : d.getAdminUnits().entrySet()){
+				
+				for(Entry<String,AdministrativeUnit> toEntry : d.getAdminUnits().entrySet()){
 
-					// Create a new person and an empty plan
-					Person person = scenario.getPopulation().getFactory().createPerson(Id.createPersonId(
-							fromEntry.getKey() + "_" + toEntry.getKey() + "-" + i));
-					Plan plan = scenario.getPopulation().getFactory().createPlan();
-					
-					// Shoot the activity coords (home activity located inside of the FROM admin unit,
-					// work activity inside of the TO admin unit)
-					Coord homeCoord = transformation.transform(GeometryUtils.shoot(fromEntry.getValue()
-							.getGeometry(),random));
-					Coord workCoord = transformation.transform(GeometryUtils.shoot(toEntry.getValue()
-							.getGeometry(),random));
-					
-					// Create activities and legs and add them to the plan
-					Activity home = scenario.getPopulation().getFactory().createActivityFromCoord(ActivityTypes.HOME,
-							homeCoord);
-					home.setEndTime(7 * 3600);
-					plan.addActivity(home);
-					
-					Leg leg = scenario.getPopulation().getFactory().createLeg(TransportMode.car);
-					plan.addLeg(leg);
-					
-					Activity work = scenario.getPopulation().getFactory().createActivityFromCoord(ActivityTypes.WORK,
-							workCoord);
-					work.setEndTime(18 * 3600);
-					plan.addActivity(work);
-					
-					Leg leg2 = scenario.getPopulation().getFactory().createLeg(TransportMode.car);
-					plan.addLeg(leg2);
-					
-					Activity home2 = scenario.getPopulation().getFactory().createActivityFromCoord(ActivityTypes.HOME,
-							homeCoord);
-					plan.addActivity(home2);
-					
-					// Add the plan to the current person and make it the selected one
-					person.addPlan(plan);
-					person.setSelectedPlan(plan);
+					//TODO maybe make the max number configurable...
+					for(int i = 0; i < 1000; i++){
 
-					// Add the current person to the population
-					scenario.getPopulation().addPerson(person);
+						// Create a new person and an empty plan
+						Person person = scenario.getPopulation().getFactory().createPerson(Id.createPersonId(
+								fromEntry.getKey() + "_" + toEntry.getKey() + "-" + i));
+						Plan plan = scenario.getPopulation().getFactory().createPlan();
+						
+						// Shoot the activity coords (home activity located inside of the FROM admin unit,
+						// work activity inside of the TO admin unit)
+						Coord homeCoord = transformation.transform(GeometryUtils.shoot(fromEntry.getValue()
+								.getGeometry(),random));
+						Coord workCoord = transformation.transform(GeometryUtils.shoot(toEntry.getValue()
+								.getGeometry(),random));
+						
+						// Create activities and legs and add them to the plan
+						Activity home = scenario.getPopulation().getFactory().createActivityFromCoord(ActivityTypes.HOME,
+								homeCoord);
+						home.setEndTime(7 * 3600);
+						plan.addActivity(home);
+						
+						Leg leg = scenario.getPopulation().getFactory().createLeg(TransportMode.car);
+						plan.addLeg(leg);
+						
+						Activity work = scenario.getPopulation().getFactory().createActivityFromCoord(ActivityTypes.WORK,
+								workCoord);
+						work.setEndTime(18 * 3600);
+						plan.addActivity(work);
+						
+						Leg leg2 = scenario.getPopulation().getFactory().createLeg(TransportMode.car);
+						plan.addLeg(leg2);
+						
+						Activity home2 = scenario.getPopulation().getFactory().createActivityFromCoord(ActivityTypes.HOME,
+								homeCoord);
+						plan.addActivity(home2);
+						
+						// Add the plan to the current person and make it the selected one
+						person.addPlan(plan);
+						person.setSelectedPlan(plan);
+
+						// Add the current person to the population
+						scenario.getPopulation().addPerson(person);
+						
+					}
 					
 				}
 				
@@ -351,21 +356,28 @@ public class PopulationCreator {
 		// Initialize a pseudo-random number and iterate over all administrative units.
 		// Accumulate their weights and as soon as the random number is smaller or equal to the accumulated weight
 		// pick the current admin unit.
-		for(int i = 0; i < configuration.getNumberOfHouseholds() * configuration.getScaleFactor(); i++){
+//		for(int i = 0; i < configuration.getNumberOfHouseholds() * configuration.getScaleFactor(); i++){
+		for(District d : this.geoinformation.getAdminUnits().values()){
 
-			currentHomeCell = null;
-			AdministrativeUnit au = null;
-			double r = random.nextDouble() * this.geoinformation.getTotalWeightForLanduseKey("residential");
+			for(int i = 0; i < d.getnHouseholds() * configuration.getScaleFactor(); i++){
+				currentHomeCell = null;
+				AdministrativeUnit au = null;
+			double r = random.nextDouble() * this.geoinformation.getTotalWeightForLanduseKey(d.getId(), "residential");
 			
 			double r2 = 0.;
+
+			int blandId = 0;
+			int rtyp = 0;
 			
-			for(AdministrativeUnit admin : this.geoinformation.getSurveyArea().values()){
+			for(AdministrativeUnit admin : d.getAdminUnits().values()){
 				
 				r2 += admin.getWeightForKey("residential");
 				
 				if(r <= r2){
 					
 					au = admin;
+					blandId = au.getBland();
+					rtyp = au.getRegionType();
 					break;
 					
 				}
@@ -374,13 +386,6 @@ public class PopulationCreator {
 			
 			// Choose a template household (weighted, same method as above)
 			SurveyHousehold template = null;
-
-			int blandId = 0;
-			int rtyp = 0;
-			for(AdministrativeUnit unit : this.geoinformation.getSurveyArea().values()){
-				blandId = unit.getBland();
-				rtyp = unit.getRegionType();
-			}
 			
 			double accumulatedWeight = 0.;
 			double rand = random.nextDouble() * container.getWeightForHouseholdsInState(blandId, rtyp);
@@ -493,6 +498,7 @@ public class PopulationCreator {
 			scenario.getHouseholds().getHouseholds().put(household.getId(), household);
 			
 		}
+		}
 		
 	}
 	
@@ -513,20 +519,24 @@ public class PopulationCreator {
 		scenario.addScenarioElement(PersonUtils.PERSON_ATTRIBUTES, personAttributes);
 		
 		// TODO this is not final and most likely won't work like that /dhosse, 05/16
-		for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
-			
-			double personalRandom = random.nextDouble();
-			
-			Map<String,SurveyPerson> templatePersons = container.getPersons();
-			SurveyPerson personTemplate = null;
-			
-			personTemplate = PersonUtils.getTemplate(templatePersons,
-					personalRandom * PersonUtils.getTotalWeight(templatePersons.values()));
-			
-			//TODO: number of inhabitants for admin units
-			for(int i = 0; i < 10000 * configuration.getScaleFactor(); i++){
+		for(District d : this.geoinformation.getAdminUnits().values()){
+
+			for(AdministrativeUnit au : d.getAdminUnits().values()){
 				
-				population.addPerson(createPerson(personTemplate, population, personAttributes, personalRandom, i, null));
+				double personalRandom = random.nextDouble();
+				
+				Map<String,SurveyPerson> templatePersons = container.getPersons();
+				SurveyPerson personTemplate = null;
+				
+				personTemplate = PersonUtils.getTemplate(templatePersons,
+						personalRandom * PersonUtils.getTotalWeight(templatePersons.values()));
+				
+				//TODO: number of inhabitants for admin units
+				for(int i = 0; i < 10000 * configuration.getScaleFactor(); i++){
+					
+					population.addPerson(createPerson(personTemplate, population, personAttributes, personalRandom, i, null));
+					
+				}
 				
 			}
 			
@@ -635,21 +645,25 @@ public class PopulationCreator {
 				
 				// Also, add all cells of which the sum of the distances between their centroid and the centroids of
 				// the home and the main act cell is less than twice the distance between the home and the main activity location
-				List<AdministrativeUnit> adminUnits = new ArrayList<>();
-				adminUnits.addAll(this.geoinformation.getSurveyArea().values());
-				adminUnits.addAll(this.geoinformation.getVicinity().values());
-				for(AdministrativeUnit au : adminUnits){
-					
-					double a = CoordUtils.calcDistance(transformation.transform(
-							MGC.point2Coord(currentHomeCell.getGeometry().getCentroid())),
-							transformation.transform(MGC.point2Coord(au.getGeometry().getCentroid())));
-					double b = CoordUtils.calcDistance(transformation.transform(
-							MGC.point2Coord(currentMainActCell.getGeometry().getCentroid())),
-							transformation.transform(MGC.point2Coord(au.getGeometry().getCentroid())));
-					
-					if(a + b < 2 * c){
+//				List<AdministrativeUnit> adminUnits = new ArrayList<>();
+//				adminUnits.addAll(this.geoinformation.getSurveyArea().values());
+//				adminUnits.addAll(this.geoinformation.getVicinity().values());
+				for(District d : this.geoinformation.getAdminUnits().values()){
+
+					for(AdministrativeUnit au : d.getAdminUnits().values()){
 						
-						currentSearchSpace.add(au);
+						double a = CoordUtils.calcDistance(transformation.transform(
+								MGC.point2Coord(currentHomeCell.getGeometry().getCentroid())),
+								transformation.transform(MGC.point2Coord(au.getGeometry().getCentroid())));
+						double b = CoordUtils.calcDistance(transformation.transform(
+								MGC.point2Coord(currentMainActCell.getGeometry().getCentroid())),
+								transformation.transform(MGC.point2Coord(au.getGeometry().getCentroid())));
+						
+						if(a + b < 2 * c){
+							
+							currentSearchSpace.add(au);
+							
+						}
 						
 					}
 					
@@ -764,7 +778,7 @@ public class PopulationCreator {
 			// If the person walked, it most likely didn't leave the last cell (to avoid very long walk legs)
 			if(mode.equals(TransportMode.walk) && fromId != null){
 				
-				return this.geoinformation.getSurveyArea().get(fromId);
+				return this.geoinformation.getAdminUnitById(fromId);
 				
 			}
 			
@@ -811,8 +825,8 @@ public class PopulationCreator {
 		if(adminUnits == null){
 			
 			adminUnits = new ArrayList<AdministrativeUnit>();
-			adminUnits.addAll(this.geoinformation.getSurveyArea().values());
-			adminUnits.addAll(this.geoinformation.getVicinity().values());
+			adminUnits.addAll(this.geoinformation.getSubUnits().values());
+//			adminUnits.addAll(this.geoinformation.getVicinity().values());
 			
 		}
 		
@@ -863,9 +877,9 @@ public class PopulationCreator {
 			
 			accumulatedWeight += entry.getValue();
 			if(r <= accumulatedWeight){
-				result = this.geoinformation.getSurveyArea().get(entry.getKey());
+				result = this.geoinformation.getSubUnits().get(entry.getKey());
 				if(result == null){
-					result = this.geoinformation.getVicinity().get(entry.getKey());
+					result = this.geoinformation.getSubUnits().get(entry.getKey());
 				}
 				break;
 			}

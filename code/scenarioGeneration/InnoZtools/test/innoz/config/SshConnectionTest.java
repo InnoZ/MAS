@@ -14,15 +14,19 @@ public class SshConnectionTest {
 		try {
 		
 			String sshUser = "innoz";
-			String sshPassword = "Winter2015";
+			String sshPassword = "Winter_2016";
 			
 			SshConnector.connect(sshUser, sshPassword, 3200, 22);
-			
-			assertTrue(SshConnector.session.getServerAliveCountMax() != 0);
 			
 		} catch (JSchException e) {
 			
 			e.printStackTrace();
+			
+		}
+		
+		finally{
+			
+			assertTrue(SshConnector.session != null);
 			
 		}
 		

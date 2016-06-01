@@ -1,6 +1,7 @@
 package innoz.io;
 
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
+import innoz.scenarioGeneration.geoinformation.District;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.utils.io.AbstractCsvReader;
 
@@ -41,24 +42,28 @@ public class BbsrDataReader {
 		
 		reader.read("../../../ressources/regionstypen.csv");
 		
-		for(String key : geoinformation.getAdminUnits().keySet()){
-			
-			String subKey = key.length() > 7 ? key.substring(0, 5) : key.substring(0, 4);
-			AdministrativeUnit unit = geoinformation.getAdminUnits().get(key);
-			
-			int regionType = this.key2Type.get(subKey);
-			
-			unit.setRegionType(regionType);
-			
-			geoinformation.getStatesSet().add(unit.getBland());
-			
-			if(!geoinformation.getStateId2RegionTypes().containsKey(unit.getBland())){
-			
-				geoinformation.getStateId2RegionTypes().put(unit.getBland(), new HashSet<Integer>());
+		for(District d : geoinformation.getAdminUnits().values()){
+
+			for(String key : d.getAdminUnits().keySet()){
+
+				String subKey = key.length() > 8 ? key.substring(0, 5) : key.substring(0, 4);
+				AdministrativeUnit unit = d.getAdminUnits().get(key);
+				
+				int regionType = this.key2Type.get(subKey);
+				
+				unit.setRegionType(regionType);
+				
+				geoinformation.getStatesSet().add(unit.getBland());
+				
+				if(!geoinformation.getStateId2RegionTypes().containsKey(unit.getBland())){
+				
+					geoinformation.getStateId2RegionTypes().put(unit.getBland(), new HashSet<Integer>());
+					
+				}
+				
+				geoinformation.getStateId2RegionTypes().get(unit.getBland()).add(this.key2Type.get(subKey));
 				
 			}
-			
-			geoinformation.getStateId2RegionTypes().get(unit.getBland()).add(this.key2Type.get(subKey));
 			
 		}
 		

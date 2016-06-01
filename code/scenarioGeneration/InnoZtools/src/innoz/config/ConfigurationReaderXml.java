@@ -135,27 +135,31 @@ public class ConfigurationReaderXml extends DefaultHandler {
 		String id = atts.getValue("id");
 		int hh = Integer.parseInt(atts.getValue(Configuration.NUMBER_OF_HH));
 		
-		if(this.creatingSurveyArea){
-			
-			if(this.configuration.surveyAreaIds == null){
-			
-				this.configuration.surveyAreaIds = new String("");
+		for(String s : id.split(Configuration.COMMENT)){
+
+			if(this.creatingSurveyArea){
+				
+				if(this.configuration.surveyAreaIds == null){
+				
+					this.configuration.surveyAreaIds = new String("");
+					
+				}
+				
+				this.configuration.surveyAreaIds += s + ",";
+				
+			} else if(this.creatingVicinity){
+				
+				if(this.configuration.vicinityIds == null){
+					
+					this.configuration.vicinityIds = new String("");
+					
+				}
+				
+				this.configuration.vicinityIds += s + ",";
 				
 			}
 			
-			this.configuration.surveyAreaIds += id + ",";
-			this.configuration.surveyArea.add(new AdminUnitEntry(id, hh));
-			
-		} else if(this.creatingVicinity){
-			
-			if(this.configuration.vicinityIds == null){
-				
-				this.configuration.vicinityIds = new String("");
-				
-			}
-			
-			this.configuration.vicinityIds += id + ",";
-			this.configuration.vicinity.add(new AdminUnitEntry(id, hh));
+			this.configuration.adminUnits.add(new AdminUnitEntry(s, hh));
 			
 		}
 		

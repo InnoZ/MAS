@@ -15,6 +15,11 @@ import org.apache.log4j.Logger;
  */
 public class Configuration {
 
+	//TAGS///////////////////////////////////////////////////////////////////////////////////
+	static final String SEP = "\t";
+	static final String COMMENT = "#";
+	/////////////////////////////////////////////////////////////////////////////////////////
+	
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	private static final Logger log = Logger.getLogger(Configuration.class);
 	static final String SURVEY_AREA_IDS = "surveyAreaIds";
@@ -46,8 +51,7 @@ public class Configuration {
 	String outputDirectory;
 	PopulationType popType;
 	
-	Set<AdminUnitEntry> surveyArea;
-	Set<AdminUnitEntry> vicinity;
+	Set<AdminUnitEntry> adminUnits;
 	
 	boolean useHouseholds = false;
 	boolean useVehicles = false;
@@ -85,8 +89,7 @@ public class Configuration {
 	 */
 	public Configuration(String file){
 		
-		this.surveyArea = new HashSet<Configuration.AdminUnitEntry>();
-		this.vicinity = new HashSet<Configuration.AdminUnitEntry>();
+		this.adminUnits = new HashSet<Configuration.AdminUnitEntry>();
 		
 		if(file.endsWith(".txt")){
 			new ConfigurationReaderTxt(this).read(file);
@@ -400,7 +403,7 @@ public class Configuration {
 		
 	}
 	
-	static class AdminUnitEntry{
+	public static class AdminUnitEntry{
 		
 		String id;
 		int numberOfHouseholds;
@@ -418,6 +421,10 @@ public class Configuration {
 			return this.numberOfHouseholds;
 		}
 		
+	}
+	
+	public Set<AdminUnitEntry> getAdminUnitEntries(){
+		return this.adminUnits;
 	}
 	
 }

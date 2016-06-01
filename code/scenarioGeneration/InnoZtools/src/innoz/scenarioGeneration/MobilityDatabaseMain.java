@@ -152,8 +152,7 @@ public class MobilityDatabaseMain {
 				e.printStackTrace();
 				
 			} catch (IOException | JSchException | FactoryException | InstantiationException |
-					IllegalAccessException | ClassNotFoundException | SQLException |
-					ParseException e) {
+					IllegalAccessException | ClassNotFoundException | SQLException | ParseException | NullPointerException e) {
 
 				e.printStackTrace();
 				

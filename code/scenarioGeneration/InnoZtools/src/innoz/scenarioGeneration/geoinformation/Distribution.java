@@ -53,8 +53,8 @@ public class Distribution {
 		Map<String, Double> rowMinima = new HashMap<>();
 		
 		Map<String, AdministrativeUnit> adminUnits = new HashMap<>();
-		adminUnits.putAll(geoinformation.getSurveyArea());
-		adminUnits.putAll(geoinformation.getVicinity());
+		adminUnits.putAll(geoinformation.getSubUnits());
+//		adminUnits.putAll(geoinformation.getVicinity());
 		
 		for(AdministrativeUnit u1 : adminUnits.values()){
 			

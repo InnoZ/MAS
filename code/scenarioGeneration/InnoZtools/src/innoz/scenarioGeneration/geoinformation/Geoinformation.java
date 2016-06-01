@@ -1,5 +1,7 @@
 package innoz.scenarioGeneration.geoinformation;
 
+import innoz.utils.matsim.QuadTree;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,8 +12,6 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import innoz.utils.matsim.QuadTree;
 
 /**
  * 
@@ -38,9 +38,10 @@ public class Geoinformation {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
-	private Map<String, AdministrativeUnit> surveyArea;
-	private Map<String, AdministrativeUnit> vicinity;
-	private Map<String, AdministrativeUnit> adminUnits;
+	private Map<String, District> adminUnits;
+	private Map<String, AdministrativeUnit> subUnits;
+//	private List<District> vicinity;
+//	private Map<String, AdministrativeUnit> adminUnits;
 	
 	private Set<Integer> states;
 	private Map<Integer, Set<Integer>> stateToRegionType;
@@ -54,9 +55,10 @@ public class Geoinformation {
 	
 	public Geoinformation(){
 		
-		this.surveyArea = new HashMap<String, AdministrativeUnit>();
-		this.vicinity = new HashMap<String, AdministrativeUnit>();
-		this.adminUnits = new HashMap<String, AdministrativeUnit>();
+//		this.surveyArea = new ArrayList<District>();
+//		this.vicinity = new ArrayList<District>();
+		this.adminUnits = new HashMap<String, District>();
+		this.subUnits = new HashMap<String, AdministrativeUnit>();
 		this.actType2QT = new HashMap<String, QuadTree<Geometry>>();
 		
 		this.states = new HashSet<Integer>();
@@ -86,7 +88,7 @@ public class Geoinformation {
 				
 				AdministrativeUnit au = new AdministrativeUnit(kennzahl);
 				au.setGeometry((Geometry)feature.getDefaultGeometry());
-				surveyArea.put(kennzahl, au);
+//				surveyArea.put(kennzahl, au);
 				
 			}
 			
@@ -120,7 +122,7 @@ public class Geoinformation {
 	
 					AdministrativeUnit au = new AdministrativeUnit(kennzahl);
 					au.setGeometry((Geometry)feature.getDefaultGeometry());
-					surveyArea.put(kennzahl, au);
+//					surveyArea.put(kennzahl, au);
 					break;
 					
 				}
@@ -138,11 +140,11 @@ public class Geoinformation {
 	 * @param key A string representing the landuse type of interest.
 	 * @return The total weight of the landuse geometries inside the survey area.
 	 */
-	public double getTotalWeightForLanduseKey(String key){
+	public double getTotalWeightForLanduseKey(String districtId, String key){
 		
 		double weight = 0.;
 		
-		for(AdministrativeUnit au : surveyArea.values()){
+		for(AdministrativeUnit au : adminUnits.get(districtId).getAdminUnits().values()){
 			
 			weight += au.getWeightForKey(key);
 			
@@ -152,23 +154,23 @@ public class Geoinformation {
 		
 	}
 	
-	public Map<String, AdministrativeUnit> getAdminUnits(){
+	public Map<String, District> getAdminUnits(){
 		
 		return this.adminUnits;
 		
 	}
 	
-	public Map<String, AdministrativeUnit> getSurveyArea(){
-		
-		return surveyArea;
-		
-	}
+//	public List<District> getSurveyArea(){
+//		
+//		return surveyArea;
+//		
+//	}
 	
-	public Map<String, AdministrativeUnit> getVicinity(){
-		
-		return vicinity;
-		
-	}
+//	public List<District> getVicinity(){
+//		
+//		return vicinity;
+//		
+//	}
 	
 	public void setSurveyAreaBoundingBox(Geometry g){
 		this.surveyAreaBoundingBox = g;
@@ -232,6 +234,18 @@ public class Geoinformation {
 	
 	public Map<Integer,Set<Integer>> getStateId2RegionTypes(){
 		return this.stateToRegionType;
+	}
+	
+	public AdministrativeUnit getAdminUnitById(String id){
+		return this.subUnits.get(id);
+	}
+	
+	public Map<String, AdministrativeUnit> getSubUnits(){
+		return this.subUnits;
+	}
+	
+	public void addSubUnit(AdministrativeUnit au){
+		this.subUnits.put(au.getId(), au);
 	}
 	
 }

@@ -1,8 +1,10 @@
 package innoz.io.database;
 
 import innoz.config.Configuration;
+import innoz.config.Configuration.AdminUnitEntry;
 import innoz.io.BbsrDataReader;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
+import innoz.scenarioGeneration.geoinformation.District;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.network.WayEntry;
 import innoz.scenarioGeneration.utils.ActivityTypes;
@@ -114,7 +116,7 @@ public class DatabaseReader {
 				
 				// If no administrative units were created, we are unable to proceed
 				// The process would probably finish, but no network or population would be created
-				if(this.geoinformation.getSurveyArea().size() < 1){
+				if(this.geoinformation.getAdminUnits().size() < 1){
 				
 					Log.error("No administrative boundaries were created!");
 					Log.error("Maybe the ids you specified don't exist in the database.");
@@ -123,6 +125,25 @@ public class DatabaseReader {
 				}
 				
 				new BbsrDataReader().read(this.geoinformation);
+				
+				for(AdminUnitEntry entry : configuration.getAdminUnitEntries()){
+
+					String id = entry.getId().startsWith("0") ? entry.getId().substring(1) : entry.getId();
+//					String districtId = id.substring(0, 5);
+					
+					this.geoinformation.getAdminUnits().get(id).setnHouseholds(entry.getNumberOfHouseholds());
+					
+					for(AdministrativeUnit au : this.geoinformation.getAdminUnits().get(id).getAdminUnits().values()){
+						
+						if(au.getId().startsWith(id)){
+							
+							au.setNumberOfHouseholds(entry.getNumberOfHouseholds());
+							
+						}
+						
+					}
+					
+				}
 				
 				// Otherwise, read in the OSM data
 				this.readOsmData(connection, configuration);
@@ -223,7 +244,7 @@ public class DatabaseReader {
 		}
 		
 		// Execute the query and store the returned valued inside a set.
-		ResultSet set = statement.executeQuery("select " + DatabaseConstants.BLAND + "," + DatabaseConstants.MUN_KEY + ", "
+		ResultSet set = statement.executeQuery("select " + DatabaseConstants.BLAND + "," + DatabaseConstants.MUN_KEY + ", cca_2,"
 				+ DatabaseConstants.functions.st_astext.name() + "(" + DatabaseConstants.ATT_GEOM + ")" + " from "
 				+ DatabaseConstants.schemata.gadm.name() + "." + DatabaseConstants.tables.districts.name() + " where" + builder.toString());
 
@@ -235,6 +256,8 @@ public class DatabaseReader {
 			if(key.startsWith("0")) key = key.substring(1);
 			String g = set.getString(DatabaseConstants.functions.st_astext.name());
 			int bland = set.getInt(DatabaseConstants.BLAND);
+			String district = set.getString("cca_2");
+			if(district.startsWith("0")) district = district.substring(1);
 //			int districtType = set.getInt("");
 //			int municipalityType = set.getInt("");
 //			int regionType = set.getInt("");
@@ -253,12 +276,17 @@ public class DatabaseReader {
 //					au.setDistrictType(districtType);
 //					au.setMunicipalityType(municipalityType);
 //					au.setRegionType(regionType);
-					if(surveyArea){
-						this.geoinformation.getSurveyArea().put(key, au);
-					} else {
-						this.geoinformation.getVicinity().put(key, au);
+//					if(surveyArea){
+//						this.geoinformation.getSurveyArea().put(key, au);
+//					} else {
+//						this.geoinformation.getVicinity().put(key, au);
+//					}
+					
+					if(!this.geoinformation.getAdminUnits().containsKey(district)){
+						this.geoinformation.getAdminUnits().put(district, new District(district));
 					}
-					this.geoinformation.getAdminUnits().put(key, au);
+					this.geoinformation.getAdminUnits().get(district).getAdminUnits().put(key, au);
+					this.geoinformation.addSubUnit(au);
 					
 					// Store all geometries inside a collection to get the survey area geometry in the end
 					geometryCollection.add(au.getGeometry());
@@ -753,8 +781,8 @@ public class DatabaseReader {
 	private void addGeometry(String landuse, Geometry g){
 		
 		List<AdministrativeUnit> adminUnits = new ArrayList<>();
-		adminUnits.addAll(this.geoinformation.getSurveyArea().values());
-		adminUnits.addAll(this.geoinformation.getVicinity().values());
+//		adminUnits.addAll(this.geoinformation.getSurveyArea().values());
+//		adminUnits.addAll(this.geoinformation.getVicinity().values());
 		
 		// Check if the geometry is not null
 		if(g != null){
@@ -762,33 +790,37 @@ public class DatabaseReader {
 			// Check if the geometry is valid (e.g. not intersecting itself)
 			if(g.isValid()){
 
-				for(AdministrativeUnit au : adminUnits){
+				for(District d : this.geoinformation.getAdminUnits().values()){
+					
+					for(AdministrativeUnit au : d.getAdminUnits().values()){
 
-					// Add the landuse geometry to the administrative unit containing it or skip it if it's outside of the survey area
-					if(au.getGeometry().contains(g) || au.getGeometry().touches(g) || au.getGeometry().intersects(g)){
-						
-						au.addLanduseGeometry(landuse, g);
-						
-						// If we don't have a quad tree for this activity type already, create a new one
-						if(this.geoinformation.getQuadTreeForActType(landuse) == null){
+						// Add the landuse geometry to the administrative unit containing it or skip it if it's outside of the survey area
+						if(au.getGeometry().contains(g) || au.getGeometry().touches(g) || au.getGeometry().intersects(g)){
 							
-							Coordinate[] coordinates = boundingBox.getCoordinates();
-							this.geoinformation.createQuadTreeForActType(landuse, new double[]{coordinates[0].x, coordinates[0].y,
-									coordinates[2].x, coordinates[2].y});
+							au.addLanduseGeometry(landuse, g);
 							
-						} 
-						
-						// Add the landuse geometry's centroid as new quad tree entry
-						Coord c = ct.transform(MGC.point2Coord(g.getCentroid()));
-						
-						if(this.boundingBox.contains(MGC.coord2Point(c))){
+							// If we don't have a quad tree for this activity type already, create a new one
+							if(this.geoinformation.getQuadTreeForActType(landuse) == null){
+								
+								Coordinate[] coordinates = boundingBox.getCoordinates();
+								this.geoinformation.createQuadTreeForActType(landuse, new double[]{coordinates[0].x, coordinates[0].y,
+										coordinates[2].x, coordinates[2].y});
+								
+							} 
 							
-							this.geoinformation.getQuadTreeForActType(landuse).put(c.getX(), c.getY(), g);
+							// Add the landuse geometry's centroid as new quad tree entry
+							Coord c = ct.transform(MGC.point2Coord(g.getCentroid()));
+							
+							if(this.boundingBox.contains(MGC.coord2Point(c))){
+								
+								this.geoinformation.getQuadTreeForActType(landuse).put(c.getX(), c.getY(), g);
+								
+							}
 							
 						}
 						
 					}
-				
+					
 				}
 				
 			} else {
@@ -834,44 +866,47 @@ public class DatabaseReader {
 			Geometry geometry = wktReader.read(set.getString(DatabaseConstants.functions.st_astext.name()));
 			String building = set.getString(DatabaseConstants.ATT_BUILDING);
 			
-			for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
+			for(District d : this.geoinformation.getAdminUnits().values()){
 				
-				String landuse = getTypeOfBuilding(building);
-				
-				if(au.getGeometry().contains(geometry)){
+				for(AdministrativeUnit au : d.getAdminUnits().values()){
 					
-					if(landuse != null){
+					String landuse = getTypeOfBuilding(building);
+					
+					if(au.getGeometry().contains(geometry)){
 						
-						if(!au.getBuildingsGeometries().containsKey(landuse)){
+						if(landuse != null){
 							
-							au.getBuildingsGeometries().put(landuse, new ArrayList<>());
+							if(!au.getBuildingsGeometries().containsKey(landuse)){
+								
+								au.getBuildingsGeometries().put(landuse, new ArrayList<>());
+								
+							}
+								
+							au.getBuildingsGeometries().get(landuse).add(geometry);
+								
+							continue;
 							
 						}
-							
-						au.getBuildingsGeometries().get(landuse).add(geometry);
-							
-						continue;
 						
-					}
-					
-					for(String use : au.getLanduseGeometries().keySet()){
-						
-						if(au.getLanduseGeometries().get(use).contains(geometry)){
+						for(String use : au.getLanduseGeometries().keySet()){
+							
+							if(au.getLanduseGeometries().get(use).contains(geometry)){
 
-							if(!au.getBuildingsGeometries().containsKey(use)){
-								
-								au.getBuildingsGeometries().put(use, new ArrayList<>());
-								
-							} else {
-								
-								au.getBuildingsGeometries().get(use).add(geometry);
+								if(!au.getBuildingsGeometries().containsKey(use)){
+									
+									au.getBuildingsGeometries().put(use, new ArrayList<>());
+									
+								} else {
+									
+									au.getBuildingsGeometries().get(use).add(geometry);
+									
+								}
 								
 							}
 							
 						}
-						
 					}
-					
+				
 				}
 				
 			}
@@ -883,33 +918,33 @@ public class DatabaseReader {
 	@SuppressWarnings("unused")
 	private void readPtStops(Connection connection) throws SQLException, ParseException{
 		
-		Statement statement = connection.createStatement();
-		ResultSet set = statement.executeQuery("select " + DatabaseConstants.functions.st_astext + "(" + DatabaseConstants.ATT_WAY
-				+ ") from "	+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_point.name() + " where "
-				+ DatabaseConstants.functions.st_within + " (" + DatabaseConstants.ATT_WAY + "," + DatabaseConstants.functions.st_geomfromtext.name()
-				+ "('" + this.geoinformation.getCompleteGeometry().toString() + "',4326));");
-		
-		Set<Geometry> ptStops = new HashSet<>();
-		
-		while(set.next()){
-			
-			Geometry g = wktReader.read(set.getString(DatabaseConstants.functions.st_astext.name()));
-			
-			for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
-				
-				if(au.getGeometry().contains(g)){
-					
-					//TODO set the buffer radius to whatever the search radius of the transit router is...
-					//default is 1000, so we will leave it like this for the time being
-					ptStops.add(g.buffer(1000));
-					
-				}
-				
-			}
-			
-			this.geoinformation.setCatchmentAreaPt(gFactory.buildGeometry(ptStops));
-			
-		}
+//		Statement statement = connection.createStatement();
+//		ResultSet set = statement.executeQuery("select " + DatabaseConstants.functions.st_astext + "(" + DatabaseConstants.ATT_WAY
+//				+ ") from "	+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_point.name() + " where "
+//				+ DatabaseConstants.functions.st_within + " (" + DatabaseConstants.ATT_WAY + "," + DatabaseConstants.functions.st_geomfromtext.name()
+//				+ "('" + this.geoinformation.getCompleteGeometry().toString() + "',4326));");
+//		
+//		Set<Geometry> ptStops = new HashSet<>();
+//		
+//		while(set.next()){
+//			
+//			Geometry g = wktReader.read(set.getString(DatabaseConstants.functions.st_astext.name()));
+//			
+//			for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
+//				
+//				if(au.getGeometry().contains(g)){
+//					
+//					//TODO set the buffer radius to whatever the search radius of the transit router is...
+//					//default is 1000, so we will leave it like this for the time being
+//					ptStops.add(g.buffer(1000));
+//					
+//				}
+//				
+//			}
+//			
+//			this.geoinformation.setCatchmentAreaPt(gFactory.buildGeometry(ptStops));
+//			
+//		}
 		
 	}
 	

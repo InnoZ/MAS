@@ -15,6 +15,7 @@ public class AdministrativeUnit {
 	private Integer regionType;
 	
 	private int nInhabitants;
+	private int nHouseholds;
 	
 	private Geometry geometry;
 	
@@ -91,6 +92,14 @@ public class AdministrativeUnit {
 	
 	public Integer getBland(){
 		return this.bland;
+	}
+	
+	public void setNumberOfHouseholds(int n){
+		this.nHouseholds = n;
+	}
+	
+	public int getNumberOfHouseholds(){
+		return this.nHouseholds;
 	}
 
 }

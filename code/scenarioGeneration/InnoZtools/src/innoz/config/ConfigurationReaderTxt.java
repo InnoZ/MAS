@@ -10,11 +10,6 @@ import org.matsim.core.utils.io.IOUtils;
 
 public class ConfigurationReaderTxt {
 
-	//TAGS///////////////////////////////////////////////////////////////////////////////////
-	private static final String SEP = "\t";
-	private static final String COMMENT = "#";
-	/////////////////////////////////////////////////////////////////////////////////////////
-
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	private final Configuration configuration;
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -41,9 +36,9 @@ public class ConfigurationReaderTxt {
 			
 			while((line = reader.readLine()) != null){
 				
-				if(!line.startsWith(COMMENT)){
+				if(!line.startsWith(Configuration.COMMENT)){
 					
-					String[] lineParts = line.split(SEP);
+					String[] lineParts = line.split(Configuration.SEP);
 					
 					if(Configuration.SURVEY_AREA_IDS.equals(lineParts[0])){
 						
@@ -119,7 +114,7 @@ public class ConfigurationReaderTxt {
 				
 			}
 			
-			this.configuration.surveyArea.add(new AdminUnitEntry(this.configuration.getSurveyAreaIds(), this.configuration.getNumberOfHouseholds()));
+			this.configuration.adminUnits.add(new AdminUnitEntry(this.configuration.getSurveyAreaIds(), this.configuration.getNumberOfHouseholds()));
 			
 		} catch (IOException e) {
 			
