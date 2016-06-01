@@ -2,7 +2,6 @@
 
 	<target name="clean">
 		<delete dir="build"/>
-		<delete file="InnoZscenarioGeneration.jar"/>
 	</target>
 
 	<target name="compile">
@@ -11,7 +10,7 @@
 			<classpath>
 				<pathelement path="jsch-0.1.53.jar"/>
 				<pathelement path="postgresql-9.3-1104.jdbc4.jar"/>
-				<pathelement path="../../../matsim0.7.0/matsim-0.7.0/matsim-0.7.0.jar"/>
+				<pathelement path="../../../innoz-workspace/matsim-0.7.0/matsim-0.7.0.jar"/>
 			</classpath>
 		</javac>
 	</target>
@@ -25,9 +24,11 @@
 	</target>
 
 	<target name="jar">
-		<jar destfile="InnoZscenarioGeneration.jar" basedir="build/classes"/>
+		<jar destfile="InnoZscenarioGeneration.jar" basedir="build/classes">
+			<fileset dir="../code/scenarioGeneration/InnoZtools/src" includes="**/*.java"/>
+		</jar>		
 	</target>
 
-	<target name="build" depends="clean,test,compile,jar"/>
+	<target name="build" depends="test,compile,jar,clean"/>
 
 </project>
