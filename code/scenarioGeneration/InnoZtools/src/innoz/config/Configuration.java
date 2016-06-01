@@ -1,11 +1,8 @@
 package innoz.config;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.matsim.core.utils.io.IOUtils;
 
 /**
  * 
@@ -16,65 +13,39 @@ import org.matsim.core.utils.io.IOUtils;
  */
 public class Configuration {
 
-	//TAGS///////////////////////////////////////////////////////////////////////////////////
-	private static final String SEP = "\t";
-	private static final String COMMENT = "#";
-	/////////////////////////////////////////////////////////////////////////////////////////
-
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	private static final Logger log = Logger.getLogger(Configuration.class);
-	
-	private static final String SURVEY_AREA_IDS = "surveyAreaIds";
-	private static final String VICINITY_IDS = "vicinityIds";
-	private static final String CRS = "coordinateSystem";
-	private static final String OUTPUT_DIR = "outputDirectory";
-	private static final String POPULATION_TYPE = "populationType";
-	private static final String SCALE_FACTOR = "scaleFactor";
-	private static final String USE_BUILDINGS = "useBuildings";
-	
-	private static final String ONLY_WORKING_DAYS = "onlyWorkingDays";
-	private static final String USE_HOUSEHOLDS = "useHouseholds";
-	private static final String USE_VEHICLES = "useVehicles";
-	private static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
-	
-	private static final String LOCAL_PORT = "localPort";
-	private static final String DB_SCHEMA_NAME = "databaseSchemaName";
-	private static final String WRITE_DB_OUTPUT = "writeTables";
-	private static final String WRITE_INTO_DATAHUB = "intoMobilityDatahub";
-	
-	private static final String RANDOM_SEED = "randomSeed";
-	private static final String OVERWRITE_FILES = "overwriteExistingFiles";
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
-	private String surveyAreaIds;
-	private String vicinityIds;
-	private String crs;
-	private String outputDirectory;
-	private PopulationType popType;
+	String surveyAreaIds;
+	String vicinityIds;
+	String crs;
+	String outputDirectory;
+	PopulationType popType;
 	
-	private boolean useHouseholds = false;
-	private boolean useVehicles = false;
-	private boolean onlyWorkingDays = false;
-	private boolean useBuildings = false;
+	boolean useHouseholds = false;
+	boolean useVehicles = false;
+	boolean onlyWorkingDays = false;
+	boolean useBuildings = false;
 	
-	private int localPort = 0;
-	private final int remotePort = 5432;
+	int localPort = 0;
+	final int remotePort = 5432;
 	
-	private int numberOfHouseholds = 0;
+	int numberOfHouseholds = 0;
 	
-	private String databaseUser;
-	private String userPassword;
+	String databaseUser;
+	String userPassword;
 	
-	private long randomSeed = 4711L;
+	long randomSeed = 4711L;
 	
-	private double scaleFactor = 1.0d;
+	double scaleFactor = 1.0d;
 
-	private boolean writeDatabaseTables = false;
-	private boolean writeIntoDatahub = false;
-	private String dbNameSpace;
+	boolean writeDatabaseTables = false;
+	boolean writeIntoDatahub = false;
+	String dbNameSpace;
 	
-	private boolean overwriteExistingFiles = false;
+	boolean overwriteExistingFiles = false;
 	
 	public enum PopulationType{dummy,commuter,complete};
 	/////////////////////////////////////////////////////////////////////////////////////////	
@@ -87,110 +58,11 @@ public class Configuration {
 	 */
 	public Configuration(String file){
 		
-		readConfigurationFile(file);
-		validate();
-		
-	}
-	
-	/**
-	 * 
-	 * Reads in the given text file and initializes the parameters according to its content.
-	 * 
-	 * @param file Text file containing the configuration parameters.
-	 */
-	private void readConfigurationFile(String file){
-		
-		BufferedReader reader = IOUtils.getBufferedReader(file);
-		
-		String line = null;
-		
-		try {
-			
-			while((line = reader.readLine()) != null){
-				
-				if(!line.startsWith(COMMENT)){
-					
-					String[] lineParts = line.split(SEP);
-					
-					if(SURVEY_AREA_IDS.equals(lineParts[0])){
-						
-						this.surveyAreaIds = lineParts[1];
-						
-					} else if(VICINITY_IDS.equals(lineParts[0])){
-						
-						this.vicinityIds = lineParts[1];
-						
-					} else if(CRS.equals(lineParts[0])){
-						
-						this.crs = lineParts[1];
-						
-					} else if(OUTPUT_DIR.equals(lineParts[0])){
-						
-						this.outputDirectory = lineParts[1];
-						
-					} else if(POPULATION_TYPE.equals(lineParts[0])){
-						
-						this.popType = PopulationType.valueOf(lineParts[1]);
-						
-					} else if(USE_HOUSEHOLDS.equals(lineParts[0])){
-						
-						this.useHouseholds = Boolean.parseBoolean(lineParts[1]);
-						
-					} else if(ONLY_WORKING_DAYS.equals(lineParts[0])){
-						
-						this.onlyWorkingDays = Boolean.parseBoolean(lineParts[1]);
-						
-					} else if(USE_VEHICLES.equals(lineParts[0])){
-						
-						this.useVehicles = Boolean.parseBoolean(lineParts[1]);
-						
-					} else if(USE_BUILDINGS.equals(lineParts[0])){
-						
-						this.useBuildings = Boolean.parseBoolean(lineParts[1]);
-						
-					} else if(LOCAL_PORT.equals(lineParts[0])){
-						
-						this.localPort = Integer.parseInt(lineParts[1]);
-						
-					} else if(NUMBER_OF_HH.equals(lineParts[0])){
-						
-						this.numberOfHouseholds = Integer.parseInt(lineParts[1]);
-						
-					} else if(RANDOM_SEED.equals(lineParts[0])){
-						
-						this.randomSeed = Long.parseLong(lineParts[1]);
-						
-					} else if(DB_SCHEMA_NAME.equals(lineParts[0])){
-						
-						this.dbNameSpace = lineParts[1];
-						
-					} else if(WRITE_INTO_DATAHUB.equals(lineParts[0])){
-						
-						this.writeIntoDatahub = Boolean.parseBoolean(lineParts[1]);
-						
-					} else if(WRITE_DB_OUTPUT.equals(lineParts[0])){
-						
-						this.writeDatabaseTables = Boolean.parseBoolean(lineParts[1]);
-						
-					} else if(OVERWRITE_FILES.equals(lineParts[0])){
-						
-						this.overwriteExistingFiles = Boolean.parseBoolean(lineParts[1]);
-						
-					} else if(SCALE_FACTOR.equals(lineParts[0])){
-						
-						this.scaleFactor = Double.parseDouble(lineParts[1]);
-						
-					}
-					
-				}
-				
-			}
-			
-		} catch (IOException e) {
-			
-			e.printStackTrace();
-			
+		if(file.endsWith(".txt")){
+			new ConfigurationReaderTxt(this).read(file);
 		}
+		
+		validate();
 		
 	}
 	
