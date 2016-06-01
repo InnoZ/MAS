@@ -1,6 +1,8 @@
 package innoz.config;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -15,6 +17,26 @@ public class Configuration {
 
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	private static final Logger log = Logger.getLogger(Configuration.class);
+	static final String SURVEY_AREA_IDS = "surveyAreaIds";
+	static final String VICINITY_IDS = "vicinityIds";
+	static final String CRS = "coordinateSystem";
+	static final String OUTPUT_DIR = "outputDirectory";
+	static final String POPULATION_TYPE = "populationType";
+	static final String SCALE_FACTOR = "scaleFactor";
+	static final String USE_BUILDINGS = "useBuildings";
+	
+	static final String ONLY_WORKING_DAYS = "onlyWorkingDays";
+	static final String USE_HOUSEHOLDS = "useHouseholds";
+	static final String USE_VEHICLES = "useVehicles";
+	static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
+	
+	static final String LOCAL_PORT = "localPort";
+	static final String DB_SCHEMA_NAME = "databaseSchemaName";
+	static final String WRITE_DB_OUTPUT = "writeTables";
+	static final String WRITE_INTO_DATAHUB = "intoMobilityDatahub";
+	
+	static final String RANDOM_SEED = "randomSeed";
+	static final String OVERWRITE_FILES = "overwriteExistingFiles";
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
@@ -23,6 +45,9 @@ public class Configuration {
 	String crs;
 	String outputDirectory;
 	PopulationType popType;
+	
+	Set<AdminUnitEntry> surveyArea;
+	Set<AdminUnitEntry> vicinity;
 	
 	boolean useHouseholds = false;
 	boolean useVehicles = false;
@@ -58,8 +83,13 @@ public class Configuration {
 	 */
 	public Configuration(String file){
 		
+		this.surveyArea = new HashSet<Configuration.AdminUnitEntry>();
+		this.vicinity = new HashSet<Configuration.AdminUnitEntry>();
+		
 		if(file.endsWith(".txt")){
 			new ConfigurationReaderTxt(this).read(file);
+		} else if(file.endsWith(".xml")){
+			new ConfigurationReaderXml(this).read(file);
 		}
 		
 		validate();
@@ -363,6 +393,26 @@ public class Configuration {
 		log.info("useBuildings:              " + this.useBuildings);
 		log.info("useMiDHouseholds:          " + this.useHouseholds);
 		log.info("useMiDVehicles:            " + this.useVehicles);
+		
+	}
+	
+	static class AdminUnitEntry{
+		
+		String id;
+		int numberOfHouseholds;
+		
+		AdminUnitEntry(String id, int nHouseholds){
+			this.id = id;
+			this.numberOfHouseholds = nHouseholds;
+		}
+		
+		public String getId(){
+			return this.id;
+		}
+		
+		public int getNumberOfHouseholds(){
+			return this.numberOfHouseholds;
+		}
 		
 	}
 	
