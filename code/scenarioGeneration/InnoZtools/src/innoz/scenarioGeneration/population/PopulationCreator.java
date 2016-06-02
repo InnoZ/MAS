@@ -591,12 +591,12 @@ public class PopulationCreator {
 		if(personTemplate.getPlans().size() > 0){
 
 			// Select a template plan from the mid survey to create a matsim plan
-			SurveyPlan templatePlan = null;
+			SurveyPlan planTemplate = null;
 			
 			// If there is only one plan, make it the template
 			if(personTemplate.getPlans().size() < 2){
 				
-				templatePlan = personTemplate.getPlans().get(0);
+				planTemplate = personTemplate.getPlans().get(0);
 				
 			} else {
 
@@ -610,7 +610,7 @@ public class PopulationCreator {
 					
 					if(planRandom <= accumulatedWeight){
 					
-						templatePlan = p;
+						planTemplate = p;
 						break;
 					
 					}
@@ -625,58 +625,23 @@ public class PopulationCreator {
 			lastActCoord = currentHomeLocation;
 
 			// If there are at least two plan elements in the chosen template plan, generate the plan elements
-			if(templatePlan.getPlanElements().size() > 1){
+			if(planTemplate.getPlanElements().size() > 1){
 				
-				// Locate the main activity according to the distribution that was computed before			
-				String mainMode = templatePlan.getMainActIndex() > 0 ? 
-						((SurveyPlanWay)templatePlan.getPlanElements().get(templatePlan.getMainActIndex()-1)).getMainMode() :
-							((SurveyPlanWay)templatePlan.getPlanElements().get(1)).getMainMode();
-				currentMainActCell = locateActivityInCell(templatePlan.getMainActType(), mainMode, personTemplate);
+				// Distribute activities in the survey area (or its vicinity) according to the distribution matrix
+				List<String> cellIds = distributeActivitiesInCells(personTemplate, planTemplate);
 				
-				currentMainActLocation = shootLocationForActType(currentMainActCell, templatePlan.getMainActType(),
-						0d, templatePlan, mainMode, personTemplate);
-
-				// To locate intermediate activities, create a search space and add the home and main activity cells
-				currentSearchSpace = new ArrayList<>();
-				currentSearchSpace.add(currentHomeCell);
-				currentSearchSpace.add(currentMainActCell);
-				
-				c = CoordUtils.calcDistance(currentHomeLocation, currentMainActLocation);
-				
-				// Also, add all cells of which the sum of the distances between their centroid and the centroids of
-				// the home and the main act cell is less than twice the distance between the home and the main activity location
-//				List<AdministrativeUnit> adminUnits = new ArrayList<>();
-//				adminUnits.addAll(this.geoinformation.getSurveyArea().values());
-//				adminUnits.addAll(this.geoinformation.getVicinity().values());
-				for(District d : this.geoinformation.getAdminUnits().values()){
-
-					for(AdministrativeUnit au : d.getAdminUnits().values()){
-						
-						double a = CoordUtils.calcDistance(transformation.transform(
-								MGC.point2Coord(currentHomeCell.getGeometry().getCentroid())),
-								transformation.transform(MGC.point2Coord(au.getGeometry().getCentroid())));
-						double b = CoordUtils.calcDistance(transformation.transform(
-								MGC.point2Coord(currentMainActCell.getGeometry().getCentroid())),
-								transformation.transform(MGC.point2Coord(au.getGeometry().getCentroid())));
-						
-						if(a + b < 2 * c){
-							
-							currentSearchSpace.add(au);
-							
-						}
-						
-					}
-					
-				}
+				int actIndex = 0;
 				
 				// Create a MATSim plan element for each survey plan element and add them to the MATSim plan
-				for(int j = 0; j < templatePlan.getPlanElements().size(); j++){
+				for(int j = 0; j < planTemplate.getPlanElements().size(); j++){
 					
-					SurveyPlanElement mpe = templatePlan.getPlanElements().get(j);
+					SurveyPlanElement mpe = planTemplate.getPlanElements().get(j);
 					
 					if(mpe instanceof SurveyPlanActivity){
 						
-						plan.addActivity(createActivity(population, personTemplate, templatePlan, mpe));
+						plan.addActivity(createActivity(population, personTemplate, planTemplate, mpe, cellIds.get(actIndex)));
+						
+						actIndex++;
 						
 					} else {
 						
@@ -713,6 +678,98 @@ public class PopulationCreator {
 		person.setSelectedPlan(plan);
 		
 		return person;
+		
+	}
+	
+	private List<String> distributeActivitiesInCells(final SurveyPerson person, final SurveyPlan plan){
+		
+		// Locate the main activity according to the distribution that was computed before
+		String mainMode = plan.getMainActIndex() > 0 ? 
+				((SurveyPlanWay)plan.getPlanElements().get(plan.getMainActIndex()-1)).getMainMode() :
+					((SurveyPlanWay)plan.getPlanElements().get(1)).getMainMode();
+		currentMainActCell = locateActivityInCell(plan.getMainActType(), mainMode, person);
+		
+		currentMainActLocation = shootLocationForActType(currentMainActCell, plan.getMainActType(),
+				0d, plan, mainMode, person);
+
+		// To locate intermediate activities, create a search space and add the home and main activity cells
+		currentSearchSpace = new ArrayList<>();
+		currentSearchSpace.add(currentHomeCell);
+		currentSearchSpace.add(currentMainActCell);
+		
+		c = CoordUtils.calcDistance(currentHomeLocation, currentMainActLocation);
+		
+		// Also, add all cells of which the sum of the distances between their centroid and the centroids of
+		// the home and the main act cell is less than twice the distance between the home and the main activity location
+		for(District d : this.geoinformation.getAdminUnits().values()){
+
+			for(AdministrativeUnit au : d.getAdminUnits().values()){
+				
+				double a = CoordUtils.calcDistance(transformation.transform(
+						MGC.point2Coord(currentHomeCell.getGeometry().getCentroid())),
+						transformation.transform(MGC.point2Coord(au.getGeometry().getCentroid())));
+				double b = CoordUtils.calcDistance(transformation.transform(
+						MGC.point2Coord(currentMainActCell.getGeometry().getCentroid())),
+						transformation.transform(MGC.point2Coord(au.getGeometry().getCentroid())));
+				
+				if(a + b < 2 * c){
+					
+					currentSearchSpace.add(au);
+					
+				}
+				
+			}
+			
+		}
+		
+		List<String> cellList = new ArrayList<String>();
+		
+		AdministrativeUnit lastTo = currentHomeCell;
+		SurveyPlanWay lastWay = null;
+		
+		for(SurveyPlanElement pe : plan.getPlanElements()){
+			
+			if(pe instanceof SurveyPlanActivity){
+				
+				AdministrativeUnit next = null;
+
+				SurveyPlanActivity act = (SurveyPlanActivity)pe;
+				
+				if(act.getActType().equals(ActivityTypes.HOME)){
+					
+					next = currentHomeCell;
+					
+				} else if(act.getId() == plan.getMainActId()){
+					
+					next = currentMainActCell;
+					
+				} else {
+					
+					if(lastWay != null){
+						next = locateActivityInCell(lastTo.getId(), act.getActType(), lastWay.getMainMode(), person, lastWay.getTravelDistance());
+					}
+					
+				}
+				
+				if(next == null){
+					
+					next = lastTo;
+					
+				}
+				
+				cellList.add(next.getId());
+				lastTo = next;
+				next = null;
+				
+			} else {
+				
+				lastWay = (SurveyPlanWay)pe;
+				
+			}
+			
+		}
+		
+		return cellList;
 		
 	}
 
@@ -826,7 +883,6 @@ public class PopulationCreator {
 			
 			adminUnits = new ArrayList<AdministrativeUnit>();
 			adminUnits.addAll(this.geoinformation.getSubUnits().values());
-//			adminUnits.addAll(this.geoinformation.getVicinity().values());
 			
 		}
 		
@@ -900,9 +956,9 @@ public class PopulationCreator {
 	 * @return A MATSim activity.
 	 */
 	private Activity createActivity(Population population, SurveyPerson personTemplate, SurveyPlan templatePlan,
-			SurveyPlanElement mpe) {
+			SurveyPlanElement mpe, String cellId) {
 
-		AdministrativeUnit au = null;
+		AdministrativeUnit au = this.geoinformation.getAdminUnitById(cellId);
 		
 		// Initialize the activity type and the start and end time
 		SurveyPlanActivity act = (SurveyPlanActivity)mpe;

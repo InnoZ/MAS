@@ -165,7 +165,7 @@ public class MobilityDatabaseMain {
 				OutputDirectoryLogging.closeOutputDirLogging();
 				System.exit(0);
 				
-			}
+			} 
 		
 		} else {
 			
