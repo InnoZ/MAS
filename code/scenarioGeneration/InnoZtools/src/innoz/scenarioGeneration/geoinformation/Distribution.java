@@ -1,24 +1,27 @@
 package innoz.scenarioGeneration.geoinformation;
 
+import innoz.io.database.MidDatabaseParser;
+import innoz.scenarioGeneration.utils.ActivityTypes;
+import innoz.scenarioGeneration.utils.Modes;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.Node;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.router.Dijkstra;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
+import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
-import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.matrices.Matrix;
-
-import innoz.io.database.MidDatabaseParser;
-import innoz.scenarioGeneration.utils.ActivityTypes;
-import innoz.scenarioGeneration.utils.Modes;
 
 public class Distribution {
 
@@ -54,7 +57,6 @@ public class Distribution {
 		
 		Map<String, AdministrativeUnit> adminUnits = new HashMap<>();
 		adminUnits.putAll(geoinformation.getSubUnits());
-//		adminUnits.putAll(geoinformation.getVicinity());
 		
 		for(AdministrativeUnit u1 : adminUnits.values()){
 			
@@ -69,19 +71,19 @@ public class Distribution {
 				
 				if(!u1.equals(u2)){
 
-					distance = CoordUtils.calcDistance(u1Coord, u2Coord);
-//					Node fromNode = NetworkUtils.getNearestRightEntryLink(this.network, u1Coord).getToNode();
-//					Node toNode = NetworkUtils.getNearestRightEntryLink(this.network, u2Coord).getFromNode();
-//					
-//					Path path = this.lcpc.calcLeastCostPath(fromNode, toNode, 0, null, null);
-//					
-//					for(Link link : path.links){
-//						distance += link.getLength();
-//					}
-//					
-//					if(distance < rowMinima.get(u1.getId())){
-//						rowMinima.put(u1.getId(), distance);
-//					}
+//					distance = CoordUtils.calcDistance(u1Coord, u2Coord);
+					Node fromNode = NetworkUtils.getNearestRightEntryLink(this.network, u1Coord).getToNode();
+					Node toNode = NetworkUtils.getNearestRightEntryLink(this.network, u2Coord).getFromNode();
+					
+					Path path = this.lcpc.calcLeastCostPath(fromNode, toNode, 0, null, null);
+					
+					for(Link link : path.links){
+						distance += link.getLength();
+					}
+					
+					if(distance < rowMinima.get(u1.getId())){
+						rowMinima.put(u1.getId(), distance);
+					}
 					
 				} else {
 					

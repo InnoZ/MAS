@@ -1028,18 +1028,18 @@ public class PopulationCreator {
 		if(mode != null){
 			
 			// Bound the maximum walk distance to avoid "endless" walk legs
-			if(mode.equals(TransportMode.walk) && distance > 2000){
-				
-				distance = 500 + random.nextInt(1001);
-				
-			}
+//			if(mode.equals(TransportMode.walk) && distance > 2000){
+//				
+//				distance = 500 + random.nextInt(1001);
+//				
+//			}
 
 		}
 		
 		// Divide the distance by the beeline distance factor and set boundaries for maximum and minimum distance traveled
 		double d = distance / 1.3;
 		double minFactor = 0.75;
-		double maxFactor = 1.25;
+		double maxFactor = 1.5;
 		
 		// Get all landuse geometries of the current activity type within the given administrative unit
 		List<Geometry> closest = au.getLanduseGeometries().get(actType);

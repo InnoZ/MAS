@@ -131,13 +131,19 @@ public class DatabaseReader {
 					String id = entry.getId().startsWith("0") ? entry.getId().substring(1) : entry.getId();
 //					String districtId = id.substring(0, 5);
 					
-					this.geoinformation.getAdminUnits().get(id).setnHouseholds(entry.getNumberOfHouseholds());
+					District d = this.geoinformation.getAdminUnits().get(id);
 					
-					for(AdministrativeUnit au : this.geoinformation.getAdminUnits().get(id).getAdminUnits().values()){
+					if(d != null){
 						
-						if(au.getId().startsWith(id)){
+						d.setnHouseholds(entry.getNumberOfHouseholds());
+						
+						for(AdministrativeUnit au : this.geoinformation.getAdminUnits().get(id).getAdminUnits().values()){
 							
-							au.setNumberOfHouseholds(entry.getNumberOfHouseholds());
+							if(au.getId().startsWith(id)){
+								
+								au.setNumberOfHouseholds(entry.getNumberOfHouseholds());
+								
+							}
 							
 						}
 						
@@ -257,7 +263,9 @@ public class DatabaseReader {
 			String g = set.getString(DatabaseConstants.functions.st_astext.name());
 			int bland = set.getInt(DatabaseConstants.BLAND);
 			String district = set.getString("cca_2");
-			if(district.startsWith("0")) district = district.substring(1);
+			if(district != null){
+				if(district.startsWith("0")) district = district.substring(1);
+			}
 //			int districtType = set.getInt("");
 //			int municipalityType = set.getInt("");
 //			int regionType = set.getInt("");
@@ -281,11 +289,15 @@ public class DatabaseReader {
 //					} else {
 //						this.geoinformation.getVicinity().put(key, au);
 //					}
-					
-					if(!this.geoinformation.getAdminUnits().containsKey(district)){
-						this.geoinformation.getAdminUnits().put(district, new District(district));
+					if(district != null){
+
+						if(!this.geoinformation.getAdminUnits().containsKey(district)){
+							this.geoinformation.getAdminUnits().put(district, new District(district));
+						}
+						this.geoinformation.getAdminUnits().get(district).getAdminUnits().put(key, au);
+						
 					}
-					this.geoinformation.getAdminUnits().get(district).getAdminUnits().put(key, au);
+					
 					this.geoinformation.addSubUnit(au);
 					
 					// Store all geometries inside a collection to get the survey area geometry in the end
@@ -790,9 +802,9 @@ public class DatabaseReader {
 			// Check if the geometry is valid (e.g. not intersecting itself)
 			if(g.isValid()){
 
-				for(District d : this.geoinformation.getAdminUnits().values()){
+//				for(District d : this.geoinformation.getAdminUnits().values()){
 					
-					for(AdministrativeUnit au : d.getAdminUnits().values()){
+					for(AdministrativeUnit au : this.geoinformation.getSubUnits().values()){
 
 						// Add the landuse geometry to the administrative unit containing it or skip it if it's outside of the survey area
 						if(au.getGeometry().contains(g) || au.getGeometry().touches(g) || au.getGeometry().intersects(g)){
@@ -821,7 +833,7 @@ public class DatabaseReader {
 						
 					}
 					
-				}
+//				}
 				
 			} else {
 				
