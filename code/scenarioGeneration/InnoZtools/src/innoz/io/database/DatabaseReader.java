@@ -360,6 +360,7 @@ public class DatabaseReader {
 				this.geoinformation.getQuadTreeForActType(ActivityTypes.SPORTS).clear();
 				this.geoinformation.getQuadTreeForActType(ActivityTypes.FURTHER).clear();
 				this.geoinformation.getQuadTreeForActType(ActivityTypes.EVENT).clear();
+				this.geoinformation.getQuadTreeForActType(ActivityTypes.HEALTH).clear();
 			
 				for(Building b : this.buildings){
 					
