@@ -4,10 +4,12 @@ import innoz.config.Configuration;
 import innoz.config.Configuration.AdminUnitEntry;
 import innoz.io.BbsrDataReader;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
+import innoz.scenarioGeneration.geoinformation.Building;
 import innoz.scenarioGeneration.geoinformation.District;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.network.WayEntry;
 import innoz.scenarioGeneration.utils.ActivityTypes;
+import innoz.utils.matsim.QuadTree;
 import innoz.utils.osm.OsmKey2ActivityType;
 
 import java.sql.Connection;
@@ -69,6 +71,8 @@ public class DatabaseReader {
 	private Geometry boundingBox;
 	private CoordinateTransformation ct;
 	private int counter = 0;
+	private List<Building> buildings;
+	private QuadTree<Building> buildingsQuadTree;
 	/////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -213,13 +217,6 @@ public class DatabaseReader {
 		this.boundingBox = JTS.transform((Geometry) this.geoinformation.getCompleteGeometry().clone(), t)
 				.getEnvelope();
 		
-//		PolygonFeatureFactory pf = new PolygonFeatureFactory.Builder()
-//				.addAttribute("id", String.class)
-//				.create();
-//		List<SimpleFeature> features = new ArrayList<>();
-//		features.add(pf.createPolygon(this.geoinformation.getCompleteGeometry().getCoordinates()));
-//		ShapeFileWriter.writeGeometries(features, "/home/danielhosse/dessau/foo/geometry.shp");
-		
 	}
 	
 	private void getAndAddGeodataFromIdSet(Connection connection, Configuration configuration, Set<String> ids,
@@ -266,9 +263,6 @@ public class DatabaseReader {
 			if(district != null){
 				if(district.startsWith("0")) district = district.substring(1);
 			}
-//			int districtType = set.getInt("");
-//			int municipalityType = set.getInt("");
-//			int regionType = set.getInt("");
 			
 			// Check if the wkb string returned is neither null nor empty, otherwise this would crash
 			if(g != null){
@@ -281,14 +275,7 @@ public class DatabaseReader {
 					Geometry geometry = wktReader.read(g);
 					au.setGeometry(geometry);
 					au.setBland((int)bland);
-//					au.setDistrictType(districtType);
-//					au.setMunicipalityType(municipalityType);
-//					au.setRegionType(regionType);
-//					if(surveyArea){
-//						this.geoinformation.getSurveyArea().put(key, au);
-//					} else {
-//						this.geoinformation.getVicinity().put(key, au);
-//					}
+
 					if(district != null){
 
 						if(!this.geoinformation.getAdminUnits().containsKey(district)){
@@ -337,19 +324,55 @@ public class DatabaseReader {
 		
 		try {
 			
-			// Read landuse geometries
-			readLanduseData(connection);
-			
-			// Read amenity geometries
-			readAmenities(connection);
-			
+			this.buildings = new ArrayList<Building>();
+
 			// If buildings should be considered, also read their geometries
 			if(configuration.isUsingBuildings()){
 				
 				readBuildings(connection);
 				
 			}
+
+			// Read amenity geometries
+			readAmenities(connection);
+			
+			// Read landuse geometries
+			readLanduseData(connection);
+			
+			if(configuration.isUsingBuildings()){
 				
+				for(AdministrativeUnit au : this.geoinformation.getSubUnits().values()){
+					
+					au.getLanduseGeometries().clear();
+					
+				}
+				
+				this.geoinformation.getQuadTreeForActType(ActivityTypes.SUPPLY).clear();
+				this.geoinformation.getQuadTreeForActType(ActivityTypes.KINDERGARTEN).clear();
+				this.geoinformation.getQuadTreeForActType("residential").clear();
+				this.geoinformation.getQuadTreeForActType(ActivityTypes.WORK).clear();
+				this.geoinformation.getQuadTreeForActType(ActivityTypes.SHOPPING).clear();
+				this.geoinformation.getQuadTreeForActType(ActivityTypes.OTHER).clear();
+				this.geoinformation.getQuadTreeForActType(ActivityTypes.LEISURE).clear();
+				this.geoinformation.getQuadTreeForActType(ActivityTypes.EDUCATION).clear();
+				this.geoinformation.getQuadTreeForActType(ActivityTypes.EATING).clear();
+				this.geoinformation.getQuadTreeForActType(ActivityTypes.CULTURE).clear();
+				this.geoinformation.getQuadTreeForActType(ActivityTypes.SPORTS).clear();
+				this.geoinformation.getQuadTreeForActType(ActivityTypes.FURTHER).clear();
+				this.geoinformation.getQuadTreeForActType(ActivityTypes.EVENT).clear();
+			
+				for(Building b : this.buildings){
+					
+					for(String actType : b.getActivityOptions()){
+						if(actType != null){
+							addGeometry(actType, b.getGeometry());
+						}
+					}
+					
+				}
+				
+			}
+			
 			log.info("Done.");
 			
 		} catch (SQLException | ParseException e) {
@@ -406,7 +429,8 @@ public class DatabaseReader {
 				+ " where "	+ DatabaseConstants.functions.st_within.name() + "(" + DatabaseConstants.ATT_WAY + ", "
 				+ DatabaseConstants.functions.st_geomfromtext.name() + "('"	+ this.geoinformation.getCompleteGeometry().toString()
 				+ "', 4326)) and (" + DatabaseConstants.ATT_LANDUSE + " is not null" + " or " + DatabaseConstants.ATT_AMENITY
-				+ " is not null or " + DatabaseConstants.ATT_LEISURE + " is not null or " + DatabaseConstants.ATT_SHOP + " is not null);");
+				+ " is not null or " + DatabaseConstants.ATT_LEISURE + " is not null or " + DatabaseConstants.ATT_SHOP + " is not null)"
+				+ " and " + DatabaseConstants.ATT_BUILDING + " is null;");
 		
 		// Go through all results
 		while(set.next()){
@@ -439,6 +463,20 @@ public class DatabaseReader {
 				
 				// Add the landuse geometry to the geoinformation if we have a valid activity option for it
 				addGeometry(landuse, geometry);
+				
+				for(Building b : this.buildings){
+					
+					if(b.getActivityOptions().isEmpty()){
+
+						if(geometry.contains(b.getGeometry())){
+							
+							b.addActivityOption(landuse);
+							
+						}
+						
+					}
+					
+				}
 				
 			}
 			
@@ -773,6 +811,11 @@ public class DatabaseReader {
 				// Add the landuse geometry to the geoinformation if we have a valid activity option for it
 				addGeometry(actType, geometry);
 				
+				Building closest = this.buildingsQuadTree.getClosest(geometry.getCentroid().getX(), geometry.getCentroid().getY());
+				if(closest != null){
+					closest.addActivityOption(actType);
+				}
+				
 			}
 			
 		}
@@ -792,49 +835,52 @@ public class DatabaseReader {
 	 */
 	private void addGeometry(String landuse, Geometry g){
 		
-		List<AdministrativeUnit> adminUnits = new ArrayList<>();
-//		adminUnits.addAll(this.geoinformation.getSurveyArea().values());
-//		adminUnits.addAll(this.geoinformation.getVicinity().values());
-		
 		// Check if the geometry is not null
 		if(g != null){
 			
 			// Check if the geometry is valid (e.g. not intersecting itself)
 			if(g.isValid()){
 
-//				for(District d : this.geoinformation.getAdminUnits().values()){
-					
-					for(AdministrativeUnit au : this.geoinformation.getSubUnits().values()){
+				for(AdministrativeUnit au : this.geoinformation.getSubUnits().values()){
 
-						// Add the landuse geometry to the administrative unit containing it or skip it if it's outside of the survey area
-						if(au.getGeometry().contains(g) || au.getGeometry().touches(g) || au.getGeometry().intersects(g)){
+					// Add the landuse geometry to the administrative unit containing it or skip it if it's outside of the survey area
+					if(au.getGeometry().contains(g) || au.getGeometry().touches(g) || au.getGeometry().intersects(g)){
+						
+						au.addLanduseGeometry(landuse, g);
+						if(!landuse.equals(ActivityTypes.LEISURE) && !landuse.equals("residential")){
+							au.addLanduseGeometry(ActivityTypes.WORK, g);
+						}
+						
+						// If we don't have a quad tree for this activity type already, create a new one
+						if(this.geoinformation.getQuadTreeForActType(landuse) == null){
 							
-							au.addLanduseGeometry(landuse, g);
+							Coordinate[] coordinates = boundingBox.getCoordinates();
+							this.geoinformation.createQuadTreeForActType(landuse, new double[]{coordinates[0].x, coordinates[0].y,
+									coordinates[2].x, coordinates[2].y});
 							
-							// If we don't have a quad tree for this activity type already, create a new one
-							if(this.geoinformation.getQuadTreeForActType(landuse) == null){
-								
-								Coordinate[] coordinates = boundingBox.getCoordinates();
-								this.geoinformation.createQuadTreeForActType(landuse, new double[]{coordinates[0].x, coordinates[0].y,
-										coordinates[2].x, coordinates[2].y});
-								
-							} 
+						}
+						if(this.geoinformation.getQuadTreeForActType(ActivityTypes.WORK) == null){
+							Coordinate[] coordinates = boundingBox.getCoordinates();
+							this.geoinformation.createQuadTreeForActType(ActivityTypes.WORK, new double[]{coordinates[0].x, coordinates[0].y,
+									coordinates[2].x, coordinates[2].y});
+						}
+						
+						// Add the landuse geometry's centroid as new quad tree entry
+						Coord c = ct.transform(MGC.point2Coord(g.getCentroid()));
+						
+						if(this.boundingBox.contains(MGC.coord2Point(c))){
 							
-							// Add the landuse geometry's centroid as new quad tree entry
-							Coord c = ct.transform(MGC.point2Coord(g.getCentroid()));
-							
-							if(this.boundingBox.contains(MGC.coord2Point(c))){
-								
-								this.geoinformation.getQuadTreeForActType(landuse).put(c.getX(), c.getY(), g);
-								
+							this.geoinformation.getQuadTreeForActType(landuse).put(c.getX(), c.getY(), g);
+							if(!landuse.equals(ActivityTypes.LEISURE) && !landuse.equals("residential")){
+								this.geoinformation.getQuadTreeForActType(ActivityTypes.WORK).put(c.getX(), c.getY(), g);
 							}
 							
 						}
 						
 					}
 					
-//				}
-				
+				}
+					
 			} else {
 				
 				// Warnings counter for invalid geometries
@@ -863,10 +909,15 @@ public class DatabaseReader {
 		//alternatively: use buildings to "bound" activities
 		log.info("Reading in buildings...");
 		
+		Coordinate[] coords = this.geoinformation.getCompleteGeometry().getCoordinates();
+		
+		this.buildingsQuadTree = new QuadTree<Building>(coords[0].x, coords[0].y, coords[2].x, coords[2].y);
+		
 		WKTReader wktReader = new WKTReader();
 		
 		Statement statement = connection.createStatement();
-		String s = "select " + DatabaseConstants.ATT_BUILDING + ", " + DatabaseConstants.functions.st_astext.name() + "("
+		String s = "select " + DatabaseConstants.ATT_BUILDING + "," + DatabaseConstants.ATT_AMENITY +  ", "
+				+ DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + ", " + DatabaseConstants.functions.st_astext.name() + "("
 				+ DatabaseConstants.ATT_WAY	+ ") from " + DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_polygon
 				+ " where " + DatabaseConstants.functions.st_within + "(" + DatabaseConstants.ATT_WAY + ","
 				+ DatabaseConstants.functions.st_geomfromtext.name() + "('" + this.geoinformation.getCompleteGeometry().toString() + "',4326))"
@@ -878,50 +929,72 @@ public class DatabaseReader {
 			Geometry geometry = wktReader.read(set.getString(DatabaseConstants.functions.st_astext.name()));
 			String building = set.getString(DatabaseConstants.ATT_BUILDING);
 			
-			for(District d : this.geoinformation.getAdminUnits().values()){
-				
-				for(AdministrativeUnit au : d.getAdminUnits().values()){
-					
-					String landuse = getTypeOfBuilding(building);
-					
-					if(au.getGeometry().contains(geometry)){
-						
-						if(landuse != null){
-							
-							if(!au.getBuildingsGeometries().containsKey(landuse)){
-								
-								au.getBuildingsGeometries().put(landuse, new ArrayList<>());
-								
-							}
-								
-							au.getBuildingsGeometries().get(landuse).add(geometry);
-								
-							continue;
-							
-						}
-						
-						for(String use : au.getLanduseGeometries().keySet()){
-							
-							if(au.getLanduseGeometries().get(use).contains(geometry)){
-
-								if(!au.getBuildingsGeometries().containsKey(use)){
-									
-									au.getBuildingsGeometries().put(use, new ArrayList<>());
-									
-								} else {
-									
-									au.getBuildingsGeometries().get(use).add(geometry);
-									
-								}
-								
-							}
-							
-						}
-					}
-				
-				}
-				
+			String type = getTypeOfBuilding(building);
+			String amenity = set.getString(DatabaseConstants.ATT_AMENITY);
+			String leisure = set.getString(DatabaseConstants.ATT_LEISURE);
+			String shop = set.getString(DatabaseConstants.ATT_SHOP);
+			
+			Building b = new Building(geometry);
+			if(type != null){
+				b.addActivityOption(type);
 			}
+			if(amenity != null){
+				b.addActivityOption(getAmenityType(amenity));
+			}
+			if(leisure != null){
+				b.addActivityOption(ActivityTypes.LEISURE);
+			}
+			if(shop != null){
+				b.addActivityOption(ActivityTypes.SHOPPING);
+			}
+			
+			this.buildings.add(b);
+			this.buildingsQuadTree.put(geometry.getCentroid().getX(), geometry.getCentroid().getY(), b);
+			
+//			for(District d : this.geoinformation.getAdminUnits().values()){
+//				
+//				for(AdministrativeUnit au : d.getAdminUnits().values()){
+//					
+//					String landuse = getTypeOfBuilding(building);
+//					
+//					if(au.getGeometry().contains(geometry)){
+//						
+//						if(landuse != null){
+//							
+//							if(!au.getBuildingsGeometries().containsKey(landuse)){
+//								
+//								au.getBuildingsGeometries().put(landuse, new ArrayList<>());
+//								
+//							}
+//								
+//							au.getBuildingsGeometries().get(landuse).add(geometry);
+//								
+//							continue;
+//							
+//						}
+//						
+//						for(String use : au.getLanduseGeometries().keySet()){
+//							
+//							if(au.getLanduseGeometries().get(use).contains(geometry)){
+//
+//								if(!au.getBuildingsGeometries().containsKey(use)){
+//									
+//									au.getBuildingsGeometries().put(use, new ArrayList<>());
+//									
+//								} else {
+//									
+//									au.getBuildingsGeometries().get(use).add(geometry);
+//									
+//								}
+//								
+//							}
+//							
+//						}
+//					}
+//				
+//				}
+//				
+//			}
 				
 		}
 		
@@ -973,17 +1046,66 @@ public class DatabaseReader {
 			
 			return ActivityTypes.EDUCATION;
 			
-		} else if(OsmKey2ActivityType.groceryShops.contains(tag) || OsmKey2ActivityType.miscShops.contains(tag)){
+		} else if(OsmKey2ActivityType.groceryShops.contains(tag) || OsmKey2ActivityType.miscShops.contains(tag) || OsmKey2ActivityType.serviceShops.contains(tag)){
 			
-			return ActivityTypes.SHOPPING;
+			if(OsmKey2ActivityType.groceryShops.contains(tag)){
+				
+				return ActivityTypes.SUPPLY;
+				
+			} else if(OsmKey2ActivityType.serviceShops.contains(tag)){
+				
+				return ActivityTypes.SERVICE;
+				
+			} else {
+				
+				return ActivityTypes.SHOPPING;
+				
+			}
 			
-		} else if(OsmKey2ActivityType.leisure.contains(tag)){
+		} else if(OsmKey2ActivityType.leisure.contains(tag) || OsmKey2ActivityType.eating.contains(tag) || OsmKey2ActivityType.culture.contains(tag) || OsmKey2ActivityType.sports.contains(tag)
+				|| OsmKey2ActivityType.furtherEducation.contains(tag) || OsmKey2ActivityType.events.contains(tag)){
 			
-			return ActivityTypes.LEISURE;
+			if(OsmKey2ActivityType.eating.contains(tag)){
+				
+				return ActivityTypes.EATING;
+				
+			} else if(OsmKey2ActivityType.culture.contains(tag)){
+				
+				return ActivityTypes.CULTURE;
+				
+			} else if(OsmKey2ActivityType.sports.contains(tag)){
+				
+				return ActivityTypes.SPORTS;
+				
+			} else if(OsmKey2ActivityType.furtherEducation.contains(tag)){
+				
+				return ActivityTypes.FURTHER;
+				
+			} else if(OsmKey2ActivityType.events.contains(tag)){
+				
+				return ActivityTypes.EVENT;
+				
+			} else {
+				
+				return ActivityTypes.LEISURE;
+				
+			}
 			
-		} else if(OsmKey2ActivityType.otherPlaces.contains(tag)) {
+		} else if(OsmKey2ActivityType.otherPlaces.contains(tag) || OsmKey2ActivityType.healthcare.contains(tag)) {
+		
+			if(OsmKey2ActivityType.healthcare.contains(tag)){
+				
+				return ActivityTypes.HEALTH;
+				
+			} else {
+				
+				return ActivityTypes.OTHER;
+				
+			}
 			
-			return ActivityTypes.OTHER;
+		} else if(ActivityTypes.KINDERGARTEN.equals(tag)){
+			
+			return ActivityTypes.KINDERGARTEN;
 			
 		} else{
 			
@@ -993,9 +1115,9 @@ public class DatabaseReader {
 		
 	}
 
-	private static String getTypeOfBuilding(String buildingTag){
+	private String getTypeOfBuilding(String buildingTag){
 		
-		if(buildingTag.equals("apartments") || buildingTag.equals("hut") || buildingTag.equals("detached") || buildingTag.equals("house") || buildingTag.equals("semi")
+		if(buildingTag.equals("apartments") || buildingTag.equals("detached") || buildingTag.equals("house") || buildingTag.equals("semi")
 				|| buildingTag.equals("terrace")){
 			
 			return "residential";

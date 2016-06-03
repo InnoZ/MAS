@@ -373,7 +373,7 @@ public class PopulationCreator {
 				
 				r2 += admin.getWeightForKey("residential");
 				
-				if(r <= r2){
+				if(r <= r2 && admin.getLanduseGeometries().get("residential") != null){
 					
 					au = admin;
 					blandId = au.getBland();
@@ -656,8 +656,8 @@ public class PopulationCreator {
 				// If there is only one plan element, create a 24hrs home activity
 				Activity home = population.getFactory().createActivityFromCoord(ActivityTypes.HOME, homeCoord);
 				home.setMaximumDuration(24 * 3600);
-				home.setStartTime(0);
-				home.setEndTime(24 * 3600);
+//				home.setStartTime(0);
+//				home.setEndTime(24 * 3600);
 				plan.addActivity(home);
 				
 			}
@@ -667,8 +667,8 @@ public class PopulationCreator {
 			// If there is no plan for the survey person, create a 24hrs home activity
 			Activity home = population.getFactory().createActivityFromCoord(ActivityTypes.HOME, homeCoord);
 			home.setMaximumDuration(24 * 3600);
-			home.setStartTime(0);
-			home.setEndTime(24 * 3600);
+//			home.setStartTime(0);
+//			home.setEndTime(24 * 3600);
 			plan.addActivity(home);
 			
 		}
@@ -746,7 +746,7 @@ public class PopulationCreator {
 				} else {
 					
 					if(lastWay != null){
-						next = locateActivityInCell(lastTo.getId(), act.getActType(), lastWay.getMainMode(), person, lastWay.getTravelDistance());
+						next = locateActivityInCell(lastTo.getId(), act.getActType(), lastWay.getMainMode(), person);
 					}
 					
 				}
@@ -810,7 +810,7 @@ public class PopulationCreator {
 	 */
 	private AdministrativeUnit locateActivityInCell(String activityType, String mode, SurveyPerson personTemplate){
 		
-		return locateActivityInCell(null, activityType, mode, personTemplate, 0d);
+		return locateActivityInCell(null, activityType, mode, personTemplate);
 		
 	}
 
@@ -826,7 +826,7 @@ public class PopulationCreator {
 	 * @param distance The distance traveled between the last and the current activity.
 	 * @return
 	 */
-	private AdministrativeUnit locateActivityInCell(String fromId, String activityType, String mode, SurveyPerson personTemplate, double distance){
+	private AdministrativeUnit locateActivityInCell(String fromId, String activityType, String mode, SurveyPerson personTemplate){
 		
 		Set<String> modes = new HashSet<String>();
 		
@@ -890,15 +890,15 @@ public class PopulationCreator {
 		// Sum up the disutilities of all connections and map the entries for further work
 		for(AdministrativeUnit au : adminUnits){
 			
-			if(fromId != null){
-			
-				if(distribution.getDistance(fromId, au.getId()) > distance / 1.3){
-					
-					continue;
-					
-				}
-				
-			}
+//			if(fromId != null){
+//			
+//				if(distribution.getDistance(fromId, au.getId()) > distance / 1.3){
+//					
+//					continue;
+//					
+//				}
+//				
+//			}
 			
 			double disutility = Double.NEGATIVE_INFINITY;
 				
@@ -974,7 +974,6 @@ public class PopulationCreator {
 		}
 		if(lastActCoord == null){
 			
-			
 			lastActCoord = currentHomeLocation;
 			
 		}
@@ -1010,7 +1009,7 @@ public class PopulationCreator {
 			
 			// If it's neither a home nor the main activity, locate the activity in any cell of the search space
 			if(lastActCell == null) lastActCell = currentHomeCell;
-			au = locateActivityInCell(lastActCell.getId(), type, mode, personTemplate,distance);
+//			au = locateActivityInCell(lastActCell.getId(), type, mode, personTemplate,distance);
 			
 			if(au == null) au = lastActCell;
 			
@@ -1026,20 +1025,20 @@ public class PopulationCreator {
 				a = CoordUtils.calcDistance(currentHomeLocation, coord);
 				b = CoordUtils.calcDistance(currentMainActLocation, coord);
 			
-			} while(a + b > 2 * c && cnt < 10);
+			} while(a + b > 2 * c && cnt < 20);
 				
 		}
 		
 		// Create a new activity
 		Activity activity = population.getFactory().createActivityFromCoord(type, coord);
-		activity.setStartTime(start);
-		activity.setEndTime(end);
+//		activity.setStartTime(start);
+//		activity.setEndTime(end);
 		
 		// If the end time is set to zero (probably last activity) or after midnight, set it to midnight
 		if(end == 0 || end > Time.MIDNIGHT){
 		
 			activity.setMaximumDuration(end - start + Time.MIDNIGHT);
-			activity.setEndTime(Time.MIDNIGHT);
+//			activity.setEndTime(Time.MIDNIGHT);
 		
 		} else{
 			
@@ -1120,8 +1119,8 @@ public class PopulationCreator {
 		
 		} else {
 			
-			closest = (List<Geometry>) this.geoinformation.getQuadTreeForActType(actType).getRing(lastActCoord.getX(),
-					lastActCoord.getY(), d * minFactor, d * maxFactor);
+			closest = (List<Geometry>) this.geoinformation.getQuadTreeForActType(actType).getRing
+			(lastActCoord.getX(), lastActCoord.getY(), d * minFactor, d * maxFactor);
 			
 			if(!closest.isEmpty()){
 				

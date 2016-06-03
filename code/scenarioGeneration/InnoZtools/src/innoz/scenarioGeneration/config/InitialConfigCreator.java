@@ -75,6 +75,42 @@ public class InitialConfigCreator {
 		work.setTypicalDuration(8 * 3600);
 		config.planCalcScore().addActivityParams(work);
 		
+		ActivityParams kindergarten = new ActivityParams(ActivityTypes.KINDERGARTEN);
+		work.setTypicalDuration(3 * 3600);
+		config.planCalcScore().addActivityParams(kindergarten);
+		
+		ActivityParams supply = new ActivityParams(ActivityTypes.SUPPLY);
+		work.setTypicalDuration(1 * 3600);
+		config.planCalcScore().addActivityParams(supply);
+		
+		ActivityParams eating = new ActivityParams(ActivityTypes.EATING);
+		work.setTypicalDuration(1 * 3600);
+		config.planCalcScore().addActivityParams(eating);
+		
+		ActivityParams culture = new ActivityParams(ActivityTypes.CULTURE);
+		work.setTypicalDuration(1 * 3600);
+		config.planCalcScore().addActivityParams(culture);
+		
+		ActivityParams sports = new ActivityParams(ActivityTypes.SPORTS);
+		work.setTypicalDuration(1 * 3600);
+		config.planCalcScore().addActivityParams(sports);
+		
+		ActivityParams furtherEdu = new ActivityParams(ActivityTypes.FURTHER);
+		work.setTypicalDuration(1 * 3600);
+		config.planCalcScore().addActivityParams(furtherEdu);
+		
+		ActivityParams service = new ActivityParams(ActivityTypes.SERVICE);
+		work.setTypicalDuration(1 * 3600);
+		config.planCalcScore().addActivityParams(service);
+		
+		ActivityParams healthcare = new ActivityParams(ActivityTypes.HEALTH);
+		work.setTypicalDuration(2 * 3600);
+		config.planCalcScore().addActivityParams(healthcare);
+		
+		ActivityParams event = new ActivityParams(ActivityTypes.EVENT);
+		work.setTypicalDuration(3 * 3600);
+		config.planCalcScore().addActivityParams(event);
+		
 	}
 
 }

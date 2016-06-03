@@ -345,6 +345,7 @@ public class MidDatabaseParser {
 				
 				//the act type index at the destination
 				int purpose = set.getInt(MiDConstants.PURPOSE);
+				double detailedPurpose = set.getDouble(MiDConstants.PURPOSE_DIFF);
 				
 				//the main mode of the leg and the mode combination
 				String mainMode = handleMainMode(set.getString(MiDConstants.MAIN_MODE));
@@ -403,7 +404,8 @@ public class MidDatabaseParser {
 					
 				}
 				
-				String actType = handleActType(purpose);
+				int dp = Double.isNaN(detailedPurpose) ? 0 : (int)detailedPurpose;
+				String actType = handleActType(purpose, dp);
 
 				int id = plan.getPlanElements().size() + 1;
 				
@@ -563,7 +565,9 @@ public class MidDatabaseParser {
 					
 					String pid = it.next();
 					
-					if(!this.postprocessPerson(container.getPersons().get(pid))){
+					boolean b = this.postprocessPerson(container.getPersons().get(pid));
+					
+					if(!b){
 						it.remove();
 					}
 					
@@ -599,7 +603,7 @@ public class MidDatabaseParser {
 	private boolean postprocessPerson(SurveyPerson person){
 		
 		if(person != null){
-			
+
 			boolean licenseAndCarAvailabilitySet = false;
 			
 			if(person.getPlans().size() < 1) return false;
@@ -829,16 +833,51 @@ public class MidDatabaseParser {
 		
 	}
 	
-	private String handleActType(int idx){
+	private String handleActType(int idx, int idxD){
 		
 		switch(idx){
 		
 			case 1: return ActivityTypes.WORK;
 			case 3: return ActivityTypes.EDUCATION;
-			case 4: return ActivityTypes.SHOPPING;
-			case 7: return ActivityTypes.LEISURE;
+			case 4: return handleActTypeDetailed(idxD);
+			case 7: return handleActTypeDetailed(idxD);
 			case 8: return ActivityTypes.HOME;
 			case 9: return "return";
+			case 32: return ActivityTypes.KINDERGARTEN;
+			default: return ActivityTypes.OTHER;
+		
+		}
+		
+	}
+	
+	private String handleActTypeDetailed(int idx){
+		
+		switch(idx){
+
+			case 501: return ActivityTypes.SUPPLY;
+			case 504: return ActivityTypes.SERVICE;
+			case 502:
+			case 503:
+			case 505: return ActivityTypes.SHOPPING;
+			case 601: return ActivityTypes.HEALTH;
+			case 702: return ActivityTypes.CULTURE;
+			case 703: return ActivityTypes.EVENT;
+			case 704: return ActivityTypes.SPORTS;
+			case 705: return ActivityTypes.FURTHER;
+			case 706: return ActivityTypes.EATING;
+			case 701:
+			case 707:
+			case 710:
+			case 712:
+			case 713:
+			case 714:
+			case 715:
+			case 716:
+			case 717:
+			case 718:
+			case 719:
+			case 720:
+			case 799: return ActivityTypes.LEISURE;
 			default: return ActivityTypes.OTHER;
 		
 		}
@@ -903,11 +942,11 @@ public class MidDatabaseParser {
 	
 	private int setActPriority(String type){
 		
-		if(type.equals(ActivityTypes.WORK) || type.equals(ActivityTypes.EDUCATION)){
+		if(type.equals(ActivityTypes.WORK) || type.equals(ActivityTypes.EDUCATION) || type.equals(ActivityTypes.KINDERGARTEN)){
 			return 1;
-		} else if(type.equals(ActivityTypes.LEISURE)){
+		} else if(type.equals(ActivityTypes.LEISURE) || type.equals(ActivityTypes.EATING)){
 			return 2;
-		} else if(type.equals(ActivityTypes.SHOPPING)){
+		} else if(type.equals(ActivityTypes.SHOPPING) || type.equals(ActivityTypes.SUPPLY)){
 			return 3;
 		} else  if(type.equals(ActivityTypes.OTHER)){
 			return 4;

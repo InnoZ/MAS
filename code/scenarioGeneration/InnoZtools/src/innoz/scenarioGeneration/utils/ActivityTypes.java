@@ -9,26 +9,38 @@ package innoz.scenarioGeneration.utils;
  */
 public class ActivityTypes {
 
-	public static final String HOME = "home";
+	public static final String HOME = "home"; //8
 	
 	//work-related
-	public static final String BUSINESS = "business";
-	public static final String WORK = "work";
+	public static final String WORK = "work"; //1
+	public static final String BUSINESS = "business"; //2
 	
 	//education
-	public static final String EDUCATION = "education";
-	public static final String KINDERGARTEN = "kindergarten";
-	public static final String PRIMARY_SCHOOL = "school_1";
-	public static final String SECONDARY_SCHOOL = "school_2";
-	public static final String UNIVERSITY = "university";
+	public static final String EDUCATION = "education"; //3, 31
+	public static final String KINDERGARTEN = "kindergarten"; //32
+	public static final String PRIMARY_SCHOOL = "school_1"; //
+	public static final String SECONDARY_SCHOOL = "school_2"; //
+	public static final String UNIVERSITY = "university"; //
+	public static final String PROFESSIONAL_SCHOOL = "professional"; //
 	
-	//misc
-	public static final String LEISURE = "leisure";
-	public static final String PICK_DROP = "pickdrop";
-	public static final String PRIVATE = "private";
-	public static final String SHOPPING = "shopping";
-	public static final String SUPPLY = "supply";
-	public static final String OTHER = "other";
+	//supply
+	public static final String PICK_DROP = "pickdrop"; //6
+	public static final String PRIVATE = "private"; //5
+	public static final String SHOPPING = "shopping"; //4
+	public static final String SUPPLY = "shopping_daily"; //
+	public static final String SERVICE = "shopping_service";
+	
+	//leisure
+	public static final String LEISURE = "leisure"; //7
+	public static final String SPORTS = "leisure_sports"; //
+	public static final String VISIT = "visit"; //
+	public static final String EATING = "leisure_eating"; //
+	public static final String CULTURE = "leisure_culture";
+	public static final String FURTHER = "leisure_furtherEdu";
+	public static final String EVENT = "leisure_event";
+	
+	public static final String OTHER = "other"; //10,11
+	public static final String HEALTH = "other_healthcare";
 	
 	//interactions
 	public static final String ROUND_TRIP_INTERACTION = "round-trip interaction";
