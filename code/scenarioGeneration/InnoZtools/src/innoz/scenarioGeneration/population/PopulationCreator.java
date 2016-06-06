@@ -1030,7 +1030,7 @@ public class PopulationCreator {
 		}
 		
 		// Create a new activity
-		Activity activity = population.getFactory().createActivityFromCoord(type, coord);
+		Activity activity = population.getFactory().createActivityFromCoord(type.split("_")[0], coord);
 //		activity.setStartTime(start);
 //		activity.setEndTime(end);
 		
@@ -1064,7 +1064,7 @@ public class PopulationCreator {
 		return activity;
 		
 	}
-
+	
 	/**
 	 * 
 	 * Shoots a coordinate for the currently created activity.
