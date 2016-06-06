@@ -1,8 +1,10 @@
 package innoz.scenarioGeneration.config;
 
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 
 import innoz.config.Configuration;
 import innoz.scenarioGeneration.utils.ActivityTypes;
@@ -31,6 +33,9 @@ public class InitialConfigCreator {
 		
 		// Add activity types to the scoring parameters
 		addBasicActivityParams(config);
+		
+		// Add mode parameters
+		addBasicModeParams(config);
 		
 		// QSim config group
 		config.qsim().setFlowCapFactor(configuration.getScaleFactor());
@@ -76,8 +81,19 @@ public class InitialConfigCreator {
 		config.planCalcScore().addActivityParams(work);
 		
 		ActivityParams kindergarten = new ActivityParams(ActivityTypes.KINDERGARTEN);
-		work.setTypicalDuration(3 * 3600);
+		kindergarten.setTypicalDuration(3 * 3600);
 		config.planCalcScore().addActivityParams(kindergarten);
+		
+	}
+	
+	private static void addBasicModeParams(Config config){
+		
+		config.planCalcScore().getOrCreateModeParams(TransportMode.bike);
+		config.planCalcScore().getOrCreateModeParams(TransportMode.car);
+		config.planCalcScore().getOrCreateModeParams(TransportMode.other);
+		config.planCalcScore().getOrCreateModeParams(TransportMode.pt);
+		config.planCalcScore().getOrCreateModeParams(TransportMode.ride);
+		config.planCalcScore().getOrCreateModeParams(TransportMode.walk);
 		
 	}
 
