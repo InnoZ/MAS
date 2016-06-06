@@ -59,23 +59,24 @@ public class OsmKey2ActivityType {
 	
 	//sports
 	public static final Set<String> sports = CollectionUtils.stringToSet(
-			"golf_course,ice_rink,sports_centre,swimming_pool");
+			"golf_course,ice_rink,sports_centre,swimming_pool,dojo");
 	
 	public static final Set<String> furtherEducation = CollectionUtils.stringToSet(
 			"music_school,driving_school,language_school,library");
 	
 	//events
 	public static final Set<String> events = CollectionUtils.stringToSet(
-			"pitch,stadium");
+			"pitch,stadium,market");
 	
 	//OTHER
 	public static final Set<String> otherPlaces = CollectionUtils.stringToSet(
-		"massage,tattoo,public_bookcase,"
-		+ "atm,bank,bureau_de_change,credit_institution,"
-		+ "pharmacy,veterinary");
+		"massage,tattoo,public_bookcase,pharmacy,veterinary");
 	
 	//health
 	public static final Set<String> healthcare = CollectionUtils.stringToSet(
 			"clinic,dentist,doctors,hospital");
+	
+	public static final Set<String> errand = CollectionUtils.stringToSet(
+			"atm,bank,bureau_de_change,credit_institution,courthouse,police,post_box,post_office,townhall");
 	
 }

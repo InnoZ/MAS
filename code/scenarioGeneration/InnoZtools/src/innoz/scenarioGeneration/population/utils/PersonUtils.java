@@ -1,12 +1,10 @@
 package innoz.scenarioGeneration.population.utils;
 
-import java.util.Collection;
-import java.util.Map;
-
-import org.matsim.api.core.v01.population.Person;
-
 import innoz.scenarioGeneration.population.surveys.SurveyPerson;
 import innoz.scenarioGeneration.utils.ActivityTypes;
+
+import java.util.Collection;
+import java.util.Map;
 
 public class PersonUtils {
 
@@ -22,27 +20,31 @@ public class PersonUtils {
 	public static final String ATT_CAR_AVAIL = "carAvail";
 	public static final String ATT_LICENSE = "hasLicense";
 
-	public static String getEducationalActTypeForPerson(Person person){
+	public static String getEducationalActTypeForPerson(SurveyPerson person){
 		
-		int age = (int) person.getCustomAttributes().get(ATT_AGE);
+		int personGroup12 = person.getPersonGroup();
 		
-		if(age < 6){
+		if(personGroup12 == 5 || personGroup12 == 6){
+
+			return ActivityTypes.UNIVERSITY;
+			
+		} else if(personGroup12 == 7 || personGroup12 == 8){
+			
+			return ActivityTypes.PROFESSIONAL_SCHOOL;
+			
+		} else if(personGroup12 == 9){
 			
 			return ActivityTypes.KINDERGARTEN;
 			
-		} else if(age >= 6 && age < 13){
+		} else if(personGroup12 == 10){
 			
 			return ActivityTypes.PRIMARY_SCHOOL;
 			
-		} else if(age >= 13 && age < 18){
+		} else if(personGroup12 == 11 | personGroup12 == 12){
 			
 			return ActivityTypes.SECONDARY_SCHOOL;
 			
-		} else{
-			
-			return ActivityTypes.UNIVERSITY;
-			
-		}
+		} else return null;
 		
 	}
 	

@@ -9,10 +9,14 @@ import java.util.Map;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.Node;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.router.Dijkstra;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
+import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.utils.geometry.CoordUtils;
@@ -48,7 +52,9 @@ public class Distribution {
 		String[] activityTypes = {ActivityTypes.WORK, ActivityTypes.EDUCATION, ActivityTypes.SHOPPING,
 				ActivityTypes.LEISURE, ActivityTypes.OTHER, ActivityTypes.KINDERGARTEN, ActivityTypes.SUPPLY,
 				ActivityTypes.EATING, ActivityTypes.CULTURE, ActivityTypes.SPORTS, ActivityTypes.FURTHER,
-				ActivityTypes.SERVICE, ActivityTypes.HEALTH, ActivityTypes.EVENT};
+				ActivityTypes.SERVICE, ActivityTypes.HEALTH, ActivityTypes.EVENT, ActivityTypes.ERRAND,
+				ActivityTypes.PRIMARY_SCHOOL, ActivityTypes.SECONDARY_SCHOOL, ActivityTypes.PROFESSIONAL_SCHOOL,
+				ActivityTypes.UNIVERSITY};
 		String[] modes = {TransportMode.bike, TransportMode.car, TransportMode.pt, TransportMode.ride, TransportMode.walk};
 		
 		distances = new Matrix("distances", "");
@@ -71,15 +77,15 @@ public class Distribution {
 				
 				if(!u1.equals(u2)){
 
-					distance = CoordUtils.calcDistance(u1Coord, u2Coord);
-//					Node fromNode = NetworkUtils.getNearestRightEntryLink(this.network, u1Coord).getToNode();
-//					Node toNode = NetworkUtils.getNearestRightEntryLink(this.network, u2Coord).getFromNode();
-//					
-//					Path path = this.lcpc.calcLeastCostPath(fromNode, toNode, 0, null, null);
-//					
-//					for(Link link : path.links){
-//						distance += link.getLength();
-//					}
+//					distance = CoordUtils.calcDistance(u1Coord, u2Coord);
+					Node fromNode = NetworkUtils.getNearestRightEntryLink(this.network, u1Coord).getToNode();
+					Node toNode = NetworkUtils.getNearestRightEntryLink(this.network, u2Coord).getFromNode();
+					
+					Path path = this.lcpc.calcLeastCostPath(fromNode, toNode, 0, null, null);
+					
+					for(Link link : path.links){
+						distance += link.getLength();
+					}
 					
 					if(distance < rowMinima.get(u1.getId())){
 						rowMinima.put(u1.getId(), distance);

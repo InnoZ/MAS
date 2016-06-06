@@ -860,6 +860,8 @@ public class MidDatabaseParser {
 			case 503:
 			case 505: return ActivityTypes.SHOPPING;
 			case 601: return ActivityTypes.HEALTH;
+			case 602: 
+			case 603: return ActivityTypes.ERRAND;
 			case 702: return ActivityTypes.CULTURE;
 			case 703: return ActivityTypes.EVENT;
 			case 704: return ActivityTypes.SPORTS;
@@ -942,13 +944,15 @@ public class MidDatabaseParser {
 	
 	private int setActPriority(String type){
 		
-		if(type.equals(ActivityTypes.WORK) || type.equals(ActivityTypes.EDUCATION) || type.equals(ActivityTypes.KINDERGARTEN)){
+		if(type.equals(ActivityTypes.WORK) || type.equals(ActivityTypes.EDUCATION) || type.equals(ActivityTypes.KINDERGARTEN) || type.equals(ActivityTypes.PRIMARY_SCHOOL)
+				|| type.equals(ActivityTypes.PROFESSIONAL_SCHOOL) || type.equals(ActivityTypes.SECONDARY_SCHOOL) || type.equals(ActivityTypes.UNIVERSITY)){
 			return 1;
-		} else if(type.equals(ActivityTypes.LEISURE) || type.equals(ActivityTypes.EATING) || type.equals(ActivityTypes.CULTURE) || type.equals(ActivityTypes.SPORTS) || type.equals(ActivityTypes.FURTHER) || type.equals(ActivityTypes.EVENT)){
+		} else if(type.equals(ActivityTypes.LEISURE) || type.equals(ActivityTypes.EATING) || type.equals(ActivityTypes.CULTURE) || type.equals(ActivityTypes.SPORTS) || type.equals(ActivityTypes.FURTHER)
+				|| type.equals(ActivityTypes.EVENT)){
 			return 2;
 		} else if(type.equals(ActivityTypes.SHOPPING) || type.equals(ActivityTypes.SUPPLY) || type.equals(ActivityTypes.SERVICE)){
 			return 3;
-		} else  if(type.equals(ActivityTypes.OTHER) || type.equals(ActivityTypes.HEALTH)){
+		} else  if(type.equals(ActivityTypes.OTHER) || type.equals(ActivityTypes.HEALTH) || type.equals(ActivityTypes.ERRAND)){
 			return 4;
 		} else{
 			return 5;

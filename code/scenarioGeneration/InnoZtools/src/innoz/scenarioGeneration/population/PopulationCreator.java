@@ -16,6 +16,7 @@ import innoz.scenarioGeneration.population.surveys.SurveyPlanWay;
 import innoz.scenarioGeneration.population.surveys.SurveyVehicle;
 import innoz.scenarioGeneration.population.utils.PersonUtils;
 import innoz.scenarioGeneration.utils.ActivityTypes;
+import innoz.scenarioGeneration.utils.Modes;
 import innoz.scenarioGeneration.vehicles.VehicleTypes;
 import innoz.utils.GeometryUtils;
 
@@ -452,7 +453,7 @@ public class PopulationCreator {
 				SurveyPerson templatePerson = container.getPersons().get(personId);
 				
 				Person person = createPerson(templatePerson, population, personAttributes, random.nextDouble(),
-						population.getPersons().size(), homeLocation);
+						population.getPersons().size(), homeLocation, container);
 				
 				// If the resulting MATSim person is not null, add it
 				if(person != null){
@@ -500,6 +501,8 @@ public class PopulationCreator {
 		}
 		}
 		
+		System.out.println(cnt);
+		
 	}
 	
 	/**
@@ -534,7 +537,7 @@ public class PopulationCreator {
 				//TODO: number of inhabitants for admin units
 				for(int i = 0; i < 10000 * configuration.getScaleFactor(); i++){
 					
-					population.addPerson(createPerson(personTemplate, population, personAttributes, personalRandom, i, null));
+					population.addPerson(createPerson(personTemplate, population, personAttributes, personalRandom, i, null, container));
 					
 				}
 				
@@ -559,7 +562,7 @@ public class PopulationCreator {
 	 */
 	@SuppressWarnings("deprecation")
 	private Person createPerson(SurveyPerson personTemplate, Population population,
-			ObjectAttributes personAttributes, double personalRandom, int i, Coord homeCoord) {
+			ObjectAttributes personAttributes, double personalRandom, int i, Coord homeCoord, SurveyDataContainer container) {
 
 		// Initialize main act location, last leg, last act cell and the coordinate of the last activity as null to avoid errors...
 		currentMainActLocation = null;
@@ -628,7 +631,7 @@ public class PopulationCreator {
 			if(planTemplate.getPlanElements().size() > 1){
 				
 				// Distribute activities in the survey area (or its vicinity) according to the distribution matrix
-				List<String> cellIds = distributeActivitiesInCells(personTemplate, planTemplate);
+				List<String> cellIds = distributeActivitiesInCells(personTemplate, planTemplate, container);
 				
 				int actIndex = 0;
 				
@@ -681,16 +684,18 @@ public class PopulationCreator {
 		
 	}
 	
-	private List<String> distributeActivitiesInCells(final SurveyPerson person, final SurveyPlan plan){
+	private List<String> distributeActivitiesInCells(final SurveyPerson person, final SurveyPlan plan, SurveyDataContainer container){
 		
 		// Locate the main activity according to the distribution that was computed before
 		String mainMode = plan.getMainActIndex() > 0 ? 
 				((SurveyPlanWay)plan.getPlanElements().get(plan.getMainActIndex()-1)).getMainMode() :
-					((SurveyPlanWay)plan.getPlanElements().get(1)).getMainMode();
+					((SurveyPlanWay)plan.getPlanElements().get(plan.getMainActIndex()+1)).getMainMode();
 		currentMainActCell = locateActivityInCell(plan.getMainActType(), mainMode, person);
 		
+		double distance = container.getModeStatsContainer().get(mainMode).getMean();
+		
 		currentMainActLocation = shootLocationForActType(currentMainActCell, plan.getMainActType(),
-				0d, plan, mainMode, person);
+				distance, plan, mainMode, person);
 
 		// To locate intermediate activities, create a search space and add the home and main activity cells
 		currentSearchSpace = new ArrayList<>();
@@ -829,6 +834,10 @@ public class PopulationCreator {
 	private AdministrativeUnit locateActivityInCell(String fromId, String activityType, String mode, SurveyPerson personTemplate){
 		
 		Set<String> modes = new HashSet<String>();
+		
+		if(fromId == null){
+			fromId = currentHomeCell.getId();
+		}
 		
 		if(mode != null){
 
@@ -1031,14 +1040,14 @@ public class PopulationCreator {
 		
 		// Create a new activity
 		Activity activity = population.getFactory().createActivityFromCoord(type.split("_")[0], coord);
-//		activity.setStartTime(start);
-//		activity.setEndTime(end);
+		activity.setStartTime(start);
+		activity.setEndTime(end);
 		
 		// If the end time is set to zero (probably last activity) or after midnight, set it to midnight
 		if(end == 0 || end > Time.MIDNIGHT){
 		
 			activity.setMaximumDuration(end - start + Time.MIDNIGHT);
-//			activity.setEndTime(Time.MIDNIGHT);
+			activity.setEndTime(Time.MIDNIGHT);
 		
 		} else{
 			
@@ -1064,6 +1073,8 @@ public class PopulationCreator {
 		return activity;
 		
 	}
+	
+	private int cnt = 0;
 	
 	/**
 	 * 
@@ -1105,8 +1116,23 @@ public class PopulationCreator {
 			
 			if(!closest.isEmpty()){
 				
-				int index = random.nextInt(closest.size());
-				Geometry area = closest.get(index);
+				double shootingRandom = random.nextDouble() * au.getWeightForKey(actType);
+				double accumulatedWeight = 0.0d;
+				Geometry area = null;
+				
+				for(Geometry g : closest){
+					
+					accumulatedWeight += g.getArea();
+					if(shootingRandom <= accumulatedWeight){
+						area = g;
+						break;
+					}
+					
+				}
+				
+				
+//				int index = random.nextInt(closest.size());
+//				Geometry area = closest.get(index);
 				return transformation.transform(GeometryUtils.shoot(area,random));
 				
 			} else {
@@ -1130,6 +1156,7 @@ public class PopulationCreator {
 				
 			} else {
 				
+				cnt++;
 				Geometry area = this.geoinformation.getQuadTreeForActType(actType).getClosest(lastActCoord.getX(), lastActCoord.getY());
 				
 				return transformation.transform(GeometryUtils.shoot(area,random));

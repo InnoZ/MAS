@@ -18,15 +18,16 @@ public class ActivityTypes {
 	//education
 	public static final String EDUCATION = "education"; //3, 31
 	public static final String KINDERGARTEN = "kindergarten"; //32
-	public static final String PRIMARY_SCHOOL = "school_1"; //
-	public static final String SECONDARY_SCHOOL = "school_2"; //
-	public static final String UNIVERSITY = "university"; //
-	public static final String PROFESSIONAL_SCHOOL = "professional"; //
+	public static final String PRIMARY_SCHOOL = "education_1"; //
+	public static final String SECONDARY_SCHOOL = "education_2"; //
+	public static final String UNIVERSITY = "education_university"; //
+	public static final String PROFESSIONAL_SCHOOL = "education_professional"; //
 	
 	//supply
 	public static final String SHOPPING = "shopping"; //4
 	public static final String SUPPLY = "shopping_daily"; //
 	public static final String SERVICE = "shopping_service";
+	public static final String SH_OTHER = "shopping_other";
 	
 	//leisure
 	public static final String LEISURE = "leisure"; //7
@@ -39,6 +40,7 @@ public class ActivityTypes {
 	
 	public static final String OTHER = "other"; //10,11
 	public static final String HEALTH = "other_healthcare";
+	public static final String ERRAND = "other_errand";
 	public static final String PICK_DROP = "pickdrop"; //6
 	public static final String PRIVATE = "private"; //5
 	
