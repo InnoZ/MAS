@@ -361,6 +361,8 @@ public class DatabaseReader {
 				this.geoinformation.getQuadTreeForActType(ActivityTypes.FURTHER).clear();
 				this.geoinformation.getQuadTreeForActType(ActivityTypes.EVENT).clear();
 				this.geoinformation.getQuadTreeForActType(ActivityTypes.HEALTH).clear();
+				this.geoinformation.getQuadTreeForActType(ActivityTypes.SERVICE).clear();
+				this.geoinformation.getQuadTreeForActType(ActivityTypes.ERRAND).clear();
 			
 				for(Building b : this.buildings){
 					
@@ -466,12 +468,18 @@ public class DatabaseReader {
 				addGeometry(landuse, geometry);
 				
 				for(Building b : this.buildings){
-					
+
 					if(b.getActivityOptions().isEmpty()){
 
 						if(geometry.contains(b.getGeometry())){
 							
 							b.addActivityOption(landuse);
+							
+							if(!landuse.startsWith(ActivityTypes.LEISURE) && !landuse.equals("residential")){
+							
+								b.addActivityOption(ActivityTypes.WORK);
+							
+							}
 							
 						}
 						
@@ -917,7 +925,7 @@ public class DatabaseReader {
 		WKTReader wktReader = new WKTReader();
 		
 		Statement statement = connection.createStatement();
-		String s = "select " + DatabaseConstants.ATT_BUILDING + "," + DatabaseConstants.ATT_AMENITY +  ", "
+		String s = "select name," + DatabaseConstants.ATT_BUILDING + "," + DatabaseConstants.ATT_AMENITY +  ", "
 				+ DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + ", " + DatabaseConstants.functions.st_astext.name() + "("
 				+ DatabaseConstants.ATT_WAY	+ ") from " + DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_polygon
 				+ " where " + DatabaseConstants.functions.st_within + "(" + DatabaseConstants.ATT_WAY + ","
@@ -940,62 +948,19 @@ public class DatabaseReader {
 				b.addActivityOption(type);
 			}
 			if(amenity != null){
+				
 				b.addActivityOption(getAmenityType(amenity));
+				
 			}
 			if(leisure != null){
-				b.addActivityOption(ActivityTypes.LEISURE);
+				b.addActivityOption(getAmenityType(leisure));
 			}
 			if(shop != null){
-				b.addActivityOption(ActivityTypes.SHOPPING);
+				b.addActivityOption(getAmenityType(shop));
 			}
 			
 			this.buildings.add(b);
 			this.buildingsQuadTree.put(geometry.getCentroid().getX(), geometry.getCentroid().getY(), b);
-			
-//			for(District d : this.geoinformation.getAdminUnits().values()){
-//				
-//				for(AdministrativeUnit au : d.getAdminUnits().values()){
-//					
-//					String landuse = getTypeOfBuilding(building);
-//					
-//					if(au.getGeometry().contains(geometry)){
-//						
-//						if(landuse != null){
-//							
-//							if(!au.getBuildingsGeometries().containsKey(landuse)){
-//								
-//								au.getBuildingsGeometries().put(landuse, new ArrayList<>());
-//								
-//							}
-//								
-//							au.getBuildingsGeometries().get(landuse).add(geometry);
-//								
-//							continue;
-//							
-//						}
-//						
-//						for(String use : au.getLanduseGeometries().keySet()){
-//							
-//							if(au.getLanduseGeometries().get(use).contains(geometry)){
-//
-//								if(!au.getBuildingsGeometries().containsKey(use)){
-//									
-//									au.getBuildingsGeometries().put(use, new ArrayList<>());
-//									
-//								} else {
-//									
-//									au.getBuildingsGeometries().get(use).add(geometry);
-//									
-//								}
-//								
-//							}
-//							
-//						}
-//					}
-//				
-//				}
-//				
-//			}
 				
 		}
 		
@@ -1092,12 +1057,16 @@ public class DatabaseReader {
 				
 			}
 			
-		} else if(OsmKey2ActivityType.otherPlaces.contains(tag) || OsmKey2ActivityType.healthcare.contains(tag)) {
+		} else if(OsmKey2ActivityType.otherPlaces.contains(tag) || OsmKey2ActivityType.healthcare.contains(tag) || OsmKey2ActivityType.errand.contains(tag)) {
 		
 			if(OsmKey2ActivityType.healthcare.contains(tag)){
 				
 				return ActivityTypes.HEALTH;
 				
+			} else if(OsmKey2ActivityType.errand.contains(tag)){
+				
+				return ActivityTypes.ERRAND;
+						
 			} else {
 				
 				return ActivityTypes.OTHER;
