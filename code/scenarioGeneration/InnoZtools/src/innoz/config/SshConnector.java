@@ -86,6 +86,12 @@ public class SshConnector {
 	    
 	    session.connect();
 	    session.setPortForwardingL(nLocalPort, remoteHost, nRemotePort);
+	    
+	}
+	
+	public static void disconnect(){
+		
+		session.disconnect();
 		
 	}
 

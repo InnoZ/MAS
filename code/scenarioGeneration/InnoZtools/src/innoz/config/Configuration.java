@@ -22,51 +22,51 @@ public class Configuration {
 	
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	private static final Logger log = Logger.getLogger(Configuration.class);
-	static final String SURVEY_AREA_IDS = "surveyAreaIds";
-	static final String VICINITY_IDS = "vicinityIds";
-	static final String CRS = "coordinateSystem";
-	static final String OUTPUT_DIR = "outputDirectory";
-	static final String POPULATION_TYPE = "populationType";
-	static final String SCALE_FACTOR = "scaleFactor";
-	static final String USE_BUILDINGS = "useBuildings";
+	public static final String SURVEY_AREA_IDS = "surveyAreaIds";
+	public static final String VICINITY_IDS = "vicinityIds";
+	public static final String CRS = "coordinateSystem";
+	public static final String OUTPUT_DIR = "outputDirectory";
+	public static final String POPULATION_TYPE = "populationType";
+	public static final String SCALE_FACTOR = "scaleFactor";
+	public static final String USE_BUILDINGS = "useBuildings";
 	
-	static final String ONLY_WORKING_DAYS = "onlyWorkingDays";
-	static final String USE_HOUSEHOLDS = "useHouseholds";
-	static final String USE_VEHICLES = "useVehicles";
-	static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
+	public static final String ONLY_WORKING_DAYS = "onlyWorkingDays";
+	public static final String USE_HOUSEHOLDS = "useHouseholds";
+	public static final String USE_VEHICLES = "useVehicles";
+	public static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
 	
-	static final String LOCAL_PORT = "localPort";
-	static final String DB_SCHEMA_NAME = "databaseSchemaName";
-	static final String WRITE_DB_OUTPUT = "writeTables";
-	static final String WRITE_INTO_DATAHUB = "intoMobilityDatahub";
+	public static final String LOCAL_PORT = "localPort";
+	public static final String DB_SCHEMA_NAME = "databaseSchemaName";
+	public static final String WRITE_DB_OUTPUT = "writeTables";
+	public static final String WRITE_INTO_DATAHUB = "intoMobilityDatahub";
 	
-	static final String RANDOM_SEED = "randomSeed";
-	static final String OVERWRITE_FILES = "overwriteExistingFiles";
+	public static final String RANDOM_SEED = "randomSeed";
+	public static final String OVERWRITE_FILES = "overwriteExistingFiles";
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	String surveyAreaIds;
 	String vicinityIds;
-	String crs;
+	String crs = "EPSG:32632";
 	String outputDirectory;
-	PopulationType popType;
+	PopulationType popType = PopulationType.complete;
 	
 	Set<AdminUnitEntry> adminUnits;
 	
-	boolean useHouseholds = false;
+	boolean useHouseholds = true;
 	boolean useVehicles = false;
-	boolean onlyWorkingDays = false;
-	boolean useBuildings = false;
+	boolean onlyWorkingDays = true;
+	boolean useBuildings = true;
 	
-	int localPort = 0;
+	int localPort = 2300;
 	final int remotePort = 5432;
 	
 	int numberOfHouseholds = 0;
 	
 	String sshUser;
 	String sshPassword;
-	String databaseUser;
-	String userPassword;
+	String databaseUser = "postgres";
+	String userPassword = "postgres";
 	
 	long randomSeed = 4711L;
 	
@@ -80,6 +80,18 @@ public class Configuration {
 	
 	public enum PopulationType{dummy,commuter,complete};
 	/////////////////////////////////////////////////////////////////////////////////////////	
+	
+	void setParam(String param, Object value){
+		
+		switch(param){
+		case "surveyAreaIds": this.surveyAreaIds = (String) value;
+		case "vicinityIds": this.vicinityIds = (String) value;
+		case "outputDirectory": this.outputDirectory = (String) value;
+		case "overwriteExistingFiles": this.overwriteExistingFiles = (Boolean) value;
+		default: return ;
+		}
+		
+	}
 	
 	/**
 	 * 
@@ -101,7 +113,9 @@ public class Configuration {
 		
 	}
 	
-	Configuration(){};
+	public Configuration(){
+		this.adminUnits = new HashSet<Configuration.AdminUnitEntry>();
+	};
 	
 	/**
 	 * Validates the configuration. Only errors that may eventually cause exceptions are taken into account here.
@@ -408,7 +422,7 @@ public class Configuration {
 		String id;
 		int numberOfHouseholds;
 		
-		AdminUnitEntry(String id, int nHouseholds){
+		public AdminUnitEntry(String id, int nHouseholds){
 			this.id = id;
 			this.numberOfHouseholds = nHouseholds;
 		}
