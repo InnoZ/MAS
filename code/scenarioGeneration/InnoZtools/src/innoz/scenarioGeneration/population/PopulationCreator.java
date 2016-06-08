@@ -16,7 +16,6 @@ import innoz.scenarioGeneration.population.surveys.SurveyPlanWay;
 import innoz.scenarioGeneration.population.surveys.SurveyVehicle;
 import innoz.scenarioGeneration.population.utils.PersonUtils;
 import innoz.scenarioGeneration.utils.ActivityTypes;
-import innoz.scenarioGeneration.utils.Modes;
 import innoz.scenarioGeneration.vehicles.VehicleTypes;
 import innoz.utils.GeometryUtils;
 
@@ -67,8 +66,8 @@ import com.vividsolutions.jts.geom.Geometry;
  * This class generates an initial demand (MATSim population) for a given scenario. </br>
  * 
  * dhosse, 05/16:
- * At the moment, only demand generation from MiD survey data is supported. Possible additional / alternative
- * data sources would be:
+ * At the moment, only demand generation from MiD survey data is supported. Possible additional /
+ * alternative data sources would be:
  * <ul>
  * <li> other surveys (e.g. SrV, MoP)
  * <li> innoz tracks
@@ -1094,11 +1093,11 @@ public class PopulationCreator {
 		if(mode != null){
 			
 			// Bound the maximum walk distance to avoid "endless" walk legs
-//			if(mode.equals(TransportMode.walk) && distance > 2000){
-//				
-//				distance = 500 + random.nextInt(1001);
-//				
-//			}
+			if(mode.equals(TransportMode.walk) && distance > 2000){
+				
+				distance = 500 + random.nextInt(1001);
+				
+			}
 
 		}
 		
@@ -1108,7 +1107,8 @@ public class PopulationCreator {
 		double maxFactor = 1.5;
 		
 		// Get all landuse geometries of the current activity type within the given administrative unit
-		List<Geometry> closest = au.getLanduseGeometries().get(actType);
+		List<Geometry> closest = (List<Geometry>) this.geoinformation.getQuadTreeForActType(actType).getRing
+				(lastActCoord.getX(), lastActCoord.getY(), d * minFactor, d * maxFactor);
 		
 		// If there were any landuse geometries found, randomly choose one of the geometries.
 		// Else pick the landuse geometry closest to the last activity coordinate.
@@ -1116,7 +1116,12 @@ public class PopulationCreator {
 			
 			if(!closest.isEmpty()){
 				
-				double shootingRandom = random.nextDouble() * au.getWeightForKey(actType);
+				double w = 0;
+				for(Geometry g : closest){
+					w+=g.getArea();
+				}
+				
+				double shootingRandom = random.nextDouble() * w;
 				double accumulatedWeight = 0.0d;
 				Geometry area = null;
 				
@@ -1145,13 +1150,26 @@ public class PopulationCreator {
 		
 		} else {
 			
-			closest = (List<Geometry>) this.geoinformation.getQuadTreeForActType(actType).getRing
-			(lastActCoord.getX(), lastActCoord.getY(), d * minFactor, d * maxFactor);
+			closest = au.getLanduseGeometries().get(actType);
 			
 			if(!closest.isEmpty()){
 				
-				int index = random.nextInt(closest.size());
-				Geometry area = closest.get(index);
+				double shootingRandom = random.nextDouble() * au.getWeightForKey(actType);
+				double accumulatedWeight = 0.0d;
+				Geometry area = null;
+				
+				for(Geometry g : closest){
+					
+					accumulatedWeight += g.getArea();
+					if(shootingRandom <= accumulatedWeight){
+						area = g;
+						break;
+					}
+					
+				}
+				
+//				int index = random.nextInt(closest.size());
+//				Geometry area = closest.get(index);
 				return transformation.transform(GeometryUtils.shoot(area,random));
 				
 			} else {

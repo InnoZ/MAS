@@ -45,7 +45,7 @@ import org.matsim.core.utils.misc.Time;
  *
  */
 public class MidDatabaseParser {
-
+	
 	private static final Logger log = Logger.getLogger(MidDatabaseParser.class);
 	
 	public void run(Configuration configuration, SurveyDataContainer container, Geoinformation geoinformation){

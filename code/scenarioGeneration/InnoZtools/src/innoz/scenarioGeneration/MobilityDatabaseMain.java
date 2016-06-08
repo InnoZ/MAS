@@ -60,8 +60,8 @@ public class MobilityDatabaseMain {
 		// Check, if there is a configuration file given
 		if(args.length > 0){
 
-			// create a new configuration that holds all the information and switches needed to generate a
-			// MATSim scenario
+			// create a new configuration that holds all the information and switches needed to
+			// generate a MATSim scenario
 			Configuration configuration = new Configuration(args[0]);
 
 			try {
@@ -101,8 +101,8 @@ public class MobilityDatabaseMain {
 						configuration.getVicinityIds(), scenario);
 				
 				// Create a MATSim network from OpenStreetMap data
-				NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(), geoinformation,
-						configuration);
+				NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(),
+						geoinformation,	configuration);
 				nc.setSimplifyNetwork(true);
 				nc.setCleanNetwork(true);
 				nc.setScaleMaxSpeed(true);
@@ -120,8 +120,9 @@ public class MobilityDatabaseMain {
 						.getOutputDirectory() + "network.xml.gz");
 				new PopulationWriter(scenario.getPopulation()).write(configuration
 						.getOutputDirectory() + "plans.xml.gz");
-				new ObjectAttributesXmlWriter((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES))
-						.writeFile(configuration.getOutputDirectory() + "personAttributes.xml.gz");
+				new ObjectAttributesXmlWriter((ObjectAttributes) scenario.getScenarioElement(
+						PersonUtils.PERSON_ATTRIBUTES)).writeFile(configuration.getOutputDirectory()
+								+ "personAttributes.xml.gz");
 				
 				if(configuration.isUsingHouseholds()){
 					
@@ -152,7 +153,8 @@ public class MobilityDatabaseMain {
 				e.printStackTrace();
 				
 			} catch (IOException | JSchException | FactoryException | InstantiationException |
-					IllegalAccessException | ClassNotFoundException | SQLException | ParseException | NullPointerException e) {
+					IllegalAccessException | ClassNotFoundException | SQLException | ParseException
+					| NullPointerException e) {
 
 				e.printStackTrace();
 				

@@ -133,7 +133,6 @@ public class DatabaseReader {
 				for(AdminUnitEntry entry : configuration.getAdminUnitEntries()){
 
 					String id = entry.getId().startsWith("0") ? entry.getId().substring(1) : entry.getId();
-//					String districtId = id.substring(0, 5);
 					
 					District d = this.geoinformation.getAdminUnits().get(id);
 					
@@ -190,9 +189,9 @@ public class DatabaseReader {
 	 * @throws MismatchedDimensionException
 	 * @throws TransformException
 	 */
-	private void readAdminBorders(Connection connection, Configuration configuration, String surveyAreaIdsString,
-			String vicinityIdsString)
-			throws SQLException, NoSuchAuthorityCodeException, FactoryException, ParseException,
+	private void readAdminBorders(Connection connection, Configuration configuration,
+			String surveyAreaIdsString, String vicinityIdsString) throws SQLException,
+			NoSuchAuthorityCodeException, FactoryException, ParseException,
 			MismatchedDimensionException, TransformException {
 
 		log.info("Reading administrative borders from database...");
@@ -200,11 +199,15 @@ public class DatabaseReader {
 		// A collection to temporarily store all geometries
 		List<Geometry> geometryCollection = new ArrayList<Geometry>();
 		
-		getAndAddGeodataFromIdSet(connection, configuration, CollectionUtils.stringToSet(surveyAreaIdsString), geometryCollection, true);
-		this.geoinformation.setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection).getEnvelope());
+		getAndAddGeodataFromIdSet(connection, configuration, CollectionUtils.stringToSet(
+				surveyAreaIdsString), geometryCollection, true);
+		this.geoinformation.setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection)
+				.getEnvelope());
 		if(vicinityIdsString != null){
-			getAndAddGeodataFromIdSet(connection, configuration, CollectionUtils.stringToSet(vicinityIdsString), geometryCollection, false);
-			this.geoinformation.setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection).getEnvelope());
+			getAndAddGeodataFromIdSet(connection, configuration, CollectionUtils.stringToSet(
+					vicinityIdsString), geometryCollection, false);
+			this.geoinformation.setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection)
+					.getEnvelope());
 		}
 		
 		// This is needed to transform the WGS84 geometries into the specified CRS
@@ -212,16 +215,18 @@ public class DatabaseReader {
 				CRS.decode(configuration.getCrs(), true));
 		
 		// Get the survey area by building the bounding box of all geometries 
-		this.geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection).getEnvelope());
+		this.geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection)
+				.getEnvelope());
 		
-		this.boundingBox = JTS.transform((Geometry) this.geoinformation.getCompleteGeometry().clone(), t)
-				.getEnvelope();
+		this.boundingBox = JTS.transform((Geometry) this.geoinformation.getCompleteGeometry()
+				.clone(), t).getEnvelope();
 		
 	}
 	
-	private void getAndAddGeodataFromIdSet(Connection connection, Configuration configuration, Set<String> ids,
-			List<Geometry> geometryCollection, boolean surveyArea) throws SQLException, NoSuchAuthorityCodeException,
-			FactoryException, ParseException, MismatchedDimensionException, TransformException{
+	private void getAndAddGeodataFromIdSet(Connection connection, Configuration configuration,
+			Set<String> ids, List<Geometry> geometryCollection, boolean surveyArea)
+					throws SQLException, NoSuchAuthorityCodeException, FactoryException,
+					ParseException, MismatchedDimensionException, TransformException{
 		
 		// Create a new statement to execute the sql query
 		Statement statement = connection.createStatement();
@@ -247,9 +252,11 @@ public class DatabaseReader {
 		}
 		
 		// Execute the query and store the returned valued inside a set.
-		ResultSet set = statement.executeQuery("select " + DatabaseConstants.BLAND + "," + DatabaseConstants.MUN_KEY + ", cca_2,"
-				+ DatabaseConstants.functions.st_astext.name() + "(" + DatabaseConstants.ATT_GEOM + ")" + " from "
-				+ DatabaseConstants.schemata.gadm.name() + "." + DatabaseConstants.tables.districts.name() + " where" + builder.toString());
+		String q = "select " + DatabaseConstants.BLAND + "," + DatabaseConstants.MUN_KEY + ", cca_2,"
+				+ DatabaseConstants.functions.st_astext.name() + "(" + DatabaseConstants.ATT_GEOM +
+				")" + " from " + DatabaseConstants.schemata.gadm.name() + "." +
+				DatabaseConstants.tables.districts.name() + " where" + builder.toString();
+		ResultSet set = statement.executeQuery(q);
 
 		// Go through all the results
 		while(set.next()){
@@ -264,7 +271,8 @@ public class DatabaseReader {
 				if(district.startsWith("0")) district = district.substring(1);
 			}
 			
-			// Check if the wkb string returned is neither null nor empty, otherwise this would crash
+			// Check if the wkb string returned is neither null nor empty, otherwise this would
+			// crash
 			if(g != null){
 				
 				if(!g.isEmpty()){
@@ -279,15 +287,18 @@ public class DatabaseReader {
 					if(district != null){
 
 						if(!this.geoinformation.getAdminUnits().containsKey(district)){
-							this.geoinformation.getAdminUnits().put(district, new District(district));
+							this.geoinformation.getAdminUnits().put(district,
+									new District(district));
 						}
-						this.geoinformation.getAdminUnits().get(district).getAdminUnits().put(key, au);
+						this.geoinformation.getAdminUnits().get(district).getAdminUnits()
+							.put(key, au);
 						
 					}
 					
 					this.geoinformation.addSubUnit(au);
 					
-					// Store all geometries inside a collection to get the survey area geometry in the end
+					// Store all geometries inside a collection to get the survey area geometry in
+					// the end
 					geometryCollection.add(au.getGeometry());
 					
 				}
@@ -312,13 +323,14 @@ public class DatabaseReader {
 	 * @throws FactoryException 
 	 * @throws NoSuchAuthorityCodeException 
 	 */
-	private void readOsmData(Connection connection, Configuration configuration) throws NoSuchAuthorityCodeException,
-		FactoryException{
+	private void readOsmData(Connection connection, Configuration configuration)
+			throws NoSuchAuthorityCodeException, FactoryException{
 
 		final CoordinateReferenceSystem fromCRS = CRS.decode(Geoinformation.AUTH_KEY_WGS84, true);
 		final CoordinateReferenceSystem toCRS = CRS.decode(configuration.getCrs(), true);
 		
-		this.ct = TransformationFactory.getCoordinateTransformation(fromCRS.toString(), toCRS.toString());
+		this.ct = TransformationFactory.getCoordinateTransformation(fromCRS.toString(),
+				toCRS.toString());
 		
 		log.info("Reading osm data...");
 		
@@ -419,26 +431,32 @@ public class DatabaseReader {
 	 * @throws ParseException
 	 * @throws SQLException
 	 */
-	private void getPolygonBasedLanduseData(Connection connection) throws ParseException, SQLException {
+	private void getPolygonBasedLanduseData(Connection connection) throws ParseException,
+		SQLException {
 		
 		log.info("Processing polygon landuse data...");
 		
 		// Create a new statement to execute the sql query
 		Statement statement = connection.createStatement();
 		// Execute the query and store the returned valued inside a set.
-		ResultSet set = statement.executeQuery("select " + DatabaseConstants.ATT_LANDUSE + ", " + DatabaseConstants.ATT_AMENITY +  ", "
-				+ DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + ", " + DatabaseConstants.functions.st_astext.name() + "("
-				+ DatabaseConstants.ATT_WAY + ") from " + DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_polygon.name()
-				+ " where "	+ DatabaseConstants.functions.st_within.name() + "(" + DatabaseConstants.ATT_WAY + ", "
-				+ DatabaseConstants.functions.st_geomfromtext.name() + "('"	+ this.geoinformation.getCompleteGeometry().toString()
-				+ "', 4326)) and (" + DatabaseConstants.ATT_LANDUSE + " is not null" + " or " + DatabaseConstants.ATT_AMENITY
-				+ " is not null or " + DatabaseConstants.ATT_LEISURE + " is not null or " + DatabaseConstants.ATT_SHOP + " is not null)"
-				+ " and " + DatabaseConstants.ATT_BUILDING + " is null;");
+		ResultSet set = statement.executeQuery("select " + DatabaseConstants.ATT_LANDUSE + ", "
+				+ DatabaseConstants.ATT_AMENITY +  ", " + DatabaseConstants.ATT_LEISURE + ", "
+				+ DatabaseConstants.ATT_SHOP + ", " + DatabaseConstants.functions.st_astext.name()
+				+ "(" + DatabaseConstants.ATT_WAY + ") from " + DatabaseConstants.schemata.osm
+				.name() + "." + DatabaseConstants.tables.osm_polygon.name() + " where "
+				+ DatabaseConstants.functions.st_within.name() + "(" + DatabaseConstants.ATT_WAY
+				+ ", " + DatabaseConstants.functions.st_geomfromtext.name() + "('"
+				+ this.geoinformation.getCompleteGeometry().toString() + "', 4326)) and ("
+				+ DatabaseConstants.ATT_LANDUSE + " is not null" + " or " + DatabaseConstants
+				.ATT_AMENITY + " is not null or " + DatabaseConstants.ATT_LEISURE + " is not null"
+				+ " or " + DatabaseConstants.ATT_SHOP + " is not null) and " 
+				+ DatabaseConstants.ATT_BUILDING + " is null;");
 		
 		// Go through all results
 		while(set.next()){
 			
-			Geometry geometry = wktReader.read(set.getString(DatabaseConstants.functions.st_astext.name()));
+			Geometry geometry = wktReader.read(set.getString(DatabaseConstants.functions.st_astext
+					.name()));
 			String landuse = set.getString(DatabaseConstants.ATT_LANDUSE);
 			String amenity = set.getString(DatabaseConstants.ATT_AMENITY);
 			String leisure = set.getString(DatabaseConstants.ATT_LEISURE);
@@ -511,9 +529,11 @@ public class DatabaseReader {
 		
 		Statement statement = connection.createStatement();
 		
-		ResultSet set = statement.executeQuery("select " + DatabaseConstants.ATT_OSM_ID + ", " + DatabaseConstants.ATT_NODES + ", "
-				+ DatabaseConstants.ATT_TAGS + " from " + DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_ways.name() +
-				" where " + DatabaseConstants.ATT_TAGS + " @> ARRAY['" + DatabaseConstants.ATT_LANDUSE + "'];");
+		ResultSet set = statement.executeQuery("select " + DatabaseConstants.ATT_OSM_ID + ", "
+				+ DatabaseConstants.ATT_NODES + ", " + DatabaseConstants.ATT_TAGS + " from " +
+				DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_ways
+				.name() + " where " + DatabaseConstants.ATT_TAGS + " @> ARRAY['" +
+				DatabaseConstants.ATT_LANDUSE + "'];");
 		
 		while(set.next()){
 			
@@ -580,9 +600,11 @@ public class DatabaseReader {
 		// Parse relations for landuse tags to get multipolygon geometries
 		Statement statement = connection.createStatement();
 			
-		ResultSet set = statement.executeQuery("select " + DatabaseConstants.ATT_PARTS + ", " + DatabaseConstants.ATT_MEMBERS + ", "
-				+ DatabaseConstants.ATT_TAGS + " from " + DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_rels.name() +
-				" where " + DatabaseConstants.ATT_TAGS + " @> ARRAY['" + DatabaseConstants.ATT_LANDUSE + "'];");
+		ResultSet set = statement.executeQuery("select " + DatabaseConstants.ATT_PARTS + ", "
+				+ DatabaseConstants.ATT_MEMBERS + ", " + DatabaseConstants.ATT_TAGS + " from "
+				+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_rels
+				.name() + " where " + DatabaseConstants.ATT_TAGS + " @> ARRAY['"
+				+ DatabaseConstants.ATT_LANDUSE + "'];");
 		
 		while(set.next()){
 			
@@ -638,11 +660,12 @@ public class DatabaseReader {
 			
 	}
 	
-	private Map<Long,LinearRing> getAffiliatedWays(Connection connection, String arguments) throws SQLException{
+	private Map<Long,LinearRing> getAffiliatedWays(Connection connection, String arguments)
+			throws SQLException{
 
 		Statement statement = connection.createStatement();
-		ResultSet set = statement.executeQuery("select * from " + DatabaseConstants.schemata.osm.name() + "."
-				+ DatabaseConstants.tables.osm_ways.name() + " where" + arguments);
+		ResultSet set = statement.executeQuery("select * from " + DatabaseConstants.schemata.osm
+				.name() + "." + DatabaseConstants.tables.osm_ways.name() + " where" + arguments);
 		
 		Map<Long, LinearRing> linearRingSet = new HashMap<>();
 		
@@ -679,11 +702,12 @@ public class DatabaseReader {
 		
 	}
 	
-	private LinearRing createLinearRing(Connection connection, String arguments, Long[] nodes) throws SQLException{
+	private LinearRing createLinearRing(Connection connection, String arguments, Long[] nodes)
+			throws SQLException{
 		
 		Statement statement = connection.createStatement();
-		ResultSet set = statement.executeQuery("select * from " + DatabaseConstants.schemata.osm.name() + "."
-				+ DatabaseConstants.tables.osm_nodes.name()	+ " where" + arguments);
+		ResultSet set = statement.executeQuery("select * from " + DatabaseConstants.schemata.osm
+				.name() + "." + DatabaseConstants.tables.osm_nodes.name() + " where" + arguments);
 		
 		Coordinate[] coordinates = new Coordinate[nodes.length];
 		
@@ -735,7 +759,8 @@ public class DatabaseReader {
 	 */
 	private static String getLanduseType(String landuseTag){
 		
-		if(landuseTag.equals("college") || landuseTag.equals("school") || landuseTag.equals("university")){
+		if(landuseTag.equals("college") || landuseTag.equals("school") || landuseTag.equals(
+				"university")){
 			
 			return ActivityTypes.EDUCATION;
 			
@@ -747,7 +772,8 @@ public class DatabaseReader {
 			
 			return ActivityTypes.OTHER;
 			
-		} else if(landuseTag.equals("recreation_ground") || landuseTag.equals("park") || landuseTag.equals("village_green")){
+		} else if(landuseTag.equals("recreation_ground") || landuseTag.equals("park")
+				|| landuseTag.equals("village_green")){
 			
 			return ActivityTypes.LEISURE;
 			
@@ -777,8 +803,8 @@ public class DatabaseReader {
 		
 		log.info("Reading in amenities...");
 
-		// Create a statement and execute an SQL query to retrieve all amenities that have a tag containing a shopping, leisure or any
-		// other activity.
+		// Create a statement and execute an SQL query to retrieve all amenities that have a tag
+		// containing a shopping, leisure or any other activity.
 		Statement statement = connection.createStatement();
 		ResultSet set = statement.executeQuery("select " + DatabaseConstants.functions.st_astext.name() + "(" + DatabaseConstants.ATT_WAY
 				+ "), "	+ DatabaseConstants.ATT_AMENITY + ", " + DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + " from "
