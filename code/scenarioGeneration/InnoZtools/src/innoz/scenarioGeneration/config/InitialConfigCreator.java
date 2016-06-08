@@ -1,13 +1,13 @@
 package innoz.scenarioGeneration.config;
 
+import innoz.config.Configuration;
+import innoz.scenarioGeneration.utils.ActivityTypes;
+
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
-
-import innoz.config.Configuration;
-import innoz.scenarioGeneration.utils.ActivityTypes;
+import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams;
 
 public class InitialConfigCreator {
 	
@@ -94,6 +94,11 @@ public class InitialConfigCreator {
 		config.planCalcScore().getOrCreateModeParams(TransportMode.pt);
 		config.planCalcScore().getOrCreateModeParams(TransportMode.ride);
 		config.planCalcScore().getOrCreateModeParams(TransportMode.walk);
+		
+		ModeRoutingParams pars = new ModeRoutingParams(TransportMode.other);
+		pars.setBeelineDistanceFactor(1.3);
+		pars.setTeleportedModeSpeed(30/3.6);
+		config.plansCalcRoute().addModeRoutingParams(pars);
 		
 	}
 
