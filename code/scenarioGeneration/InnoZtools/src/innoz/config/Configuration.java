@@ -45,28 +45,21 @@ public class Configuration {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
+	//CONFIGURABLE///////////////////////////////////////////////////////////////////////////
 	String surveyAreaIds;
 	String vicinityIds;
 	String crs = "EPSG:32632";
 	String outputDirectory;
 	PopulationType popType = PopulationType.complete;
 	
-	Set<AdminUnitEntry> adminUnits;
-	
 	boolean useHouseholds = true;
 	boolean useVehicles = false;
 	boolean onlyWorkingDays = true;
 	boolean useBuildings = true;
 	
-	int localPort = 2300;
-	final int remotePort = 5432;
-	
 	int numberOfHouseholds = 0;
 	
-	String sshUser;
-	String sshPassword;
-	String databaseUser = "postgres";
-	String userPassword = "postgres";
+	Set<AdminUnitEntry> adminUnits;
 	
 	long randomSeed = 4711L;
 	
@@ -78,16 +71,29 @@ public class Configuration {
 	
 	boolean overwriteExistingFiles = false;
 	
+	//NON-CONFIGURABLE///////////////////////////////////////////////////////////////////////
+	int localPort = 2300;
+	final int remotePort = 5432;
+	
+	String sshUser;
+	String sshPassword;
+	String databaseUser = "postgres";
+	String userPassword = "postgres";
+	
 	public enum PopulationType{dummy,commuter,complete};
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
 	void setParam(String param, Object value){
 		
 		switch(param){
-		case "surveyAreaIds": this.surveyAreaIds = (String) value;
-		case "vicinityIds": this.vicinityIds = (String) value;
-		case "outputDirectory": this.outputDirectory = (String) value;
-		case "overwriteExistingFiles": this.overwriteExistingFiles = (Boolean) value;
+		case SURVEY_AREA_IDS: this.surveyAreaIds = (String) value;
+			break;
+		case VICINITY_IDS: this.vicinityIds = (String) value;
+			break;
+		case OUTPUT_DIR: this.outputDirectory = (String) value;
+			break;
+		case OVERWRITE_FILES: this.overwriteExistingFiles = (Boolean) value;
+			break;
 		default: return ;
 		}
 		

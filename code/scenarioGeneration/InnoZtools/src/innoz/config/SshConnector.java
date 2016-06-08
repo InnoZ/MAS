@@ -31,7 +31,7 @@ public class SshConnector {
 	private static final Logger log = Logger.getLogger(SshConnector.class);
 	static Session session;
 	
-	public static void connect(Configuration configuration) throws JSchException, IOException{
+	public static boolean connect(Configuration configuration) throws JSchException, IOException{
 		
 		log.info("Trying to establish ssh tunnel to mobility database server...");
 		
@@ -64,6 +64,8 @@ public class SshConnector {
 	    
 	    log.info("Ssh tunnel established.");
 		
+	    return session != null;
+	    
 	}
 	
 	static void connect(String sshUser, String sshPassword, int localPort, int remotePort) throws JSchException{

@@ -1,8 +1,8 @@
 package innoz.gui;
 
 import innoz.config.Configuration;
-import innoz.config.ConfigurationParameterSetter;
 import innoz.config.Configuration.AdminUnitEntry;
+import innoz.config.ConfigurationParameterSetter;
 import innoz.config.SshConnector;
 import innoz.io.database.DatabaseReader;
 import innoz.io.database.DatabaseUpdater;
@@ -13,6 +13,7 @@ import innoz.scenarioGeneration.population.PopulationCreator;
 import innoz.scenarioGeneration.population.utils.PersonUtils;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -21,10 +22,13 @@ import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -34,6 +38,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import org.matsim.api.core.v01.Scenario;
@@ -67,10 +72,17 @@ public final class MainFrame {
 	private JTextField nHouseholdsTextField;
 	private JLabel outputDir;
 	private JCheckBox overwrite;
+	private JButton runButton;
 	
 	public static void main(String args[]) {
 
-		new MainFrame();
+//		EventQueue.invokeLater(new Runnable() {
+//			
+//			@Override
+//			public void run() {
+				new MainFrame();
+//			}
+//		});
 		
 	}
 	
@@ -80,18 +92,44 @@ public final class MainFrame {
 		this.listener = new RunnerActionListener();
 		
 		this.frame = new JFrame("InnoZ scenario generation toolbox");
+
+		try {
+			this.frame.setIconImage(ImageIO.read(new File("../../../ressources/background.png")));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		this.frame.setSize(new Dimension(1024, 768));
+		this.frame.setLayout(new BorderLayout());
 		
-		this.frame.setSize(new Dimension(800, 600));
+		try {
+			this.frame.setContentPane(new JLabel(new ImageIcon(ImageIO.read(new File("../../../ressources/background.png")))));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		this.frame.setLayout(new BorderLayout());
 		
 		this.frame.add(this.createView(), BorderLayout.CENTER);
+		this.mainPanel.setBackground(new Color(1,1,1,0.5f));
 		this.mainPanel.setEnabled(false);
 		
 		JPanel footer = this.createFooter();
 		this.frame.add(footer, BorderLayout.NORTH);
+		footer.setPreferredSize(new Dimension(1024,100));
+		footer.setBackground(new Color(0,0.59f,0.84f,1.0f));
+
+		JTextArea textArea = new JTextArea();
+		textArea.setPreferredSize(new Dimension(1024,100));
+		TextAreaOutputStreamContainer comp = new TextAreaOutputStreamContainer(textArea, new TextAreaOutputStream(textArea, ""));
+		this.frame.add(comp, BorderLayout.SOUTH);
 		
 		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.frame.pack();
 		this.frame.setVisible(true);
+		
+		System.out.println("initialized");
 		
 	}
 	
@@ -103,8 +141,10 @@ public final class MainFrame {
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.ipady = 10;
+		c.ipadx = 100;
 		
 		JLabel l = new JLabel("Scenario generation parameters");
+		l.setBackground(Color.WHITE);
 		c.gridx = 0;
 		c.gridy = 0;
 		c.gridwidth = 2;
@@ -200,6 +240,8 @@ public final class MainFrame {
 					outputDir.setText(chooser.getSelectedFile().getAbsolutePath() + "/");
 				}
 				
+				frame.repaint();
+				
 			}
 		});
 		c.gridx = 2;
@@ -254,7 +296,7 @@ public final class MainFrame {
 		householdsGroup.add(households);
 		householdsGroup.add(noHouseholds);
 		
-		JButton runButton = new JButton("Run");
+		runButton = new JButton("Run");
 		runButton.setEnabled(false);
 		c.gridx = 1;
 		c.gridy = 13;
@@ -269,6 +311,8 @@ public final class MainFrame {
 
 		JLabel label = new JLabel("Status of MobilityDataHub connection:");
 		JLabel connectionStatus = new JLabel("<html><font color='red'>Not connected</font></html>");
+		connectionStatus.setBackground(Color.WHITE);
+		connectionStatus.setPreferredSize(new Dimension(120,40));
 		JButton connection = new JButton("Connect");
 		
 		connection.addActionListener(new SshConnectionListener(connection, connectionStatus));
@@ -288,6 +332,8 @@ public final class MainFrame {
 			component.setEnabled(true);
 		}
 		
+		this.frame.repaint();
+		
 	}
 	
 	private void disableComponents(){
@@ -295,6 +341,8 @@ public final class MainFrame {
 		for(Component component : mainPanel.getComponents()){
 			component.setEnabled(false);
 		}
+		
+		this.frame.repaint();
 		
 	}
 	
@@ -315,9 +363,11 @@ public final class MainFrame {
 			
 			if(this.status.getText().equals("<html><font color='red'>Not connected</font></html>")){
 				
+				boolean established = false;
+				
 				try {
 					
-					SshConnector.connect(configuration);
+					established = SshConnector.connect(configuration);
 				
 				} catch (JSchException | IOException e1) {
 
@@ -325,9 +375,11 @@ public final class MainFrame {
 				
 				}
 				
-				this.status.setText("<html><font color='green'>Connected</font></html>");
-				this.button.setText("Disconnect");
-				enableComponents();
+				if(established){
+					this.status.setText("<html><font color='green'>Connected</font></html>");
+					this.button.setText("Disconnect");
+					enableComponents();
+				}
 				
 			} else {
 				
@@ -347,15 +399,55 @@ public final class MainFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			
+			Thread t = new Thread(new ScenarioGeneration());
+			t.start();
+						
+		}
+		
+	}
+	
+	class ImagePanel extends JComponent {
+		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 7280737010865829760L;
+		
+		private Image image;
+		
+		public ImagePanel(Image image){
+			this.image = image;
+		}
+		
+		@Override
+		protected void paintComponent(Graphics g){
+			super.paintComponent(g);
+			g.drawImage(image, 0, 0, this);
+		}
+		
+	}
+	
+	class ScenarioGeneration implements Runnable{
+
+		@Override
+		public void run() {
+
+			runButton.setEnabled(false);
+			
+			System.out.println("starting scenario generation...");
+			
 			ConfigurationParameterSetter.set(configuration, Configuration.SURVEY_AREA_IDS, surveyAreaIdsTextField.getText());
 
+			int nHouseholds = !nHouseholdsTextField.getText().equals("") ? Integer.parseInt(nHouseholdsTextField.getText()) : 0;
+			
 			for(String s : configuration.getSurveyAreaIds().split(",")){
-				configuration.getAdminUnitEntries().add(new AdminUnitEntry(s, Integer.parseInt(nHouseholdsTextField.getText())));
+				configuration.getAdminUnitEntries().add(new AdminUnitEntry(s, nHouseholds));
 			}
 			
-			String vicinity = surveyAreaIdsTextField.getText().length() > 0 ? surveyAreaIdsTextField.getText() : null;
+			String vicinity = vicinityIdsTextField.getText().length() > 0 ? vicinityIdsTextField.getText() : null;
 			ConfigurationParameterSetter.set(configuration, Configuration.VICINITY_IDS, vicinity);
 			ConfigurationParameterSetter.set(configuration, Configuration.OVERWRITE_FILES, overwrite.isSelected());
+			ConfigurationParameterSetter.set(configuration, Configuration.OUTPUT_DIR, outputDir.getText());
 			
 			configuration.dumpSettings();
 			
@@ -373,6 +465,8 @@ public final class MainFrame {
 				((ScenarioImpl)scenario).createVehicleContainer();
 			}
 			
+			System.out.println("reading from database...");
+			
 			// Container for geoinformation (admin borders, landuse)
 			Geoinformation geoinformation = new Geoinformation();
 
@@ -380,6 +474,8 @@ public final class MainFrame {
 			DatabaseReader dbReader = new DatabaseReader(geoinformation);
 			dbReader.readGeodataFromDatabase(configuration, configuration.getSurveyAreaIds(),
 					configuration.getVicinityIds(), scenario);
+			
+			System.out.println("creating network...");
 			
 			// Create a MATSim network from OpenStreetMap data
 			NetworkCreatorFromPsql nc;
@@ -394,6 +490,8 @@ public final class MainFrame {
 				e1.printStackTrace();
 			}
 			
+			System.out.println("creating plans...");
+			
 			// Create a MATSim population
 			try {
 				new PopulationCreator(geoinformation).run(configuration, scenario);
@@ -404,6 +502,8 @@ public final class MainFrame {
 			// Create an initial MATSim config file and write it into the output directory
 			Config config = InitialConfigCreator.create(configuration);
 			new ConfigWriter(config).write(configuration.getOutputDirectory() + "config.xml.gz");
+			
+			System.out.println("writing output...");
 			
 			// Dump scenario elements into the output directory
 			new NetworkWriter(scenario.getNetwork()).write(configuration
@@ -436,27 +536,11 @@ public final class MainFrame {
 				
 			}
 			
-		}
-		
-	}
-	
-	class ImagePanel extends JComponent {
-		
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 7280737010865829760L;
-		
-		private Image image;
-		
-		public ImagePanel(Image image){
-			this.image = image;
-		}
-		
-		@Override
-		protected void paintComponent(Graphics g){
-			super.paintComponent(g);
-			g.drawImage(image, 0, 0, this);
+			System.out.println("done.");
+
+			runButton.setEnabled(true);
+			
+			
 		}
 		
 	}
