@@ -20,10 +20,17 @@ public class TextAreaOutputStreamContainer extends JPanel{
 	public TextAreaOutputStreamContainer(final JTextArea textArea, final TextAreaOutputStream taos){
 		
 		this.textArea = textArea;
+		this.textArea.setCaretPosition(this.textArea.getDocument().getLength());
+		this.textArea.setEditable(false);
 		this.taos = taos;
-		this.setLayout(new BorderLayout());
-		this.add(new JScrollPane(textArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
+		
 		System.setOut(new PrintStream(taos));
+		
+		this.setLayout(new BorderLayout());
+		JScrollPane scrollPane = new JScrollPane(textArea);
+		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPane.setAutoscrolls(true);
+		this.add(scrollPane);
 		
 	}
 	

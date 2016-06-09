@@ -1,0 +1,412 @@
+1001000; Flensburg, Kreisfreie Stadt;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+1002000; Kiel, Landeshauptstadt, Kreisfreie Stadt;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+1003000; Lübeck, Hansestadt, Kreisfreie Stadt;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+1004000; Neumünster, Kreisfreie Stadt;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+1051000; Dithmarschen, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+1053000; Herzogtum Lauenburg, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+1054000; Nordfriesland, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+1055000; Ostholstein, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+1056000; Pinneberg, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+1057000; Plön, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+1058000; Rendsburg-Eckernförde, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+1059000; Schleswig-Flensburg, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+1060000; Segeberg, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+1061000; Steinburg, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+1062000; Stormarn, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+2000000; Hamburg;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+3101000; Braunschweig, Kreisfreie Stadt;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+3102000; Salzgitter, Kreisfreie Stadt;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+3103000; Wolfsburg, Kreisfreie Stadt;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+3151000; Gifhorn, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+3152000; Göttingen, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+3153000; Goslar, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+3154000; Helmstedt, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+3155000; Northeim, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+3156000; Osterode am Harz, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+3157000; Peine, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+3158000; Wolfenbüttel, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+3241000; Region Hannover, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+3251000; Diepholz, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+3252000; Hameln-Pyrmont, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+3254000; Hildesheim, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+3255000; Holzminden, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+3256000; Nienburg (Weser), Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+3257000; Schaumburg, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+3351000; Celle, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+3352000; Cuxhaven, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+3353000; Harburg, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+3354000; Lüchow-Dannenberg, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+3355000; Lüneburg, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+3356000; Osterholz, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+3357000; Rotenburg (Wümme), Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+3358000; Soltau-Fallingbostel, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+3359000; Stade, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+3360000; Uelzen, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+3361000; Verden, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+3401000; Delmenhorst, Kreisfreie Stadt;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+3402000; Emden, Kreisfreie Stadt;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+3403000; Oldenburg (Oldenburg), Kreisfreie Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+3404000; Osnabrück, Kreisfreie Stadt;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+3405000; Wilhelmshaven, Kreisfreie Stadt;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+3451000; Ammerland, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+3452000; Aurich, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+3453000; Cloppenburg, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+3454000; Emsland, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+3455000; Friesland, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+3456000; Grafschaft Bentheim, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+3457000; Leer, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+3458000; Oldenburg, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+3459000; Osnabrück, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+3460000; Vechta, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+3461000; Wesermarsch, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+3462000; Wittmund, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+4011000; Bremen, Kreisfreie Stadt;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+4012000; Bremerhaven, Kreisfreie Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+5111000; Düsseldorf, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5112000; Duisburg, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5113000; Essen, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5114000; Krefeld, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5116000; Mönchengladbach, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5117000; Mülheim an der Ruhr, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5119000; Oberhausen, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5120000; Remscheid, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5122000; Solingen, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5124000; Wuppertal, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5154000; Kleve, Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5158000; Mettmann, Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5162000; Rhein-Kreis Neuss, Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5166000; Viersen, Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5170000; Wesel, Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5314000; Bonn, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5315000; Köln, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5316000; Leverkusen, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5334000; Aachen, Städteregion;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5358000; Düren, Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5362000; Rhein-Erft-Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5366000; Euskirchen, Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5370000; Heinsberg, Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5374000; Oberbergischer Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5378000; Rheinisch-Bergischer Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5382000; Rhein-Sieg-Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5512000; Bottrop, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5513000; Gelsenkirchen, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5515000; Münster, Kreisfreie Stadt;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+5554000; Borken, Kreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+5558000; Coesfeld, Kreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+5562000; Recklinghausen, Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5566000; Steinfurt, Kreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+5570000; Warendorf, Kreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+5711000; Bielefeld, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5754000; Gütersloh, Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5758000; Herford, Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5762000; Höxter, Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+5766000; Lippe, Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5770000; Minden-Lübbecke, Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5774000; Paderborn, Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+5911000; Bochum, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5913000; Dortmund, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5914000; Hagen, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5915000; Hamm, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5916000; Herne, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5954000; Ennepe-Ruhr-Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5958000; Hochsauerlandkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+5962000; Märkischer Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+5966000; Olpe, Kreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+5970000; Siegen-Wittgenstein, Kreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+5974000; Soest, Kreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+5978000; Unna, Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+6411000; Darmstadt, Wissenschaftsstadt, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+6412000; Frankfurt am Main, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+6413000; Offenbach am Main, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+6414000; Wiesbaden, Landeshauptstadt, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+6431000; Bergstraße, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+6432000; Darmstadt-Dieburg, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+6433000; Groß-Gerau, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+6434000; Hochtaunuskreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+6435000; Main-Kinzig-Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+6436000; Main-Taunus-Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+6437000; Odenwaldkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+6438000; Offenbach, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+6439000; Rheingau-Taunus-Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+6440000; Wetteraukreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+6531000; Gießen, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+6532000; Lahn-Dill-Kreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+6533000; Limburg-Weilburg, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+6534000; Marburg-Biedenkopf, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+6535000; Vogelsbergkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+6611000; Kassel, documenta-Stadt, Kreisfreie Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+6631000; Fulda, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+6632000; Hersfeld-Rotenburg, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+6633000; Kassel, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+6634000; Schwalm-Eder-Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+6635000; Waldeck-Frankenberg, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+6636000; Werra-Meißner-Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+7111000; Koblenz, Kreisfreie Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+7131000; Ahrweiler, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+7132000; Altenkirchen (Westerwald), Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+7133000; Bad Kreuznach, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+7134000; Birkenfeld, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+7135000; Cochem-Zell, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+7137000; Mayen-Koblenz, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+7138000; Neuwied, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+7140000; Rhein-Hunsrück-Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+7141000; Rhein-Lahn-Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+7143000; Westerwaldkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+7211000; Trier, Kreisfreie Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+7231000; Bernkastel-Wittlich, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+7232000; Eifelkreis Bitburg-Prüm;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+7233000; Vulkaneifel, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+7235000; Trier-Saarburg, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+7311000; Frankenthal (Pfalz), Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+7312000; Kaiserslautern, Kreisfreie Stadt;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+7313000; Landau in der Pfalz, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+7314000; Ludwigshafen am Rhein, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+7315000; Mainz, Kreisfreie Stadt;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+7316000; Neustadt an der Weinstraße, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+7317000; Pirmasens, Kreisfreie Stadt;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+7318000; Speyer, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+7319000; Worms, Kreisfreie Stadt;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+7320000; Zweibrücken, Kreisfreie Stadt;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+7331000; Alzey-Worms, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+7332000; Bad Dürkheim, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+7333000; Donnersbergkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+7334000; Germersheim, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+7335000; Kaiserslautern, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+7336000; Kusel, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+7337000; Südliche Weinstraße, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+7338000; Rhein-Pfalz-Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+7339000; Mainz-Bingen, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+7340000; Südwestpfalz, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+8111000; Stuttgart, Landeshauptstadt, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+8115000; Böblingen, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+8116000; Esslingen, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+8117000; Göppingen, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+8118000; Ludwigsburg, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+8119000; Rems-Murr-Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+8121000; Heilbronn, Kreisfreie Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+8125000; Heilbronn, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+8126000; Hohenlohekreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+8127000; Schwäbisch Hall, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+8128000; Main-Tauber-Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+8135000; Heidenheim, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+8136000; Ostalbkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+8211000; Baden-Baden, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+8212000; Karlsruhe, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+8215000; Karlsruhe, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+8216000; Rastatt, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+8221000; Heidelberg, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+8222000; Mannheim, Universitätsstadt, Kreisfreie Stadt;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+8225000; Neckar-Odenwald-Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+8226000; Rhein-Neckar-Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+8231000; Pforzheim, Kreisfreie Stadt;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+8235000; Calw, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+8236000; Enzkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+8237000; Freudenstadt, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+8311000; Freiburg im Breisgau, Kreisfreie Stadt;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+8315000; Breisgau-Hochschwarzwald, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+8316000; Emmendingen, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+8317000; Ortenaukreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+8325000; Rottweil, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+8326000; Schwarzwald-Baar-Kreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+8327000; Tuttlingen, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+8335000; Konstanz, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+8336000; Lörrach, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+8337000; Waldshut, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+8415000; Reutlingen, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+8416000; Tübingen, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+8417000; Zollernalbkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+8421000; Ulm, Universitätsstadt, Kreisfreie Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+8425000; Alb-Donau-Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+8426000; Biberach, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+8435000; Bodenseekreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+8436000; Ravensburg, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+8437000; Sigmaringen, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+9161000; Ingolstadt, Kreisfreie Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+9162000; München, Landeshauptstadt, Kreisfreie Stadt;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9163000; Rosenheim, Kreisfreie Stadt;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9171000; Altötting, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9172000; Berchtesgadener Land, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9173000; Bad Tölz-Wolfratshausen, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9174000; Dachau, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9175000; Ebersberg, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9176000; Eichstätt, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+9177000; Erding, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9178000; Freising, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9179000; Fürstenfeldbruck, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9180000; Garmisch-Partenkirchen, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9181000; Landsberg am Lech, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9182000; Miesbach, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9183000; Mühldorf a.Inn, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9184000; München, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9185000; Neuburg-Schrobenhausen, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+9186000; Pfaffenhofen a.d.Ilm, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+9187000; Rosenheim, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9188000; Starnberg, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9189000; Traunstein, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9190000; Weilheim-Schongau, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9261000; Landshut, Kreisfreie Stadt;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9262000; Passau, Kreisfreie Stadt;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9263000; Straubing, Kreisfreie Stadt;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9271000; Deggendorf, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9272000; Freyung-Grafenau, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9273000; Kelheim, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+9274000; Landshut, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9275000; Passau, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9276000; Regen, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9277000; Rottal-Inn, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9278000; Straubing-Bogen, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9279000; Dingolfing-Landau, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9361000; Amberg, Kreisfreie Stadt;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+9362000; Regensburg, Kreisfreie Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+9363000; Weiden i.d.OPf., Kreisfreie Stadt;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+9371000; Amberg-Sulzbach, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+9372000; Cham, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+9373000; Neumarkt i.d.OPf., Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+9374000; Neustadt a.d.Waldnaab, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+9375000; Regensburg, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+9376000; Schwandorf, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+9377000; Tirschenreuth, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+9461000; Bamberg, Kreisfreie Stadt;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+9462000; Bayreuth, Kreisfreie Stadt;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9463000; Coburg, Kreisfreie Stadt;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+9464000; Hof, Kreisfreie Stadt;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9471000; Bamberg, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+9472000; Bayreuth, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9473000; Coburg, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+9474000; Forchheim, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+9475000; Hof, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9476000; Kronach, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+9477000; Kulmbach, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9478000; Lichtenfels, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+9479000; Wunsiedel i.Fichtelgebirge, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9561000; Ansbach, Kreisfreie Stadt;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+9562000; Erlangen, Kreisfreie Stadt;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9563000; Fürth, Kreisfreie Stadt;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9564000; Nürnberg, Kreisfreie Stadt;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9565000; Schwabach, Kreisfreie Stadt;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9571000; Ansbach, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+9572000; Erlangen-Höchstadt, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9573000; Fürth, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9574000; Nürnberger Land, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9575000; Neustadt a.d.Aisch-Bad Windsheim, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+9576000; Roth, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+9577000; Weißenburg-Gunzenhausen, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+9661000; Aschaffenburg, Kreisfreie Stadt;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+9662000; Schweinfurt, Kreisfreie Stadt;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9663000; Würzburg, Kreisfreie Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+9671000; Aschaffenburg, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+9672000; Bad Kissingen, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9673000; Rhön-Grabfeld, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9674000; Haßberge, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9675000; Kitzingen, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+9676000; Miltenberg, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+9677000; Main-Spessart, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+9678000; Schweinfurt, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9679000; Würzburg, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+9761000; Augsburg, Kreisfreie Stadt;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+9762000; Kaufbeuren, Kreisfreie Stadt;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9763000; Kempten (Allgäu), Kreisfreie Stadt;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9764000; Memmingen, Kreisfreie Stadt;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+9771000; Aichach-Friedberg, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+9772000; Augsburg, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+9773000; Dillingen a.d.Donau, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+9774000; Günzburg, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+9775000; Neu-Ulm, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+9776000; Lindau (Bodensee), Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9777000; Ostallgäu, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+9778000; Unterallgäu, Landkreis;2;Verdichtete Räume;5;Verstädterte Räume mittlerer Dichte ohne große Oberzentren
+9779000; Donau-Ries, Landkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+9780000; Oberallgäu, Landkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+10041000; Saarbrücken, Regionalverband;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+10042000; Merzig-Wadern, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+10043000; Neunkirchen, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+10044000; Saarlouis, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+10045000; Saarpfalz-Kreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+10046000; St. Wendel, Landkreis;1;Agglomerationsräume;1;Hochverdichtete Agglomerationsräume
+11000000; Berlin;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+12051000; Brandenburg an der Havel, Kreisfreie Stadt;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+12052000; Cottbus, Kreisfreie Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+12053000; Frankfurt (Oder), Kreisfreie Stadt;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+12054000; Potsdam, Kreisfreie Stadt;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+12060000; Barnim, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+12061000; Dahme-Spreewald, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+12062000; Elbe-Elster, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+12063000; Havelland, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+12064000; Märkisch-Oderland, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+12065000; Oberhavel, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+12066000; Oberspreewald-Lausitz, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+12067000; Oder-Spree, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+12068000; Ostprignitz-Ruppin, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+12069000; Potsdam-Mittelmark, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+12070000; Prignitz, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+12071000; Spree-Neiße, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+12072000; Teltow-Fläming, Landkreis;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+12073000; Uckermark, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+13001000; Greifswald, Kreisfreie Stadt;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+13002000; Neubrandenburg, Kreisfreie Stadt;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+13003000; Rostock, Kreisfreie Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+13004000; Schwerin, Kreisfreie Stadt;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+13005000; Stralsund, Kreisfreie Stadt;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+13006000; Wismar, Kreisfreie Stadt;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+13051000; Bad Doberan, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+13052000; Demmin, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+13053000; Güstrow, Landkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+13054000; Ludwigslust, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+13055000; Mecklenburg-Strelitz, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+13056000; Müritz, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+13057000; Nordvorpommern, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+13058000; Nordwestmecklenburg, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+13059000; Ostvorpommern, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+13060000; Parchim, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+13061000; Rügen, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+13062000; Uecker-Randow, Landkreis;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+14511000; Chemnitz, Stadt;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+14521000; Erzgebirgskreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+14522000; Mittelsachsen;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+14523000; Vogtlandkreis;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+14524000; Zwickau;2;Verdichtete Räume;3;Verstädterte Räume höherer Dichte
+14612000; Dresden, Stadt;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+14625000; Bautzen;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+14626000; Görlitz;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+14627000; Meißen;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+14628000; Sächsische Schweiz-Osterzgebirge;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+14713000; Leipzig, Stadt;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+14729000; Leipzig;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+14730000; Nordsachsen;1;Agglomerationsräume;2;Agglomerationsräume mit herausragenden Zentren
+15001000; Dessau-Roßlau, Stadt;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+15002000; Halle (Saale), Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+15003000; Magdeburg, Landeshauptstadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+15081000; Altmarkkreis Salzwedel;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+15082000; Anhalt-Bitterfeld;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+15083000; Börde;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+15084000; Burgenlandkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+15085000; Harz;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+15086000; Jerichower Land;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+15087000; Mansfeld-Südharz;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+15088000; Saalekreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+15089000; Salzlandkreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+15090000; Stendal;3;Ländliche Räume;7;Ländliche Räume geringerer Dichte
+15091000; Wittenberg;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+16051000; Erfurt, Kreisfreie Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+16052000; Gera, Kreisfreie Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+16053000; Jena, Kreisfreie Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+16054000; Suhl, Kreisfreie Stadt;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+16055000; Weimar, Kreisfreie Stadt;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+16056000; Eisenach, Kreisfreie Stadt;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+16061000; Eichsfeld, Kreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+16062000; Nordhausen, Kreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+16063000; Wartburgkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+16064000; Unstrut-Hainich-Kreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+16065000; Kyffhäuserkreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+16066000; Schmalkalden-Meiningen, Kreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+16067000; Gotha, Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+16068000; Sömmerda, Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+16069000; Hildburghausen, Kreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+16070000; Ilm-Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+16071000; Weimarer-Land, Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+16072000; Sonneberg, Kreis;3;Ländliche Räume;6;Ländliche Räume höherer Dichte
+16073000; Saalfeld-Rudolstadt, Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+16074000; Saale-Holzland-Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+16075000; Saale-Orla-Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+16076000; Greiz, Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren
+16077000; Altenburger Land, Kreis;2;Verdichtete Räume;4;Verstädterte Räume mittlerer Dichte mit großen Oberzentren

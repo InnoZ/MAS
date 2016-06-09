@@ -362,7 +362,7 @@ public class PopulationCreator {
 			for(int i = 0; i < d.getnHouseholds() * configuration.getScaleFactor(); i++){
 				currentHomeCell = null;
 				AdministrativeUnit au = null;
-			double r = random.nextDouble() * this.geoinformation.getTotalWeightForLanduseKey(d.getId(), "residential");
+			double r = random.nextDouble() * this.geoinformation.getTotalWeightForLanduseKey(d.getId(), ActivityTypes.HOME);
 			
 			double r2 = 0.;
 
@@ -371,9 +371,9 @@ public class PopulationCreator {
 			
 			for(AdministrativeUnit admin : d.getAdminUnits().values()){
 				
-				r2 += admin.getWeightForKey("residential");
+				r2 += admin.getWeightForKey(ActivityTypes.HOME);
 				
-				if(r <= r2 && admin.getLanduseGeometries().get("residential") != null){
+				if(r <= r2 && admin.getLanduseGeometries().get(ActivityTypes.HOME) != null){
 					
 					au = admin;
 					blandId = au.getBland();
@@ -419,12 +419,12 @@ public class PopulationCreator {
 			Coord homeLocation = null;
 
 			// Go through all residential areas of the home cell and randomly choose one of them
-			if(au.getLanduseGeometries().containsKey("residential")){
+			if(au.getLanduseGeometries().containsKey(ActivityTypes.HOME)){
 				
-				double p = random.nextDouble() * au.getWeightForKey("residential");
+				double p = random.nextDouble() * au.getWeightForKey(ActivityTypes.HOME);
 				accumulatedWeight = 0.;
 				
-				for(Geometry g : au.getLanduseGeometries().get("residential")){
+				for(Geometry g : au.getLanduseGeometries().get(ActivityTypes.HOME)){
 					
 					accumulatedWeight += g.getArea();
 					

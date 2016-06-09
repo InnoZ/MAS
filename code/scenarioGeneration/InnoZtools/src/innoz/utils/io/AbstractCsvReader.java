@@ -2,6 +2,7 @@ package innoz.utils.io;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import org.apache.log4j.Logger;
 import org.matsim.core.utils.io.IOUtils;
@@ -57,6 +58,42 @@ public abstract class AbstractCsvReader {
 		log.info("Column separator value is '" + this.sep + "'");
 		
 		BufferedReader reader = IOUtils.getBufferedReader(file);
+		
+		String line = null;
+		
+		try {
+		
+			if(this.hasHeader){
+				
+				//skip one line if the file contains a header
+				line = reader.readLine();
+				
+			}
+			
+			while((line = reader.readLine()) != null){
+				
+				this.handleRow(line.split(this.sep));
+				
+			}
+			
+			log.info("Done.");
+			
+			reader.close();
+		
+		} catch(IOException e){
+			
+			e.printStackTrace();
+			
+		}
+		
+	}
+	
+	public void read(InputStreamReader in){
+		
+		log.info("Reading file " + "" + "...");
+		log.info("Column separator value is '" + this.sep + "'");
+		
+		BufferedReader reader = new BufferedReader(in);
 		
 		String line = null;
 		

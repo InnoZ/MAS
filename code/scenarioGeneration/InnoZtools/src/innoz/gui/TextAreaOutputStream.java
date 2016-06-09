@@ -45,6 +45,7 @@ public class TextAreaOutputStream extends OutputStream {
       }
 
       sb.append((char) b);
+      
    }
 }
 

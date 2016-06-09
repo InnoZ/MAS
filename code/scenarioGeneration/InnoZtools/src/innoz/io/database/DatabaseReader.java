@@ -128,8 +128,6 @@ public class DatabaseReader {
 					
 				}
 				
-				new BbsrDataReader().read(this.geoinformation);
-				
 				for(AdminUnitEntry entry : configuration.getAdminUnitEntries()){
 
 					String id = entry.getId().startsWith("0") ? entry.getId().substring(1) : entry.getId();
@@ -263,7 +261,7 @@ public class DatabaseReader {
 			
 			//TODO attributes have to be added to the table
 			String key = set.getString(DatabaseConstants.MUN_KEY);
-			if(key.startsWith("0")) key = key.substring(1);
+//			if(key.startsWith("0")) key = key.substring(1);
 			String g = set.getString(DatabaseConstants.functions.st_astext.name());
 			int bland = set.getInt(DatabaseConstants.BLAND);
 			String district = set.getString("cca_2");

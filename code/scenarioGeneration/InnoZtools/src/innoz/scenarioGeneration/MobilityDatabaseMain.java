@@ -3,6 +3,7 @@ package innoz.scenarioGeneration;
 import innoz.config.Configuration;
 import innoz.config.ConfigurationUtils;
 import innoz.config.SshConnector;
+import innoz.io.BbsrDataReader;
 import innoz.io.database.DatabaseReader;
 import innoz.io.database.DatabaseUpdater;
 import innoz.scenarioGeneration.config.InitialConfigCreator;
@@ -100,6 +101,7 @@ public class MobilityDatabaseMain {
 				DatabaseReader dbReader = new DatabaseReader(geoinformation);
 				dbReader.readGeodataFromDatabase(configuration, configuration.getSurveyAreaIds(),
 						configuration.getVicinityIds(), scenario);
+				new BbsrDataReader().read(geoinformation);
 				
 				// Create a MATSim network from OpenStreetMap data
 				NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(),

@@ -4,6 +4,7 @@ import innoz.config.Configuration;
 import innoz.config.Configuration.AdminUnitEntry;
 import innoz.config.ConfigurationUtils;
 import innoz.config.SshConnector;
+import innoz.io.BbsrDataReader;
 import innoz.io.database.DatabaseReader;
 import innoz.io.database.DatabaseUpdater;
 import innoz.scenarioGeneration.config.InitialConfigCreator;
@@ -18,16 +19,22 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Graphics;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.imageio.ImageIO;
+import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -35,6 +42,7 @@ import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
@@ -63,6 +71,7 @@ public final class MainFrame {
 	private final JFrame frame;
 	private final Configuration configuration;
 	private final RunnerActionListener listener;
+	private final ClassLoader classLoader = this.getClass().getClassLoader();
 	JPanel mainPanel;
 	
 	//Components
@@ -74,6 +83,9 @@ public final class MainFrame {
 	private JButton runButton;
 	private JCheckBox network;
 	private JCheckBox households;
+	
+	private Map<String, String> surveyArea;
+	private Map<String, String> vicinity;
 	
 	public static void main(String args[]) {
 
@@ -95,24 +107,30 @@ public final class MainFrame {
 		this.configuration = ConfigurationUtils.createConfiguration();
 		this.listener = new RunnerActionListener();
 		
+		this.surveyArea = new ConcurrentHashMap<String, String>();
+		this.vicinity = new ConcurrentHashMap<String, String>();
+		
 		this.frame = new JFrame("InnoZ scenario generation toolbox");
 
-		URL url = this.getClass().getResource("background.png");
+		BufferedImage icon = null;
 		
 		try {
-			this.frame.setIconImage(ImageIO.read(url));
+			
+			URL in = this.classLoader.getResource("background.png");
+			icon = ImageIO.read(in);
+			
 		} catch (IOException e) {
+
+			
 			e.printStackTrace();
 		}
 
+		this.frame.setIconImage(icon);
+		
 		this.frame.setSize(new Dimension(1024, 768));
 		this.frame.setLayout(new BorderLayout());
 		
-		try {
-			this.frame.setContentPane(new JLabel(new ImageIcon(ImageIO.read(url))));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		this.frame.setContentPane(new JLabel(new ImageIcon(icon)));
 		
 		this.frame.setLayout(new BorderLayout());
 		
@@ -133,6 +151,7 @@ public final class MainFrame {
 		
 		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.frame.pack();
+		this.frame.setLocationRelativeTo(null);
 		this.frame.setVisible(true);
 		
 		System.out.println("initialized");
@@ -142,90 +161,163 @@ public final class MainFrame {
 	private JPanel createMainPanel(){
 		
 		mainPanel = new JPanel();
-		mainPanel.setLayout(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
+		mainPanel.setLayout(new GridLayout(20,1));
 		
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.ipady = 10;
-//		c.ipadx = 100;
-		
-		JLabel l = new JLabel("Scenario generation parameters");
+		JLabel l = new JLabel("<html><font size='16pt'><strong>Scenario generation parameters</strong></font></html>");
 		l.setBackground(Color.WHITE);
-		c.gridx = 0;
-		c.gridy = 0;
-		c.gridwidth = 2;
-		c.weightx = 0.1;
-		mainPanel.add(l, c);
+		mainPanel.add(l);
 		
 		JSeparator line = new JSeparator(JSeparator.HORIZONTAL);
-		c.gridx = 0;
-		c.gridy = 1;
-		c.gridwidth = 2;
-		mainPanel.add(line, c);
+		mainPanel.add(line);
+
+		JPanel surveyAreaPanel = new JPanel();
+		surveyAreaPanel.setBackground(new Color(0,0,0,0));
+		surveyAreaPanel.setLayout(new BorderLayout());
+		JLabel l1 = new JLabel("Survey area ids:");
+		surveyAreaPanel.add(l1, BorderLayout.LINE_START);
 		
-		JLabel l1 = new JLabel("Survey area ids (comma-separated):");
-		c.gridx = 0;
-		c.gridy = 2;
-		c.gridwidth = 1;
-		mainPanel.add(l1, c);
-		this.surveyAreaIdsTextField = new JTextField();
-		this.surveyAreaIdsTextField.setEnabled(false);
-		c.gridx = 1;
-		c.gridy = 2;
-		c.gridwidth = 1;
-		mainPanel.add(this.surveyAreaIdsTextField, c);
+		JButton addButton = new JButton("Add...");
+		addButton.setEnabled(false);
+		surveyAreaPanel.add(addButton, BorderLayout.LINE_END);
 		
-		JLabel l2 = new JLabel("Vicinity ids (comma-separated):");
-		c.gridx = 0;
-		c.gridy = 3;
-		c.gridwidth = 1;
-		mainPanel.add(l2, c);
-		vicinityIdsTextField = new JTextField();
-		vicinityIdsTextField.setEnabled(false);
-		c.gridx = 1;
-		c.gridy = 3;
-		c.gridwidth = 1;
-		mainPanel.add(vicinityIdsTextField, c);
+		addButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				JPanel message = new JPanel();
+				message.setLayout(new GridLayout());
+				message.add(new JLabel("Id"));
+				JTextField id = new JTextField();
+				message.add(id);
+				message.add(new JLabel("Number of households"));
+				JTextField n = new JTextField();
+				message.add(n);
+				
+				String[] options = {"Ok", "Cancel"};
+				int option = JOptionPane.showOptionDialog(MainFrame.this.frame, message, "Add a new administrative unit", JOptionPane.NO_OPTION, JOptionPane.DEFAULT_OPTION, null, options, options[0]);
+				
+				if(option == 0){
+				
+					surveyArea.put(id.getText(), n.getText());
+					
+					surveyAreaPanel.removeAll();
+					
+					surveyAreaPanel.add(l1, BorderLayout.LINE_START);
+
+					JPanel buttonPanel = new JPanel();
+					buttonPanel.setBackground(new Color(0,0,0,0));
+					
+					for(Entry<String, String> t : surveyArea.entrySet()){
+						
+						JButton newButton = new JButton(t.getKey() + ", " + t.getValue());
+						newButton.addActionListener(new ButtonChangeActionListener(newButton, surveyAreaPanel));
+						
+						buttonPanel.add(newButton);
+					
+					}
+					
+					surveyAreaPanel.add(buttonPanel, BorderLayout.CENTER);
+					
+					surveyAreaPanel.add(addButton, BorderLayout.LINE_END);
+					
+					surveyAreaPanel.revalidate();
+					frame.repaint();
+					
+				}
+
+			}
+			
+		});
+		mainPanel.add(surveyAreaPanel);
 		
-		JLabel l3 = new JLabel("Number of households:");
-		c.gridx = 0;
-		c.gridy = 4;
-		c.gridwidth = 1;
-		mainPanel.add(l3, c);
-		this.nHouseholdsTextField = new JTextField();
-		this.nHouseholdsTextField.setEnabled(false);
-		c.gridx = 1;
-		c.gridy = 4;
-		c.gridwidth = 1;
-		mainPanel.add(this.nHouseholdsTextField, c);
+		JPanel vicinityPanel = new JPanel();
+		
+		vicinityPanel.setLayout(new BorderLayout());
+		
+		vicinityPanel.setBackground(new Color(0,0,0,0));
+		
+		JLabel l2 = new JLabel("Vicinity ids:");
+		vicinityPanel.add(l2, BorderLayout.LINE_START);
+		JButton addButton2 = new JButton("Add...");
+		addButton2.setEnabled(false);
+		vicinityPanel.add(addButton2, BorderLayout.LINE_END);
+		
+		addButton2.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				JPanel message = new JPanel();
+				message.setLayout(new GridLayout());
+				message.add(new JLabel("Id"));
+				JTextField id = new JTextField();
+				message.add(id);
+				message.add(new JLabel("Number of households"));
+				JTextField n = new JTextField();
+				message.add(n);
+				
+				String[] options = {"Ok", "Cancel"};
+				int option = JOptionPane.showOptionDialog(MainFrame.this.frame, message, "Add a new administrative unit", JOptionPane.NO_OPTION, JOptionPane.DEFAULT_OPTION, null, options, options[0]);
+				
+				if(option == 0){
+				
+					vicinity.put(id.getText(), n.getText());
+					
+					vicinityPanel.removeAll();
+					
+					vicinityPanel.add(l2, BorderLayout.LINE_START);
+
+					JPanel buttonPanel = new JPanel();
+					buttonPanel.setBackground(new Color(0,0,0,0));
+					
+					for(Entry<String, String> t : vicinity.entrySet()){
+						
+						JButton newButton = new JButton(t.getKey() + ", " + t.getValue());
+						newButton.addActionListener(new ButtonChangeActionListener(newButton, vicinityPanel));
+						
+						buttonPanel.add(newButton);
+					
+					}
+					
+					vicinityPanel.add(buttonPanel, BorderLayout.CENTER);
+					
+					vicinityPanel.add(addButton2, BorderLayout.LINE_END);
+					
+					vicinityPanel.revalidate();
+					frame.repaint();
+					
+				}
+
+			}
+			
+		});
+		mainPanel.add(vicinityPanel);
+		
+//		vicinityIdsTextField = new JTextField();
+//		vicinityIdsTextField.setEnabled(false);
+//		mainPanel.add(vicinityIdsTextField);
+		
+//		JLabel l3 = new JLabel("Number of households:");
+//		mainPanel.add(l3);
+//		this.nHouseholdsTextField = new JTextField();
+//		this.nHouseholdsTextField.setEnabled(false);
+//		mainPanel.add(this.nHouseholdsTextField);
 
 		line = new JSeparator(JSeparator.HORIZONTAL);
-		c.gridx = 0;
-		c.gridy = 5;
-		c.gridwidth = 2;
-		mainPanel.add(line, c);
+		mainPanel.add(line);
 		
 		line = new JSeparator(JSeparator.HORIZONTAL);
-		c.gridx = 0;
-		c.gridy = 6;
-		mainPanel.add(line, c);
+		mainPanel.add(line);
 		
 		l = new JLabel("Output");
-		c.gridx = 0;
-		c.gridy = 7;
-		mainPanel.add(l, c);
+		mainPanel.add(l);
 		
 		line = new JSeparator(JSeparator.HORIZONTAL);
-		c.gridx = 0;
-		c.gridy = 8;
-		c.gridwidth = 2;
-		mainPanel.add(line, c);
+		mainPanel.add(line);
 		
 		JLabel ll = new JLabel("Output directory");
-		c.gridx = 0;
-		c.gridy = 9;
-		c.gridwidth = 1;
-		mainPanel.add(ll, c);
+		mainPanel.add(ll);
 		
 		chooseOutputDirButton = new JButton("Choose");
 		chooseOutputDirButton.setEnabled(false);
@@ -246,66 +338,85 @@ public final class MainFrame {
 				
 			}
 		});
-		c.gridx = 1;
-		mainPanel.add(chooseOutputDirButton, c);
+		mainPanel.add(chooseOutputDirButton);
 		
-//		outputDir = new JLabel();
-//		c.gridx = 1;
-//		mainPanel.add(outputDir, c);
 		
-		JLabel lll = new JLabel("Overwrite existing files?");
-		c.gridx = 0;
-		c.gridy = 10;
-		mainPanel.add(lll, c);
-		overwrite = new JCheckBox();
+		overwrite = new JCheckBox("Overwrite existing files?");
 		overwrite.setEnabled(false);
-		c.gridx = 1;
-		mainPanel.add(overwrite, c);
+		mainPanel.add(overwrite);
 		
-		JLabel l4 = new JLabel("Create network");
-		c.gridx = 0;
-		c.gridy = 11;
-		mainPanel.add(l4, c);
-		
-		network = new JCheckBox();
+		network = new JCheckBox("Create network");
 		network.setEnabled(false);
-		c.gridx = 1;
-		c.gridy = 11;
-		mainPanel.add(network, c);
+		mainPanel.add(network);
 		
-		JLabel l5 = new JLabel("Create Households");
-		c.gridx = 0;
-		c.gridy = 12;
-		mainPanel.add(l5, c);
-		
-		households = new JCheckBox();
+		households = new JCheckBox("Create Households");
 		households.setEnabled(false);
-		c.gridx = 1;
-		c.gridy = 12;
-		mainPanel.add(households, c);
+		mainPanel.add(households);
 		
 		runButton = new JButton("Run");
 		runButton.setEnabled(false);
-		c.gridx = 1;
-		c.gridy = 13;
-		mainPanel.add(runButton, c);
+		mainPanel.add(runButton);
 		runButton.addActionListener(this.listener);
 		
 		JButton reset = new JButton("Reset");
 		reset.setEnabled(false);
-		c.gridx = 1;
-		c.gridy = 14;
-		mainPanel.add(reset, c);
+		mainPanel.add(reset);
 		reset.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				reset();
+				MainFrame.this.frame.repaint();
 			}
 		});
 		
 		return mainPanel;
 
+	}
+	
+	class ButtonChangeActionListener implements ActionListener{
+
+		private final JButton button;
+		private final JPanel parent;
+		
+		public ButtonChangeActionListener(JButton button, JPanel parent) {
+			this.button = button;
+			this.parent = parent;
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			
+			String oldKey = this.button.getText().split(", ")[0];
+			
+			JPanel message = new JPanel();
+			message.setLayout(new GridLayout());
+			message.add(new JLabel("Id"));
+			JTextField id = new JTextField(this.button.getText().split(", ")[0]);
+			message.add(id);
+			message.add(new JLabel("Number of households"));
+			JTextField n = new JTextField(this.button.getText().split(", ")[1]);
+			message.add(n);
+			
+			String[] options = {"Ok", "Cancel"};
+			int option = JOptionPane.showOptionDialog(MainFrame.this.frame, message, "Add a new administrative unit", JOptionPane.NO_OPTION, JOptionPane.DEFAULT_OPTION, null, options, options[0]);
+			
+			if(option == 0){
+
+				surveyArea.remove(oldKey);
+				
+				surveyArea.put(id.getText(), n.getText());
+				
+				this.button.setText(id.getText() + ", " + n. getText());
+				
+				this.parent.revalidate();
+				frame.repaint();
+				
+			}
+
+			
+		}
+		
 	}
 	
 	private void reset(){
@@ -314,6 +425,9 @@ public final class MainFrame {
 		this.nHouseholdsTextField.setText("");
 		this.surveyAreaIdsTextField.setText("");
 		this.vicinityIdsTextField.setText("");
+		this.network.setSelected(false);
+		this.households.setSelected(false);
+		this.overwrite.setSelected(false);
 		
 	}
 	
@@ -340,6 +454,11 @@ public final class MainFrame {
 		
 		for(Component component : mainPanel.getComponents()){
 			component.setEnabled(true);
+			if(component instanceof JComponent){
+				for(Component c : ((JComponent)component).getComponents()){
+					c.setEnabled(true);
+				}
+			}
 		}
 		
 		this.frame.repaint();
@@ -386,17 +505,41 @@ public final class MainFrame {
 				}
 				
 				if(established){
+					
 					this.status.setText("<html><font color='green'>Connected</font></html>");
 					this.button.setText("Disconnect");
 					enableComponents();
+					
+				} else {
+					
+					JPanel message = new JPanel();
+					message.setPreferredSize(new Dimension(400,50));
+					message.add(new JLabel("Could not connect to MobilityDataHub!"));
+					message.add(new JLabel("Did you enter correct user names and passwords?"));
+					
+					JOptionPane.showConfirmDialog(MainFrame.this.frame, message, "Error!", JOptionPane.DEFAULT_OPTION,
+							JOptionPane.ERROR_MESSAGE);
+					
 				}
 				
 			} else {
+		
+				JPanel panel = new JPanel();
+				panel.setPreferredSize(new Dimension(300,50));
+				panel.add(new JLabel("Disconnect from MobilityDataHub?"));
+				String[] options = {"Yes","No"};
+					
+				int option = JOptionPane.showOptionDialog(MainFrame.this.frame, panel, "",
+						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 				
-				SshConnector.disconnect();
-				this.status.setText("<html><font color='red'>Not connected</font></html>");
-				this.button.setText("Connect");
-				disableComponents();
+				if(option == 0){
+
+					SshConnector.disconnect();
+					this.status.setText("<html><font color='red'>Not connected</font></html>");
+					this.button.setText("Connect");
+					disableComponents();
+					
+				}
 				
 			}
 			
@@ -441,23 +584,38 @@ public final class MainFrame {
 
 		@Override
 		public void run() {
-
+			
 			runButton.setEnabled(false);
 			
 			System.out.println("starting scenario generation...");
 			
-			ConfigurationUtils.set(configuration, Configuration.SURVEY_AREA_IDS, surveyAreaIdsTextField.getText());
+//			ConfigurationUtils.set(configuration, Configuration.SURVEY_AREA_IDS, surveyAreaIdsTextField.getText());
 
-			int nHouseholds = !nHouseholdsTextField.getText().equals("") ? Integer.parseInt(nHouseholdsTextField.getText()) : 0;
+//			int nHouseholds = !nHouseholdsTextField.getText().equals("") ? Integer.parseInt(nHouseholdsTextField.getText()) : 0;
+			String outputDir = !chooseOutputDirButton.getText().equals("") ? chooseOutputDirButton.getText() : ".";
 			
-			for(String s : configuration.getSurveyAreaIds().split(",")){
-				configuration.getAdminUnitEntries().add(new AdminUnitEntry(s, nHouseholds));
+			StringBuilder surveyAreaIds = new StringBuilder();
+			
+			for(Entry<String, String> entry : surveyArea.entrySet()){
+				int nHouseholds = entry.getValue().equals("") ? 0 : Integer.parseInt(entry.getValue());
+				configuration.getAdminUnitEntries().add(new AdminUnitEntry(entry.getKey(), nHouseholds));
+				surveyAreaIds.append(entry.getKey() + ",");
 			}
 			
-			String vicinity = vicinityIdsTextField.getText().length() > 0 ? vicinityIdsTextField.getText() : null;
+			ConfigurationUtils.set(configuration, Configuration.SURVEY_AREA_IDS, surveyAreaIds.toString());
+			
+			StringBuilder vicinityIds = new StringBuilder();
+			
+			for(Entry<String, String> entry : vicinity.entrySet()){
+				int nHouseholds = entry.getValue().equals("") ? 0 : Integer.parseInt(entry.getValue());
+				configuration.getAdminUnitEntries().add(new AdminUnitEntry(entry.getKey(), nHouseholds));
+				vicinityIds.append(entry.getKey());
+			}
+			
+			String vicinity = vicinityIds.toString().length() > 0 ? vicinityIds.toString() : null;
 			ConfigurationUtils.set(configuration, Configuration.VICINITY_IDS, vicinity);
 			ConfigurationUtils.set(configuration, Configuration.OVERWRITE_FILES, overwrite.isSelected());
-			ConfigurationUtils.set(configuration, Configuration.OUTPUT_DIR, chooseOutputDirButton.getText());
+			ConfigurationUtils.set(configuration, Configuration.OUTPUT_DIR, outputDir);
 			
 			configuration.dumpSettings();
 			
@@ -484,6 +642,9 @@ public final class MainFrame {
 			DatabaseReader dbReader = new DatabaseReader(geoinformation);
 			dbReader.readGeodataFromDatabase(configuration, configuration.getSurveyAreaIds(),
 					configuration.getVicinityIds(), scenario);
+			InputStream in = classLoader.getResourceAsStream("regionstypen.csv");
+//			System.out.println(file);
+			new BbsrDataReader().read(geoinformation, new InputStreamReader(in));
 			
 			System.out.println("creating network...");
 			
@@ -548,8 +709,7 @@ public final class MainFrame {
 			System.out.println("done.");
 
 			runButton.setEnabled(true);
-			
-			
+
 		}
 		
 	}
