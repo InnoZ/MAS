@@ -908,12 +908,10 @@ public class DatabaseReader {
 						// If we don't have a quad tree for this activity type already, create a new one
 						if(this.geoinformation.getQuadTreeForActType(landuse) == null){
 							
-							Coordinate[] coordinates = boundingBox.getCoordinates();
 							this.geoinformation.createQuadTreeForActType(landuse, new double[]{minX,minY,maxX,maxY});
 							
 						}
 						if(this.geoinformation.getQuadTreeForActType(ActivityTypes.WORK) == null){
-							Coordinate[] coordinates = boundingBox.getCoordinates();
 							this.geoinformation.createQuadTreeForActType(ActivityTypes.WORK, new double[]{minX,minY,maxX,maxY});
 						}
 						
