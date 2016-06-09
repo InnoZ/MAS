@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import javax.imageio.ImageIO;
-import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -36,7 +35,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -73,16 +71,12 @@ public final class MainFrame {
 	private JLabel outputDir;
 	private JCheckBox overwrite;
 	private JButton runButton;
+	private JCheckBox network;
+	private JCheckBox households;
 	
 	public static void main(String args[]) {
 
-//		EventQueue.invokeLater(new Runnable() {
-//			
-//			@Override
-//			public void run() {
-				new MainFrame();
-//			}
-//		});
+		new MainFrame();
 		
 	}
 	
@@ -158,6 +152,7 @@ public final class MainFrame {
 		mainPanel.add(line, c);
 		
 		JLabel l1 = new JLabel("Survey area ids (comma-separated):");
+		l1.setToolTipText("This is the region for which the model is constructed. Person and landuse data are most detailed here.");
 		c.gridx = 0;
 		c.gridy = 2;
 		c.gridwidth = 1;
@@ -170,6 +165,7 @@ public final class MainFrame {
 		mainPanel.add(this.surveyAreaIdsTextField, c);
 		
 		JLabel l2 = new JLabel("Vicinity ids (comma-separated):");
+		l2.setToolTipText("The vicinity of the survey area.");
 		c.gridx = 0;
 		c.gridy = 3;
 		c.gridwidth = 1;
@@ -261,40 +257,22 @@ public final class MainFrame {
 		c.gridy = 11;
 		mainPanel.add(l4, c);
 		
-		JRadioButton network = new JRadioButton("Yes");
+		network = new JCheckBox();
 		network.setEnabled(false);
 		c.gridx = 1;
 		c.gridy = 11;
 		mainPanel.add(network, c);
-		JRadioButton noNetwork = new JRadioButton("No");
-		noNetwork.setEnabled(false);
-		c.gridx = 2;
-		c.gridy = 11;
-		mainPanel.add(noNetwork, c);
-		
-		ButtonGroup networkGroup = new ButtonGroup();
-		networkGroup.add(network);
-		networkGroup.add(noNetwork);
 		
 		JLabel l5 = new JLabel("Create Households");
 		c.gridx = 0;
 		c.gridy = 12;
 		mainPanel.add(l5, c);
 		
-		JRadioButton households = new JRadioButton("Yes");
+		households = new JCheckBox();
 		households.setEnabled(false);
 		c.gridx = 1;
 		c.gridy = 12;
 		mainPanel.add(households, c);
-		JRadioButton noHouseholds = new JRadioButton("No");
-		noHouseholds.setEnabled(false);
-		c.gridx = 2;
-		c.gridy = 12;
-		mainPanel.add(noHouseholds, c);
-		
-		ButtonGroup householdsGroup = new ButtonGroup();
-		householdsGroup.add(households);
-		householdsGroup.add(noHouseholds);
 		
 		runButton = new JButton("Run");
 		runButton.setEnabled(false);
@@ -477,49 +455,48 @@ public final class MainFrame {
 			
 			System.out.println("creating network...");
 			
-			// Create a MATSim network from OpenStreetMap data
-			NetworkCreatorFromPsql nc;
-			try {
-				nc = new NetworkCreatorFromPsql(scenario.getNetwork(),
-						geoinformation,	configuration);
-				nc.setSimplifyNetwork(true);
-				nc.setCleanNetwork(true);
-				nc.setScaleMaxSpeed(true);
-				nc.create(dbReader);
-			} catch (FactoryException | InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException | ParseException e1) {
-				e1.printStackTrace();
+			if(network.isSelected()){
+
+				// Create a MATSim network from OpenStreetMap data
+				NetworkCreatorFromPsql nc;
+				try {
+					nc = new NetworkCreatorFromPsql(scenario.getNetwork(),
+							geoinformation,	configuration);
+					nc.setSimplifyNetwork(true);
+					nc.setCleanNetwork(true);
+					nc.setScaleMaxSpeed(true);
+					nc.create(dbReader);
+				} catch (FactoryException | InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException | ParseException e1) {
+					e1.printStackTrace();
+				}
+				
+				new NetworkWriter(scenario.getNetwork()).write(configuration
+						.getOutputDirectory() + "network.xml.gz");
+				
 			}
 			
 			System.out.println("creating plans...");
 			
-			// Create a MATSim population
-			try {
-				new PopulationCreator(geoinformation).run(configuration, scenario);
-			} catch (FactoryException e1) {
-				e1.printStackTrace();
+			if(households.isSelected()){
+				// Create a MATSim population
+				try {
+					new PopulationCreator(geoinformation).run(configuration, scenario);
+				} catch (FactoryException e1) {
+					e1.printStackTrace();
+				}
+				
+				new PopulationWriter(scenario.getPopulation()).write(configuration
+						.getOutputDirectory() + "plans.xml.gz");
+				new ObjectAttributesXmlWriter((ObjectAttributes) scenario.getScenarioElement(
+						PersonUtils.PERSON_ATTRIBUTES)).writeFile(configuration.getOutputDirectory()
+								+ "personAttributes.xml.gz");
+				new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration
+						.getOutputDirectory() + "households.xml.gz");
 			}
 			
 			// Create an initial MATSim config file and write it into the output directory
 			Config config = InitialConfigCreator.create(configuration);
 			new ConfigWriter(config).write(configuration.getOutputDirectory() + "config.xml.gz");
-			
-			System.out.println("writing output...");
-			
-			// Dump scenario elements into the output directory
-			new NetworkWriter(scenario.getNetwork()).write(configuration
-					.getOutputDirectory() + "network.xml.gz");
-			new PopulationWriter(scenario.getPopulation()).write(configuration
-					.getOutputDirectory() + "plans.xml.gz");
-			new ObjectAttributesXmlWriter((ObjectAttributes) scenario.getScenarioElement(
-					PersonUtils.PERSON_ATTRIBUTES)).writeFile(configuration.getOutputDirectory()
-							+ "personAttributes.xml.gz");
-			
-			if(configuration.isUsingHouseholds()){
-				
-				new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration
-						.getOutputDirectory() + "households.xml.gz");
-				
-			}
 			
 			if(configuration.isUsingVehicles()){
 
