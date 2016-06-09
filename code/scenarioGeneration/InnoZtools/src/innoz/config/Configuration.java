@@ -105,7 +105,7 @@ public class Configuration {
 	 * 
 	 * @param file Text file containing the configuration parameters.
 	 */
-	public Configuration(String file){
+	Configuration(String file){
 		
 		this.adminUnits = new HashSet<Configuration.AdminUnitEntry>();
 		
@@ -119,7 +119,7 @@ public class Configuration {
 		
 	}
 	
-	public Configuration(){
+	Configuration(){
 		this.adminUnits = new HashSet<Configuration.AdminUnitEntry>();
 	};
 	

@@ -1,6 +1,7 @@
 package innoz.scenarioGeneration;
 
 import innoz.config.Configuration;
+import innoz.config.ConfigurationUtils;
 import innoz.config.SshConnector;
 import innoz.io.database.DatabaseReader;
 import innoz.io.database.DatabaseUpdater;
@@ -62,7 +63,7 @@ public class MobilityDatabaseMain {
 
 			// create a new configuration that holds all the information and switches needed to
 			// generate a MATSim scenario
-			Configuration configuration = new Configuration(args[0]);
+			Configuration configuration = ConfigurationUtils.loadConfiguration(args[0]);
 
 			try {
 				

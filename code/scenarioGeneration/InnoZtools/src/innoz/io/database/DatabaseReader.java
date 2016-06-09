@@ -361,7 +361,7 @@ public class DatabaseReader {
 				
 				this.geoinformation.getQuadTreeForActType(ActivityTypes.SUPPLY).clear();
 				this.geoinformation.getQuadTreeForActType(ActivityTypes.KINDERGARTEN).clear();
-				this.geoinformation.getQuadTreeForActType("residential").clear();
+				this.geoinformation.getQuadTreeForActType(ActivityTypes.HOME).clear();
 				this.geoinformation.getQuadTreeForActType(ActivityTypes.WORK).clear();
 				this.geoinformation.getQuadTreeForActType(ActivityTypes.SHOPPING).clear();
 				this.geoinformation.getQuadTreeForActType(ActivityTypes.OTHER).clear();
@@ -379,9 +379,13 @@ public class DatabaseReader {
 				for(Building b : this.buildings){
 					
 					for(String actType : b.getActivityOptions()){
+						
 						if(actType != null){
+					
 							addGeometry(actType, b.getGeometry());
+						
 						}
+					
 					}
 					
 				}
@@ -493,7 +497,7 @@ public class DatabaseReader {
 							
 							b.addActivityOption(landuse);
 							
-							if(!landuse.startsWith(ActivityTypes.LEISURE) && !landuse.equals("residential")){
+							if(!landuse.startsWith(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
 							
 								b.addActivityOption(ActivityTypes.WORK);
 							
@@ -779,7 +783,7 @@ public class DatabaseReader {
 			
 		} else if(landuseTag.equals("residential")){
 			
-			return "residential";
+			return ActivityTypes.HOME;
 			
 		} else if(landuseTag.equals("retail")){
 			
@@ -901,7 +905,7 @@ public class DatabaseReader {
 					if(au.getGeometry().contains(g) || au.getGeometry().touches(g) || au.getGeometry().intersects(g)){
 						
 						au.addLanduseGeometry(landuse, g);
-						if(!landuse.equals(ActivityTypes.LEISURE) && !landuse.equals("residential")){
+						if(!landuse.equals(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
 							au.addLanduseGeometry(ActivityTypes.WORK, g);
 						}
 						
@@ -921,7 +925,7 @@ public class DatabaseReader {
 						if(this.boundingBox.contains(MGC.coord2Point(c))){
 							
 							this.geoinformation.getQuadTreeForActType(landuse).put(c.getX(), c.getY(), g);
-							if(!landuse.equals(ActivityTypes.LEISURE) && !landuse.equals("residential")){
+							if(!landuse.equals(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
 								this.geoinformation.getQuadTreeForActType(ActivityTypes.WORK).put(c.getX(), c.getY(), g);
 							}
 							
@@ -1141,7 +1145,7 @@ public class DatabaseReader {
 		if(buildingTag.equals("apartments") || buildingTag.equals("detached") || buildingTag.equals("house") || buildingTag.equals("semi")
 				|| buildingTag.equals("terrace")){
 			
-			return "residential";
+			return ActivityTypes.HOME;
 			
 		} else if(buildingTag.equals("barn") || buildingTag.equals("brewery") || buildingTag.equals("factory") || buildingTag.equals("office")
 				|| buildingTag.equals("warehouse")){

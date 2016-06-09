@@ -2,7 +2,7 @@ package innoz.gui;
 
 import innoz.config.Configuration;
 import innoz.config.Configuration.AdminUnitEntry;
-import innoz.config.ConfigurationParameterSetter;
+import innoz.config.ConfigurationUtils;
 import innoz.config.SshConnector;
 import innoz.io.database.DatabaseReader;
 import innoz.io.database.DatabaseUpdater;
@@ -16,14 +16,15 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.sql.SQLException;
 
 import javax.imageio.ImageIO;
@@ -68,7 +69,7 @@ public final class MainFrame {
 	private JTextField surveyAreaIdsTextField;
 	private JTextField vicinityIdsTextField;
 	private JTextField nHouseholdsTextField;
-	private JLabel outputDir;
+	private JButton chooseOutputDirButton;
 	private JCheckBox overwrite;
 	private JButton runButton;
 	private JCheckBox network;
@@ -76,21 +77,31 @@ public final class MainFrame {
 	
 	public static void main(String args[]) {
 
-		new MainFrame();
+		EventQueue.invokeLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				new MainFrame();
+				
+			}
+			
+		});
 		
 	}
 	
 	private MainFrame() {
 
-		this.configuration = new Configuration();
+		this.configuration = ConfigurationUtils.createConfiguration();
 		this.listener = new RunnerActionListener();
 		
 		this.frame = new JFrame("InnoZ scenario generation toolbox");
 
+		URL url = this.getClass().getResource("background.png");
+		
 		try {
-			this.frame.setIconImage(ImageIO.read(new File("../../../ressources/background.png")));
+			this.frame.setIconImage(ImageIO.read(url));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -98,21 +109,22 @@ public final class MainFrame {
 		this.frame.setLayout(new BorderLayout());
 		
 		try {
-			this.frame.setContentPane(new JLabel(new ImageIcon(ImageIO.read(new File("../../../ressources/background.png")))));
+			this.frame.setContentPane(new JLabel(new ImageIcon(ImageIO.read(url))));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 		this.frame.setLayout(new BorderLayout());
 		
-		this.frame.add(this.createView(), BorderLayout.CENTER);
+		this.frame.add(this.createMainPanel(), BorderLayout.CENTER);
 		this.mainPanel.setBackground(new Color(1,1,1,0.5f));
+		this.mainPanel.setPreferredSize(new Dimension(1024,600));
 		this.mainPanel.setEnabled(false);
 		
 		JPanel footer = this.createFooter();
 		this.frame.add(footer, BorderLayout.NORTH);
 		footer.setPreferredSize(new Dimension(1024,100));
-		footer.setBackground(new Color(0,0.59f,0.84f,1.0f));
+		footer.setBackground(new Color(0,0.59f,0.84f,0.5f));
 
 		JTextArea textArea = new JTextArea();
 		textArea.setPreferredSize(new Dimension(1024,100));
@@ -127,15 +139,15 @@ public final class MainFrame {
 		
 	}
 	
-	private JPanel createView(){
-
+	private JPanel createMainPanel(){
+		
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.ipady = 10;
-		c.ipadx = 100;
+//		c.ipadx = 100;
 		
 		JLabel l = new JLabel("Scenario generation parameters");
 		l.setBackground(Color.WHITE);
@@ -148,11 +160,10 @@ public final class MainFrame {
 		JSeparator line = new JSeparator(JSeparator.HORIZONTAL);
 		c.gridx = 0;
 		c.gridy = 1;
-		c.gridwidth = 3;
+		c.gridwidth = 2;
 		mainPanel.add(line, c);
 		
 		JLabel l1 = new JLabel("Survey area ids (comma-separated):");
-		l1.setToolTipText("This is the region for which the model is constructed. Person and landuse data are most detailed here.");
 		c.gridx = 0;
 		c.gridy = 2;
 		c.gridwidth = 1;
@@ -161,11 +172,10 @@ public final class MainFrame {
 		this.surveyAreaIdsTextField.setEnabled(false);
 		c.gridx = 1;
 		c.gridy = 2;
-		c.gridwidth = 2;
+		c.gridwidth = 1;
 		mainPanel.add(this.surveyAreaIdsTextField, c);
 		
 		JLabel l2 = new JLabel("Vicinity ids (comma-separated):");
-		l2.setToolTipText("The vicinity of the survey area.");
 		c.gridx = 0;
 		c.gridy = 3;
 		c.gridwidth = 1;
@@ -174,7 +184,7 @@ public final class MainFrame {
 		vicinityIdsTextField.setEnabled(false);
 		c.gridx = 1;
 		c.gridy = 3;
-		c.gridwidth = 2;
+		c.gridwidth = 1;
 		mainPanel.add(vicinityIdsTextField, c);
 		
 		JLabel l3 = new JLabel("Number of households:");
@@ -186,13 +196,13 @@ public final class MainFrame {
 		this.nHouseholdsTextField.setEnabled(false);
 		c.gridx = 1;
 		c.gridy = 4;
-		c.gridwidth = 2;
+		c.gridwidth = 1;
 		mainPanel.add(this.nHouseholdsTextField, c);
 
 		line = new JSeparator(JSeparator.HORIZONTAL);
 		c.gridx = 0;
 		c.gridy = 5;
-		c.gridwidth = 3;
+		c.gridwidth = 2;
 		mainPanel.add(line, c);
 		
 		line = new JSeparator(JSeparator.HORIZONTAL);
@@ -208,7 +218,7 @@ public final class MainFrame {
 		line = new JSeparator(JSeparator.HORIZONTAL);
 		c.gridx = 0;
 		c.gridy = 8;
-		c.gridwidth = 3;
+		c.gridwidth = 2;
 		mainPanel.add(line, c);
 		
 		JLabel ll = new JLabel("Output directory");
@@ -217,13 +227,9 @@ public final class MainFrame {
 		c.gridwidth = 1;
 		mainPanel.add(ll, c);
 		
-		outputDir = new JLabel();
-		c.gridx = 1;
-		mainPanel.add(outputDir, c);
-		
-		JButton choose = new JButton("Choose");
-		choose.setEnabled(false);
-		choose.addActionListener(new ActionListener() {
+		chooseOutputDirButton = new JButton("Choose");
+		chooseOutputDirButton.setEnabled(false);
+		chooseOutputDirButton.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -231,17 +237,21 @@ public final class MainFrame {
 				JFileChooser chooser = new JFileChooser();
 				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				chooser.setAcceptAllFileFilterUsed(false);
-				int returnVal = chooser.showOpenDialog(choose);
+				int returnVal = chooser.showOpenDialog(chooseOutputDirButton);
 				if(returnVal == JFileChooser.APPROVE_OPTION){
-					outputDir.setText(chooser.getSelectedFile().getAbsolutePath() + "/");
+					chooseOutputDirButton.setText(chooser.getSelectedFile().getAbsolutePath() + "/");
 				}
 				
 				frame.repaint();
 				
 			}
 		});
-		c.gridx = 2;
-		mainPanel.add(choose, c);
+		c.gridx = 1;
+		mainPanel.add(chooseOutputDirButton, c);
+		
+//		outputDir = new JLabel();
+//		c.gridx = 1;
+//		mainPanel.add(outputDir, c);
 		
 		JLabel lll = new JLabel("Overwrite existing files?");
 		c.gridx = 0;
@@ -281,8 +291,30 @@ public final class MainFrame {
 		mainPanel.add(runButton, c);
 		runButton.addActionListener(this.listener);
 		
+		JButton reset = new JButton("Reset");
+		reset.setEnabled(false);
+		c.gridx = 1;
+		c.gridy = 14;
+		mainPanel.add(reset, c);
+		reset.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				reset();
+			}
+		});
+		
 		return mainPanel;
 
+	}
+	
+	private void reset(){
+		
+		this.chooseOutputDirButton.setText("Choose");
+		this.nHouseholdsTextField.setText("");
+		this.surveyAreaIdsTextField.setText("");
+		this.vicinityIdsTextField.setText("");
+		
 	}
 	
 	private JPanel createFooter(){
@@ -414,7 +446,7 @@ public final class MainFrame {
 			
 			System.out.println("starting scenario generation...");
 			
-			ConfigurationParameterSetter.set(configuration, Configuration.SURVEY_AREA_IDS, surveyAreaIdsTextField.getText());
+			ConfigurationUtils.set(configuration, Configuration.SURVEY_AREA_IDS, surveyAreaIdsTextField.getText());
 
 			int nHouseholds = !nHouseholdsTextField.getText().equals("") ? Integer.parseInt(nHouseholdsTextField.getText()) : 0;
 			
@@ -423,9 +455,9 @@ public final class MainFrame {
 			}
 			
 			String vicinity = vicinityIdsTextField.getText().length() > 0 ? vicinityIdsTextField.getText() : null;
-			ConfigurationParameterSetter.set(configuration, Configuration.VICINITY_IDS, vicinity);
-			ConfigurationParameterSetter.set(configuration, Configuration.OVERWRITE_FILES, overwrite.isSelected());
-			ConfigurationParameterSetter.set(configuration, Configuration.OUTPUT_DIR, outputDir.getText());
+			ConfigurationUtils.set(configuration, Configuration.VICINITY_IDS, vicinity);
+			ConfigurationUtils.set(configuration, Configuration.OVERWRITE_FILES, overwrite.isSelected());
+			ConfigurationUtils.set(configuration, Configuration.OUTPUT_DIR, chooseOutputDirButton.getText());
 			
 			configuration.dumpSettings();
 			
