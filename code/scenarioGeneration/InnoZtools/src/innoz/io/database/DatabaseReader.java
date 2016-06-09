@@ -202,12 +202,12 @@ public class DatabaseReader {
 		getAndAddGeodataFromIdSet(connection, configuration, CollectionUtils.stringToSet(
 				surveyAreaIdsString), geometryCollection, true);
 		this.geoinformation.setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection)
-				.getEnvelope());
+				.convexHull());
 		if(vicinityIdsString != null){
 			getAndAddGeodataFromIdSet(connection, configuration, CollectionUtils.stringToSet(
 					vicinityIdsString), geometryCollection, false);
 			this.geoinformation.setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection)
-					.getEnvelope());
+					.convexHull());
 		}
 		
 		// This is needed to transform the WGS84 geometries into the specified CRS
@@ -216,10 +216,10 @@ public class DatabaseReader {
 		
 		// Get the survey area by building the bounding box of all geometries 
 		this.geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection)
-				.getEnvelope());
+				.convexHull());
 		
 		this.boundingBox = JTS.transform((Geometry) this.geoinformation.getCompleteGeometry()
-				.clone(), t).getEnvelope();
+				.clone(), t).convexHull();
 		
 	}
 	
@@ -861,6 +861,8 @@ public class DatabaseReader {
 		
 	}
 	
+	boolean set = false;
+	
 	/**
 	 * 
 	 * Adds a landuse geometry to the geoinformationo container.
@@ -869,6 +871,23 @@ public class DatabaseReader {
 	 * @param g The geometry of the activity location.
 	 */
 	private void addGeometry(String landuse, Geometry g){
+		
+		if(!set){
+			
+			set = true;
+			minX = Double.MAX_VALUE;
+			minY = Double.MAX_VALUE;
+			maxX = Double.MIN_VALUE;
+			maxY = Double.MIN_VALUE;
+			
+			for(Coordinate coord : this.boundingBox.getCoordinates()){
+				if(coord.x < minX) minX = coord.x;
+				if(coord.x > maxX) maxX = coord.x;
+				if(coord.y < minY) minY = coord.y;
+				if(coord.y > maxY) maxY = coord.y;
+			}
+			
+		}
 		
 		// Check if the geometry is not null
 		if(g != null){
@@ -890,14 +909,12 @@ public class DatabaseReader {
 						if(this.geoinformation.getQuadTreeForActType(landuse) == null){
 							
 							Coordinate[] coordinates = boundingBox.getCoordinates();
-							this.geoinformation.createQuadTreeForActType(landuse, new double[]{coordinates[0].x, coordinates[0].y,
-									coordinates[2].x, coordinates[2].y});
+							this.geoinformation.createQuadTreeForActType(landuse, new double[]{minX,minY,maxX,maxY});
 							
 						}
 						if(this.geoinformation.getQuadTreeForActType(ActivityTypes.WORK) == null){
 							Coordinate[] coordinates = boundingBox.getCoordinates();
-							this.geoinformation.createQuadTreeForActType(ActivityTypes.WORK, new double[]{coordinates[0].x, coordinates[0].y,
-									coordinates[2].x, coordinates[2].y});
+							this.geoinformation.createQuadTreeForActType(ActivityTypes.WORK, new double[]{minX,minY,maxX,maxY});
 						}
 						
 						// Add the landuse geometry's centroid as new quad tree entry
@@ -938,15 +955,25 @@ public class DatabaseReader {
 		
 	}
 	
+	double minX = Double.MAX_VALUE;
+	double minY = Double.MAX_VALUE;
+	double maxX = Double.MIN_VALUE;
+	double maxY = Double.MIN_VALUE; 
+	
 	void readBuildings(Connection connection) throws SQLException, ParseException{
 	
 		//TODO this method implies we are eventually using facilities in MATSim...
 		//alternatively: use buildings to "bound" activities
 		log.info("Reading in buildings...");
 		
-		Coordinate[] coords = this.geoinformation.getCompleteGeometry().getCoordinates();
+		for(Coordinate coord : this.geoinformation.getCompleteGeometry().getCoordinates()){
+			if(coord.x < minX) minX = coord.x;
+			if(coord.x > maxX) maxX = coord.x;
+			if(coord.y < minY) minY = coord.y;
+			if(coord.y > maxY) maxY = coord.y;
+		}
 		
-		this.buildingsQuadTree = new QuadTree<Building>(coords[0].x, coords[0].y, coords[2].x, coords[2].y);
+		this.buildingsQuadTree = new QuadTree<Building>(minX, minY, maxX, maxY);
 		
 		WKTReader wktReader = new WKTReader();
 		
