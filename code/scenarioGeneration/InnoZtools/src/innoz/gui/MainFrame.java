@@ -68,6 +68,13 @@ import org.opengis.referencing.FactoryException;
 import com.jcraft.jsch.JSchException;
 import com.vividsolutions.jts.io.ParseException;
 
+/**
+ * 
+ * Main class for the GUI version of the scenario generation code.
+ * 
+ * @author dhosse
+ *
+ */
 public final class MainFrame {
 
 	private final JFrame frame;
