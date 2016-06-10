@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<!-- This is a template scenario generation configuration file used by the InnoZ  -->
+<configuration>
+
+	<!-- The basic settings -->
+	<scenario>
+		<areaSet k="surveyArea">
+			<adminUnit id="09180" numberOfHouseholds="41838" />
+		</areaSet>
+		<areaSet k="vicinity" >
+		<!--	<adminUnit id="09173" numberOfHouseholds="0" /> --> <!-- 52832 -->
+		<!--	<adminUnit id="09190" numberOfHouseholds="0" /> --> <!-- 56365 -->
+		<!--	<adminUnit id="09762" numberOfHouseholds="0" /> --> <!-- 20111  -->
+		<!--	<adminUnit id="09777" numberOfHouseholds="0" /> --> <!-- 58063  -->
+		<!--	<adminUnit id="703" numberOfHouseholds="0" /> -->
+		<!--	<adminUnit id="701" numberOfHouseholds="0" /> -->
+		<!--	<adminUnit id="702" numberOfHouseholds="0" /> -->
+		<!--	<adminUnit id="708" numberOfHouseholds="0" /> -->
+		<!--	<adminUnit id="709" numberOfHouseholds="0" /> -->
+		</areaSet>	
+		<coordinateSystem v="EPSG:32632" />
+		<createTransit v="false" />
+		<populationType v="complete" />
+		<scaleFactor v="1.0" />
+		<outputDirectory v="/home/dhosse/dessau/foo/" />
+		<overwriteExistingFiles v="true"/>
+	</scenario>
+
+	<surveyData>
+		<useBuildings v="true" />
+		<useHouseholds v="true" />
+		<onlyWorkingDays v="true"/>
+		<useVehicles v="false" />
+	</surveyData>
+
+	<database>
+		<localPort v="5432" />
+		<writeTables v="false" />
+	</database>
+
+</configuration>
