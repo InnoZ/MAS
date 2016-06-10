@@ -86,6 +86,9 @@ public final class MainFrame {
 	private Map<String, String> surveyArea;
 	private Map<String, String> vicinity;
 	
+	private JPanel surveyAreaPanel;
+	private JPanel vicinityPanel;
+	
 	public static void main(String args[]) {
 
 		EventQueue.invokeLater(new Runnable() {
@@ -163,16 +166,15 @@ public final class MainFrame {
 	private JPanel createMainPanel(){
 		
 		mainPanel = new JPanel();
-		mainPanel.setLayout(new GridLayout(20,1));
+		mainPanel.setLayout(new GridLayout(15,1));
 		
-		JLabel l = new JLabel("<html><font size='16pt'><strong>Scenario generation parameters</strong></font></html>");
-		l.setBackground(Color.WHITE);
+		JLabel l = new JLabel("<html><font size='10'><strong>Scenario generation parameters</strong></font></html>");
+		l.setMinimumSize(new Dimension(1024, 200));
+		l.setPreferredSize(new Dimension(1024, 200));
 		mainPanel.add(l);
 		
-		JSeparator line = new JSeparator(JSeparator.HORIZONTAL);
-		mainPanel.add(line);
 
-		JPanel surveyAreaPanel = new JPanel();
+		surveyAreaPanel = new JPanel();
 		surveyAreaPanel.setBackground(new Color(0,0,0,0));
 		surveyAreaPanel.setLayout(new BorderLayout());
 		JLabel l1 = new JLabel("Survey area ids:");
@@ -233,7 +235,7 @@ public final class MainFrame {
 		});
 		mainPanel.add(surveyAreaPanel);
 		
-		JPanel vicinityPanel = new JPanel();
+		vicinityPanel = new JPanel();
 		
 		vicinityPanel.setLayout(new BorderLayout());
 		
@@ -296,32 +298,13 @@ public final class MainFrame {
 		});
 		mainPanel.add(vicinityPanel);
 		
-//		vicinityIdsTextField = new JTextField();
-//		vicinityIdsTextField.setEnabled(false);
-//		mainPanel.add(vicinityIdsTextField);
-		
-//		JLabel l3 = new JLabel("Number of households:");
-//		mainPanel.add(l3);
-//		this.nHouseholdsTextField = new JTextField();
-//		this.nHouseholdsTextField.setEnabled(false);
-//		mainPanel.add(this.nHouseholdsTextField);
-
-		line = new JSeparator(JSeparator.HORIZONTAL);
+		JSeparator line = new JSeparator(JSeparator.HORIZONTAL);
 		mainPanel.add(line);
 		
-		line = new JSeparator(JSeparator.HORIZONTAL);
-		mainPanel.add(line);
-		
-		l = new JLabel("Output");
+		l = new JLabel("<html><font size='10'><strong>Output</strong></font></html>");
 		mainPanel.add(l);
 		
-		line = new JSeparator(JSeparator.HORIZONTAL);
-		mainPanel.add(line);
-		
-		JLabel ll = new JLabel("Output directory");
-		mainPanel.add(ll);
-		
-		chooseOutputDirButton = new JButton("Choose");
+		chooseOutputDirButton = new JButton("Choose output directory");
 		chooseOutputDirButton.setEnabled(false);
 		chooseOutputDirButton.addActionListener(new ActionListener() {
 			
@@ -423,13 +406,9 @@ public final class MainFrame {
 	
 	private void reset(){
 		
-		this.chooseOutputDirButton.setText("Choose");
+		this.chooseOutputDirButton.setText("Choose output directory");
 		this.surveyArea = new HashMap<String, String>();
 		this.vicinity = new HashMap<String, String>();
-		
-//		this.nHouseholdsTextField.setText("");
-//		this.surveyAreaIdsTextField.setText("");
-//		this.vicinityIdsTextField.setText("");
 		this.network.setSelected(false);
 		this.households.setSelected(false);
 		this.overwrite.setSelected(false);
@@ -441,7 +420,7 @@ public final class MainFrame {
 
 		JLabel label = new JLabel("Status of MobilityDataHub connection:");
 		JLabel connectionStatus = new JLabel("<html><font color='red'>Not connected</font></html>");
-		connectionStatus.setBackground(Color.WHITE);
+//		connectionStatus.setBackground(Color.WHITE);
 		connectionStatus.setPreferredSize(new Dimension(120,40));
 		JButton connection = new JButton("Connect");
 		
@@ -593,7 +572,7 @@ public final class MainFrame {
 			
 			runButton.setEnabled(false);
 			
-			String outputDir = !chooseOutputDirButton.getText().equals("") ? chooseOutputDirButton.getText() : ".";
+			String outputDir = !chooseOutputDirButton.getText().contains("Choose") ? chooseOutputDirButton.getText() : ".";
 			
 			StringBuilder surveyAreaIds = new StringBuilder();
 			
