@@ -2,7 +2,7 @@ package innoz.io.database;
 
 import innoz.config.Configuration;
 import innoz.config.Configuration.AdminUnitEntry;
-import innoz.io.BbsrDataReader;
+import innoz.config.Configuration.PopulationType;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.geoinformation.Building;
 import innoz.scenarioGeneration.geoinformation.District;
@@ -31,7 +31,6 @@ import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.gbl.Gbl;
-import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
@@ -99,8 +98,7 @@ public class DatabaseReader {
 	 * @param vicinityIdsString The vicinity area id(s).
 	 * @param scenario The MATSim scenario.
 	 */
-	public void readGeodataFromDatabase(Configuration configuration, String surveyAreaIdsString, 
-			String vicinityIdsString, Scenario scenario) {
+	public void readGeodataFromDatabase(Configuration configuration, Scenario scenario) {
 		
 		try {
 			
@@ -116,7 +114,7 @@ public class DatabaseReader {
 				
 				// Read the administrative borders that have one of the specified ids
 				// TODO Vicinity... /dhosse 05/16
-				this.readAdminBorders(connection, configuration, surveyAreaIdsString, vicinityIdsString);
+				this.readAdminBorders(connection, configuration);
 				
 				// If no administrative units were created, we are unable to proceed
 				// The process would probably finish, but no network or population would be created
@@ -128,7 +126,7 @@ public class DatabaseReader {
 					
 				}
 				
-				for(AdminUnitEntry entry : configuration.getAdminUnitEntries()){
+				for(AdminUnitEntry entry : configuration.getAdminUnitEntries().values()){
 
 					String id = entry.getId().startsWith("0") ? entry.getId().substring(1) : entry.getId();
 					
@@ -152,8 +150,12 @@ public class DatabaseReader {
 					
 				}
 				
-				// Otherwise, read in the OSM data
-				this.readOsmData(connection, configuration);
+				if(!configuration.getPopulationType().equals(PopulationType.none)){
+
+					// Otherwise, read in the OSM data
+					this.readOsmData(connection, configuration);
+					
+				}
 				
 			}
 			
@@ -187,8 +189,7 @@ public class DatabaseReader {
 	 * @throws MismatchedDimensionException
 	 * @throws TransformException
 	 */
-	private void readAdminBorders(Connection connection, Configuration configuration,
-			String surveyAreaIdsString, String vicinityIdsString) throws SQLException,
+	private void readAdminBorders(Connection connection, Configuration configuration) throws SQLException,
 			NoSuchAuthorityCodeException, FactoryException, ParseException,
 			MismatchedDimensionException, TransformException {
 
@@ -197,15 +198,17 @@ public class DatabaseReader {
 		// A collection to temporarily store all geometries
 		List<Geometry> geometryCollection = new ArrayList<Geometry>();
 		
-		getAndAddGeodataFromIdSet(connection, configuration, CollectionUtils.stringToSet(
-				surveyAreaIdsString), geometryCollection, true);
+		getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, true);
 		this.geoinformation.setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection)
 				.convexHull());
-		if(vicinityIdsString != null){
-			getAndAddGeodataFromIdSet(connection, configuration, CollectionUtils.stringToSet(
-					vicinityIdsString), geometryCollection, false);
+		if(configuration.getVicinityIds() != null){
+			getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, false);
 			this.geoinformation.setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection)
 					.convexHull());
+		}
+		
+		for(District d : this.geoinformation.getAdminUnits().values()){
+			d.setnHouseholds(configuration.getAdminUnitEntries().get(d.getId()).getNumberOfHouseholds());
 		}
 		
 		// This is needed to transform the WGS84 geometries into the specified CRS
@@ -221,21 +224,22 @@ public class DatabaseReader {
 		
 	}
 	
-	private void getAndAddGeodataFromIdSet(Connection connection, Configuration configuration,
-			Set<String> ids, List<Geometry> geometryCollection, boolean surveyArea)
-					throws SQLException, NoSuchAuthorityCodeException, FactoryException,
-					ParseException, MismatchedDimensionException, TransformException{
+	private void getAndAddGeodataFromIdSet(Connection connection, Configuration configuration, List<Geometry> geometryCollection,
+			boolean surveyArea) throws SQLException, NoSuchAuthorityCodeException, FactoryException, ParseException,
+			MismatchedDimensionException, TransformException{
 		
 		// Create a new statement to execute the sql query
 		Statement statement = connection.createStatement();
 		StringBuilder builder = new StringBuilder();
+		
+		String[] ids = surveyArea ? configuration.getSurveyAreaIds().split(",") : configuration.getVicinityIds().split(",");
 		
 		int i = 0;
 		
 		// Append all ids inside the given collection to a string
 		for(String id : ids){
 
-			if(i < ids.size() - 1){
+			if(i < ids.length - 1){
 				
 				builder.append(" " + DatabaseConstants.MUN_KEY + " like '" + id + "%' OR");
 				
@@ -261,13 +265,9 @@ public class DatabaseReader {
 			
 			//TODO attributes have to be added to the table
 			String key = set.getString(DatabaseConstants.MUN_KEY);
-//			if(key.startsWith("0")) key = key.substring(1);
 			String g = set.getString(DatabaseConstants.functions.st_astext.name());
 			int bland = set.getInt(DatabaseConstants.BLAND);
 			String district = set.getString("cca_2");
-			if(district != null){
-				if(district.startsWith("0")) district = district.substring(1);
-			}
 			
 			// Check if the wkb string returned is neither null nor empty, otherwise this would
 			// crash
@@ -281,6 +281,7 @@ public class DatabaseReader {
 					Geometry geometry = wktReader.read(g);
 					au.setGeometry(geometry);
 					au.setBland((int)bland);
+					au.setNetworkDetail(configuration.getAdminUnitEntries().get(district).getNetworkDetail());
 
 					if(district != null){
 
@@ -347,7 +348,7 @@ public class DatabaseReader {
 			readAmenities(connection);
 			
 			// Read landuse geometries
-			readLanduseData(connection);
+			readLanduseData(connection, configuration);
 			
 			if(configuration.isUsingBuildings()){
 				
@@ -406,14 +407,14 @@ public class DatabaseReader {
 	 * 
 	 * @param connection The database connection
 	 */
-	private void readLanduseData(Connection connection){
+	private void readLanduseData(Connection connection, Configuration configuration){
 		
 		log.info("Reading in landuse data...");
 		
 		try {
 
 			// Parse polygons for landuse data
-			getPolygonBasedLanduseData(connection);
+			getPolygonBasedLanduseData(connection, configuration);
 		
 		} catch (SQLException | ParseException e) {
 
@@ -433,7 +434,7 @@ public class DatabaseReader {
 	 * @throws ParseException
 	 * @throws SQLException
 	 */
-	private void getPolygonBasedLanduseData(Connection connection) throws ParseException,
+	private void getPolygonBasedLanduseData(Connection connection, Configuration configuration) throws ParseException,
 		SQLException {
 		
 		log.info("Processing polygon landuse data...");
@@ -487,18 +488,22 @@ public class DatabaseReader {
 				// Add the landuse geometry to the geoinformation if we have a valid activity option for it
 				addGeometry(landuse, geometry);
 				
-				for(Building b : this.buildings){
+				if(configuration.isUsingBuildings()){
 
-					if(b.getActivityOptions().isEmpty()){
+					for(Building b : this.buildings){
 
-						if(geometry.contains(b.getGeometry())){
-							
-							b.addActivityOption(landuse);
-							
-							if(!landuse.startsWith(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
-							
-								b.addActivityOption(ActivityTypes.WORK);
-							
+						if(b.getActivityOptions().isEmpty()){
+
+							if(geometry.contains(b.getGeometry())){
+								
+								b.addActivityOption(landuse);
+								
+								if(!landuse.startsWith(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
+								
+									b.addActivityOption(ActivityTypes.WORK);
+								
+								}
+								
 							}
 							
 						}
@@ -982,7 +987,7 @@ public class DatabaseReader {
 				+ DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + ", " + DatabaseConstants.functions.st_astext.name() + "("
 				+ DatabaseConstants.ATT_WAY	+ ") from " + DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_polygon
 				+ " where " + DatabaseConstants.functions.st_within + "(" + DatabaseConstants.ATT_WAY + ","
-				+ DatabaseConstants.functions.st_geomfromtext.name() + "('" + this.geoinformation.getCompleteGeometry().toString() + "',4326))"
+				+ DatabaseConstants.functions.st_geomfromtext.name() + "('" + this.geoinformation.getSurveyAreaBoundingBox().toString() + "',4326))"
 				+ " and " + DatabaseConstants.ATT_BUILDING + " is not null";
 		ResultSet set = statement.executeQuery(s);
 		

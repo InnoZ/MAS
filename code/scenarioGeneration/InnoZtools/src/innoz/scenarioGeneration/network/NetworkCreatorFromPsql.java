@@ -1,5 +1,11 @@
 package innoz.scenarioGeneration.network;
 
+import innoz.config.Configuration;
+import innoz.io.database.DatabaseReader;
+import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
+import innoz.scenarioGeneration.geoinformation.Geoinformation;
+import innoz.utils.matsim.NetworkSimplifier;
+
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,11 +32,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
-
-import innoz.config.Configuration;
-import innoz.io.database.DatabaseReader;
-import innoz.scenarioGeneration.geoinformation.Geoinformation;
-import innoz.utils.matsim.NetworkSimplifier;
 
 /**
  * 
@@ -340,15 +341,28 @@ public class NetworkCreatorFromPsql {
 //					for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
 
 					boolean inSurveyArea = true;
+					
+					com.vividsolutions.jts.geom.Point lastPoint = gf.createPoint(lastTo);
+					com.vividsolutions.jts.geom.Point nextPoint = gf.createPoint(next);
+					
 					// If the coordinates are contained in the survey area, add a new link to the network
-					if(!this.geoinformation.getSurveyAreaBoundingBox().contains(gf.createPoint(lastTo)) &&
-							!this.geoinformation.getSurveyAreaBoundingBox().contains(gf.createPoint(next))){
+					if(!this.geoinformation.getSurveyAreaBoundingBox().contains(lastPoint) &&
+							!this.geoinformation.getSurveyAreaBoundingBox().contains(nextPoint)){
 						
 						inSurveyArea = false;
 						
 					}
+					
+					String adminUnitId = null;
+//					
+					for(AdministrativeUnit au : this.geoinformation.getSubUnits().values()){
+						if(au.getGeometry().contains(lastPoint) || au.getGeometry().contains(nextPoint)){
+							adminUnitId = au.getId();
+							break;
+						}
+					}
 						
-					createLink(entry, length, lastTo, next, inSurveyArea);
+					createLink(entry, length, lastTo, next, inSurveyArea, adminUnitId);
 							//TODO make a difference between inner and outer au's (w/ respect to highway hierarchy)
 							
 //							break;
@@ -380,18 +394,38 @@ public class NetworkCreatorFromPsql {
 	 * @param from The coordinate at the beginning of the link.
 	 * @param to The coordinate at the end of the link.
 	 */
-	private void createLink(WayEntry entry, double length, Coordinate from, Coordinate to, boolean inSurveyArea){
+	private void createLink(WayEntry entry, double length, Coordinate from, Coordinate to, boolean inSurveyArea,
+			String adminUnitId){
 		
 		HighwayDefaults defaults = this.highwayDefaults.get(entry.highwayTag);
 		
 		// If there are defaults for the highway type of the current way, we proceed
 		// Else the way is simply skipped
 		if(defaults != null){
+
+			if(adminUnitId == null) return;
+			Integer lod = this.geoinformation.getAdminUnitById(adminUnitId).getNetworkDetail();
 			
-			if(!inSurveyArea){
-				if(defaults.hierarchyLevel > this.levelOfDetail - 2){
+			if(lod != null){
+				
+				if(defaults.hierarchyLevel > lod){
+					
 					return;
+					
 				}
+				
+			} else {
+
+				if(!inSurveyArea){
+					
+					if(defaults.hierarchyLevel > this.levelOfDetail - 2){
+						
+						return;
+						
+					}
+					
+				}
+				
 			}
 			
 			//set all values to default

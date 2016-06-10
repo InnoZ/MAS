@@ -1,8 +1,8 @@
 package innoz.config;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -34,6 +34,7 @@ public class Configuration {
 	public static final String USE_HOUSEHOLDS = "useHouseholds";
 	public static final String USE_VEHICLES = "useVehicles";
 	public static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
+	public static final String LOD_NETWORK = "networkDetail";
 	
 	public static final String LOCAL_PORT = "localPort";
 	public static final String DB_SCHEMA_NAME = "databaseSchemaName";
@@ -59,7 +60,7 @@ public class Configuration {
 	
 	int numberOfHouseholds = 0;
 	
-	Set<AdminUnitEntry> adminUnits;
+	Map<String,AdminUnitEntry> adminUnits;
 	
 	long randomSeed = 4711L;
 	
@@ -80,7 +81,7 @@ public class Configuration {
 	String databaseUser = "postgres";
 	String userPassword = "postgres";
 	
-	public enum PopulationType{dummy,commuter,complete};
+	public enum PopulationType{dummy,commuter,complete,none};
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
 	void setParam(String param, Object value){
@@ -107,7 +108,7 @@ public class Configuration {
 	 */
 	Configuration(String file){
 		
-		this.adminUnits = new HashSet<Configuration.AdminUnitEntry>();
+		this.adminUnits = new HashMap<String, Configuration.AdminUnitEntry>();
 		
 		if(file.endsWith(".txt")){
 			new ConfigurationReaderTxt(this).read(file);
@@ -120,7 +121,7 @@ public class Configuration {
 	}
 	
 	Configuration(){
-		this.adminUnits = new HashSet<Configuration.AdminUnitEntry>();
+		this.adminUnits = new HashMap<String, Configuration.AdminUnitEntry>();
 	};
 	
 	/**
@@ -427,10 +428,12 @@ public class Configuration {
 		
 		String id;
 		int numberOfHouseholds;
+		Integer lodNetwork;
 		
-		public AdminUnitEntry(String id, int nHouseholds){
+		public AdminUnitEntry(String id, int nHouseholds, Integer lod){
 			this.id = id;
 			this.numberOfHouseholds = nHouseholds;
+			this.lodNetwork = lod;
 		}
 		
 		public String getId(){
@@ -441,9 +444,13 @@ public class Configuration {
 			return this.numberOfHouseholds;
 		}
 		
+		public Integer getNetworkDetail(){
+			return this.lodNetwork;
+		}
+		
 	}
 	
-	public Set<AdminUnitEntry> getAdminUnitEntries(){
+	public Map<String, AdminUnitEntry> getAdminUnitEntries(){
 		return this.adminUnits;
 	}
 	

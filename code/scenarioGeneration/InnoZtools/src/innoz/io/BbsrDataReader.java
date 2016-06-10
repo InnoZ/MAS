@@ -104,7 +104,8 @@ public class BbsrDataReader {
 
 			for(String key : d.getAdminUnits().keySet()){
 
-				String subKey = key.length() > 8 ? key.substring(0, 4) : key.substring(0, 4);
+				String subKey = key.substring(0, 5);
+				if(subKey.startsWith("0")) subKey = subKey.substring(1);
 				AdministrativeUnit unit = d.getAdminUnits().get(key);
 				
 				int regionType = this.key2Type.get(subKey);

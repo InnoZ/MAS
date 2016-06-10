@@ -134,6 +134,7 @@ public class ConfigurationReaderXml extends DefaultHandler {
 		
 		String id = atts.getValue("id");
 		int hh = Integer.parseInt(atts.getValue(Configuration.NUMBER_OF_HH));
+		Integer lod = Integer.parseInt(atts.getValue(Configuration.LOD_NETWORK));
 		
 		for(String s : id.split(Configuration.COMMENT)){
 
@@ -159,7 +160,7 @@ public class ConfigurationReaderXml extends DefaultHandler {
 				
 			}
 			
-			this.configuration.adminUnits.add(new AdminUnitEntry(s, hh));
+			this.configuration.adminUnits.put(id, new AdminUnitEntry(s, hh, lod));
 			
 		}
 		

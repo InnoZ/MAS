@@ -14,6 +14,8 @@ public class AdministrativeUnit {
 	private Integer bland;
 	private Integer regionType;
 	
+	private Integer networkDetail = 6;
+	
 	private int nInhabitants;
 	private int nHouseholds;
 	
@@ -100,6 +102,16 @@ public class AdministrativeUnit {
 	
 	public int getNumberOfHouseholds(){
 		return this.nHouseholds;
+	}
+	
+	public Integer getNetworkDetail(){
+		return this.networkDetail;
+	}
+	
+	public void setNetworkDetail(Integer lod){
+		if(lod != null){
+			this.networkDetail = lod;
+		}
 	}
 
 }

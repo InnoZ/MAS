@@ -34,7 +34,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.imageio.ImageIO;
-import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -44,10 +43,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.text.Caret;
 
+import org.apache.log4j.LogManager;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.core.config.Config;
@@ -144,17 +146,22 @@ public final class MainFrame {
 		footer.setPreferredSize(new Dimension(1024,100));
 		footer.setBackground(new Color(0,0.59f,0.84f,0.5f));
 
-		JTextArea textArea = new JTextArea();
-		textArea.setPreferredSize(new Dimension(1024,100));
-		TextAreaOutputStreamContainer comp = new TextAreaOutputStreamContainer(textArea, new TextAreaOutputStream(textArea, ""));
-		this.frame.add(comp, BorderLayout.SOUTH);
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+		JTextArea textArea = new JTextArea(10,5);
+		textArea.setEditable(true);
+//		textArea.setPreferredSize(new Dimension(1024,200));
+		JScrollPane scrollPane = new JScrollPane(textArea);
+//		scrollPane.setPreferredSize(textArea.getPreferredSize());
+		StatusMessageAppender appender = new StatusMessageAppender(textArea);
+		LogManager.getRootLogger().addAppender(appender);
+		panel.add(scrollPane, BorderLayout.CENTER);
+		this.frame.add(panel, BorderLayout.SOUTH);
 		
 		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.frame.pack();
 		this.frame.setLocationRelativeTo(null);
 		this.frame.setVisible(true);
-		
-		System.out.println("initialized");
 		
 	}
 	
@@ -587,18 +594,13 @@ public final class MainFrame {
 			
 			runButton.setEnabled(false);
 			
-			System.out.println("starting scenario generation...");
-			
-//			ConfigurationUtils.set(configuration, Configuration.SURVEY_AREA_IDS, surveyAreaIdsTextField.getText());
-
-//			int nHouseholds = !nHouseholdsTextField.getText().equals("") ? Integer.parseInt(nHouseholdsTextField.getText()) : 0;
 			String outputDir = !chooseOutputDirButton.getText().equals("") ? chooseOutputDirButton.getText() : ".";
 			
 			StringBuilder surveyAreaIds = new StringBuilder();
 			
 			for(Entry<String, String> entry : surveyArea.entrySet()){
 				int nHouseholds = entry.getValue().equals("") ? 0 : Integer.parseInt(entry.getValue());
-				configuration.getAdminUnitEntries().add(new AdminUnitEntry(entry.getKey(), nHouseholds));
+				configuration.getAdminUnitEntries().put(entry.getKey(), new AdminUnitEntry(entry.getKey(), nHouseholds, null));
 				surveyAreaIds.append(entry.getKey() + ",");
 			}
 			
@@ -608,7 +610,7 @@ public final class MainFrame {
 			
 			for(Entry<String, String> entry : vicinity.entrySet()){
 				int nHouseholds = entry.getValue().equals("") ? 0 : Integer.parseInt(entry.getValue());
-				configuration.getAdminUnitEntries().add(new AdminUnitEntry(entry.getKey(), nHouseholds));
+				configuration.getAdminUnitEntries().put(entry.getKey(), new AdminUnitEntry(entry.getKey(), nHouseholds, null));
 				vicinityIds.append(entry.getKey());
 			}
 			
@@ -633,20 +635,14 @@ public final class MainFrame {
 				((ScenarioImpl)scenario).createVehicleContainer();
 			}
 			
-			System.out.println("reading from database...");
-			
 			// Container for geoinformation (admin borders, landuse)
 			Geoinformation geoinformation = new Geoinformation();
 
 			// A class that reads data from database tables into local containers
 			DatabaseReader dbReader = new DatabaseReader(geoinformation);
-			dbReader.readGeodataFromDatabase(configuration, configuration.getSurveyAreaIds(),
-					configuration.getVicinityIds(), scenario);
+			dbReader.readGeodataFromDatabase(configuration, scenario);
 			InputStream in = classLoader.getResourceAsStream("regionstypen.csv");
-//			System.out.println(file);
 			new BbsrDataReader().read(geoinformation, new InputStreamReader(in));
-			
-			System.out.println("creating network...");
 			
 			if(network.isSelected()){
 
@@ -667,8 +663,6 @@ public final class MainFrame {
 						.getOutputDirectory() + "network.xml.gz");
 				
 			}
-			
-			System.out.println("creating plans...");
 			
 			if(households.isSelected()){
 				// Create a MATSim population
@@ -706,9 +700,9 @@ public final class MainFrame {
 				
 			}
 			
-			System.out.println("done.");
-
 			runButton.setEnabled(true);
+			
+			JOptionPane.showMessageDialog(frame, new JLabel("Output successfully created!"));
 
 		}
 		

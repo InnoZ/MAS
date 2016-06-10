@@ -3,6 +3,7 @@ package innoz.scenarioGeneration;
 import innoz.config.Configuration;
 import innoz.config.ConfigurationUtils;
 import innoz.config.SshConnector;
+import innoz.config.Configuration.PopulationType;
 import innoz.io.BbsrDataReader;
 import innoz.io.database.DatabaseReader;
 import innoz.io.database.DatabaseUpdater;
@@ -99,8 +100,7 @@ public class MobilityDatabaseMain {
 
 				// A class that reads data from database tables into local containers
 				DatabaseReader dbReader = new DatabaseReader(geoinformation);
-				dbReader.readGeodataFromDatabase(configuration, configuration.getSurveyAreaIds(),
-						configuration.getVicinityIds(), scenario);
+				dbReader.readGeodataFromDatabase(configuration, scenario);
 				new BbsrDataReader().read(geoinformation);
 				
 				// Create a MATSim network from OpenStreetMap data
@@ -121,23 +121,28 @@ public class MobilityDatabaseMain {
 				// Dump scenario elements into the output directory
 				new NetworkWriter(scenario.getNetwork()).write(configuration
 						.getOutputDirectory() + "network.xml.gz");
-				new PopulationWriter(scenario.getPopulation()).write(configuration
-						.getOutputDirectory() + "plans.xml.gz");
-				new ObjectAttributesXmlWriter((ObjectAttributes) scenario.getScenarioElement(
-						PersonUtils.PERSON_ATTRIBUTES)).writeFile(configuration.getOutputDirectory()
-								+ "personAttributes.xml.gz");
-				
-				if(configuration.isUsingHouseholds()){
-					
-					new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration
-							.getOutputDirectory() + "households.xml.gz");
-					
-				}
-				
-				if(configuration.isUsingVehicles()){
 
-					new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration
-							.getOutputDirectory() + "vehicles.xml.gz");
+				if(!configuration.getPopulationType().equals(PopulationType.none)){
+
+					new PopulationWriter(scenario.getPopulation()).write(configuration
+							.getOutputDirectory() + "plans.xml.gz");
+					new ObjectAttributesXmlWriter((ObjectAttributes) scenario.getScenarioElement(
+							PersonUtils.PERSON_ATTRIBUTES)).writeFile(configuration.getOutputDirectory()
+									+ "personAttributes.xml.gz");
+					
+					if(configuration.isUsingHouseholds()){
+						
+						new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration
+								.getOutputDirectory() + "households.xml.gz");
+						
+					}
+					
+					if(configuration.isUsingVehicles()){
+
+						new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration
+								.getOutputDirectory() + "vehicles.xml.gz");
+						
+					}
 					
 				}
 				

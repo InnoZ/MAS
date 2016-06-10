@@ -359,7 +359,9 @@ public class PopulationCreator {
 //		for(int i = 0; i < configuration.getNumberOfHouseholds() * configuration.getScaleFactor(); i++){
 		for(District d : this.geoinformation.getAdminUnits().values()){
 
+			System.out.println(d.getId() + "\t" + d.getnHouseholds());
 			for(int i = 0; i < d.getnHouseholds() * configuration.getScaleFactor(); i++){
+				
 				currentHomeCell = null;
 				AdministrativeUnit au = null;
 			double r = random.nextDouble() * this.geoinformation.getTotalWeightForLanduseKey(d.getId(), ActivityTypes.HOME);

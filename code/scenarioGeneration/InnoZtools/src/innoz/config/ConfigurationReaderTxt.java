@@ -114,7 +114,7 @@ public class ConfigurationReaderTxt {
 				
 			}
 			
-			this.configuration.adminUnits.add(new AdminUnitEntry(this.configuration.getSurveyAreaIds(), this.configuration.getNumberOfHouseholds()));
+//			this.configuration.adminUnits.put(new AdminUnitEntry(this.configuration.getSurveyAreaIds(), this.configuration.getNumberOfHouseholds(), null));
 			
 		} catch (IOException e) {
 			
