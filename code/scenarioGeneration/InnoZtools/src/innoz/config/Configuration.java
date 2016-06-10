@@ -108,9 +108,21 @@ public class Configuration {
 	 */
 	Configuration(String file){
 		
+		this();		
+		this.load(file);
+		
+	}
+	
+	Configuration(){
+		
 		this.adminUnits = new HashMap<String, Configuration.AdminUnitEntry>();
+	
+	}
+	
+	void load(String file){
 		
 		if(file.endsWith(".txt")){
+			//TODO this needs to be removed
 			new ConfigurationReaderTxt(this).read(file);
 		} else if(file.endsWith(".xml")){
 			new ConfigurationReaderXml(this).read(file);
@@ -119,10 +131,6 @@ public class Configuration {
 		validate();
 		
 	}
-	
-	Configuration(){
-		this.adminUnits = new HashMap<String, Configuration.AdminUnitEntry>();
-	};
 	
 	/**
 	 * Validates the configuration. Only errors that may eventually cause exceptions are taken into account here.

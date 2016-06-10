@@ -2,8 +2,8 @@ package innoz.config;
 
 public class ConfigurationUtils {
 
-	public static Configuration loadConfiguration(String file){
-		return new Configuration(file);
+	public static void loadConfiguration(String file, Configuration configuration){
+		configuration.load(file);
 	}
 	
 	public static Configuration createConfiguration(){

@@ -65,7 +65,8 @@ public class MobilityDatabaseMain {
 
 			// create a new configuration that holds all the information and switches needed to
 			// generate a MATSim scenario
-			Configuration configuration = ConfigurationUtils.loadConfiguration(args[0]);
+			Configuration configuration = ConfigurationUtils.createConfiguration();
+			ConfigurationUtils.loadConfiguration(args[0], configuration);
 
 			try {
 				
