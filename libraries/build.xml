@@ -1,21 +1,28 @@
-<project>
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="InnoZ-Toolbox" basedir=".">
 
-	<target name="clean">
+	<path id="libraries.path" >
+		<fileset dir="." >
+			<include name="jsch-0.1.53.jar"/>
+			<include name="postgresql-9.3-1104.jdbc4.jar" />
+		</fileset>
+		<fileset dir="../../../innoz-workspace/matsim-0.7.0/" >
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+
+	<target name="clean" description="remove old files" >
 		<delete dir="build"/>
 	</target>
 
-	<target name="compile">
+	<target name="compile" description="create class files" depends="test"  >
 		<mkdir dir="build/classes"/>
 		<javac srcdir="../code/scenarioGeneration/InnoZtools/src" destdir="build/classes/">
-			<classpath>
-				<pathelement path="jsch-0.1.53.jar"/>
-				<pathelement path="postgresql-9.3-1104.jdbc4.jar"/>
-				<pathelement path="../../../innoz-workspace/matsim-0.7.0/matsim-0.7.0.jar"/>
-			</classpath>
+			<classpath refid="libraries.path"/>
 		</javac>
 	</target>
 
-	<target name="test">
+	<target name="test" description="run junit tests">
 		<junit printsummary="on" haltonerror="yes" haltonfailure="yes" fork="true">
 			<batchtest>
 				<fileset dir="../code/scenarioGeneration/InnoZtools/test" includes="/opt/eclipse/plugins"/>
@@ -23,12 +30,51 @@
 		</junit>
 	</target>
 
-	<target name="jar">
+	<target name="jar" description="build jar file" depends="compile" >
+		<mkdir dir="build/classes/lib"/>
+		<copy todir="build/classes/lib">
+			<path refid="libraries.path"/>
+		</copy>
+		<copy todir="build/classes">
+			<fileset dir="../code/scenarioGeneration/InnoZtools/bin" includes="*.png"/>
+			<fileset dir="../ressources" includes="*.csv" />
+		</copy>
+		<manifestclasspath property="manifest.classpath" jarfile="InnoZscenarioGeneration.jar" maxParentLevels="5">
+                    <classpath refid="libraries.path"/>
+                </manifestclasspath>
 		<jar destfile="InnoZscenarioGeneration.jar" basedir="build/classes">
 			<fileset dir="../code/scenarioGeneration/InnoZtools/src" includes="**/*.java"/>
-		</jar>		
+			<manifest>
+				<attribute name="Class-Path" value="${manifest.classpath}" />
+			</manifest>
+		</jar>
+
 	</target>
 
-	<target name="build" depends="test,compile,jar,clean"/>
+	<target name="xjar" description="build runnable jar file" depends="compile" >
+		<mkdir dir="build/classes/lib"/>
+		<copy todir="build/classes/lib">
+			<path refid="libraries.path"/>
+		</copy>
+		<copy todir="build/classes">
+			<fileset dir="../code/scenarioGeneration/InnoZtools/bin" includes="*.png"/>
+			<fileset dir="../ressources" includes="*.csv" />
+		</copy>
+
+		<manifestclasspath property="manifest.classpath" jarfile="InnoZtoolbox.jar" maxParentLevels="5">
+        	    <classpath refid="libraries.path"/>
+	        </manifestclasspath>
+
+		<jar destfile="InnoZtoolbox.jar" basedir="build/classes" update="true">
+			<manifest>
+				<attribute name="Main-Class" value="innoz/gui/MainFrame" />
+				<attribute name="Class-Path" value="${manifest.classpath}" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="build" depends="jar,clean" description="build plain jar file" />
+
+	<target name="buildGui" depends="xjar,clean" description="build runnable jar file with gui" />
 
 </project>
