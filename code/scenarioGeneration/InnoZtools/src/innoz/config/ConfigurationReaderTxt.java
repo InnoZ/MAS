@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import org.matsim.core.utils.io.IOUtils;
 
+@Deprecated
 public class ConfigurationReaderTxt {
 
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
@@ -114,7 +115,8 @@ public class ConfigurationReaderTxt {
 				
 			}
 			
-//			this.configuration.adminUnits.put(new AdminUnitEntry(this.configuration.getSurveyAreaIds(), this.configuration.getNumberOfHouseholds(), null));
+			this.configuration.adminUnits.put(this.configuration.getSurveyAreaIds(),
+					new AdminUnitEntry(this.configuration.getSurveyAreaIds(), this.configuration.getNumberOfHouseholds(), null));
 			
 		} catch (IOException e) {
 			
