@@ -31,11 +31,11 @@ import org.opengis.referencing.FactoryException;
 
 import com.vividsolutions.jts.io.ParseException;
 
-public class ScenarioGenerationControler implements Runnable {
+public class ScenarioGenerationController implements DefaultController {
 
 	private final Configuration configuration;
 	
-	public ScenarioGenerationControler(final Configuration configuration){
+	public ScenarioGenerationController(final Configuration configuration){
 		this.configuration = configuration;
 	}
 	
