@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,7 +48,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.text.Caret;
 
 import org.apache.log4j.LogManager;
 import org.matsim.api.core.v01.Scenario;
@@ -77,9 +77,6 @@ public final class MainFrame {
 	JPanel mainPanel;
 	
 	//Components
-	private JTextField surveyAreaIdsTextField;
-	private JTextField vicinityIdsTextField;
-	private JTextField nHouseholdsTextField;
 	private JButton chooseOutputDirButton;
 	private JCheckBox overwrite;
 	private JButton runButton;
@@ -150,9 +147,7 @@ public final class MainFrame {
 		panel.setLayout(new BorderLayout());
 		JTextArea textArea = new JTextArea(10,5);
 		textArea.setEditable(true);
-//		textArea.setPreferredSize(new Dimension(1024,200));
 		JScrollPane scrollPane = new JScrollPane(textArea);
-//		scrollPane.setPreferredSize(textArea.getPreferredSize());
 		StatusMessageAppender appender = new StatusMessageAppender(textArea);
 		LogManager.getRootLogger().addAppender(appender);
 		panel.add(scrollPane, BorderLayout.CENTER);
@@ -429,12 +424,16 @@ public final class MainFrame {
 	private void reset(){
 		
 		this.chooseOutputDirButton.setText("Choose");
-		this.nHouseholdsTextField.setText("");
-		this.surveyAreaIdsTextField.setText("");
-		this.vicinityIdsTextField.setText("");
+		this.surveyArea = new HashMap<String, String>();
+		this.vicinity = new HashMap<String, String>();
+		
+//		this.nHouseholdsTextField.setText("");
+//		this.surveyAreaIdsTextField.setText("");
+//		this.vicinityIdsTextField.setText("");
 		this.network.setSelected(false);
 		this.households.setSelected(false);
 		this.overwrite.setSelected(false);
+		this.frame.repaint();
 		
 	}
 	
