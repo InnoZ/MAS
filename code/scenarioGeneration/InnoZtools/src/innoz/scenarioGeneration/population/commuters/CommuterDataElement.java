@@ -29,6 +29,7 @@ public class CommuterDataElement {
 	private String fromName;
 	private String toName;
 	private int commuters;
+	private int trainees;
 	private int adminLevel;
 	private double shareOfMaleCommuters;
 	
@@ -44,7 +45,8 @@ public class CommuterDataElement {
 		this.adminLevel = fromId.length();
 	}
 	
-	public CommuterDataElement(String fromId, String fromName,  String toId, String toName,  int commuters, double shareOfMaleCommuters){
+	public CommuterDataElement(String fromId, String fromName,  String toId, String toName,  int commuters,
+			double shareOfMaleCommuters){
 		this.fromId = fromId;
 		this.toId = toId;
 		this.commuters = commuters;
@@ -52,6 +54,18 @@ public class CommuterDataElement {
 		this.toName = toName;
 		this.adminLevel = fromId.length();
 		this.shareOfMaleCommuters = shareOfMaleCommuters;
+	}
+	
+	public CommuterDataElement(String fromId, String fromName,  String toId, String toName,  int commuters,
+			double shareOfMaleCommuters, int nTrainees){
+		this.fromId = fromId;
+		this.toId = toId;
+		this.commuters = commuters;
+		this.fromName = fromName;
+		this.toName = toName;
+		this.adminLevel = fromId.length();
+		this.shareOfMaleCommuters = shareOfMaleCommuters;
+		this.trainees = nTrainees;
 	}
 	
 	
@@ -88,8 +102,12 @@ public class CommuterDataElement {
 		return toId;
 	}
 
-	public int getCommuters() {
+	public int getNumberOfCommuters() {
 		return commuters;
+	}
+	
+	public int getNumberOfTrainees(){
+		return this.trainees;
 	}
 	
 	public String toString(){
