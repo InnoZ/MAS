@@ -987,7 +987,7 @@ public class DatabaseReader {
 				+ DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + ", " + DatabaseConstants.functions.st_astext.name() + "("
 				+ DatabaseConstants.ATT_WAY	+ ") from " + DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_polygon
 				+ " where " + DatabaseConstants.functions.st_within + "(" + DatabaseConstants.ATT_WAY + ","
-				+ DatabaseConstants.functions.st_geomfromtext.name() + "('" + this.geoinformation.getSurveyAreaBoundingBox().toString() + "',4326))"
+				+ DatabaseConstants.functions.st_geomfromtext.name() + "('" + this.geoinformation.getCompleteGeometry().toString() + "',4326))"
 				+ " and " + DatabaseConstants.ATT_BUILDING + " is not null";
 		ResultSet set = statement.executeQuery(s);
 		
