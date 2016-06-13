@@ -33,7 +33,7 @@ public class MobilityDatabaseMain {
 					System.out.print("> ");
 					String command = scanner.nextLine();
 					
-					if(command.equals("exit") || command.equals("e")){
+					if(command.equals("quit") || command.equals("q")){
 					
 						SshConnector.disconnect();
 						alive = false;
@@ -92,7 +92,7 @@ public class MobilityDatabaseMain {
 		System.out.println("> ");
 		System.out.println("> Usage:");
 		System.out.println("> build-scenario (bs) <path-to-file> : Build a new scenario based on the specifications in the given configuration file");
-		System.out.println("> e(xit)                             : Exit the program");
+		System.out.println("> q(uit)                             : Exits the program");
 		System.out.println("> ");
 		
 	}
