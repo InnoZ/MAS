@@ -1,5 +1,13 @@
 package innoz.io.database;
 
+/**
+ * 
+ * Holds the string representations of the mid variable names.
+ * Basically a wrapper class to store this kind of information.
+ * 
+ * @author dhosse
+ *
+ */
 public class MiDConstants {
 	
 	private MiDConstants(){};

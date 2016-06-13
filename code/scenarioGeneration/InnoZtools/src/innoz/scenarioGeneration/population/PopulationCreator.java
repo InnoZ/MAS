@@ -580,7 +580,7 @@ public class PopulationCreator {
 		innoz.utils.matsim.PersonUtils.setSex(person, personTemplate.getSex());
 		innoz.utils.matsim.PersonUtils.setAge(person, personTemplate.getAge());
 		innoz.utils.matsim.PersonUtils.setEmployed(person, personTemplate.isEmployed());
-		String carAvail = personTemplate.getCarAvailable() ? "always" : "never";
+		String carAvail = personTemplate.hasCarAvailable() ? "always" : "never";
 		innoz.utils.matsim.PersonUtils.setCarAvail(person, carAvail);
 		String hasLicense = personTemplate.hasLicense() ? "yes" : "no";
 		innoz.utils.matsim.PersonUtils.setLicence(person, hasLicense);
@@ -857,7 +857,7 @@ public class PopulationCreator {
 			// If the transport mode wasn't reported, consider all modes the person could have used
 			modes = CollectionUtils.stringToSet(TransportMode.bike + "," + TransportMode.pt + "," + TransportMode.walk);
 			
-			if(personTemplate.getCarAvailable()){
+			if(personTemplate.hasCarAvailable()){
 			
 				modes.add(TransportMode.ride);
 				

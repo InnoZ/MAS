@@ -24,7 +24,7 @@ public class HashGenerator {
 		int upperBound = lowerBound + 9;
 		String ageClass = lowerBound + "_" + upperBound;
 		
-		return ("ageClass=" + ageClass + "_sex=" + person.getSex() + "_carAvail=" + person.getCarAvailable() +
+		return ("ageClass=" + ageClass + "_sex=" + person.getSex() + "_carAvail=" + person.hasCarAvailable() +
 				"_hasLicense=" + person.hasLicense() + "_employed=" + person.isEmployed());
 		
 	}

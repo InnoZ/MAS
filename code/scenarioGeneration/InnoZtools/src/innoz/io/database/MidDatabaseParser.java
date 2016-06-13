@@ -650,7 +650,7 @@ public class MidDatabaseParser {
 							plan.setLongestLeg(way.getTravelDistance());
 						}
 						
-						if(way.getMainMode().equals(TransportMode.car) && !person.getCarAvailable()){
+						if(way.getMainMode().equals(TransportMode.car) && !person.hasCarAvailable()){
 							if(!licenseAndCarAvailabilitySet){
 								log.warn("Person " + person.getId() + " reported that no car was available, but it is driving anyway!");
 								log.info("Setting car availability and license ownership to ’true’.");
