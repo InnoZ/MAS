@@ -84,6 +84,49 @@ public class Configuration {
 	public enum PopulationType{dummy,commuter,complete,none};
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
+	/**
+	 * 
+	 * Creates a new configuration and sets its parameters according to what's defined in the given file.
+	 * 
+	 * @param file Text file containing the configuration parameters.
+	 */
+	Configuration(String file){
+		
+		this();		
+		this.load(file);
+		
+	}
+	
+	/**
+	 * 
+	 * Creates an empty (i.e. only default values) configuration.
+	 * 
+	 */
+	Configuration(){
+		
+		this.adminUnits = new HashMap<String, Configuration.AdminUnitEntry>();
+	
+	}
+	
+	/**
+	 * 
+	 * Loads the configuration object by reading in data from an existing configuration file (*.xml).
+	 * 
+	 * @param file The configuration file to load.
+	 */
+	void load(String file){
+		
+		new ConfigurationReaderXml(this).read(file);
+		
+		validate();
+		
+	}
+	
+	/**
+	 * 
+	 * Sets the configurable parameters of the configuration to their default values.
+	 * 
+	 */
 	public void reset(){
 		
 		this.surveyAreaIds = null;
@@ -106,51 +149,32 @@ public class Configuration {
 		
 	}
 	
+	/**
+	 * 
+	 * Setter method for the configurable parameters of the configuration.
+	 * 
+	 * @param param The string identifier of the parameter.
+	 * @param value The value to which the parameter is to be set.
+	 */
 	void setParam(String param, Object value){
 		
 		switch(param){
-		case SURVEY_AREA_IDS: this.surveyAreaIds = (String) value;
-			break;
-		case VICINITY_IDS: this.vicinityIds = (String) value;
-			break;
-		case OUTPUT_DIR: this.outputDirectory = (String) value;
-			break;
-		case OVERWRITE_FILES: this.overwriteExistingFiles = (Boolean) value;
-			break;
-		default: return ;
+		
+			case SURVEY_AREA_IDS: this.surveyAreaIds = (String) value;
+				break;
+			
+			case VICINITY_IDS: this.vicinityIds = (String) value;
+				break;
+			
+			case OUTPUT_DIR: this.outputDirectory = (String) value;
+				break;
+			
+			case OVERWRITE_FILES: this.overwriteExistingFiles = (Boolean) value;
+				break;
+			
+			default: return ;
+			
 		}
-		
-	}
-	
-	/**
-	 * 
-	 * Creates a new configuration from the given file.
-	 * 
-	 * @param file Text file containing the configuration parameters.
-	 */
-	Configuration(String file){
-		
-		this();		
-		this.load(file);
-		
-	}
-	
-	Configuration(){
-		
-		this.adminUnits = new HashMap<String, Configuration.AdminUnitEntry>();
-	
-	}
-	
-	void load(String file){
-		
-		if(file.endsWith(".txt")){
-			//TODO this needs to be removed
-			new ConfigurationReaderTxt(this).read(file);
-		} else if(file.endsWith(".xml")){
-			new ConfigurationReaderXml(this).read(file);
-		}
-		
-		validate();
 		
 	}
 	
@@ -454,32 +478,73 @@ public class Configuration {
 		
 	}
 	
+	/**
+	 * 
+	 * Class to temporarily store information about administrative units.
+	 * 
+	 * @author dhosse
+	 *
+	 */
 	public static class AdminUnitEntry{
 		
 		String id;
 		int numberOfHouseholds;
 		Integer lodNetwork;
 		
+		/**
+		 * 
+		 * Creates a new admin unit object with the specified parameters.
+		 * 
+		 * @param id Identifier of the administrative unit.
+		 * @param nHouseholds The number of households contained.
+		 * @param lod The level of detail the network should have inside the administrative unit's geometry.
+		 */
 		public AdminUnitEntry(String id, int nHouseholds, Integer lod){
+			
 			this.id = id;
 			this.numberOfHouseholds = nHouseholds;
 			this.lodNetwork = lod;
+			
 		}
 		
+		/**
+		 * 
+		 * Getter for the admin unit's identifier.
+		 * 
+		 * @return String representation of the identifier.
+		 */
 		public String getId(){
 			return this.id;
 		}
 		
+		/**
+		 * 
+		 * Getter for the number of households inside the administrative unit.
+		 * 
+		 * @return The number of households.
+		 */
 		public int getNumberOfHouseholds(){
 			return this.numberOfHouseholds;
 		}
 		
+		/**
+		 * 
+		 * Getter for the level of detail the network should have inside the administrative unit.
+		 * 
+		 * @return Level of detail.
+		 */
 		public Integer getNetworkDetail(){
 			return this.lodNetwork;
 		}
 		
 	}
 	
+	/**
+	 * 
+	 * Getter for the administrative unit map.
+	 * 
+	 * @return The map containing the administrative units.
+	 */
 	public Map<String, AdminUnitEntry> getAdminUnitEntries(){
 		return this.adminUnits;
 	}
