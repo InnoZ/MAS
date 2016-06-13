@@ -356,153 +356,150 @@ public class PopulationCreator {
 		// Initialize a pseudo-random number and iterate over all administrative units.
 		// Accumulate their weights and as soon as the random number is smaller or equal to the accumulated weight
 		// pick the current admin unit.
-//		for(int i = 0; i < configuration.getNumberOfHouseholds() * configuration.getScaleFactor(); i++){
 		for(District d : this.geoinformation.getAdminUnits().values()){
 
-			System.out.println(d.getId() + "\t" + d.getnHouseholds());
 			for(int i = 0; i < d.getnHouseholds() * configuration.getScaleFactor(); i++){
 				
 				currentHomeCell = null;
 				AdministrativeUnit au = null;
-			double r = random.nextDouble() * this.geoinformation.getTotalWeightForLanduseKey(d.getId(), ActivityTypes.HOME);
-			
-			double r2 = 0.;
-
-			int blandId = 0;
-			int rtyp = 0;
-			
-			for(AdministrativeUnit admin : d.getAdminUnits().values()){
+				double r = random.nextDouble() * this.geoinformation.getTotalWeightForLanduseKey(d.getId(), ActivityTypes.HOME);
 				
-				r2 += admin.getWeightForKey(ActivityTypes.HOME);
+				double r2 = 0.;
+	
+				int blandId = 0;
+				int rtyp = 0;
 				
-				if(r <= r2 && admin.getLanduseGeometries().get(ActivityTypes.HOME) != null){
+				for(AdministrativeUnit admin : d.getAdminUnits().values()){
 					
-					au = admin;
-					blandId = au.getBland();
-					rtyp = au.getRegionType();
-					break;
+					r2 += admin.getWeightForKey(ActivityTypes.HOME);
 					
-				}
-				
-			}
-			
-			// Choose a template household (weighted, same method as above)
-			SurveyHousehold template = null;
-			
-			double accumulatedWeight = 0.;
-			double rand = random.nextDouble() * container.getWeightForHouseholdsInState(blandId, rtyp);
-			
-			for(String hhId : container.getHouseholdsForState(blandId, rtyp)){
-				
-				SurveyHousehold hh = container.getHouseholds().get(hhId);
-				
-				if(hh != null){
-					
-					accumulatedWeight += hh.getWeight();
-					if(accumulatedWeight >= rand){
+					if(r <= r2 && admin.getLanduseGeometries().get(ActivityTypes.HOME) != null){
 						
-						template = hh;
+						au = admin;
+						blandId = au.getBland();
+						rtyp = au.getRegionType();
 						break;
 						
 					}
 					
 				}
 				
-			}
-			
-			int nPersons = template.getNPersons();
-
-			// Create a MATSim household
-			Household household = new HouseholdImpl(Id.create(au.getId() + "_" + i, Household.class));
-			household.setIncome(new IncomeImpl(template.getIncome(), IncomePeriod.month));
-			((HouseholdImpl)household).setMemberIds(new ArrayList<Id<Person>>());
-
-			// Set global home location for the entire household
-			Coord homeLocation = null;
-
-			// Go through all residential areas of the home cell and randomly choose one of them
-			if(au.getLanduseGeometries().containsKey(ActivityTypes.HOME)){
+				// Choose a template household (weighted, same method as above)
+				SurveyHousehold template = null;
 				
-				double p = random.nextDouble() * au.getWeightForKey(ActivityTypes.HOME);
-				accumulatedWeight = 0.;
+				double accumulatedWeight = 0.;
+				double rand = random.nextDouble() * container.getWeightForHouseholdsInState(blandId, rtyp);
 				
-				for(Geometry g : au.getLanduseGeometries().get(ActivityTypes.HOME)){
+				for(String hhId : container.getHouseholdsForState(blandId, rtyp)){
 					
-					accumulatedWeight += g.getArea();
+					SurveyHousehold hh = container.getHouseholds().get(hhId);
 					
-					if(p <= accumulatedWeight){
-						// Shoot the home location
-						homeLocation = transformation.transform(GeometryUtils.shoot(g, random));
-						currentHomeCell = au;
-						break;
-					}
-					
-				}
-				
-			} else {
-			
-				// If no residential areas exist within the home cell, shoot a random coordinate
-				homeLocation = transformation.transform(GeometryUtils.shoot(au.getGeometry(), random));
-				currentHomeCell = au;
-				
-			}
-
-			// Create as many persons as were reported and add them to the household and the population
-			for(int j = 0; j < nPersons; j++){
-				
-				String personId = template.getMemberIds().get(j);
-				SurveyPerson templatePerson = container.getPersons().get(personId);
-				
-				Person person = createPerson(templatePerson, population, personAttributes, random.nextDouble(),
-						population.getPersons().size(), homeLocation, container);
-				
-				// If the resulting MATSim person is not null, add it
-				if(person != null){
-					
-					population.addPerson(person);
-					household.getMemberIds().add(person.getId());
-					
-				}
-
-			}
-			
-			// If we model non-generic cars, create all cars that were reported in the survey and add them to the household
-			if(configuration.isUsingVehicles()){
-				
-				for(String vid : template.getVehicleIds()){
-					
-					SurveyVehicle v = container.getVehicles().get(vid);
-					
-					VehicleType type = VehicleTypes.getVehicleTypeForKey(v.getKbaClass(), v.getFuelType());
-					
-					if(!scenario.getVehicles().getVehicleTypes().containsKey(type.getId())){
-						scenario.getVehicles().addVehicleType(type);
-					}
-					
-					Vehicle vehicle = scenario.getVehicles().getFactory().createVehicle(Id.create(template.getId() + "_" + vid +
-							"_" + v.getFuelType().name() + "_" + vehicleCounter, Vehicle.class), type);
-					scenario.getVehicles().addVehicle(vehicle);
-					vehicleCounter++;
-					
-					if(household.getVehicleIds() == null){
+					if(hh != null){
 						
-						((HouseholdImpl)household).setVehicleIds(new ArrayList<Id<Vehicle>>());
+						accumulatedWeight += hh.getWeight();
+						if(accumulatedWeight >= rand){
+							
+							template = hh;
+							break;
+							
+						}
 						
 					}
 					
-					household.getVehicleIds().add(vehicle.getId());
+				}
+				
+				int nPersons = template.getNPersons();
+	
+				// Create a MATSim household
+				Household household = new HouseholdImpl(Id.create(au.getId() + "_" + i, Household.class));
+				household.setIncome(new IncomeImpl(template.getIncome(), IncomePeriod.month));
+				((HouseholdImpl)household).setMemberIds(new ArrayList<Id<Person>>());
+	
+				// Set global home location for the entire household
+				Coord homeLocation = null;
+	
+				// Go through all residential areas of the home cell and randomly choose one of them
+				if(au.getLanduseGeometries().containsKey(ActivityTypes.HOME)){
+					
+					double p = random.nextDouble() * au.getWeightForKey(ActivityTypes.HOME);
+					accumulatedWeight = 0.;
+					
+					for(Geometry g : au.getLanduseGeometries().get(ActivityTypes.HOME)){
+						
+						accumulatedWeight += g.getArea();
+						
+						if(p <= accumulatedWeight){
+							// Shoot the home location
+							homeLocation = transformation.transform(GeometryUtils.shoot(g, random));
+							currentHomeCell = au;
+							break;
+						}
+						
+					}
+					
+				} else {
+				
+					// If no residential areas exist within the home cell, shoot a random coordinate
+					homeLocation = transformation.transform(GeometryUtils.shoot(au.getGeometry(), random));
+					currentHomeCell = au;
+					
+				}
+	
+				// Create as many persons as were reported and add them to the household and the population
+				for(int j = 0; j < nPersons; j++){
+					
+					String personId = template.getMemberIds().get(j);
+					SurveyPerson templatePerson = container.getPersons().get(personId);
+					
+					Person person = createPerson(templatePerson, population, personAttributes, random.nextDouble(),
+							population.getPersons().size(), homeLocation, container);
+					
+					// If the resulting MATSim person is not null, add it
+					if(person != null){
+						
+						population.addPerson(person);
+						household.getMemberIds().add(person.getId());
+						
+					}
+	
+				}
+				
+				// If we model non-generic cars, create all cars that were reported in the survey and add them to the household
+				if(configuration.isUsingVehicles()){
+					
+					for(String vid : template.getVehicleIds()){
+						
+						SurveyVehicle v = container.getVehicles().get(vid);
+						
+						VehicleType type = VehicleTypes.getVehicleTypeForKey(v.getKbaClass(), v.getFuelType());
+						
+						if(!scenario.getVehicles().getVehicleTypes().containsKey(type.getId())){
+							scenario.getVehicles().addVehicleType(type);
+						}
+						
+						Vehicle vehicle = scenario.getVehicles().getFactory().createVehicle(Id.create(template.getId() + "_" + vid +
+								"_" + v.getFuelType().name() + "_" + vehicleCounter, Vehicle.class), type);
+						scenario.getVehicles().addVehicle(vehicle);
+						vehicleCounter++;
+						
+						if(household.getVehicleIds() == null){
+							
+							((HouseholdImpl)household).setVehicleIds(new ArrayList<Id<Vehicle>>());
+							
+						}
+						
+						household.getVehicleIds().add(vehicle.getId());
+						
+					}
 					
 				}
 				
+				// Add the household to the scenario
+				scenario.getHouseholds().getHouseholds().put(household.getId(), household);
+				
 			}
-			
-			// Add the household to the scenario
-			scenario.getHouseholds().getHouseholds().put(household.getId(), household);
-			
+
 		}
-		}
-		
-		System.out.println(cnt);
 		
 	}
 	
