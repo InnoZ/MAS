@@ -3,7 +3,6 @@ package innoz.io.database;
 import innoz.config.Configuration;
 import innoz.io.database.MidDatabaseParser.Subtour.subtourType;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
-import innoz.scenarioGeneration.population.surveys.MiDConstants;
 import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
 import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
 import innoz.scenarioGeneration.population.surveys.SurveyPerson;

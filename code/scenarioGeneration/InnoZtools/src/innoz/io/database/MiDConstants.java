@@ -1,4 +1,4 @@
-package innoz.scenarioGeneration.population.surveys;
+package innoz.io.database;
 
 public class MiDConstants {
 	

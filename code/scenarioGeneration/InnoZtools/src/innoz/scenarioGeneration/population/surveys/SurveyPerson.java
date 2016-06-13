@@ -3,6 +3,7 @@ package innoz.scenarioGeneration.population.surveys;
 import java.util.ArrayList;
 import java.util.List;
 
+import innoz.io.database.MiDConstants;
 import innoz.scenarioGeneration.population.utils.HashGenerator;
 
 public class SurveyPerson {
