@@ -66,7 +66,7 @@ public class MobilityDatabaseMain {
 				
 			} else {
 				
-				if(args[0].equals("sg")){
+				if(args[0].equals("build-scenario") || args[0].equals("bs")){
 					
 					ConfigurationUtils.loadConfiguration(args[1], c);
 					
