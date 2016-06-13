@@ -23,7 +23,7 @@ public class MobilityDatabaseMain {
 			}
 			
 			if(args.length == 0){
-
+				
 				System.out.println("> Welcome user!");
 				
 				Scanner scanner = new Scanner(System.in);
@@ -40,7 +40,7 @@ public class MobilityDatabaseMain {
 						scanner.close();
 						System.out.println("> Goodbye!");
 					
-					} else if(command.startsWith("sg")){
+					} else if(command.startsWith("build-scenario") || command.startsWith("bs")){
 						
 						ConfigurationUtils.loadConfiguration(command.split(" ")[1], c);
 						
@@ -91,8 +91,8 @@ public class MobilityDatabaseMain {
 		
 		System.out.println("> ");
 		System.out.println("> Usage:");
-		System.out.println("> e(xit)           : Quits the program");
-		System.out.println("> sg <path-to-file>: Generate a new scenario based on the specifications in the given configuration file");
+		System.out.println("> build-scenario (bs) <path-to-file> : Build a new scenario based on the specifications in the given configuration file");
+		System.out.println("> e(xit)                             : Exit the program");
 		System.out.println("> ");
 		
 	}
