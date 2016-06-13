@@ -1,5 +1,7 @@
 package innoz.gui;
 
+import innoz.gui.actionListeners.ButtonChangeActionListener;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -24,15 +26,18 @@ public class MainPanel extends JPanel {
 	 */
 	private static final long serialVersionUID = 2199029831448438809L;
 	
-	JPanel surveyAreaPanel;
-	JPanel vicinityPanel;
-	JButton chooseOutputDirButton;
-	JCheckBox overwrite;
-	JCheckBox households;
-	JCheckBox network;
-	JButton runButton;
+	private final MainFrame mainFrame;
+	private JPanel surveyAreaPanel;
+	private JPanel vicinityPanel;
+	private JButton chooseOutputDirButton;
+	private JCheckBox overwrite;
+	private JCheckBox households;
+	private JCheckBox network;
+	private JButton runButton;
 	
 	protected MainPanel(final MainFrame parent){
+		
+		this.mainFrame = parent;
 		
 		this.setLayout(new GridLayout(15,1));
 		this.setBackground(new Color(1,1,1,0.5f));
@@ -70,11 +75,11 @@ public class MainPanel extends JPanel {
 				message.add(n);
 				
 				String[] options = {"Ok", "Cancel"};
-				int option = JOptionPane.showOptionDialog(parent.frame, message, "Add a new administrative unit", JOptionPane.NO_OPTION, JOptionPane.DEFAULT_OPTION, null, options, options[0]);
+				int option = JOptionPane.showOptionDialog(parent.getFrame(), message, "Add a new administrative unit", JOptionPane.NO_OPTION, JOptionPane.DEFAULT_OPTION, null, options, options[0]);
 				
 				if(option == 0){
 				
-					parent.surveyArea.put(id.getText(), n.getText());
+					parent.getSurveyAreaMap().put(id.getText(), n.getText());
 					
 					surveyAreaPanel.removeAll();
 					
@@ -83,10 +88,10 @@ public class MainPanel extends JPanel {
 					JPanel buttonPanel = new JPanel();
 					buttonPanel.setBackground(new Color(0,0,0,0));
 					
-					for(Entry<String, String> t : parent.surveyArea.entrySet()){
+					for(Entry<String, String> t : parent.getSurveyAreaMap().entrySet()){
 						
 						JButton newButton = new JButton(t.getKey() + ", " + t.getValue());
-						newButton.addActionListener(parent.new ButtonChangeActionListener(newButton, surveyAreaPanel));
+						newButton.addActionListener(new ButtonChangeActionListener(MainPanel.this.mainFrame, newButton, surveyAreaPanel));
 						
 						buttonPanel.add(newButton);
 					
@@ -97,7 +102,7 @@ public class MainPanel extends JPanel {
 					surveyAreaPanel.add(addButton, BorderLayout.LINE_END);
 					
 					surveyAreaPanel.revalidate();
-					parent.frame.repaint();
+					parent.getFrame().repaint();
 					
 				}
 
@@ -133,11 +138,11 @@ public class MainPanel extends JPanel {
 				message.add(n);
 				
 				String[] options = {"Ok", "Cancel"};
-				int option = JOptionPane.showOptionDialog(parent.frame, message, "Add a new administrative unit", JOptionPane.NO_OPTION, JOptionPane.DEFAULT_OPTION, null, options, options[0]);
+				int option = JOptionPane.showOptionDialog(parent.getFrame(), message, "Add a new administrative unit", JOptionPane.NO_OPTION, JOptionPane.DEFAULT_OPTION, null, options, options[0]);
 				
 				if(option == 0){
 				
-					parent.vicinity.put(id.getText(), n.getText());
+					parent.getVicinityMap().put(id.getText(), n.getText());
 					
 					vicinityPanel.removeAll();
 					
@@ -146,10 +151,10 @@ public class MainPanel extends JPanel {
 					JPanel buttonPanel = new JPanel();
 					buttonPanel.setBackground(new Color(0,0,0,0));
 					
-					for(Entry<String, String> t : parent.vicinity.entrySet()){
+					for(Entry<String, String> t : parent.getVicinityMap().entrySet()){
 						
 						JButton newButton = new JButton(t.getKey() + ", " + t.getValue());
-						newButton.addActionListener(parent.new ButtonChangeActionListener(newButton, vicinityPanel));
+						newButton.addActionListener(new ButtonChangeActionListener(MainPanel.this.mainFrame, newButton, vicinityPanel));
 						
 						buttonPanel.add(newButton);
 					
@@ -160,7 +165,7 @@ public class MainPanel extends JPanel {
 					vicinityPanel.add(addButton2, BorderLayout.LINE_END);
 					
 					vicinityPanel.revalidate();
-					parent.frame.repaint();
+					parent.getFrame().repaint();
 					
 				}
 
@@ -190,7 +195,7 @@ public class MainPanel extends JPanel {
 					chooseOutputDirButton.setText(chooser.getSelectedFile().getAbsolutePath() + "/");
 				}
 				
-				parent.frame.repaint();
+				parent.getFrame().repaint();
 				
 			}
 		});
@@ -218,7 +223,7 @@ public class MainPanel extends JPanel {
 		runButton = new JButton("Run");
 		runButton.setEnabled(false);
 		this.add(runButton);
-		runButton.addActionListener(parent.listener);
+		runButton.addActionListener(this.mainFrame.getRunnerActionListener());
 		
 		JButton reset = new JButton("Reset");
 		reset.setEnabled(false);
@@ -228,7 +233,7 @@ public class MainPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				parent.reset();
-				parent.frame.repaint();
+				parent.getFrame().repaint();
 			}
 		});
 		
