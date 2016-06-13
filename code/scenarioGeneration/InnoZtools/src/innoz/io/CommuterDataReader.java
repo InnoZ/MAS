@@ -17,7 +17,9 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package innoz.scenarioGeneration.population.commuters;
+package innoz.io;
+
+import innoz.scenarioGeneration.population.commuters.CommuterDataElement;
 
 import java.io.BufferedReader;
 import java.io.File;
