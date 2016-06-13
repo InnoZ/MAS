@@ -47,7 +47,8 @@ public class RunnerActionListener implements ActionListener, Runnable {
 			surveyAreaIds.append(entry.getKey() + ",");
 		}
 		
-		ConfigurationUtils.set(this.mainFrame.getConfiguration(), Configuration.SURVEY_AREA_IDS, surveyAreaIds.toString());
+		String surveyArea = surveyAreaIds.toString().length() > 0 ? surveyAreaIds.toString() : null;
+		ConfigurationUtils.set(this.mainFrame.getConfiguration(), Configuration.SURVEY_AREA_IDS, surveyArea);
 		
 		StringBuilder vicinityIds = new StringBuilder();
 		
