@@ -12,7 +12,7 @@ import innoz.scenarioGeneration.population.surveys.SurveyPerson;
 import innoz.scenarioGeneration.population.surveys.SurveyPlan;
 import innoz.scenarioGeneration.population.surveys.SurveyPlanActivity;
 import innoz.scenarioGeneration.population.surveys.SurveyPlanElement;
-import innoz.scenarioGeneration.population.surveys.SurveyPlanWay;
+import innoz.scenarioGeneration.population.surveys.SurveyPlanTrip;
 import innoz.scenarioGeneration.population.surveys.SurveyVehicle;
 import innoz.scenarioGeneration.population.utils.PersonUtils;
 import innoz.scenarioGeneration.utils.ActivityTypes;
@@ -103,7 +103,7 @@ public class PopulationCreator {
 	
 	private Coord currentHomeLocation = null;
 	private Coord currentMainActLocation = null;
-	private SurveyPlanWay lastLeg = null;
+	private SurveyPlanTrip lastLeg = null;
 	private Coord lastActCoord = null;
 	private double c = 0d;
 	private AdministrativeUnit currentHomeCell;
@@ -689,8 +689,8 @@ public class PopulationCreator {
 		
 		// Locate the main activity according to the distribution that was computed before
 		String mainMode = plan.getMainActIndex() > 0 ? 
-				((SurveyPlanWay)plan.getPlanElements().get(plan.getMainActIndex()-1)).getMainMode() :
-					((SurveyPlanWay)plan.getPlanElements().get(plan.getMainActIndex()+1)).getMainMode();
+				((SurveyPlanTrip)plan.getPlanElements().get(plan.getMainActIndex()-1)).getMainMode() :
+					((SurveyPlanTrip)plan.getPlanElements().get(plan.getMainActIndex()+1)).getMainMode();
 		currentMainActCell = locateActivityInCell(plan.getMainActType(), mainMode, person);
 		
 		double distance = container.getModeStatsContainer().get(mainMode).getMean();
@@ -731,7 +731,7 @@ public class PopulationCreator {
 		List<String> cellList = new ArrayList<String>();
 		
 		AdministrativeUnit lastTo = currentHomeCell;
-		SurveyPlanWay lastWay = null;
+		SurveyPlanTrip lastWay = null;
 		
 		for(SurveyPlanElement pe : plan.getPlanElements()){
 			
@@ -769,7 +769,7 @@ public class PopulationCreator {
 				
 			} else {
 				
-				lastWay = (SurveyPlanWay)pe;
+				lastWay = (SurveyPlanTrip)pe;
 				
 			}
 			
@@ -790,7 +790,7 @@ public class PopulationCreator {
 	private Leg createLeg(Population population,
 			SurveyPlanElement mpe) {
 		
-		SurveyPlanWay way = (SurveyPlanWay)mpe;
+		SurveyPlanTrip way = (SurveyPlanTrip)mpe;
 		String mode = way.getMainMode();
 		double departure = way.getStartTime();
 		double ttime = way.getEndTime() - departure;

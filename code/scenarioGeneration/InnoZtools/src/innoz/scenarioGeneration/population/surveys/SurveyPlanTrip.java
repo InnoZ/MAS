@@ -3,20 +3,37 @@ package innoz.scenarioGeneration.population.surveys;
 import java.util.HashSet;
 import java.util.Set;
 
-public class SurveyPlanWay implements SurveyPlanElement {
+/**
+ * 
+ * @author dhosse
+ *
+ */
+public class SurveyPlanTrip implements SurveyPlanElement {
 
+	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	private int id;
+	
 	private double weight;
-	private String personId;
-	private String mainMode;
-	private Set<String> modes;
 	private double startTime;
 	private double endTime;
 	private double travelTime;
 	private double travelDistance;
+	
 	private boolean roundTrip;
 	
-	public SurveyPlanWay(int id){
+	private String personId;
+	private String mainMode;
+	
+	private Set<String> modes;
+	/////////////////////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * 
+	 * Creates a new trip from data that has been reported in a traffic survey.
+	 * 
+	 * @param id The identifier for this trip (normally the current number of the trip in the list of reported trips).
+	 */
+	public SurveyPlanTrip(int id){
 		
 		this.id = id;
 		this.modes = new HashSet<>();

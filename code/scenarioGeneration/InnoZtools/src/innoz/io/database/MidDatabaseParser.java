@@ -9,7 +9,7 @@ import innoz.scenarioGeneration.population.surveys.SurveyPerson;
 import innoz.scenarioGeneration.population.surveys.SurveyPlan;
 import innoz.scenarioGeneration.population.surveys.SurveyPlanActivity;
 import innoz.scenarioGeneration.population.surveys.SurveyPlanElement;
-import innoz.scenarioGeneration.population.surveys.SurveyPlanWay;
+import innoz.scenarioGeneration.population.surveys.SurveyPlanTrip;
 import innoz.scenarioGeneration.population.surveys.SurveyVehicle;
 import innoz.scenarioGeneration.population.utils.HashGenerator;
 import innoz.scenarioGeneration.utils.ActivityTypes;
@@ -377,7 +377,7 @@ public class MidDatabaseParser {
 
 				//create a new way and set the main mode, mode combination
 				//and departure / arrival time
-				SurveyPlanWay way = new SurveyPlanWay(currentWayIdx);
+				SurveyPlanTrip way = new SurveyPlanTrip(currentWayIdx);
 				way.setMainMode(mainMode);
 				way.setModes(modes);
 				way.setStartTime(startTime);
@@ -524,7 +524,7 @@ public class MidDatabaseParser {
 		
 	}
 	
-	private void addWayAndActivity(SurveyPlan plan, SurveyPlanWay way, String actType, int id, SurveyDataContainer container) throws SQLException{
+	private void addWayAndActivity(SurveyPlan plan, SurveyPlanTrip way, String actType, int id, SurveyDataContainer container) throws SQLException{
 		
 		SurveyPlanActivity activity = new SurveyPlanActivity(actType);
 		
@@ -644,7 +644,7 @@ public class MidDatabaseParser {
 						
 					} else {
 						
-						SurveyPlanWay way = (SurveyPlanWay)pe;
+						SurveyPlanTrip way = (SurveyPlanTrip)pe;
 						
 						if(way.getTravelDistance() > plan.getLongestLeg()){
 							plan.setLongestLeg(way.getTravelDistance());
@@ -772,7 +772,7 @@ public class MidDatabaseParser {
 			
 			for(SurveyPlanElement pe : plan.getPlanElements()){
 				
-				if(pe instanceof SurveyPlanWay){
+				if(pe instanceof SurveyPlanTrip){
 					
 					SurveyPlanActivity from = (SurveyPlanActivity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)-1);
 					
