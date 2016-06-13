@@ -4,14 +4,7 @@ import innoz.config.Configuration;
 import innoz.config.Configuration.AdminUnitEntry;
 import innoz.config.ConfigurationUtils;
 import innoz.config.SshConnector;
-import innoz.io.BbsrDataReader;
-import innoz.io.database.DatabaseReader;
-import innoz.io.database.DatabaseUpdater;
-import innoz.scenarioGeneration.config.InitialConfigCreator;
-import innoz.scenarioGeneration.geoinformation.Geoinformation;
-import innoz.scenarioGeneration.network.NetworkCreatorFromPsql;
-import innoz.scenarioGeneration.population.PopulationCreator;
-import innoz.scenarioGeneration.population.utils.PersonUtils;
+import innoz.run.ScenarioGenerationController;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -24,10 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -36,36 +26,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import org.apache.log4j.LogManager;
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.NetworkWriter;
-import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.gbl.MatsimRandom;
-import org.matsim.core.population.PopulationWriter;
-import org.matsim.core.scenario.ScenarioImpl;
-import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.households.HouseholdsWriterV10;
-import org.matsim.utils.objectattributes.ObjectAttributes;
-import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
-import org.matsim.vehicles.VehicleWriterV1;
-import org.opengis.referencing.FactoryException;
 
 import com.jcraft.jsch.JSchException;
-import com.vividsolutions.jts.io.ParseException;
 
 /**
  * 
@@ -76,24 +48,15 @@ import com.vividsolutions.jts.io.ParseException;
  */
 public final class MainFrame {
 
-	private final JFrame frame;
+	final JFrame frame;
 	private final Configuration configuration;
-	private final RunnerActionListener listener;
+	final RunnerActionListener listener;
 	private final ClassLoader classLoader = this.getClass().getClassLoader();
-	JPanel mainPanel;
+	MainPanel mainPanel;
 	
 	//Components
-	private JButton chooseOutputDirButton;
-	private JCheckBox overwrite;
-	private JButton runButton;
-	private JCheckBox network;
-	private JCheckBox households;
-	
-	private Map<String, String> surveyArea;
-	private Map<String, String> vicinity;
-	
-	private JPanel surveyAreaPanel;
-	private JPanel vicinityPanel;
+	Map<String, String> surveyArea;
+	Map<String, String> vicinity;
 	
 	public MainFrame() {
 
@@ -113,9 +76,9 @@ public final class MainFrame {
 			icon = ImageIO.read(in);
 			
 		} catch (IOException e) {
-
 			
 			e.printStackTrace();
+			
 		}
 
 		this.frame.setIconImage(icon);
@@ -127,10 +90,8 @@ public final class MainFrame {
 		
 		this.frame.setLayout(new BorderLayout());
 		
-		this.frame.add(this.createMainPanel(), BorderLayout.CENTER);
-		this.mainPanel.setBackground(new Color(1,1,1,0.5f));
-		this.mainPanel.setPreferredSize(new Dimension(1024,600));
-		this.mainPanel.setEnabled(false);
+		this.mainPanel = new MainPanel(this);
+		this.frame.add(this.mainPanel, BorderLayout.CENTER);
 		
 		JPanel footer = this.createFooter();
 		this.frame.add(footer, BorderLayout.NORTH);
@@ -152,202 +113,6 @@ public final class MainFrame {
 		this.frame.setLocationRelativeTo(null);
 		this.frame.setVisible(true);
 		
-	}
-	
-	private JPanel createMainPanel(){
-		
-		mainPanel = new JPanel();
-		mainPanel.setLayout(new GridLayout(15,1));
-		
-		JLabel l = new JLabel("<html><font size='10'><strong>Scenario generation parameters</strong></font></html>");
-		l.setMinimumSize(new Dimension(1024, 200));
-		l.setPreferredSize(new Dimension(1024, 200));
-		mainPanel.add(l);
-		
-
-		surveyAreaPanel = new JPanel();
-		surveyAreaPanel.setBackground(new Color(0,0,0,0));
-		surveyAreaPanel.setLayout(new BorderLayout());
-		JLabel l1 = new JLabel("Survey area ids:");
-		surveyAreaPanel.add(l1, BorderLayout.LINE_START);
-		
-		JButton addButton = new JButton("Add...");
-		addButton.setEnabled(false);
-		surveyAreaPanel.add(addButton, BorderLayout.LINE_END);
-		
-		addButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-				JPanel message = new JPanel();
-				message.setLayout(new GridLayout());
-				message.add(new JLabel("Id"));
-				JTextField id = new JTextField();
-				message.add(id);
-				message.add(new JLabel("Number of households"));
-				JTextField n = new JTextField();
-				message.add(n);
-				
-				String[] options = {"Ok", "Cancel"};
-				int option = JOptionPane.showOptionDialog(MainFrame.this.frame, message, "Add a new administrative unit", JOptionPane.NO_OPTION, JOptionPane.DEFAULT_OPTION, null, options, options[0]);
-				
-				if(option == 0){
-				
-					surveyArea.put(id.getText(), n.getText());
-					
-					surveyAreaPanel.removeAll();
-					
-					surveyAreaPanel.add(l1, BorderLayout.LINE_START);
-
-					JPanel buttonPanel = new JPanel();
-					buttonPanel.setBackground(new Color(0,0,0,0));
-					
-					for(Entry<String, String> t : surveyArea.entrySet()){
-						
-						JButton newButton = new JButton(t.getKey() + ", " + t.getValue());
-						newButton.addActionListener(new ButtonChangeActionListener(newButton, surveyAreaPanel));
-						
-						buttonPanel.add(newButton);
-					
-					}
-					
-					surveyAreaPanel.add(buttonPanel, BorderLayout.CENTER);
-					
-					surveyAreaPanel.add(addButton, BorderLayout.LINE_END);
-					
-					surveyAreaPanel.revalidate();
-					frame.repaint();
-					
-				}
-
-			}
-			
-		});
-		mainPanel.add(surveyAreaPanel);
-		
-		vicinityPanel = new JPanel();
-		
-		vicinityPanel.setLayout(new BorderLayout());
-		
-		vicinityPanel.setBackground(new Color(0,0,0,0));
-		
-		JLabel l2 = new JLabel("Vicinity ids:");
-		vicinityPanel.add(l2, BorderLayout.LINE_START);
-		JButton addButton2 = new JButton("Add...");
-		addButton2.setEnabled(false);
-		vicinityPanel.add(addButton2, BorderLayout.LINE_END);
-		
-		addButton2.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-				JPanel message = new JPanel();
-				message.setLayout(new GridLayout());
-				message.add(new JLabel("Id"));
-				JTextField id = new JTextField();
-				message.add(id);
-				message.add(new JLabel("Number of households"));
-				JTextField n = new JTextField();
-				message.add(n);
-				
-				String[] options = {"Ok", "Cancel"};
-				int option = JOptionPane.showOptionDialog(MainFrame.this.frame, message, "Add a new administrative unit", JOptionPane.NO_OPTION, JOptionPane.DEFAULT_OPTION, null, options, options[0]);
-				
-				if(option == 0){
-				
-					vicinity.put(id.getText(), n.getText());
-					
-					vicinityPanel.removeAll();
-					
-					vicinityPanel.add(l2, BorderLayout.LINE_START);
-
-					JPanel buttonPanel = new JPanel();
-					buttonPanel.setBackground(new Color(0,0,0,0));
-					
-					for(Entry<String, String> t : vicinity.entrySet()){
-						
-						JButton newButton = new JButton(t.getKey() + ", " + t.getValue());
-						newButton.addActionListener(new ButtonChangeActionListener(newButton, vicinityPanel));
-						
-						buttonPanel.add(newButton);
-					
-					}
-					
-					vicinityPanel.add(buttonPanel, BorderLayout.CENTER);
-					
-					vicinityPanel.add(addButton2, BorderLayout.LINE_END);
-					
-					vicinityPanel.revalidate();
-					frame.repaint();
-					
-				}
-
-			}
-			
-		});
-		mainPanel.add(vicinityPanel);
-		
-		JSeparator line = new JSeparator(JSeparator.HORIZONTAL);
-		mainPanel.add(line);
-		
-		l = new JLabel("<html><font size='10'><strong>Output</strong></font></html>");
-		mainPanel.add(l);
-		
-		chooseOutputDirButton = new JButton("Choose output directory");
-		chooseOutputDirButton.setEnabled(false);
-		chooseOutputDirButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				JFileChooser chooser = new JFileChooser();
-				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				chooser.setAcceptAllFileFilterUsed(false);
-				int returnVal = chooser.showOpenDialog(chooseOutputDirButton);
-				if(returnVal == JFileChooser.APPROVE_OPTION){
-					chooseOutputDirButton.setText(chooser.getSelectedFile().getAbsolutePath() + "/");
-				}
-				
-				frame.repaint();
-				
-			}
-		});
-		mainPanel.add(chooseOutputDirButton);
-		
-		
-		overwrite = new JCheckBox("Overwrite existing files?");
-		overwrite.setEnabled(false);
-		mainPanel.add(overwrite);
-		
-		network = new JCheckBox("Create network");
-		network.setEnabled(false);
-		mainPanel.add(network);
-		
-		households = new JCheckBox("Create Households");
-		households.setEnabled(false);
-		mainPanel.add(households);
-		
-		runButton = new JButton("Run");
-		runButton.setEnabled(false);
-		mainPanel.add(runButton);
-		runButton.addActionListener(this.listener);
-		
-		JButton reset = new JButton("Reset");
-		reset.setEnabled(false);
-		mainPanel.add(reset);
-		reset.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				reset();
-				MainFrame.this.frame.repaint();
-			}
-		});
-		
-		return mainPanel;
-
 	}
 	
 	class ButtonChangeActionListener implements ActionListener{
@@ -375,7 +140,7 @@ public final class MainFrame {
 			message.add(n);
 			
 			String[] options = {"Ok", "Cancel"};
-			int option = JOptionPane.showOptionDialog(MainFrame.this.frame, message, "Add a new administrative unit", JOptionPane.NO_OPTION, JOptionPane.DEFAULT_OPTION, null, options, options[0]);
+			int option = JOptionPane.showOptionDialog(frame, message, "Add a new administrative unit", JOptionPane.NO_OPTION, JOptionPane.DEFAULT_OPTION, null, options, options[0]);
 			
 			if(option == 0){
 
@@ -395,14 +160,14 @@ public final class MainFrame {
 		
 	}
 	
-	private void reset(){
+	void reset(){
 		
-		this.chooseOutputDirButton.setText("Choose output directory");
+		this.mainPanel.chooseOutputDirButton.setText("Choose output directory");
 		this.surveyArea = new HashMap<String, String>();
 		this.vicinity = new HashMap<String, String>();
-		this.network.setSelected(false);
-		this.households.setSelected(false);
-		this.overwrite.setSelected(false);
+		this.mainPanel.network.setSelected(false);
+		this.mainPanel.households.setSelected(false);
+		this.mainPanel.overwrite.setSelected(false);
 		this.frame.repaint();
 		
 	}
@@ -561,9 +326,9 @@ public final class MainFrame {
 		@Override
 		public void run() {
 			
-			runButton.setEnabled(false);
+			mainPanel.runButton.setEnabled(false);
 			
-			String outputDir = !chooseOutputDirButton.getText().contains("Choose") ? chooseOutputDirButton.getText() : ".";
+			String outputDir = !mainPanel.chooseOutputDirButton.getText().contains("Choose") ? mainPanel.chooseOutputDirButton.getText() : ".";
 			
 			StringBuilder surveyAreaIds = new StringBuilder();
 			
@@ -585,91 +350,12 @@ public final class MainFrame {
 			
 			String vicinity = vicinityIds.toString().length() > 0 ? vicinityIds.toString() : null;
 			ConfigurationUtils.set(configuration, Configuration.VICINITY_IDS, vicinity);
-			ConfigurationUtils.set(configuration, Configuration.OVERWRITE_FILES, overwrite.isSelected());
+			ConfigurationUtils.set(configuration, Configuration.OVERWRITE_FILES, mainPanel.overwrite.isSelected());
 			ConfigurationUtils.set(configuration, Configuration.OUTPUT_DIR, outputDir);
-			
-			configuration.dumpSettings();
-			
-			MatsimRandom.reset(configuration.getRandomSeed());
-			
-			// Create a MATSim scenario
-			Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-			// Enable the usage of households
-			scenario.getConfig().scenario().setUseHouseholds(true);
-			((ScenarioImpl)scenario).createHouseholdsContainer();
-			
-			// If we want to explicitly model household's cars, enable it
-			if(configuration.isUsingVehicles()){
-				scenario.getConfig().scenario().setUseVehicles(true);
-				((ScenarioImpl)scenario).createVehicleContainer();
-			}
-			
-			// Container for geoinformation (admin borders, landuse)
-			Geoinformation geoinformation = new Geoinformation();
 
-			// A class that reads data from database tables into local containers
-			DatabaseReader dbReader = new DatabaseReader(geoinformation);
-			dbReader.readGeodataFromDatabase(configuration, scenario);
-			InputStream in = classLoader.getResourceAsStream("regionstypen.csv");
-			new BbsrDataReader().read(geoinformation, new InputStreamReader(in));
+			new ScenarioGenerationController(configuration).run();
 			
-			if(network.isSelected()){
-
-				// Create a MATSim network from OpenStreetMap data
-				NetworkCreatorFromPsql nc;
-				try {
-					nc = new NetworkCreatorFromPsql(scenario.getNetwork(),
-							geoinformation,	configuration);
-					nc.setSimplifyNetwork(true);
-					nc.setCleanNetwork(true);
-					nc.setScaleMaxSpeed(true);
-					nc.create(dbReader);
-				} catch (FactoryException | InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException | ParseException e1) {
-					e1.printStackTrace();
-				}
-				
-				new NetworkWriter(scenario.getNetwork()).write(configuration
-						.getOutputDirectory() + "network.xml.gz");
-				
-			}
-			
-			if(households.isSelected()){
-				// Create a MATSim population
-				try {
-					new PopulationCreator(geoinformation).run(configuration, scenario);
-				} catch (FactoryException e1) {
-					e1.printStackTrace();
-				}
-				
-				new PopulationWriter(scenario.getPopulation()).write(configuration
-						.getOutputDirectory() + "plans.xml.gz");
-				new ObjectAttributesXmlWriter((ObjectAttributes) scenario.getScenarioElement(
-						PersonUtils.PERSON_ATTRIBUTES)).writeFile(configuration.getOutputDirectory()
-								+ "personAttributes.xml.gz");
-				new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration
-						.getOutputDirectory() + "households.xml.gz");
-			}
-			
-			// Create an initial MATSim config file and write it into the output directory
-			Config config = InitialConfigCreator.create(configuration);
-			new ConfigWriter(config).write(configuration.getOutputDirectory() + "config.xml.gz");
-			
-			if(configuration.isUsingVehicles()){
-
-				new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration
-						.getOutputDirectory() + "vehicles.xml.gz");
-				
-			}
-			
-			if(configuration.isWritingDatabaseOutput()){
-				
-				new DatabaseUpdater().update(configuration, scenario,
-						configuration.getDatabaseSchemaName(),
-						configuration.isWritingIntoMobilityDatahub());
-				
-			}
-			
-			runButton.setEnabled(true);
+			mainPanel.runButton.setEnabled(true);
 			
 			JOptionPane.showMessageDialog(frame, new JLabel("Output successfully created!"));
 

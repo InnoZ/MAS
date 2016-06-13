@@ -171,6 +171,9 @@ public class Configuration {
 			
 			case OVERWRITE_FILES: this.overwriteExistingFiles = (Boolean) value;
 				break;
+				
+			case USE_HOUSEHOLDS: this.useHouseholds = (Boolean) value;
+				break;
 			
 			default: return ;
 			
