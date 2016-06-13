@@ -4,22 +4,17 @@ import innoz.config.Configuration;
 import innoz.config.ConfigurationUtils;
 import innoz.config.SshConnector;
 
-import java.awt.EventQueue;
-import java.io.Console;
+import java.util.Scanner;
 
 import com.jcraft.jsch.JSchException;
 
 public class MobilityDatabaseMain {
 
-	private static Configuration c;
-	
 	public static void main(String args[]){
 		
 		try {
 			
-//			Runtime.getRuntime().exec("clear");
-			
-			c = ConfigurationUtils.createConfiguration();
+			Configuration c = ConfigurationUtils.createConfiguration();
 			
 			boolean alive = false;
 			
@@ -27,45 +22,63 @@ public class MobilityDatabaseMain {
 				alive = true;
 			}
 			
-			System.out.println("> Welcome user!");
-			
-			Console console = System.console();
-			
-			while(alive){
+			if(args.length == 0){
+
+				System.out.println("> Welcome user!");
 				
-				System.out.print("> ");
-				String command = console.readLine();
+				Scanner scanner = new Scanner(System.in);
 				
-				if(command.equals("exit") || command.equals("e")){
-				
-					SshConnector.disconnect();
-					alive = false;
-					System.out.println("> Goodbye!");
-				
-				} else if(command.startsWith("sg")){
+				while(alive){
 					
-					ConfigurationUtils.loadConfiguration(command.split(" ")[1], c);
+					System.out.print("> ");
+					String command = scanner.nextLine();
+					
+					if(command.equals("exit") || command.equals("e")){
+					
+						SshConnector.disconnect();
+						alive = false;
+						scanner.close();
+						System.out.println("> Goodbye!");
+					
+					} else if(command.startsWith("sg")){
+						
+						ConfigurationUtils.loadConfiguration(command.split(" ")[1], c);
+						
+						new ScenarioGenerationController(c).run();
+						
+						c.reset();
+						
+					} else if(command.equals("help") || command.equals("h")){
+						
+						printHelpStack();
+						
+					} else if(command.equals("")){
+						
+						
+					} else {
+						
+						System.out.println("> Unknown command '" + command + "'!");
+						System.out.println("> Enter h(elp) for usage information.");
+						
+					}
+					
+				}
+				
+			} else {
+				
+				if(args[0].equals("sg")){
+					
+					ConfigurationUtils.loadConfiguration(args[1], c);
 					
 					new ScenarioGenerationController(c).run();
 					
-					c.reset();
-					
-				} else if(command.equals("help") || command.equals("h")){
-					
-					printHelpStack();
-					
-				} else if(command.equals("")){
-					
-					
-				} else {
-					
-					System.out.println("> Unknown command '" + command + "'!");
-					System.out.println("> Enter h(elp) for usage information.");
+					SshConnector.disconnect();
+					alive = false;
 					
 				}
 				
 			}
-		
+			
 		} catch (JSchException e) {
 
 			e.printStackTrace();
