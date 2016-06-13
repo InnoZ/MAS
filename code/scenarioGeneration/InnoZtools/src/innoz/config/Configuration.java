@@ -73,7 +73,7 @@ public class Configuration {
 	boolean overwriteExistingFiles = false;
 	
 	//NON-CONFIGURABLE///////////////////////////////////////////////////////////////////////
-	int localPort = 2300;
+	int localPort = 3200;
 	final int remotePort = 5432;
 	
 	String sshUser;
@@ -83,6 +83,28 @@ public class Configuration {
 	
 	public enum PopulationType{dummy,commuter,complete,none};
 	/////////////////////////////////////////////////////////////////////////////////////////	
+	
+	public void reset(){
+		
+		this.surveyAreaIds = null;
+		this.vicinityIds = null;
+		this.crs = "EPSG:32632";
+		this.outputDirectory = null;
+		this.popType = PopulationType.complete;
+		this.useHouseholds = true;
+		this.useVehicles = false;
+		this.onlyWorkingDays = true;
+		this.useBuildings = true;
+		this.numberOfHouseholds = 0;
+		this.adminUnits = new HashMap<String, Configuration.AdminUnitEntry>();
+		this.randomSeed = 4711L;
+		this.scaleFactor = 1.0d;
+		this.writeDatabaseTables = false;
+		this.writeIntoDatahub = false;
+		this.dbNameSpace = null;
+		this.overwriteExistingFiles = false;
+		
+	}
 	
 	void setParam(String param, Object value){
 		
@@ -423,7 +445,7 @@ public class Configuration {
 		log.info("surveyAreaId(s):           " + this.surveyAreaIds);
 		log.info("vicinityId(s):             " + this.vicinityIds);
 		log.info("coordinateReferenceSystem: " + this.crs);
-		log.info("workingDirectory:          " + this.outputDirectory);
+		log.info("outputDirectory:           " + this.outputDirectory);
 		log.info("populationType:            " + this.popType.name());
 		log.info("onlyWorkingDays:           " + this.onlyWorkingDays);
 		log.info("useBuildings:              " + this.useBuildings);

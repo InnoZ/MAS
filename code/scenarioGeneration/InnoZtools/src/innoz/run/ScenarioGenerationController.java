@@ -12,6 +12,8 @@ import innoz.scenarioGeneration.population.PopulationCreator;
 import innoz.scenarioGeneration.population.utils.PersonUtils;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.SQLException;
 
 import org.matsim.api.core.v01.Scenario;
@@ -69,7 +71,8 @@ public class ScenarioGenerationController implements DefaultController {
 			// A class that reads data from database tables into local containers
 			DatabaseReader dbReader = new DatabaseReader(geoinformation);
 			dbReader.readGeodataFromDatabase(configuration, scenario);
-			new BbsrDataReader().read(geoinformation);
+			InputStream in = this.getClass().getClassLoader().getResourceAsStream("regionstypen.csv");
+			new BbsrDataReader().read(geoinformation, new InputStreamReader(in));
 			
 			// Create a MATSim network from OpenStreetMap data
 			NetworkCreatorFromPsql nc;
@@ -125,7 +128,11 @@ public class ScenarioGenerationController implements DefaultController {
 		
 		} catch (FactoryException | InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException | ParseException e) {
 			e.printStackTrace();
+			return;
 		}
+
+		System.out.println("> Scenario generation complete. All files have been written to " + configuration.getOutputDirectory());
+		return;
 		
 	}
 	

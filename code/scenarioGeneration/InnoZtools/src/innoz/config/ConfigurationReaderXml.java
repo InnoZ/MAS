@@ -133,8 +133,16 @@ public class ConfigurationReaderXml extends DefaultHandler {
 	private void createAdminUnit(Attributes atts){
 		
 		String id = atts.getValue("id");
-		int hh = Integer.parseInt(atts.getValue(Configuration.NUMBER_OF_HH));
-		Integer lod = Integer.parseInt(atts.getValue(Configuration.LOD_NETWORK));
+		
+		String nHH = atts.getValue(Configuration.NUMBER_OF_HH);
+		if(nHH == null) nHH = "0";
+		
+		int hh = Integer.parseInt(nHH);
+		
+		String levelOfDetail = atts.getValue(Configuration.LOD_NETWORK);
+		if(levelOfDetail == null) levelOfDetail = "6";
+		
+		Integer lod = Integer.parseInt(levelOfDetail);
 		
 		for(String s : id.split(Configuration.COMMENT)){
 

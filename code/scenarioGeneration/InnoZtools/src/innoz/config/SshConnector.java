@@ -96,6 +96,45 @@ public class SshConnector {
 		session.disconnect();
 		
 	}
+	
+	public static boolean connectShell(Configuration configuration) throws JSchException{
+		
+		log.info("Trying to establish ssh tunnel to mobility database server...");
+		
+		// Set user names and passwords for ssh and database
+		System.out.print("Enter ssh user name: ");
+		String sshuser = System.console().readLine();
+		System.out.print("Enter ssh password: ");
+		String sshpassword = new String(System.console().readPassword());
+		System.out.print("Enter database user name: ");
+		configuration.setDatabaseUser(System.console().readLine());
+		System.out.print("Enter database password: ");
+		configuration.setDatabasePassword(new String(System.console().readPassword()));
+		
+		// Set hosts and ports for the connection
+		String sshhost = "playground";
+		String remoteHost = "localhost";
+		int nLocalPort = configuration.getLocalPort();
+		int nRemotePort = configuration.getRemotePort();
+		
+		final JSch jsch = new JSch();
+
+		// Start a new session with the predefined settings
+		session = jsch.getSession(sshuser, sshhost);
+		session.setPassword(sshpassword);
+		
+		final Properties config = new Properties();
+	    config.put( "StrictHostKeyChecking", "no" );
+	    session.setConfig( config );
+	    
+	    session.connect();
+	    session.setPortForwardingL(nLocalPort, remoteHost, nRemotePort);
+	    
+	    log.info("Ssh tunnel established.");
+		
+	    return session != null;
+		
+	}
 
 	/**
 	 * 
