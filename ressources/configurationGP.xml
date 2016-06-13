@@ -20,7 +20,7 @@
 		</areaSet>	
 		<coordinateSystem v="EPSG:32632" />
 		<createTransit v="false" />
-		<populationType v="complete" />
+		<populationType v="none" />
 		<scaleFactor v="1.0" />
 		<outputDirectory v="/home/dhosse/dessau/foo/" />
 		<overwriteExistingFiles v="true"/>
@@ -34,7 +34,7 @@
 	</surveyData>
 
 	<database>
-		<localPort v="5432" />
+		<localPort v="3200" />
 		<writeTables v="false" />
 	</database>
 
