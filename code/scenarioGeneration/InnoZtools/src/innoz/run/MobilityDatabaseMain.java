@@ -3,6 +3,7 @@ package innoz.run;
 import innoz.config.Configuration;
 import innoz.config.ConfigurationUtils;
 import innoz.config.SshConnector;
+import innoz.run.controller.ScenarioGenerationController;
 
 import java.util.Scanner;
 

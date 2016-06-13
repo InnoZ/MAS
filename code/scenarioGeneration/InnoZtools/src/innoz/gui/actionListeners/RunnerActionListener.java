@@ -3,8 +3,9 @@ package innoz.gui.actionListeners;
 import innoz.config.Configuration;
 import innoz.config.Configuration.AdminUnitEntry;
 import innoz.config.ConfigurationUtils;
+import innoz.gui.GuiConstants;
 import innoz.gui.MainFrame;
-import innoz.run.ScenarioGenerationController;
+import innoz.run.controller.ScenarioGenerationController;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -36,15 +37,20 @@ public class RunnerActionListener implements ActionListener, Runnable {
 		
 		this.mainFrame.getMainPanel().getRunButton().setEnabled(false);
 		
-		String outputDir = !this.mainFrame.getMainPanel().getChooseOutputDirButton().getText().contains("Choose") ?
+		String outputDir = !this.mainFrame.getMainPanel().getChooseOutputDirButton().getText().contains(GuiConstants.CHOOSE) ?
 				this.mainFrame.getMainPanel().getChooseOutputDirButton().getText() : ".";
 		
 		StringBuilder surveyAreaIds = new StringBuilder();
 		
 		for(Entry<String, String> entry : this.mainFrame.getSurveyAreaMap().entrySet()){
+		
 			int nHouseholds = entry.getValue().equals("") ? 0 : Integer.parseInt(entry.getValue());
-			this.mainFrame.getConfiguration().getAdminUnitEntries().put(entry.getKey(), new AdminUnitEntry(entry.getKey(), nHouseholds, null));
+			
+			this.mainFrame.getConfiguration().getAdminUnitEntries().put(entry.getKey(), new AdminUnitEntry(entry.getKey(),
+					nHouseholds, null));
+			
 			surveyAreaIds.append(entry.getKey() + ",");
+		
 		}
 		
 		String surveyArea = surveyAreaIds.toString().length() > 0 ? surveyAreaIds.toString() : null;
@@ -53,8 +59,12 @@ public class RunnerActionListener implements ActionListener, Runnable {
 		StringBuilder vicinityIds = new StringBuilder();
 		
 		for(Entry<String, String> entry : this.mainFrame.getVicinityMap().entrySet()){
+			
 			int nHouseholds = entry.getValue().equals("") ? 0 : Integer.parseInt(entry.getValue());
-			this.mainFrame.getConfiguration().getAdminUnitEntries().put(entry.getKey(), new AdminUnitEntry(entry.getKey(), nHouseholds, null));
+			
+			this.mainFrame.getConfiguration().getAdminUnitEntries().put(entry.getKey(), new AdminUnitEntry(entry.getKey(),
+					nHouseholds, null));
+			
 			vicinityIds.append(entry.getKey());
 		}
 		

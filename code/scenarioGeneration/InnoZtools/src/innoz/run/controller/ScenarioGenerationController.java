@@ -1,4 +1,4 @@
-package innoz.run;
+package innoz.run.controller;
 
 import innoz.config.Configuration;
 import innoz.config.Configuration.PopulationType;

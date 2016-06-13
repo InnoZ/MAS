@@ -1,4 +1,4 @@
-package innoz.run;
+package innoz.run.controller;
 
 /**
  * 

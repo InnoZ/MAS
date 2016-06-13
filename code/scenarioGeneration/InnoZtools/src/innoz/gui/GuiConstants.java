@@ -3,6 +3,7 @@ package innoz.gui;
 public final class GuiConstants {
 	
 	public static final String BACKGROUND_IMAGE = "background.png";
+	public static final String CHOOSE = "Choose";
 	public static final String CHOOSE_OUTPUT = "Choose output directory";
 	public static final String CONNECT = "Connect";
 	public static final String DISCONNECT = "Disconnect";
