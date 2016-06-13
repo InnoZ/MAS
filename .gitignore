@@ -9,3 +9,5 @@ code/scenarioGeneration/InnoZtools/.classpath
 libraries/build/*
 # ignore temp files:
 *~
+# ignore local documentation
+doc
