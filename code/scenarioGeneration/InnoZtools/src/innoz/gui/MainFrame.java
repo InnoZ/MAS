@@ -55,13 +55,13 @@ public final class MainFrame {
 		this.surveyArea = new ConcurrentHashMap<String, String>();
 		this.vicinity = new ConcurrentHashMap<String, String>();
 		
-		this.frame = new JFrame("InnoZ scenario generation toolbox");
+		this.frame = new JFrame(GuiConstants.TITLE);
 
 		BufferedImage icon = null;
 		
 		try {
 			
-			URL in = this.classLoader.getResource("background.png");
+			URL in = this.classLoader.getResource(GuiConstants.BACKGROUND_IMAGE);
 			icon = ImageIO.read(in);
 			
 		} catch (IOException e) {
@@ -106,7 +106,7 @@ public final class MainFrame {
 	
 	void reset(){
 		
-		this.mainPanel.getChooseOutputDirButton().setText("Choose output directory");
+		this.mainPanel.getChooseOutputDirButton().setText(GuiConstants.CHOOSE_OUTPUT);
 		this.surveyArea = new HashMap<String, String>();
 		this.vicinity = new HashMap<String, String>();
 		this.mainPanel.getNetwork().setSelected(false);
@@ -119,9 +119,9 @@ public final class MainFrame {
 	private JPanel createFooter(){
 
 		JLabel label = new JLabel("Status of MobilityDataHub connection:");
-		JLabel connectionStatus = new JLabel("<html><font color='red'>Not connected</font></html>");
+		JLabel connectionStatus = new JLabel(GuiConstants.STATUS_DISCONNECTED);
 		connectionStatus.setPreferredSize(new Dimension(120,40));
-		JButton connection = new JButton("Connect");
+		JButton connection = new JButton(GuiConstants.CONNECT);
 		
 		connection.addActionListener(new SshConnectionListener(this, connection, connectionStatus));
 		

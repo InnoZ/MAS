@@ -1,6 +1,7 @@
 package innoz.gui.actionListeners;
 
 import innoz.config.SshConnector;
+import innoz.gui.GuiConstants;
 import innoz.gui.MainFrame;
 
 import java.awt.Dimension;
@@ -32,7 +33,7 @@ public class SshConnectionListener implements ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		if(this.status.getText().equals("<html><font color='red'>Not connected</font></html>")){
+		if(this.status.getText().equals(GuiConstants.STATUS_DISCONNECTED)){
 			
 			boolean established = false;
 			
@@ -48,8 +49,8 @@ public class SshConnectionListener implements ActionListener{
 			
 			if(established){
 				
-				this.status.setText("<html><font color='green'>Connected</font></html>");
-				this.button.setText("Disconnect");
+				this.status.setText(GuiConstants.STATUS_CONNECTED);
+				this.button.setText(GuiConstants.DISCONNECT);
 				this.mainFrame.enableComponents();
 				
 			} else {
@@ -77,8 +78,8 @@ public class SshConnectionListener implements ActionListener{
 			if(option == 0){
 
 				SshConnector.disconnect();
-				this.status.setText("<html><font color='red'>Not connected</font></html>");
-				this.button.setText("Connect");
+				this.status.setText(GuiConstants.STATUS_DISCONNECTED);
+				this.button.setText(GuiConstants.CONNECT);
 				this.mainFrame.disableComponents();
 				
 			}
