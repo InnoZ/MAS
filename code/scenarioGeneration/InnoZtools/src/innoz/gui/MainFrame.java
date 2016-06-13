@@ -17,7 +17,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
@@ -96,22 +95,7 @@ public final class MainFrame {
 	private JPanel surveyAreaPanel;
 	private JPanel vicinityPanel;
 	
-	public static void main(String args[]) {
-
-		EventQueue.invokeLater(new Runnable() {
-			
-			@Override
-			public void run() {
-				
-				new MainFrame();
-				
-			}
-			
-		});
-		
-	}
-	
-	private MainFrame() {
+	public MainFrame() {
 
 		this.configuration = ConfigurationUtils.createConfiguration();
 		this.listener = new RunnerActionListener();
