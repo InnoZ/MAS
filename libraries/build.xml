@@ -36,8 +36,10 @@
 			<path refid="libraries.path"/>
 		</copy>
 		<copy todir="build/classes">
-			<fileset dir="../code/scenarioGeneration/InnoZtools/bin" includes="*.png"/>
-			<fileset dir="../ressources" includes="*.csv" />
+			<fileset dir="../ressources">
+				<include name="*.csv" />
+				<include name="*.png" />
+			</fileset>
 		</copy>
 		<manifestclasspath property="manifest.classpath" jarfile="InnoZscenarioGeneration.jar" maxParentLevels="5">
                     <classpath refid="libraries.path"/>
@@ -57,8 +59,10 @@
 			<path refid="libraries.path"/>
 		</copy>
 		<copy todir="build/classes">
-			<fileset dir="../code/scenarioGeneration/InnoZtools/bin" includes="*.png"/>
-			<fileset dir="../ressources" includes="*.csv" />
+			<fileset dir="../ressources">
+				<include name="*.csv" />
+				<include name="*.png" />
+			</fileset>
 		</copy>
 
 		<manifestclasspath property="manifest.classpath" jarfile="InnoZtoolbox.jar" maxParentLevels="5">
