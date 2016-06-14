@@ -1,5 +1,7 @@
 package innoz.io.dbMigration;
 
+import innoz.utils.TextUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -81,9 +83,36 @@ public class CommuterSpreadsheetFileReader {
 			
 			Statement statement = connection.createStatement();
 			
-			for(String line : text.split("\n")){
+			String fromId = null;
+			String fromName = null;
+			
+			for(String line : text.split(TextUtils.NEW_LINE)){
 
-				//TODO update db table
+				if(!line.equals(TextUtils.EMPTY)){
+
+					//TODO update db table
+					String[] lineParts = line.split(TextUtils.TAB);
+					
+					// from location included: length 10, else length 8
+					if(lineParts.length == 10){
+						
+						fromId = lineParts[0];
+						fromName = lineParts[1];
+						
+						String[] parts = new String[lineParts.length - 2];
+						for(int i = 2; i < lineParts.length; i++){
+							parts[i-2] = lineParts[i];
+						}
+						
+						createNewEntry(statement, fromId, fromName, parts);
+						
+					} else if(lineParts.length == 8){
+						
+						createNewEntry(statement, fromId, fromName, lineParts);
+						
+					}
+					
+				}
 				
 			}
 			
@@ -92,6 +121,14 @@ public class CommuterSpreadsheetFileReader {
 		}
 		
 		connection.close();
+		
+	}
+	
+	private void createNewEntry(Statement statement, String fromId, String fromName, String[] lineParts) throws SQLException{
+		
+		statement.executeUpdate("INSERT INTO commuters.2015_commuters VALUES('" + fromId + "','" + fromName + "','"
+				+ lineParts[0] + "','" + lineParts[1] + "','" + lineParts[2] + lineParts[3] + "','" + lineParts[4] + "','" 
+				+ lineParts[5] + "','" + lineParts[6] + "','" + lineParts[7] + "');");
 		
 	}
 	
