@@ -288,7 +288,11 @@ public class PopulationCreator {
 		String homeId = el.getFromId();
 		String workId = el.getToId();
 
-		if(!this.geoinformation.getAdminUnits().containsKey(homeId) || !this.geoinformation.getAdminUnits().containsKey(workId)) return;
+		if(!this.geoinformation.getAdminUnits().containsKey(homeId) || !this.geoinformation.getAdminUnits().containsKey(workId)){
+			
+			return;
+			
+		}
 		
 		District home = this.geoinformation.getAdminUnits().get(homeId);
 		
@@ -354,7 +358,7 @@ public class PopulationCreator {
 			
 		}
 		
-		Person person = population.getFactory().createPerson(Id.createPersonId(n));
+		Person person = population.getFactory().createPerson(Id.createPersonId(homeId + "-" + workId + "_" + n));
 		Plan plan = population.getFactory().createPlan();
 		
 		Activity homeAct = population.getFactory().createActivityFromCoord(ActivityTypes.HOME, homeLocation);
