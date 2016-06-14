@@ -20,6 +20,7 @@ public final class DatabaseConstants {
 	public static final String GEODATA_DB = "geodata";
 	public static final String SIMULATIONS_DB = "simulated_mobility";
 	public static final String SIMULATIONS_DB_LOCAL = "innoz_simulation_development";
+	public static final String SURVEYS_DB = "surveyed_mobility";
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//DATABASE-SPECIFIC CONSTANTS////////////////////////////////////////////////////////////
