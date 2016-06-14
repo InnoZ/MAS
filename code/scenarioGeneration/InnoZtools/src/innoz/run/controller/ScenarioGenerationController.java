@@ -98,9 +98,14 @@ public class ScenarioGenerationController implements DefaultController {
 	
 				new PopulationWriter(scenario.getPopulation()).write(configuration
 						.getOutputDirectory() + "plans.xml.gz");
-				new ObjectAttributesXmlWriter((ObjectAttributes) scenario.getScenarioElement(
-						PersonUtils.PERSON_ATTRIBUTES)).writeFile(configuration.getOutputDirectory()
-								+ "personAttributes.xml.gz");
+				
+				if(scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES) != null){
+					
+					new ObjectAttributesXmlWriter((ObjectAttributes) scenario.getScenarioElement(
+							PersonUtils.PERSON_ATTRIBUTES)).writeFile(configuration.getOutputDirectory()
+									+ "personAttributes.xml.gz");
+					
+				}
 				
 				if(configuration.isUsingHouseholds()){
 					
