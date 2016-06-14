@@ -1,5 +1,8 @@
 package innoz.io.database.migration;
 
+import innoz.config.Configuration;
+import innoz.config.ConfigurationUtils;
+import innoz.config.SshConnector;
 import innoz.utils.TextUtils;
 
 import java.io.File;
@@ -19,52 +22,62 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
+import com.jcraft.jsch.JSchException;
+
 public class CommuterSpreadsheetFileHandler {
 
 	private static final Logger log = Logger.getLogger(CommuterSpreadsheetFileHandler.class);
 	
 	private Connection connection;
 	
-	public static void main(String args[]){
+	public static void main(String args[]) throws JSchException{
 		
 		try {
 	
 			log.info("Parsing xls commuter data to write it into MobilityDatabase...");
 			
-			CommuterSpreadsheetFileHandler handler = new CommuterSpreadsheetFileHandler();
+			Configuration configuration = ConfigurationUtils.createConfiguration();
 			
-			Class.forName("org.postgresql.Driver").newInstance();
-			handler.connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/surveyed_mobility",
-					"postgres", "postgres");
-			
-			if(handler.connection != null){
-				
-				String path = "/run/user/1009/gvfs/smb-share:domain=INNOZ,server=192.168.0.3,share=gisdata,user=dhosse/"
-						+ "MOBILITYDATA/Pendlerdaten_Arbeitsagentur/xls/";
+			if(SshConnector.connect(configuration)){
 
-				handler.createDatabaseTables();
-				handler.appendExcelSheetToDatabase(path + "krpend_01_0.xls");
-				handler.appendExcelSheetToDatabase(path + "krpend_02_0.xls");
-				handler.appendExcelSheetToDatabase(path + "krpend_03_0.xls");
-				handler.appendExcelSheetToDatabase(path + "krpend_04_0.xls");
-				handler.appendExcelSheetToDatabase(path + "krpend_05_0.xls");
-				handler.appendExcelSheetToDatabase(path + "krpend_06_0.xls");
-				handler.appendExcelSheetToDatabase(path + "krpend_07_0.xls");
-				handler.appendExcelSheetToDatabase(path + "krpend_08_0.xls");
-				handler.appendExcelSheetToDatabase(path + "krpend_09_0.xls");
-				handler.appendExcelSheetToDatabase(path + "krpend_10_0.xls");
-				handler.appendExcelSheetToDatabase(path + "krpend_11_0.xls");
-				handler.appendExcelSheetToDatabase(path + "krpend_12_0.xls");
-				handler.appendExcelSheetToDatabase(path + "krpend_13_0.xls");
-				handler.appendExcelSheetToDatabase(path + "krpend_14_0.xls");
-				handler.appendExcelSheetToDatabase(path + "krpend_15_0.xls");
-				handler.appendExcelSheetToDatabase(path + "krpend_16_0.xls");
+				CommuterSpreadsheetFileHandler handler = new CommuterSpreadsheetFileHandler();
+				
+				Class.forName("org.postgresql.Driver").newInstance();
+				handler.connection = DriverManager.getConnection("jdbc:postgresql://localhost:" + configuration.getLocalPort() +
+						"/surveyed_mobility", configuration.getDatabaseUsername(), configuration.getDatabasePassword());
+				
+				if(handler.connection != null){
+					
+					String path = "/run/user/1009/gvfs/smb-share:domain=INNOZ,server=192.168.0.3,share=gisdata,user=dhosse/"
+							+ "MOBILITYDATA/Pendlerdaten_Arbeitsagentur/xls/";
+
+					handler.createDatabaseTables();
+					handler.appendExcelSheetToDatabase(path + "krpend_01_0.xls");
+					handler.appendExcelSheetToDatabase(path + "krpend_02_0.xls");
+					handler.appendExcelSheetToDatabase(path + "krpend_03_0.xls");
+					handler.appendExcelSheetToDatabase(path + "krpend_04_0.xls");
+					handler.appendExcelSheetToDatabase(path + "krpend_05_0.xls");
+					handler.appendExcelSheetToDatabase(path + "krpend_06_0.xls");
+					handler.appendExcelSheetToDatabase(path + "krpend_07_0.xls");
+					handler.appendExcelSheetToDatabase(path + "krpend_08_0.xls");
+					handler.appendExcelSheetToDatabase(path + "krpend_09_0.xls");
+					handler.appendExcelSheetToDatabase(path + "krpend_10_0.xls");
+					handler.appendExcelSheetToDatabase(path + "krpend_11_0.xls");
+					handler.appendExcelSheetToDatabase(path + "krpend_12_0.xls");
+					handler.appendExcelSheetToDatabase(path + "krpend_13_0.xls");
+					handler.appendExcelSheetToDatabase(path + "krpend_14_0.xls");
+					handler.appendExcelSheetToDatabase(path + "krpend_15_0.xls");
+					handler.appendExcelSheetToDatabase(path + "krpend_16_0.xls");
+					
+				}
+				
+				handler.connection.close();
+				
+				log.info("Done.");
 				
 			}
 			
-			handler.connection.close();
-			
-			log.info("Done.");
+			SshConnector.disconnect();
 			
 		} catch (EncryptedDocumentException | InvalidFormatException | IOException | InstantiationException |
 				IllegalAccessException | ClassNotFoundException | SQLException | InterruptedException e) {
@@ -159,11 +172,33 @@ public class CommuterSpreadsheetFileHandler {
 		
 		// To prevent duplicate keys store them inside the key set
 		if(!keys.contains(lineParts[0])){
-
+			
+			String toId = null;
+			String toName = null;
+			int amount = getNumber(lineParts[2]);
+			int men = getNumber(lineParts[3]);
+			int women = getNumber(lineParts[4]);
+			int germans = getNumber(lineParts[5]);
+			int foreigners = getNumber(lineParts[6]);
+			int azubis = getNumber(lineParts[6]);
+			
+			if(table.equals("2015_commuters")){
+				
+				toId = new String(fromId);
+				toName = new String(fromName);
+				fromId = lineParts[0];
+				fromName = lineParts[1];
+				
+			} else {
+				
+				toId = lineParts[0];
+				toName = lineParts[1];
+				
+			}
+			
 			statement.executeUpdate("INSERT INTO commuters.\"" + table + "\" VALUES('" + fromId + "','" + fromName + "','"
-					+ lineParts[0] + "','" + lineParts[1] + "','" + getNumber(lineParts[2]) + "','" + getNumber(lineParts[3]) + "','"
-					+ getNumber(lineParts[4]) + "','" + getNumber(lineParts[5]) + "','" + getNumber(lineParts[6]) + "','"
-					+ getNumber(lineParts[7]) + "');");
+					+ toId + "','" + toName + "','" + amount + "','" + men + "','" + women + "','" + germans + "','"
+					+ foreigners + "','" + azubis + "');");
 			
 			keys.add(lineParts[0]);
 			
