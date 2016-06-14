@@ -19,9 +19,9 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
-public class CommuterSpreadsheetFileReader {
+public class CommuterSpreadsheetFileHandler {
 
-	private static final Logger log = Logger.getLogger(CommuterSpreadsheetFileReader.class);
+	private static final Logger log = Logger.getLogger(CommuterSpreadsheetFileHandler.class);
 	
 	private Connection connection;
 	
@@ -31,7 +31,7 @@ public class CommuterSpreadsheetFileReader {
 	
 			log.info("Parsing xls commuter data to write it into MobilityDatabase...");
 			
-			CommuterSpreadsheetFileReader handler = new CommuterSpreadsheetFileReader();
+			CommuterSpreadsheetFileHandler handler = new CommuterSpreadsheetFileHandler();
 			
 			Class.forName("org.postgresql.Driver").newInstance();
 			handler.connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/surveyed_mobility",
