@@ -1,11 +1,13 @@
 package innoz.scenarioGeneration.population;
 
 import innoz.config.Configuration;
+import innoz.io.database.CommuterDatabaseParser;
 import innoz.io.database.MidDatabaseParser;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.geoinformation.Distribution;
 import innoz.scenarioGeneration.geoinformation.District;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
+import innoz.scenarioGeneration.population.commuters.CommuterDataElement;
 import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
 import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
 import innoz.scenarioGeneration.population.surveys.SurveyPerson;
@@ -43,6 +45,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.collections.CollectionUtils;
+import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -263,38 +266,119 @@ public class PopulationCreator {
 	 */
 	private void createCommuterPopulation(Configuration configuration, Scenario scenario){
 		
-//		if(!configuration.getReverseCommuterFile().equals(null) &&
-//				!configuration.getCommuterFile().equals(null)){
-//			
-//			CommuterFileReader cReader = new CommuterFileReader();
-//			cReader.read(configuration.getReverseCommuterFile(), true);
-//			cReader.read(configuration.getCommuterFile(), false);
-//
-//			Population population = scenario.getPopulation();
-//			
-//			for(Entry<String, CommuterDataElement> entry : cReader.getCommuterRelations().entrySet()){
-//				
-//				String homeId = entry.getValue().getFromId();
-//				String workId = entry.getValue().toString();
-//				
-//				Geometry homeCell = Geoinformation.getAdminUnits().get(homeId).getGeometry();
-//				Geometry workCell = Geoinformation.getAdminUnits().get(workId).getGeometry();
-//				
-//				for(int i = 0; i < entry.getValue().getCommuters(); i++){
-//					
-//					createOneCommuter(entry.getValue(), population, homeId, workId, homeCell, workCell, i);
-//					
-//				}
-//				
-//			}
-//			
-//		} else {
-//			
-//			log.error("Population type was set to " + configuration.getPopulationType().name() + 
-//					" but no input file was defined!");
-//			log.warn("No population will be created.");
-//			
-//		}
+		CommuterDatabaseParser parser = new CommuterDatabaseParser();
+		parser.run(configuration);
+
+		Population population = scenario.getPopulation();
+		
+		for(Entry<Tuple<String, String>, CommuterDataElement> entry : parser.getCommuterRelations().entrySet()){
+			
+			for(int i = 0; i < entry.getValue().getNumberOfCommuters(); i++){
+				
+				createOneCommuter(entry.getValue(), population, i);
+				
+			}
+			
+		}
+		
+	}
+	
+	private void createOneCommuter(CommuterDataElement el, Population population, int n){
+
+		String homeId = el.getFromId();
+		String workId = el.getToId();
+
+		if(!this.geoinformation.getAdminUnits().containsKey(homeId) || !this.geoinformation.getAdminUnits().containsKey(workId)) return;
+		
+		District home = this.geoinformation.getAdminUnits().get(homeId);
+		
+		Coord homeLocation = null;
+		
+		double r = random.nextDouble() * this.geoinformation.getTotalWeightForLanduseKey(home.getId(), ActivityTypes.HOME);
+		double r2 = 0.;
+		
+		for(AdministrativeUnit admin : home.getAdminUnits().values()){
+			
+			r2 += admin.getWeightForKey(ActivityTypes.HOME);
+			
+			if(r <= r2 && admin.getLanduseGeometries().get(ActivityTypes.HOME) != null){
+				
+				double p = random.nextDouble() * admin.getWeightForKey(ActivityTypes.HOME);
+				double accumulatedWeight = 0.;
+				
+				for(Geometry g : admin.getLanduseGeometries().get(ActivityTypes.HOME)){
+					
+					accumulatedWeight += g.getArea();
+					
+					if(p <= accumulatedWeight){
+						// Shoot the home location
+						homeLocation = transformation.transform(GeometryUtils.shoot(g, random));
+						break;
+					}
+					
+				}
+				
+				break;
+				
+			}
+			
+		}
+		
+		District work = this.geoinformation.getAdminUnits().get(workId);
+		Coord workLocation = null;
+		
+		for(AdministrativeUnit admin : work.getAdminUnits().values()){
+			
+			r2 += admin.getWeightForKey(ActivityTypes.WORK);
+			
+			if(r <= r2 && admin.getLanduseGeometries().get(ActivityTypes.WORK) != null){
+				
+				double p = random.nextDouble() * admin.getWeightForKey(ActivityTypes.WORK);
+				double accumulatedWeight = 0.;
+				
+				for(Geometry g : admin.getLanduseGeometries().get(ActivityTypes.WORK)){
+					
+					accumulatedWeight += g.getArea();
+					
+					if(p <= accumulatedWeight){
+						// Shoot the home location
+						workLocation = transformation.transform(GeometryUtils.shoot(g, random));
+						break;
+					}
+					
+				}
+				
+				break;
+				
+			}
+			
+		}
+		
+		Person person = population.getFactory().createPerson(Id.createPersonId(n));
+		Plan plan = population.getFactory().createPlan();
+		
+		Activity homeAct = population.getFactory().createActivityFromCoord(ActivityTypes.HOME, homeLocation);
+		homeAct.setEndTime(7 * 3600);
+		plan.addActivity(homeAct);
+		
+		Leg firstLeg = population.getFactory().createLeg(TransportMode.car);
+		plan.addLeg(firstLeg);
+		
+		Activity workAct = population.getFactory().createActivityFromCoord(ActivityTypes.WORK, workLocation);
+		workAct.setMaximumDuration(8 * 3600);
+		plan.addActivity(workAct);
+		
+		Leg secondLeg = population.getFactory().createLeg(TransportMode.car);
+		plan.addLeg(secondLeg);
+		
+		Activity secondHomeAct = population.getFactory().createActivityFromCoord(ActivityTypes.HOME, homeLocation);
+		secondHomeAct.setEndTime(24 * 3600);
+		plan.addActivity(secondHomeAct);
+		
+		person.addPlan(plan);
+		person.setSelectedPlan(plan);
+		
+		population.addPerson(person);
 		
 	}
 	
