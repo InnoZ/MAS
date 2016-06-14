@@ -3,6 +3,7 @@ package innoz.io.database.migration;
 import innoz.config.Configuration;
 import innoz.config.ConfigurationUtils;
 import innoz.config.SshConnector;
+import innoz.io.database.DatabaseConstants;
 import innoz.utils.TextUtils;
 
 import java.io.File;
@@ -48,8 +49,12 @@ public class CommuterSpreadsheetFileHandler {
 	 * 
 	 * @param args
 	 * @throws JSchException
+	 * @throws IOException 
+	 * @throws SQLException 
+	 * @throws InvalidFormatException 
+	 * @throws EncryptedDocumentException 
 	 */
-	public static void main(String args[]) throws JSchException{
+	public static void main(String args[]) throws JSchException, EncryptedDocumentException, InvalidFormatException, SQLException, IOException{
 		
 		try {
 	
@@ -65,36 +70,37 @@ public class CommuterSpreadsheetFileHandler {
 				CommuterSpreadsheetFileHandler handler = new CommuterSpreadsheetFileHandler();
 				
 				// Instantiate a postgresql driver and establish a connection to the remote database
-				Class.forName("org.postgresql.Driver").newInstance();
-				handler.connection = DriverManager.getConnection("jdbc:postgresql://localhost:" + configuration.getLocalPort() +
-						"/surveyed_mobility", configuration.getDatabaseUsername(), configuration.getDatabasePassword());
+				Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
+				handler.connection = DriverManager.getConnection(DatabaseConstants.PSQL_PREFIX + configuration.getLocalPort() +
+						"/" + DatabaseConstants.SURVEYS_DB, configuration.getDatabaseUsername(), configuration.getDatabasePassword());
 				
 				// If the connection could be established, proceed
 				if(handler.connection != null){
 					
 					String path = "/run/user/1009/gvfs/smb-share:domain=INNOZ,server=192.168.0.3,share=gisdata,user=dhosse/"
-							+ "MOBILITYDATA/Pendlerdaten_Arbeitsagentur/xls/";
+							+ "MOBILITYDATA/Arbeitsagentur/";
 
 					// Create all the schemata and tables needed
 					handler.createDatabaseTables();
 					// Read one spreadsheet per state and write the data into the database
-					handler.appendExcelSheetToDatabase(path + "krpend_01_0.xls");
-					handler.appendExcelSheetToDatabase(path + "krpend_02_0.xls");
-					handler.appendExcelSheetToDatabase(path + "krpend_03_0.xls");
-					handler.appendExcelSheetToDatabase(path + "krpend_04_0.xls");
-					handler.appendExcelSheetToDatabase(path + "krpend_05_0.xls");
-					handler.appendExcelSheetToDatabase(path + "krpend_06_0.xls");
-					handler.appendExcelSheetToDatabase(path + "krpend_07_0.xls");
-					handler.appendExcelSheetToDatabase(path + "krpend_08_0.xls");
-					handler.appendExcelSheetToDatabase(path + "krpend_09_0.xls");
-					handler.appendExcelSheetToDatabase(path + "krpend_10_0.xls");
-					handler.appendExcelSheetToDatabase(path + "krpend_11_0.xls");
-					handler.appendExcelSheetToDatabase(path + "krpend_12_0.xls");
-					handler.appendExcelSheetToDatabase(path + "krpend_13_0.xls");
-					handler.appendExcelSheetToDatabase(path + "krpend_14_0.xls");
-					handler.appendExcelSheetToDatabase(path + "krpend_15_0.xls");
-					handler.appendExcelSheetToDatabase(path + "krpend_16_0.xls");
-					
+					handler.appendExcelSheetToDatabase(path + "Pendler/xls/krpend_01_0.xls");
+					handler.appendExcelSheetToDatabase(path + "Pendler/xls/krpend_02_0.xls");
+					handler.appendExcelSheetToDatabase(path + "Pendler/xls/krpend_03_0.xls");
+					handler.appendExcelSheetToDatabase(path + "Pendler/xls/krpend_04_0.xls");
+					handler.appendExcelSheetToDatabase(path + "Pendler/xls/krpend_05_0.xls");
+					handler.appendExcelSheetToDatabase(path + "Pendler/xls/krpend_06_0.xls");
+					handler.appendExcelSheetToDatabase(path + "Pendler/xls/krpend_07_0.xls");
+					handler.appendExcelSheetToDatabase(path + "Pendler/xls/krpend_08_0.xls");
+					handler.appendExcelSheetToDatabase(path + "Pendler/xls/krpend_09_0.xls");
+					handler.appendExcelSheetToDatabase(path + "Pendler/xls/krpend_10_0.xls");
+					handler.appendExcelSheetToDatabase(path + "Pendler/xls/krpend_11_0.xls");
+					handler.appendExcelSheetToDatabase(path + "Pendler/xls/krpend_12_0.xls");
+					handler.appendExcelSheetToDatabase(path + "Pendler/xls/krpend_13_0.xls");
+					handler.appendExcelSheetToDatabase(path + "Pendler/xls/krpend_14_0.xls");
+					handler.appendExcelSheetToDatabase(path + "Pendler/xls/krpend_15_0.xls");
+					handler.appendExcelSheetToDatabase(path + "Pendler/xls/krpend_16_0.xls");
+					handler.createAndFillInternalTrafficTable(path + "Beschäftigte/gemband_d_0.xls");
+				
 				}
 				
 				// After everything is done, close the connection and exit
@@ -242,6 +248,95 @@ public class CommuterSpreadsheetFileHandler {
 	
 	/**
 	 * 
+	 * Creates a database table containing data about internal traffic on district level.
+	 * 
+	 * @param file The input Excel file.
+	 * @throws SQLException
+	 * @throws EncryptedDocumentException
+	 * @throws InvalidFormatException
+	 * @throws IOException
+	 */
+	public void createAndFillInternalTrafficTable(String file) throws SQLException, EncryptedDocumentException,
+		InvalidFormatException, IOException{
+		
+		log.info("Handling file " + file + "...");
+		
+		// Apache POI part
+		// Create a new workbook and an extractor the retrieve the data
+		Workbook workbook = WorkbookFactory.create(new File(file));
+		ExcelExtractor extractor = new ExcelExtractor((HSSFWorkbook) workbook);
+		// Make the extractor ignore blank cells, formulas and sheet names
+		extractor.setIncludeBlankCells(true);
+		extractor.setFormulasNotResults(false);
+		extractor.setIncludeSheetNames(false);
+		// Retrieve the text
+		String text = extractor.getText();
+		// Close the extractor when it's done
+		extractor.close();
+		// Apache POI end
+		
+		// Create a new statement to execute the following queries
+		Statement statement = connection.createStatement();
+		
+		statement.executeUpdate("DROP TABLE IF EXISTS commuters.\"2015_internal\";");
+		statement.executeUpdate("CREATE TABLE commuters.\"2015_internal\"(home_id character varying, home_name character varying,"
+				+ " amount integer);");
+
+		boolean active = false;
+		
+		// Iterate over all lines of the spreadsheed text
+		for(String line : text.split(TextUtils.NEW_LINE)){
+		
+			if(!line.isEmpty() && line.split(TextUtils.TAB).length >= 12){
+				
+				if(active){
+
+					String[] lineParts = line.split(TextUtils.TAB);
+					
+					String homeId = lineParts[0];
+					String homeName = lineParts[1];
+					
+					if(homeId.length() > 5){
+					
+						if(homeId.substring(5, 8).equals("000")){
+							
+							homeId = homeId.substring(0, 5);
+							
+						} else continue;
+						
+					}
+		
+					int amount = 0;
+					
+					try{
+						amount = getNumber(lineParts[11]);
+					} catch(ArrayIndexOutOfBoundsException e){
+						System.out.println(line);
+						e.printStackTrace();
+					}
+					
+					statement.executeUpdate("INSERT INTO commuters.\"2015_internal\" VALUES('" + homeId + "','"
+							+ homeName + "','" + amount + "');");
+					
+					
+				}
+				
+				if(line.contains("1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13")){
+					
+					active = true;
+					
+				}
+				
+			}
+			
+		}
+		
+		statement.close();
+		
+	}
+	
+	/**
+	 * 
 	 * Creates a new origin-destination (OD) pair for the current identifiers.
 	 * The data (i.e. origin, destination, amount of travelers) is directly written into the specified database table.
 	 * 
@@ -267,7 +362,7 @@ public class CommuterSpreadsheetFileHandler {
 			int women = getNumber(lineParts[4]);
 			int germans = getNumber(lineParts[5]);
 			int foreigners = getNumber(lineParts[6]);
-			int azubis = getNumber(lineParts[6]);
+			int azubis = getNumber(lineParts[7]);
 			
 			// If we are parsing a 'commuter' relation, the first two columns contain the work location (destination).
 			// Thus, we have to switch from and to id.
@@ -307,7 +402,7 @@ public class CommuterSpreadsheetFileHandler {
 	 */
 	private int getNumber(String numberString){
 		
-		if(numberString.equals("-") || numberString.equals("*")){
+		if(numberString.equals("-") || numberString.equals("*") || numberString.isEmpty()){
 			
 			return 0;
 			
