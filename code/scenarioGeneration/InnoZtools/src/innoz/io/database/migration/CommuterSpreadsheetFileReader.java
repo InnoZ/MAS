@@ -1,4 +1,4 @@
-package innoz.io.dbMigration;
+package innoz.io.database.migration;
 
 import innoz.utils.TextUtils;
 
