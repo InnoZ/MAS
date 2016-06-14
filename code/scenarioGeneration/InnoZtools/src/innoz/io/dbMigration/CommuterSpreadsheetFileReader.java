@@ -8,7 +8,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.extractor.ExcelExtractor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -18,13 +21,51 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 public class CommuterSpreadsheetFileReader {
 
+	private static final Logger log = Logger.getLogger(CommuterSpreadsheetFileReader.class);
+	
+	private Connection connection;
+	
 	public static void main(String args[]){
 		
 		try {
-		
-			new CommuterSpreadsheetFileReader().appendExcelSheetToDatabase("/home/dhosse/guiTest/pendlerdaten/krpend_01_0.xls",
-					"reverse");
-		
+	
+			log.info("Parsing xls commuter data to write it into MobilityDatabase...");
+			
+			CommuterSpreadsheetFileReader handler = new CommuterSpreadsheetFileReader();
+			
+			Class.forName("org.postgresql.Driver").newInstance();
+			handler.connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/surveyed_mobility",
+					"postgres", "postgres");
+			
+			if(handler.connection != null){
+				
+				String path = "/run/user/1009/gvfs/smb-share:domain=INNOZ,server=192.168.0.3,share=gisdata,user=dhosse/"
+						+ "MOBILITYDATA/Pendlerdaten_Arbeitsagentur/xls/";
+
+				handler.createDatabaseTables();
+				handler.appendExcelSheetToDatabase(path + "krpend_01_0.xls");
+				handler.appendExcelSheetToDatabase(path + "krpend_02_0.xls");
+				handler.appendExcelSheetToDatabase(path + "krpend_03_0.xls");
+				handler.appendExcelSheetToDatabase(path + "krpend_04_0.xls");
+				handler.appendExcelSheetToDatabase(path + "krpend_05_0.xls");
+				handler.appendExcelSheetToDatabase(path + "krpend_06_0.xls");
+				handler.appendExcelSheetToDatabase(path + "krpend_07_0.xls");
+				handler.appendExcelSheetToDatabase(path + "krpend_08_0.xls");
+				handler.appendExcelSheetToDatabase(path + "krpend_09_0.xls");
+				handler.appendExcelSheetToDatabase(path + "krpend_10_0.xls");
+				handler.appendExcelSheetToDatabase(path + "krpend_11_0.xls");
+				handler.appendExcelSheetToDatabase(path + "krpend_12_0.xls");
+				handler.appendExcelSheetToDatabase(path + "krpend_13_0.xls");
+				handler.appendExcelSheetToDatabase(path + "krpend_14_0.xls");
+				handler.appendExcelSheetToDatabase(path + "krpend_15_0.xls");
+				handler.appendExcelSheetToDatabase(path + "krpend_16_0.xls");
+				
+			}
+			
+			handler.connection.close();
+			
+			log.info("Done.");
+			
 		} catch (EncryptedDocumentException | InvalidFormatException | IOException | InstantiationException |
 				IllegalAccessException | ClassNotFoundException | SQLException | InterruptedException e) {
 
@@ -37,34 +78,27 @@ public class CommuterSpreadsheetFileReader {
 	public void createDatabaseTables() throws SQLException, InstantiationException, IllegalAccessException,
 		ClassNotFoundException{
 		
-		Class.forName("org.postgresql.Driver").newInstance();
-		Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/surveyed_mobility",
-				"postgres", "postgres");
+		log.info("Creating schemata and tables...");
 		
-		if(connection != null){
-			
-			Statement statement = connection.createStatement();
-			statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS commuters;");
-			statement.executeUpdate("DROP TABLE IF EXISTS 2015_commuters;");
-			statement.executeUpdate("DROP TABLE IF EXISTS 2015_reverse;");
-			statement.executeUpdate("CREATE TABLE 2015_commuters(home_id character varying, home_name character varying,"
-					+ "work_id character varying, work_name character varying, amount integer, men integer, women integer,"
-					+ "germans integer, foreigners integer, azubis integer);");
-			statement.executeUpdate("CREATE TABLE 2015_reverse(home_id character varying, home_name character varying,"
-					+ "work_id character varying, work_name character varying, amount integer, men integer, women integer,"
-					+ "germans integer, foreigners integer, azubis integer);");
-			
-			statement.close();
-			
-		}
+		Statement statement = connection.createStatement();
+		statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS commuters;");
+		statement.executeUpdate("DROP TABLE IF EXISTS commuters.\"2015_commuters\";");
+		statement.executeUpdate("DROP TABLE IF EXISTS commuters.\"2015_reverse\";");
+		statement.executeUpdate("CREATE TABLE commuters.\"2015_commuters\"(home_id character varying, home_name character varying,"
+				+ "work_id character varying, work_name character varying, amount integer, men integer, women integer,"
+				+ "germans integer, foreigners integer, azubis integer);");
+		statement.executeUpdate("CREATE TABLE commuters.\"2015_reverse\"(home_id character varying, home_name character varying,"
+				+ "work_id character varying, work_name character varying, amount integer, men integer, women integer,"
+				+ "germans integer, foreigners integer, azubis integer);");
 		
-		connection.close();
+		statement.close();
 		
 	}
 	
-	public void appendExcelSheetToDatabase(String file, String commuterType) throws EncryptedDocumentException,
-		InvalidFormatException, IOException, InstantiationException, IllegalAccessException, ClassNotFoundException,
-		SQLException, InterruptedException{
+	public void appendExcelSheetToDatabase(String file) throws EncryptedDocumentException, InvalidFormatException, IOException,
+		InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, InterruptedException {
+		
+		log.info("Handling file " + file + "...");
 		
 		Workbook workbook = WorkbookFactory.create(new File(file));
 		ExcelExtractor extractor = new ExcelExtractor((HSSFWorkbook) workbook);
@@ -74,61 +108,80 @@ public class CommuterSpreadsheetFileReader {
 		String text = extractor.getText();
 		extractor.close();
 		
+		Statement statement = connection.createStatement();
 		
-		Class.forName("org.postgresql.Driver").newInstance();
-		Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/surveyed_mobility",
-				"postgres", "postgres");
+		String fromId = null;
+		String fromName = null;
+		String table = null;
+		Set<String> keys = new HashSet<String>();
 		
-		if(connection != null){
-			
-			Statement statement = connection.createStatement();
-			
-			String fromId = null;
-			String fromName = null;
-			
-			for(String line : text.split(TextUtils.NEW_LINE)){
+		for(String line : text.split(TextUtils.NEW_LINE)){
 
-				if(!line.equals(TextUtils.EMPTY)){
+			if(!line.isEmpty()){
 
-					//TODO update db table
-					String[] lineParts = line.split(TextUtils.TAB);
+				if(line.contains("Auspendler")){
 					
-					// from location included: length 10, else length 8
-					if(lineParts.length == 10){
-						
-						fromId = lineParts[0];
-						fromName = lineParts[1];
-						
-						String[] parts = new String[lineParts.length - 2];
-						for(int i = 2; i < lineParts.length; i++){
-							parts[i-2] = lineParts[i];
-						}
-						
-						createNewEntry(statement, fromId, fromName, parts);
-						
-					} else if(lineParts.length == 8){
-						
-						createNewEntry(statement, fromId, fromName, lineParts);
-						
-					}
+					table = "2015_reverse";
+					keys.clear();
+					
+				} else if(line.contains("Einpendler")){
+					
+					table = "2015_commuters";
+					keys.clear();
+					
+				}
+				
+				String[] lineParts = line.split(TextUtils.TAB);
+				
+				if(lineParts.length == 2){
+					
+					fromId = lineParts[0];
+					fromName = lineParts[1];
+					
+					keys.clear();
+					
+				} else if(lineParts.length == 8){
+					
+					createNewEntry(statement, table, keys, fromId, fromName, lineParts);
 					
 				}
 				
 			}
 			
-			statement.close();
-			
 		}
 		
-		connection.close();
+		statement.close();
 		
 	}
 	
-	private void createNewEntry(Statement statement, String fromId, String fromName, String[] lineParts) throws SQLException{
+	private void createNewEntry(Statement statement, String table, Set<String> keys, String fromId, String fromName,
+			String[] lineParts) throws SQLException {
 		
-		statement.executeUpdate("INSERT INTO commuters.2015_commuters VALUES('" + fromId + "','" + fromName + "','"
-				+ lineParts[0] + "','" + lineParts[1] + "','" + lineParts[2] + lineParts[3] + "','" + lineParts[4] + "','" 
-				+ lineParts[5] + "','" + lineParts[6] + "','" + lineParts[7] + "');");
+		// To prevent duplicate keys store them inside the key set
+		if(!keys.contains(lineParts[0])){
+
+			statement.executeUpdate("INSERT INTO commuters.\"" + table + "\" VALUES('" + fromId + "','" + fromName + "','"
+					+ lineParts[0] + "','" + lineParts[1] + "','" + getNumber(lineParts[2]) + "','" + getNumber(lineParts[3]) + "','"
+					+ getNumber(lineParts[4]) + "','" + getNumber(lineParts[5]) + "','" + getNumber(lineParts[6]) + "','"
+					+ getNumber(lineParts[7]) + "');");
+			
+			keys.add(lineParts[0]);
+			
+		}
+		
+	}
+	
+	private int getNumber(String numberString){
+		
+		if(numberString.equals("-") || numberString.equals("*")){
+			
+			return 0;
+			
+		} else {
+			
+			return Integer.parseInt(numberString.replace(",", ""));
+			
+		}
 		
 	}
 	
