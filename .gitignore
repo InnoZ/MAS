@@ -5,6 +5,8 @@ output/**/*
 code/scenarioGeneration/InnoZtools/bin/innoz/
 #ignore user-specific classpaths
 code/scenarioGeneration/InnoZtools/.classpath
+code/scenarioGeneration/InnoZtools/.gitignor
+code/scenarioGeneration/InnoZtools/.gitignore
 #ingore build files from jar generation
 libraries/build/*
 # ignore temp files:
