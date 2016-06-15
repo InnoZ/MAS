@@ -180,8 +180,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				} else {
 				
 					// If no residential areas exist within the home cell, shoot a random coordinate
-					homeLocation = transformation.transform(GeometryUtils.shoot(
-							this.currentHomeCell.getGeometry(), random));
+					homeLocation = this.transformation.transform(GeometryUtils.shoot(
+							this.currentHomeCell.getGeometry(), this.random));
 					
 				}
 	
@@ -191,7 +191,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 					String personId = template.getMemberIds().get(j);
 					SurveyPerson templatePerson = container.getPersons().get(personId);
 					
-					Person person = createPerson(templatePerson, population, personAttributes, random.nextDouble(),
+					Person person = createPerson(templatePerson, population, personAttributes, this.random.nextDouble(),
 							population.getPersons().size(), homeLocation, container);
 					
 					// If the resulting MATSim person is not null, add it
@@ -264,7 +264,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
 			for(AdministrativeUnit au : d.getAdminUnits().values()){
 				
-				double personalRandom = random.nextDouble();
+				double personalRandom = this.random.nextDouble();
 				
 				Map<String,SurveyPerson> templatePersons = container.getPersons();
 				SurveyPerson personTemplate = null;
@@ -275,7 +275,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				//TODO: number of inhabitants for admin units
 				for(int i = 0; i < 10000 * configuration.getScaleFactor(); i++){
 					
-					population.addPerson(createPerson(personTemplate, population, personAttributes, personalRandom, i, null, container));
+					Coord homeCoord = chooseActivityCoordInAdminUnit(au, ActivityTypes.HOME);
+					population.addPerson(createPerson(personTemplate, population, personAttributes, personalRandom, i, homeCoord, container));
 					
 				}
 				
@@ -303,14 +304,14 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			ObjectAttributes personAttributes, double personalRandom, int i, Coord homeCoord, SurveyDataContainer container) {
 
 		// Initialize main act location, last leg, last act cell and the coordinate of the last activity as null to avoid errors...
-		currentMainActLocation = null;
-		lastLeg = null;
-		lastActCoord = null;
-		lastActCell = null;
-		currentSearchSpace = null;
+		this.currentMainActLocation = null;
+		this.lastLeg = null;
+		this.lastActCoord = null;
+		this.lastActCell = null;
+		this.currentSearchSpace = null;
 		
 		// Create a new MATSim person and an empty plan
-		Person person = population.getFactory().createPerson(Id.createPersonId(currentHomeCell.getId() + "_" + personTemplate.getId() + "_" + i));
+		Person person = population.getFactory().createPerson(Id.createPersonId(this.currentHomeCell.getId() + "_" + personTemplate.getId() + "_" + i));
 		Plan plan = population.getFactory().createPlan();
 		
 		// Set the person's attributes (sex, age, employed, license, car availability) according to what was reported in the survey
@@ -366,9 +367,10 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			}
 			
 			// Set the current home location
-			currentHomeLocation = homeCoord != null ? homeCoord :
-				transformation.transform(GeometryUtils.shoot(currentHomeCell.getGeometry(),random));
-			lastActCoord = currentHomeLocation;
+			this.currentHomeLocation = homeCoord != null ? homeCoord :
+				this.transformation.transform(GeometryUtils.shoot(this.currentHomeCell.getGeometry(),
+						this.random));
+			this.lastActCoord = this.currentHomeLocation;
 
 			// If there are at least two plan elements in the chosen template plan, generate the plan elements
 			if(planTemplate.getPlanElements().size() > 1){
@@ -433,19 +435,19 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		String mainMode = plan.getMainActIndex() > 0 ? 
 				((SurveyPlanTrip)plan.getPlanElements().get(plan.getMainActIndex()-1)).getMainMode() :
 					((SurveyPlanTrip)plan.getPlanElements().get(plan.getMainActIndex()+1)).getMainMode();
-		currentMainActCell = locateActivityInCell(plan.getMainActType(), mainMode, person);
+		this.currentMainActCell = locateActivityInCell(plan.getMainActType(), mainMode, person);
 		
 		double distance = container.getModeStatsContainer().get(mainMode).getMean();
 		
-		currentMainActLocation = shootLocationForActType(currentMainActCell, plan.getMainActType(),
-				distance, plan, mainMode, person);
+		this.currentMainActLocation = shootLocationForActType(this.currentMainActCell,
+				plan.getMainActType(), distance, plan, mainMode, person);
 
 		// To locate intermediate activities, create a search space and add the home and main activity cells
-		currentSearchSpace = new ArrayList<>();
-		currentSearchSpace.add(currentHomeCell);
-		currentSearchSpace.add(currentMainActCell);
+		this.currentSearchSpace = new ArrayList<>();
+		this.currentSearchSpace.add(this.currentHomeCell);
+		this.currentSearchSpace.add(this.currentMainActCell);
 		
-		c = CoordUtils.calcEuclideanDistance(currentHomeLocation, currentMainActLocation);
+		c = CoordUtils.calcEuclideanDistance(this.currentHomeLocation, this.currentMainActLocation);
 		
 		// Also, add all cells of which the sum of the distances between their centroid and the centroids of
 		// the home and the main act cell is less than twice the distance between the home and the main activity location
@@ -453,16 +455,16 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
 			for(AdministrativeUnit au : d.getAdminUnits().values()){
 				
-				double a = CoordUtils.calcEuclideanDistance(transformation.transform(
-						MGC.point2Coord(currentHomeCell.getGeometry().getCentroid())),
-						transformation.transform(MGC.point2Coord(au.getGeometry().getCentroid())));
-				double b = CoordUtils.calcEuclideanDistance(transformation.transform(
-						MGC.point2Coord(currentMainActCell.getGeometry().getCentroid())),
-						transformation.transform(MGC.point2Coord(au.getGeometry().getCentroid())));
+				double a = CoordUtils.calcEuclideanDistance(this.transformation.transform(
+						MGC.point2Coord(this.currentHomeCell.getGeometry().getCentroid())),
+						this.transformation.transform(MGC.point2Coord(au.getGeometry().getCentroid())));
+				double b = CoordUtils.calcEuclideanDistance(this.transformation.transform(
+						MGC.point2Coord(this.currentMainActCell.getGeometry().getCentroid())),
+						this.transformation.transform(MGC.point2Coord(au.getGeometry().getCentroid())));
 				
 				if(a + b < 2 * c){
 					
-					currentSearchSpace.add(au);
+					this.currentSearchSpace.add(au);
 					
 				}
 				
@@ -472,7 +474,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 		List<String> cellList = new ArrayList<String>();
 		
-		AdministrativeUnit lastTo = currentHomeCell;
+		AdministrativeUnit lastTo = this.currentHomeCell;
 		SurveyPlanTrip lastWay = null;
 		
 		for(SurveyPlanElement pe : plan.getPlanElements()){
@@ -485,16 +487,17 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				
 				if(act.getActType().equals(ActivityTypes.HOME)){
 					
-					next = currentHomeCell;
+					next = this.currentHomeCell;
 					
 				} else if(act.getId() == plan.getMainActId()){
 					
-					next = currentMainActCell;
+					next = this.currentMainActCell;
 					
 				} else {
 					
 					if(lastWay != null){
-						next = locateActivityInCell(lastTo.getId(), act.getActType(), lastWay.getMainMode(), person);
+						next = locateActivityInCell(lastTo.getId(), act.getActType(),
+								lastWay.getMainMode(), person);
 					}
 					
 				}
@@ -540,7 +543,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		Leg leg = population.getFactory().createLeg(mode);
 		leg.setTravelTime(ttime);
 
-		lastLeg = way;
+		this.lastLeg = way;
 		
 		return leg;
 		
@@ -579,7 +582,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		Set<String> modes = new HashSet<String>();
 		
 		if(fromId == null){
-			fromId = currentHomeCell.getId();
+			fromId = this.currentHomeCell.getId();
 		}
 		
 		if(mode != null){
@@ -597,7 +600,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		} else {
 			
 			// If the transport mode wasn't reported, consider all modes the person could have used
-			modes = CollectionUtils.stringToSet(TransportMode.bike + "," + TransportMode.pt + "," + TransportMode.walk);
+			modes = CollectionUtils.stringToSet(TransportMode.bike + "," + TransportMode.pt + ","
+					+ TransportMode.walk);
 			
 			if(personTemplate.hasCarAvailable()){
 			
@@ -621,11 +625,11 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		// Set the search space to the person's search space if it's not null.
 		// Else consider the whole survey area.
 		List<AdministrativeUnit> adminUnits = null;
-		if(currentSearchSpace != null){
+		if(this.currentSearchSpace != null){
 			
-			if(currentSearchSpace.size() > 0){
+			if(this.currentSearchSpace.size() > 0){
 				
-				adminUnits = currentSearchSpace;
+				adminUnits = this.currentSearchSpace;
 				
 			}
 			
@@ -642,27 +646,19 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		// Sum up the disutilities of all connections and map the entries for further work
 		for(AdministrativeUnit au : adminUnits){
 			
-//			if(fromId != null){
-//			
-//				if(distribution.getDistance(fromId, au.getId()) > distance / 1.3){
-//					
-//					continue;
-//					
-//				}
-//				
-//			}
-			
 			double disutility = Double.NEGATIVE_INFINITY;
 				
 			for(String m : modes){
 				
 				if(fromId != null){
 					
-					disutility = distribution.getDisutilityForActTypeAndMode(fromId, au.getId(), activityType, m);
+					disutility = this.distribution.getDisutilityForActTypeAndMode(fromId, au.getId(),
+							activityType, m);
 					
 				} else {
 					
-					disutility = distribution.getDisutilityForActTypeAndMode(currentHomeCell.getId(), au.getId(), activityType, m);
+					disutility = this.distribution.getDisutilityForActTypeAndMode(
+							this.currentHomeCell.getId(), au.getId(), activityType, m);
 					
 				}
 				
@@ -678,7 +674,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		}
 		
 		// Randomly choose a connection out of the search space
-		double r = random.nextDouble() * sumOfWeights;
+		double r = this.random.nextDouble() * sumOfWeights;
 		double accumulatedWeight = 0d;
 		
 		for(Entry<String, Double> entry : toId2Disutility.entrySet()){
@@ -720,13 +716,13 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 		double distance = 0.;
 		String mode = null;
-		if(lastLeg != null){
-			distance = lastLeg.getTravelDistance();
-			mode = lastLeg.getMainMode();
+		if(this.lastLeg != null){
+			distance = this.lastLeg.getTravelDistance();
+			mode = this.lastLeg.getMainMode();
 		}
-		if(lastActCoord == null){
+		if(this.lastActCoord == null){
 			
-			lastActCoord = currentHomeLocation;
+			this.lastActCoord = this.currentHomeLocation;
 			
 		}
 
@@ -736,34 +732,34 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		if(type.equals(ActivityTypes.HOME)){
 			
 			// If it's a home activity, set the location to the home coordinate
-			coord = currentHomeLocation;
-			au = currentHomeCell;
+			coord = this.currentHomeLocation;
+			au = this.currentHomeCell;
 			
 		} else if(act.getId() == templatePlan.getMainActId()){
 			
-			au = currentMainActCell;
+			au = this.currentMainActCell;
 			
 			// If we already know the main act location, set it.
 			// Else, shoot a new coordinate for the main act location.
-			if(currentMainActLocation != null){
+			if(this.currentMainActLocation != null){
 				
-				coord = currentMainActLocation;
+				coord = this.currentMainActLocation;
 				
 			} else {
 				
 				coord = shootLocationForActType(au, type, distance, templatePlan, mode, personTemplate);
 				
-				currentMainActLocation = coord;
+				this.currentMainActLocation = coord;
 				
 			}
 			
 		} else {
 			
 			// If it's neither a home nor the main activity, locate the activity in any cell of the search space
-			if(lastActCell == null) lastActCell = currentHomeCell;
+			if(this.lastActCell == null) this.lastActCell = this.currentHomeCell;
 //			au = locateActivityInCell(lastActCell.getId(), type, mode, personTemplate,distance);
 			
-			if(au == null) au = lastActCell;
+			if(au == null) au = this.lastActCell;
 			
 			double a = 0;
 			double b = 0;
@@ -774,8 +770,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			
 				cnt++;
 				coord = shootLocationForActType(au, type, distance, templatePlan, mode, personTemplate);
-				a = CoordUtils.calcEuclideanDistance(currentHomeLocation, coord);
-				b = CoordUtils.calcEuclideanDistance(currentMainActLocation, coord);
+				a = CoordUtils.calcEuclideanDistance(this.currentHomeLocation, coord);
+				b = CoordUtils.calcEuclideanDistance(this.currentMainActLocation, coord);
 			
 			} while(a + b > 2 * c && cnt < 20);
 				
@@ -810,8 +806,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		}
 		
 		// Set the last coord and the last cell visited
-		lastActCoord = activity.getCoord();
-		lastActCell = au;
+		this.lastActCoord = activity.getCoord();
+		this.lastActCell = au;
 		
 		return activity;
 		
@@ -832,16 +828,16 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	private Coord shootLocationForActType(AdministrativeUnit au, String actType, double distance,
 			SurveyPlan templatePlan, String mode, SurveyPerson personTemplate) {
 
-		if(mode != null){
-			
-			// Bound the maximum walk distance to avoid "endless" walk legs
-			if(mode.equals(TransportMode.walk) && distance > 2000){
-				
-				distance = 500 + random.nextInt(1001);
-				
-			}
-
-		}
+//		if(mode != null){
+//			
+//			// Bound the maximum walk distance to avoid "endless" walk legs
+//			if(mode.equals(TransportMode.walk) && distance > 2000){
+//				
+//				distance = 500 + random.nextInt(1001);
+//				
+//			}
+//
+//		}
 		
 		// Divide the distance by the beeline distance factor and set boundaries for maximum and minimum distance traveled
 		double d = distance / 1.3;
@@ -850,7 +846,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 		// Get all landuse geometries of the current activity type within the given administrative unit
 		List<Geometry> closest = (List<Geometry>) this.geoinformation.getQuadTreeForActType(actType).getRing
-				(lastActCoord.getX(), lastActCoord.getY(), d * minFactor, d * maxFactor);
+				(this.lastActCoord.getX(), this.lastActCoord.getY(), d * minFactor, d * maxFactor);
 		
 		// If there were any landuse geometries found, randomly choose one of the geometries.
 		// Else pick the landuse geometry closest to the last activity coordinate.
@@ -863,7 +859,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 					w+=g.getArea();
 				}
 				
-				double shootingRandom = random.nextDouble() * w;
+				double shootingRandom = this.random.nextDouble() * w;
 				double accumulatedWeight = 0.0d;
 				Geometry area = null;
 				
@@ -878,13 +874,14 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				}
 				
 				
-				return transformation.transform(GeometryUtils.shoot(area,random));
+				return this.transformation.transform(GeometryUtils.shoot(area, this.random));
 				
 			} else {
 				
-				Geometry area = this.geoinformation.getQuadTreeForActType(actType).getClosest(lastActCoord.getX(), lastActCoord.getY());
+				Geometry area = this.geoinformation.getQuadTreeForActType(actType)
+						.getClosest(this.lastActCoord.getX(), this.lastActCoord.getY());
 				
-				return transformation.transform(GeometryUtils.shoot(area,random));
+				return this.transformation.transform(GeometryUtils.shoot(area, this.random));
 				
 			}
 		
@@ -894,7 +891,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			
 			if(!closest.isEmpty()){
 				
-				double shootingRandom = random.nextDouble() * au.getWeightForKey(actType);
+				double shootingRandom = this.random.nextDouble() * au.getWeightForKey(actType);
 				double accumulatedWeight = 0.0d;
 				Geometry area = null;
 				
@@ -908,13 +905,14 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 					
 				}
 				
-				return transformation.transform(GeometryUtils.shoot(area,random));
+				return this.transformation.transform(GeometryUtils.shoot(area, this.random));
 				
 			} else {
 				
-				Geometry area = this.geoinformation.getQuadTreeForActType(actType).getClosest(lastActCoord.getX(), lastActCoord.getY());
+				Geometry area = this.geoinformation.getQuadTreeForActType(actType).getClosest(
+						this.lastActCoord.getX(), this.lastActCoord.getY());
 				
-				return transformation.transform(GeometryUtils.shoot(area,random));
+				return this.transformation.transform(GeometryUtils.shoot(area, this.random));
 				
 			}
 			
