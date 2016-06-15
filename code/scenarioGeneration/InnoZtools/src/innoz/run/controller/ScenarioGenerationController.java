@@ -23,7 +23,6 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.PopulationWriter;
-import org.matsim.core.scenario.ScenarioImpl;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.households.HouseholdsWriterV10;
 import org.matsim.utils.objectattributes.ObjectAttributes;
@@ -55,15 +54,6 @@ public class ScenarioGenerationController implements DefaultController {
 			
 			// Create a MATSim scenario
 			Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-			// Enable the usage of households
-			scenario.getConfig().scenario().setUseHouseholds(true);
-			((ScenarioImpl)scenario).createHouseholdsContainer();
-			
-			// If we want to explicitly model household's cars, enable it
-			if(configuration.isUsingVehicles()){
-				scenario.getConfig().scenario().setUseVehicles(true);
-				((ScenarioImpl)scenario).createVehicleContainer();
-			}
 			
 			// Container for geoinformation (admin borders, landuse)
 			Geoinformation geoinformation = new Geoinformation();

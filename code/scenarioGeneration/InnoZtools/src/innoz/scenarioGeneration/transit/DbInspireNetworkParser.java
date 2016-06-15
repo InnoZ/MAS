@@ -1,5 +1,8 @@
 package innoz.scenarioGeneration.transit;
 
+import innoz.scenarioGeneration.utils.Modes;
+import innoz.utils.GeometryUtils;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -22,7 +25,6 @@ import org.matsim.core.network.LinkImpl;
 import org.matsim.core.network.NetworkImpl;
 import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.geometry.CoordImpl;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
@@ -30,9 +32,6 @@ import org.matsim.core.utils.io.MatsimXmlParser;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.xml.sax.Attributes;
-
-import innoz.scenarioGeneration.utils.Modes;
-import innoz.utils.GeometryUtils;
 
 /**
  * Parser for the rail network data provided by the Deutsche Bahn
@@ -47,7 +46,7 @@ public class DbInspireNetworkParser extends MatsimXmlParser {
 	public static void main(String args[]){
 		
 		Config config = ConfigUtils.createConfig();
-		config.scenario().setUseTransit(true);
+		config.transit().setUseTransit(true);
 		Scenario scenario = ScenarioUtils.createScenario(config);
 		
 		new DbInspireNetworkParser(scenario, "EPSG:32632").parse(
@@ -354,7 +353,7 @@ public class DbInspireNetworkParser extends MatsimXmlParser {
 		
 		if(this.currentStation != null){
 
-			this.currentStation.coord = this.ct.transform(new CoordImpl(x, y));
+			this.currentStation.coord = this.ct.transform(new Coord(x, y));
 			
 		}
 		
@@ -606,12 +605,12 @@ public class DbInspireNetworkParser extends MatsimXmlParser {
 		
 		for(int i = 0; i < splitContent.length-1; i+=2){
 			
-			Coord coord = this.ct.transform(new CoordImpl(Double.parseDouble(splitContent[i+1]),
+			Coord coord = this.ct.transform(new Coord(Double.parseDouble(splitContent[i+1]),
 					Double.parseDouble(splitContent[i])));
 			
 			if(i > 0){
 				
-				length += CoordUtils.calcDistance(lastCoord, coord);
+				length += CoordUtils.calcEuclideanDistance(lastCoord, coord);
 				
 			}
 			

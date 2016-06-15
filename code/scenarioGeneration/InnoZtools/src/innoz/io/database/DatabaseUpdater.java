@@ -1,5 +1,8 @@
 package innoz.io.database;
 
+import innoz.config.Configuration;
+import innoz.scenarioGeneration.population.utils.PersonUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
@@ -19,12 +23,8 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.utils.geometry.CoordImpl;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.utils.objectattributes.ObjectAttributes;
-
-import innoz.config.Configuration;
-import innoz.scenarioGeneration.population.utils.PersonUtils;
 
 /**
  * This class transfers MATSim simulation data into a postgreSQL database.
@@ -394,7 +394,7 @@ public class DatabaseUpdater {
 			station.x = Double.parseDouble(l[2]);
 			station.y = Double.parseDouble(l[3]);
 			station.nVehicles = Integer.parseInt(l[6]);
-			station.linkId = NetworkUtils.getNearestLink(network, new CoordImpl(station.x, station.y))
+			station.linkId = NetworkUtils.getNearestLink(network, new Coord(station.x, station.y))
 					.getId().toString();
 			stations.add(station);
 			

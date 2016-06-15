@@ -4,7 +4,6 @@ import innoz.config.Configuration;
 import innoz.io.database.DatabaseReader;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
-import innoz.utils.matsim.NetworkSimplifier;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -21,6 +20,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.network.LinkImpl;
 import org.matsim.core.network.algorithms.NetworkCleaner;
+import org.matsim.core.network.algorithms.NetworkSimplifier;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -335,8 +335,9 @@ public class NetworkCreatorFromPsql {
 					// Get the next coordinate in the sequence and calculate the length between it and the last coordinate
 					Coordinate next = coordinates[i];
 					
-					length = CoordUtils.calcDistance(this.transformation.transform(MGC.coordinate2Coord(lastTo)),
-							this.transformation.transform(MGC.coordinate2Coord(next)));
+					length = CoordUtils.calcEuclideanDistance(this.transformation.transform(
+							MGC.coordinate2Coord(lastTo)), this.transformation.transform(
+									MGC.coordinate2Coord(next)));
 
 //					for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
 

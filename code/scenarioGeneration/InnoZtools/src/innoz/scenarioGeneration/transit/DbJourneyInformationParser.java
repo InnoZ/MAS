@@ -1,5 +1,7 @@
 package innoz.scenarioGeneration.transit;
 
+import innoz.scenarioGeneration.utils.Modes;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,7 +11,6 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.core.utils.geometry.CoordImpl;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.io.MatsimXmlParser;
@@ -24,8 +25,6 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
 import org.xml.sax.Attributes;
-
-import innoz.scenarioGeneration.utils.Modes;
 
 /**
  * Parses a given journey information file provided by the Deutsche Bahn
@@ -129,7 +128,7 @@ public class DbJourneyInformationParser extends MatsimXmlParser {
 		String departureDate = atts.getValue(ATT_DEPARTURE_DATE);
 		String track = atts.getValue(ATT_TRACK);
 		
-		Coord coord = this.transform.transform(new CoordImpl(Double.parseDouble(lon), Double.parseDouble(lat)));
+		Coord coord = this.transform.transform(new Coord(Double.parseDouble(lon), Double.parseDouble(lat)));
 		Id<TransitStopFacility> facilityId = Id.create(id, TransitStopFacility.class);
 		if(!this.schedule.getFacilities().containsKey(facilityId)){
 

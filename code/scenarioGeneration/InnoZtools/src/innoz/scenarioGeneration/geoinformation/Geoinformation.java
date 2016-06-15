@@ -1,13 +1,12 @@
 package innoz.scenarioGeneration.geoinformation;
 
-import innoz.utils.matsim.QuadTree;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 

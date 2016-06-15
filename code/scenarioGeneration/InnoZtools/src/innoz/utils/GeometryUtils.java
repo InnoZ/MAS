@@ -425,7 +425,7 @@ public class GeometryUtils {
 			
 			//if the distance between the coords is equal or smaller than the given distance,
 			//break out of the loop.
-		}while(CoordUtils.calcDistance(coord, fromCoord) > distance);
+		}while(CoordUtils.calcEuclideanDistance(coord, fromCoord) > distance);
 		
 		return coord;
 		

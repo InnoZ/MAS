@@ -9,7 +9,6 @@ import innoz.scenarioGeneration.geoinformation.District;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.network.WayEntry;
 import innoz.scenarioGeneration.utils.ActivityTypes;
-import innoz.utils.matsim.QuadTree;
 import innoz.utils.osm.OsmKey2ActivityType;
 
 import java.sql.Connection;
@@ -31,6 +30,7 @@ import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.gbl.Gbl;
+import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;

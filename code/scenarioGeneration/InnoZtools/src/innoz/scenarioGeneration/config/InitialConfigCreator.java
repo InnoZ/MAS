@@ -8,6 +8,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams;
+import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
 
 public class InitialConfigCreator {
 	
@@ -26,7 +27,6 @@ public class InitialConfigCreator {
 		// If households are used, adapt the parameters that define the usage in MATSim
 		if(configuration.isUsingHouseholds()){
 			
-			config.scenario().setUseHouseholds(true);
 			config.households().setInputFile(configuration.getOutputDirectory() + "households.xml.gz");
 			
 		}
@@ -44,8 +44,7 @@ public class InitialConfigCreator {
 		// If non-generic vehicles are used, adapt the parameters that define the usage in MATSim
 		if(configuration.isUsingVehicles()){
 			
-			config.scenario().setUseVehicles(true);
-			config.qsim().setUseDefaultVehicles(false);
+			config.qsim().setVehiclesSource(VehiclesSource.fromVehiclesData);
 			config.vehicles().setVehiclesFile(configuration.getOutputDirectory() + "vehicles.xml.gz");
 			
 		}

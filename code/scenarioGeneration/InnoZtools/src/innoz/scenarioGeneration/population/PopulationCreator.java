@@ -16,7 +16,6 @@ import innoz.scenarioGeneration.population.surveys.SurveyPlanActivity;
 import innoz.scenarioGeneration.population.surveys.SurveyPlanElement;
 import innoz.scenarioGeneration.population.surveys.SurveyPlanTrip;
 import innoz.scenarioGeneration.population.surveys.SurveyVehicle;
-import innoz.scenarioGeneration.population.utils.PersonUtils;
 import innoz.scenarioGeneration.utils.ActivityTypes;
 import innoz.scenarioGeneration.vehicles.VehicleTypes;
 import innoz.utils.GeometryUtils;
@@ -44,6 +43,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.gbl.MatsimRandom;
+import org.matsim.core.population.PersonUtils;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordUtils;
@@ -433,7 +433,7 @@ public class PopulationCreator {
 		// Get the MATSim population and initialize person attributes
 		Population population = scenario.getPopulation();
 		ObjectAttributes personAttributes = new ObjectAttributes();
-		scenario.addScenarioElement(PersonUtils.PERSON_ATTRIBUTES, personAttributes);
+		scenario.addScenarioElement(innoz.scenarioGeneration.population.utils.PersonUtils.PERSON_ATTRIBUTES, personAttributes);
 		
 		// Sort the households by their weight (according to the survey data)
 		List<SurveyHousehold> households = new ArrayList<>();
@@ -605,7 +605,7 @@ public class PopulationCreator {
 		// Get the MATSim population and initialize person attributes
 		Population population = scenario.getPopulation();
 		ObjectAttributes personAttributes = new ObjectAttributes();
-		scenario.addScenarioElement(PersonUtils.PERSON_ATTRIBUTES, personAttributes);
+		scenario.addScenarioElement(innoz.scenarioGeneration.population.utils.PersonUtils.PERSON_ATTRIBUTES, personAttributes);
 		
 		// TODO this is not final and most likely won't work like that /dhosse, 05/16
 		for(District d : this.geoinformation.getAdminUnits().values()){
@@ -617,8 +617,8 @@ public class PopulationCreator {
 				Map<String,SurveyPerson> templatePersons = container.getPersons();
 				SurveyPerson personTemplate = null;
 				
-				personTemplate = PersonUtils.getTemplate(templatePersons,
-						personalRandom * PersonUtils.getTotalWeight(templatePersons.values()));
+				personTemplate = innoz.scenarioGeneration.population.utils.PersonUtils.getTemplate(templatePersons,
+						personalRandom * innoz.scenarioGeneration.population.utils.PersonUtils.getTotalWeight(templatePersons.values()));
 				
 				//TODO: number of inhabitants for admin units
 				for(int i = 0; i < 10000 * configuration.getScaleFactor(); i++){
@@ -662,19 +662,24 @@ public class PopulationCreator {
 		Plan plan = population.getFactory().createPlan();
 		
 		// Set the person's attributes (sex, age, employed, license, car availability) according to what was reported in the survey
-		innoz.utils.matsim.PersonUtils.setSex(person, personTemplate.getSex());
-		innoz.utils.matsim.PersonUtils.setAge(person, personTemplate.getAge());
-		innoz.utils.matsim.PersonUtils.setEmployed(person, personTemplate.isEmployed());
+		PersonUtils.setSex(person, personTemplate.getSex());
+		PersonUtils.setAge(person, personTemplate.getAge());
+		PersonUtils.setEmployed(person, personTemplate.isEmployed());
 		String carAvail = personTemplate.hasCarAvailable() ? "always" : "never";
-		innoz.utils.matsim.PersonUtils.setCarAvail(person, carAvail);
+		PersonUtils.setCarAvail(person, carAvail);
 		String hasLicense = personTemplate.hasLicense() ? "yes" : "no";
-		innoz.utils.matsim.PersonUtils.setLicence(person, hasLicense);
+		PersonUtils.setLicence(person, hasLicense);
 		
-		personAttributes.putAttribute(person.getId().toString(), PersonUtils.ATT_SEX, personTemplate.getSex());
-		personAttributes.putAttribute(person.getId().toString(), PersonUtils.ATT_AGE, personTemplate.getAge());
-		personAttributes.putAttribute(person.getId().toString(), PersonUtils.ATT_EMPLOYED, personTemplate.isEmployed());
-		personAttributes.putAttribute(person.getId().toString(), PersonUtils.ATT_CAR_AVAIL, carAvail);
-		personAttributes.putAttribute(person.getId().toString(), PersonUtils.ATT_LICENSE, hasLicense);
+		personAttributes.putAttribute(person.getId().toString(),
+				innoz.scenarioGeneration.population.utils.PersonUtils.ATT_SEX, personTemplate.getSex());
+		personAttributes.putAttribute(person.getId().toString(),
+				innoz.scenarioGeneration.population.utils.PersonUtils.ATT_AGE, personTemplate.getAge());
+		personAttributes.putAttribute(person.getId().toString(),
+				innoz.scenarioGeneration.population.utils.PersonUtils.ATT_EMPLOYED, personTemplate.isEmployed());
+		personAttributes.putAttribute(person.getId().toString(),
+				innoz.scenarioGeneration.population.utils.PersonUtils.ATT_CAR_AVAIL, carAvail);
+		personAttributes.putAttribute(person.getId().toString(),
+				innoz.scenarioGeneration.population.utils.PersonUtils.ATT_LICENSE, hasLicense);
 		
 		// Check if there are any plans for the person (if it is a mobile person)
 		if(personTemplate.getPlans().size() > 0){
@@ -788,7 +793,7 @@ public class PopulationCreator {
 		currentSearchSpace.add(currentHomeCell);
 		currentSearchSpace.add(currentMainActCell);
 		
-		c = CoordUtils.calcDistance(currentHomeLocation, currentMainActLocation);
+		c = CoordUtils.calcEuclideanDistance(currentHomeLocation, currentMainActLocation);
 		
 		// Also, add all cells of which the sum of the distances between their centroid and the centroids of
 		// the home and the main act cell is less than twice the distance between the home and the main activity location
@@ -796,10 +801,10 @@ public class PopulationCreator {
 
 			for(AdministrativeUnit au : d.getAdminUnits().values()){
 				
-				double a = CoordUtils.calcDistance(transformation.transform(
+				double a = CoordUtils.calcEuclideanDistance(transformation.transform(
 						MGC.point2Coord(currentHomeCell.getGeometry().getCentroid())),
 						transformation.transform(MGC.point2Coord(au.getGeometry().getCentroid())));
-				double b = CoordUtils.calcDistance(transformation.transform(
+				double b = CoordUtils.calcEuclideanDistance(transformation.transform(
 						MGC.point2Coord(currentMainActCell.getGeometry().getCentroid())),
 						transformation.transform(MGC.point2Coord(au.getGeometry().getCentroid())));
 				
@@ -1117,8 +1122,8 @@ public class PopulationCreator {
 			
 				cnt++;
 				coord = shootLocationForActType(au, type, distance, templatePlan, mode, personTemplate);
-				a = CoordUtils.calcDistance(currentHomeLocation, coord);
-				b = CoordUtils.calcDistance(currentMainActLocation, coord);
+				a = CoordUtils.calcEuclideanDistance(currentHomeLocation, coord);
+				b = CoordUtils.calcEuclideanDistance(currentMainActLocation, coord);
 			
 			} while(a + b > 2 * c && cnt < 20);
 				

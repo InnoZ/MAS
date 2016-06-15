@@ -1,5 +1,7 @@
 package innoz.scenarioGeneration.population.tracks;
 
+import innoz.utils.io.AbstractCsvReader;
+
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -11,7 +13,6 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.population.ActivityImpl;
 import org.matsim.core.population.PopulationWriter;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.geometry.CoordImpl;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
@@ -22,8 +23,6 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
-
-import innoz.utils.io.AbstractCsvReader;
 
 public class CreatePlansFromTracks {
 	
@@ -61,7 +60,7 @@ public class CreatePlansFromTracks {
 					plan = scenario.getPopulation().getFactory().createPlan();
 					
 					Activity act = scenario.getPopulation().getFactory().createActivityFromCoord(
-							ACT_TYPE, new CoordImpl(0,0));
+							ACT_TYPE, new Coord(0,0));
 					act.setEndTime(Time.parseTime(startedAt.split(" ")[1]));
 					plan.addActivity(act);
 					
