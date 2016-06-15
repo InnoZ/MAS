@@ -486,9 +486,9 @@ public class NetworkCreatorFromPsql {
 				
 			}
 			
-			if(entry.getHighwayTag().equalsIgnoreCase("trunk") ||
-					entry.getHighwayTag().equalsIgnoreCase("primary") ||
-					entry.getHighwayTag().equalsIgnoreCase("secondary")){
+			if(entry.getHighwayTag().equalsIgnoreCase(TRUNK) ||
+					entry.getHighwayTag().equalsIgnoreCase(PRIMARY) ||
+					entry.getHighwayTag().equalsIgnoreCase(SECONDARY)){
 	            
 				if((oneway || onewayReverse) && lanesPerDirection == 1.0){
 	            
