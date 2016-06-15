@@ -1160,8 +1160,6 @@ public class PopulationCreator {
 		
 	}
 	
-	private int cnt = 0;
-	
 	/**
 	 * 
 	 * Shoots a coordinate for the currently created activity.
@@ -1261,7 +1259,6 @@ public class PopulationCreator {
 				
 			} else {
 				
-				cnt++;
 				Geometry area = this.geoinformation.getQuadTreeForActType(actType).getClosest(lastActCoord.getX(), lastActCoord.getY());
 				
 				return transformation.transform(GeometryUtils.shoot(area,random));
