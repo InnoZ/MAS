@@ -1,7 +1,5 @@
 package innoz.scenarioGeneration.population.algorithm;
 
-import java.util.Map.Entry;
-
 import innoz.config.Configuration;
 import innoz.io.database.CommuterDatabaseParser;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
@@ -9,7 +7,8 @@ import innoz.scenarioGeneration.geoinformation.District;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.population.commuters.CommuterDataElement;
 import innoz.scenarioGeneration.utils.ActivityTypes;
-import innoz.utils.GeometryUtils;
+
+import java.util.Map.Entry;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -22,8 +21,6 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 
@@ -87,69 +84,13 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 			
 		}
 		
-		District home = this.geoinformation.getAdminUnits().get(homeId);
+		District homeDistrict = this.geoinformation.getAdminUnits().get(homeId);
+		AdministrativeUnit home = this.chooseAdminUnitInsideDistrict(homeDistrict, ActivityTypes.HOME);
+		Coord homeLocation = this.chooseActivityCoordInAdminUnit(home, ActivityTypes.HOME);
 		
-		Coord homeLocation = null;
-		
-		double r = random.nextDouble() * this.geoinformation.getTotalWeightForLanduseKey(home.getId(), ActivityTypes.HOME);
-		double r2 = 0.;
-		
-		for(AdministrativeUnit admin : home.getAdminUnits().values()){
-			
-			r2 += admin.getWeightForKey(ActivityTypes.HOME);
-			
-			if(r <= r2 && admin.getLanduseGeometries().get(ActivityTypes.HOME) != null){
-				
-				double p = random.nextDouble() * admin.getWeightForKey(ActivityTypes.HOME);
-				double accumulatedWeight = 0.;
-				
-				for(Geometry g : admin.getLanduseGeometries().get(ActivityTypes.HOME)){
-					
-					accumulatedWeight += g.getArea();
-					
-					if(p <= accumulatedWeight){
-						// Shoot the home location
-						homeLocation = transformation.transform(GeometryUtils.shoot(g, random));
-						break;
-					}
-					
-				}
-				
-				break;
-				
-			}
-			
-		}
-		
-		District work = this.geoinformation.getAdminUnits().get(workId);
-		Coord workLocation = null;
-		
-		for(AdministrativeUnit admin : work.getAdminUnits().values()){
-			
-			r2 += admin.getWeightForKey(ActivityTypes.WORK);
-			
-			if(r <= r2 && admin.getLanduseGeometries().get(ActivityTypes.WORK) != null){
-				
-				double p = random.nextDouble() * admin.getWeightForKey(ActivityTypes.WORK);
-				double accumulatedWeight = 0.;
-				
-				for(Geometry g : admin.getLanduseGeometries().get(ActivityTypes.WORK)){
-					
-					accumulatedWeight += g.getArea();
-					
-					if(p <= accumulatedWeight){
-						// Shoot the home location
-						workLocation = transformation.transform(GeometryUtils.shoot(g, random));
-						break;
-					}
-					
-				}
-				
-				break;
-				
-			}
-			
-		}
+		District workDistrict = this.geoinformation.getAdminUnits().get(workId);
+		AdministrativeUnit work = chooseAdminUnitInsideDistrict(workDistrict, ActivityTypes.WORK);
+		Coord workLocation = chooseActivityCoordInAdminUnit(work, ActivityTypes.WORK);
 		
 		Person person = population.getFactory().createPerson(Id.createPersonId(homeId + "-" + workId + "_" + n));
 		Plan plan = population.getFactory().createPlan();

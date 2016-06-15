@@ -131,30 +131,10 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
 			for(int i = 0; i < d.getnHouseholds() * configuration.getScaleFactor(); i++){
 				
-				this.currentHomeCell = null;
-				AdministrativeUnit au = null;
-				double r = this.random.nextDouble() * this.geoinformation
-						.getTotalWeightForLanduseKey(d.getId(), ActivityTypes.HOME);
+				this.currentHomeCell = chooseAdminUnitInsideDistrict(d, ActivityTypes.HOME);
 				
-				double r2 = 0.;
-	
-				int blandId = 0;
-				int rtyp = 0;
-				
-				for(AdministrativeUnit admin : d.getAdminUnits().values()){
-					
-					r2 += admin.getWeightForKey(ActivityTypes.HOME);
-					
-					if(r <= r2 && admin.getLanduseGeometries().get(ActivityTypes.HOME) != null){
-						
-						au = admin;
-						blandId = au.getBland();
-						rtyp = au.getRegionType();
-						break;
-						
-					}
-					
-				}
+				int blandId = this.currentHomeCell.getBland();
+				int rtyp = this.currentHomeCell.getRegionType();
 				
 				// Choose a template household (weighted, same method as above)
 				SurveyHousehold template = null;
@@ -184,7 +164,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				int nPersons = template.getNPersons();
 	
 				// Create a MATSim household
-				Household household = new HouseholdImpl(Id.create(au.getId() + "_" + i,
+				Household household = new HouseholdImpl(Id.create(this.currentHomeCell.getId() + "_" + i,
 						Household.class));
 				household.setIncome(new IncomeImpl(template.getIncome(), IncomePeriod.month));
 				((HouseholdImpl)household).setMemberIds(new ArrayList<Id<Person>>());
@@ -193,30 +173,15 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				Coord homeLocation = null;
 	
 				// Go through all residential areas of the home cell and randomly choose one of them
-				if(au.getLanduseGeometries().containsKey(ActivityTypes.HOME)){
+				if(this.currentHomeCell.getLanduseGeometries().containsKey(ActivityTypes.HOME)){
 					
-					double p = this.random.nextDouble() * au.getWeightForKey(ActivityTypes.HOME);
-					accumulatedWeight = 0.;
-					
-					for(Geometry g : au.getLanduseGeometries().get(ActivityTypes.HOME)){
-						
-						accumulatedWeight += g.getArea();
-						
-						if(p <= accumulatedWeight){
-							// Shoot the home location
-							homeLocation = this.transformation.transform(GeometryUtils.shoot(g,
-									this.random));
-							this.currentHomeCell = au;
-							break;
-						}
-						
-					}
+					homeLocation = chooseActivityCoordInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
 					
 				} else {
 				
 					// If no residential areas exist within the home cell, shoot a random coordinate
-					homeLocation = transformation.transform(GeometryUtils.shoot(au.getGeometry(), random));
-					currentHomeCell = au;
+					homeLocation = transformation.transform(GeometryUtils.shoot(
+							this.currentHomeCell.getGeometry(), random));
 					
 				}
 	
@@ -913,8 +878,6 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				}
 				
 				
-//				int index = random.nextInt(closest.size());
-//				Geometry area = closest.get(index);
 				return transformation.transform(GeometryUtils.shoot(area,random));
 				
 			} else {
@@ -945,8 +908,6 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 					
 				}
 				
-//				int index = random.nextInt(closest.size());
-//				Geometry area = closest.get(index);
 				return transformation.transform(GeometryUtils.shoot(area,random));
 				
 			} else {
