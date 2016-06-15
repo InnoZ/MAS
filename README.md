@@ -52,7 +52,7 @@ You can access the playground via SecureShell (ssh). If your computer has a Linu
 
 ### MATSim
 
-To set up MATSim in your Eclipse workspace, you need to visit www.matsim.org and download the latest stable release. After the download has finished, unpack the zip file to a location in your workspace. Eventually, you should see a folder named e.g. matism-0.7.0.
+To set up MATSim in your Eclipse workspace, you need to visit www.matsim.org and download the latest stable release. After the download has finished, unpack the zip file to a location in your workspace. Eventually, you should see a folder named e.g. matism-0.8.0.
 
 In Eclipse, start the new Java project wizard. Uncheck the default location checkbox and choose the matsim folder you just unpacked. Then, press "Finish".
 
