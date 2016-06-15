@@ -318,7 +318,7 @@ public class NetworkCreatorFromPsql {
 		for(WayEntry entry : wayEntries){
 
 			// If access is restricted, we skip the way
-			if("no".equals(entry.accessTag)) continue;
+			if("no".equals(entry.getAccessTag())) continue;
 			
 			Coordinate[] coordinates = entry.geometry.getCoordinates();
 			
@@ -398,7 +398,7 @@ public class NetworkCreatorFromPsql {
 	private void createLink(WayEntry entry, double length, Coordinate from, Coordinate to, boolean inSurveyArea,
 			String adminUnitId){
 		
-		HighwayDefaults defaults = this.highwayDefaults.get(entry.highwayTag);
+		HighwayDefaults defaults = this.highwayDefaults.get(entry.getHighwayTag());
 		
 		// If there are defaults for the highway type of the current way, we proceed
 		// Else the way is simply skipped
@@ -438,7 +438,7 @@ public class NetworkCreatorFromPsql {
 			boolean onewayReverse = false;
 
 			// Handle the freespeed tag
-			String freespeedTag = entry.maxspeedTag;
+			String freespeedTag = entry.getMaxspeedTag();
 			
 			if(freespeedTag != null){
 				
@@ -459,24 +459,25 @@ public class NetworkCreatorFromPsql {
 				
 			}
 			
-			if("roundabout".equals(entry.junctionTag)){
+			if("roundabout".equals(entry.getJunctionTag())){
 				
 				oneway = true;
 				
 			}
 			
 			// Handle the oneway tag
-			if(entry.onewayTag != null){
+			if(entry.getOnewayTag() != null){
 
-				if(entry.onewayTag.equals("yes") || entry.onewayTag.equals("true") || entry.onewayTag.equals("1")){
+				if(entry.getOnewayTag().equals("yes") || entry.getOnewayTag().equals("true") ||
+						entry.getOnewayTag().equals("1")){
 					
 					oneway = true;
 					
-				} else if(entry.onewayTag.equals("no")){
+				} else if(entry.getOnewayTag().equals("no")){
 					
 					oneway = false;
 					
-				} else if(entry.onewayTag.equals("-1")){
+				} else if(entry.getOnewayTag().equals("-1")){
 					
 					onewayReverse = true;
 					oneway = false;
@@ -485,8 +486,9 @@ public class NetworkCreatorFromPsql {
 				
 			}
 			
-			if(entry.highwayTag.equalsIgnoreCase("trunk") || entry.highwayTag.equalsIgnoreCase("primary") ||
-					entry.highwayTag.equalsIgnoreCase("secondary")){
+			if(entry.getHighwayTag().equalsIgnoreCase("trunk") ||
+					entry.getHighwayTag().equalsIgnoreCase("primary") ||
+					entry.getHighwayTag().equalsIgnoreCase("secondary")){
 	            
 				if((oneway || onewayReverse) && lanesPerDirection == 1.0){
 	            
@@ -497,7 +499,7 @@ public class NetworkCreatorFromPsql {
 			}
 			
 			// Handle the lanes tag.
-			String lanesTag = entry.lanesTag;
+			String lanesTag = entry.getLanesTag();
 			if(lanesTag != null){
 				
 				try {
@@ -556,7 +558,7 @@ public class NetworkCreatorFromPsql {
 				toNode = coords2Nodes.get(toCoord);
 			}
 			
-			String origId = entry.osmId;
+			String origId = entry.getOsmId();
 			
 			// Create a link in one direction
 			if(!onewayReverse){
@@ -570,7 +572,7 @@ public class NetworkCreatorFromPsql {
 				if(link instanceof LinkImpl){
 					
 					((LinkImpl)link).setOrigId(origId);
-					((LinkImpl)link).setType(entry.highwayTag);
+					((LinkImpl)link).setType(entry.getHighwayTag());
 					
 				}
 				
@@ -591,7 +593,7 @@ public class NetworkCreatorFromPsql {
 				if(link instanceof LinkImpl){
 					
 					((LinkImpl)link).setOrigId(origId);
-					((LinkImpl)link).setType(entry.highwayTag);
+					((LinkImpl)link).setType(entry.getHighwayTag());
 					
 				}
 				
