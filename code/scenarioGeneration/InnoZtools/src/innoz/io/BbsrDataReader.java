@@ -108,19 +108,23 @@ public class BbsrDataReader {
 				if(subKey.startsWith("0")) subKey = subKey.substring(1);
 				AdministrativeUnit unit = d.getAdminUnits().get(key);
 				
-				int regionType = this.key2Type.get(subKey);
-				
-				unit.setRegionType(regionType);
-				
-				geoinformation.getStatesSet().add(unit.getBland());
-				
-				if(!geoinformation.getStateId2RegionTypes().containsKey(unit.getBland())){
-				
-					geoinformation.getStateId2RegionTypes().put(unit.getBland(), new HashSet<Integer>());
+				if(this.key2Type.containsKey(subKey)){
+
+					int regionType = this.key2Type.get(subKey);
+					
+					unit.setRegionType(regionType);
+					
+					geoinformation.getStatesSet().add(unit.getBland());
+					
+					if(!geoinformation.getStateId2RegionTypes().containsKey(unit.getBland())){
+					
+						geoinformation.getStateId2RegionTypes().put(unit.getBland(), new HashSet<Integer>());
+						
+					}
+					
+					geoinformation.getStateId2RegionTypes().get(unit.getBland()).add(this.key2Type.get(subKey));
 					
 				}
-				
-				geoinformation.getStateId2RegionTypes().get(unit.getBland()).add(this.key2Type.get(subKey));
 				
 			}
 			
