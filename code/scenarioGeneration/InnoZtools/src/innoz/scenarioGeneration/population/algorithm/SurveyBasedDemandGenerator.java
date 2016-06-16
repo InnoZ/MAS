@@ -54,7 +54,7 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
-	SurveyBasedDemandGenerator(final Geoinformation geoinformation,
+	public SurveyBasedDemandGenerator(final Geoinformation geoinformation,
 			final CoordinateTransformation transformation) {
 
 		super(geoinformation, transformation);
