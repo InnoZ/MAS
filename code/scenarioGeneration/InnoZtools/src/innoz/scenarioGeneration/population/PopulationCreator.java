@@ -88,7 +88,7 @@ public class PopulationCreator {
 			case commuter:	className = CommuterDemandGenerator.class.getName();
 							break;
 							
-			case complete:	className = SurveyBasedDemandGenerator.class.getName();
+			case survey:	className = SurveyBasedDemandGenerator.class.getName();
 							break;
 							
 			default: 		break;

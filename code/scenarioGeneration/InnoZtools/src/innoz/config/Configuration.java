@@ -51,7 +51,7 @@ public class Configuration {
 	String vicinityIds;
 	String crs = "EPSG:32632";
 	String outputDirectory;
-	PopulationType popType = PopulationType.complete;
+	PopulationType popType = PopulationType.survey;
 	
 	boolean useHouseholds = true;
 	boolean useVehicles = false;
@@ -81,7 +81,7 @@ public class Configuration {
 	String databaseUser = "postgres";
 	String userPassword = "postgres";
 	
-	public enum PopulationType{dummy,commuter,complete,none};
+	public enum PopulationType{dummy,commuter,survey,none};
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
 	/**
@@ -133,7 +133,7 @@ public class Configuration {
 		this.vicinityIds = null;
 		this.crs = "EPSG:32632";
 		this.outputDirectory = null;
-		this.popType = PopulationType.complete;
+		this.popType = PopulationType.survey;
 		this.useHouseholds = true;
 		this.useVehicles = false;
 		this.onlyWorkingDays = true;
