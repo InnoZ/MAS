@@ -254,7 +254,7 @@ public class DatabaseReader {
 		}
 		
 		// Execute the query and store the returned valued inside a set.
-		String q = "select " + DatabaseConstants.BLAND + "," + DatabaseConstants.MUN_KEY + ", cca_2,"
+		String q = "select " + DatabaseConstants.BLAND + "," + DatabaseConstants.MUN_KEY + ", cca_2, ccn_3, "
 				+ DatabaseConstants.functions.st_astext.name() + "(" + DatabaseConstants.ATT_GEOM +
 				")" + " from " + DatabaseConstants.schemata.gadm.name() + "." +
 				DatabaseConstants.tables.districts.name() + " where" + builder.toString();
@@ -267,7 +267,7 @@ public class DatabaseReader {
 			String key = set.getString(DatabaseConstants.MUN_KEY);
 			String g = set.getString(DatabaseConstants.functions.st_astext.name());
 			int bland = set.getInt(DatabaseConstants.BLAND);
-			String district = set.getString("cca_2");
+			String district = set.getString("cca_2") != null ? set.getString("cca_2") : set.getString("ccn_3").substring(0, 3);
 			
 			// Check if the wkb string returned is neither null nor empty, otherwise this would
 			// crash
@@ -281,9 +281,10 @@ public class DatabaseReader {
 					Geometry geometry = wktReader.read(g);
 					au.setGeometry(geometry);
 					au.setBland((int)bland);
-					au.setNetworkDetail(configuration.getAdminUnitEntries().get(district).getNetworkDetail());
 
 					if(district != null){
+						
+						au.setNetworkDetail(configuration.getAdminUnitEntries().get(district).getNetworkDetail());
 
 						if(!this.geoinformation.getAdminUnits().containsKey(district)){
 							this.geoinformation.getAdminUnits().put(district,
