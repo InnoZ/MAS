@@ -339,8 +339,6 @@ public class NetworkCreatorFromPsql {
 							MGC.coordinate2Coord(lastTo)), this.transformation.transform(
 									MGC.coordinate2Coord(next)));
 
-//					for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
-
 					boolean inSurveyArea = true;
 					
 					com.vividsolutions.jts.geom.Point lastPoint = gf.createPoint(lastTo);
@@ -355,7 +353,7 @@ public class NetworkCreatorFromPsql {
 					}
 					
 					String adminUnitId = null;
-//					
+					
 					for(AdministrativeUnit au : this.geoinformation.getSubUnits().values()){
 						if(au.getGeometry().contains(lastPoint) || au.getGeometry().contains(nextPoint)){
 							adminUnitId = au.getId();
@@ -364,12 +362,7 @@ public class NetworkCreatorFromPsql {
 					}
 						
 					createLink(entry, length, lastTo, next, inSurveyArea, adminUnitId);
-							//TODO make a difference between inner and outer au's (w/ respect to highway hierarchy)
-							
-//							break;
-//						}
 						
-//					}
 					//Update last visited coordinate in the sequence
 					lastTo = next;
 					
@@ -404,14 +397,29 @@ public class NetworkCreatorFromPsql {
 		// Else the way is simply skipped
 		if(defaults != null){
 
-			if(adminUnitId == null) return;
-			Integer lod = this.geoinformation.getAdminUnitById(adminUnitId).getNetworkDetail();
-			
-			if(lod != null){
+			if(adminUnitId != null){
+
+				Integer lod = this.geoinformation.getAdminUnitById(adminUnitId).getNetworkDetail();
 				
-				if(defaults.hierarchyLevel > lod){
+				if(lod != null){
 					
-					return;
+					if(defaults.hierarchyLevel > lod){
+						
+						return;
+						
+					}
+					
+				} else {
+
+					if(!inSurveyArea){
+						
+						if(defaults.hierarchyLevel > this.levelOfDetail - 2){
+							
+							return;
+							
+						}
+						
+					}
 					
 				}
 				
