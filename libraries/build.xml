@@ -1,20 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="InnoZ-Toolbox" basedir=".">
 
+	<!-- The exteral libraries used during scenario generation  -->
 	<path id="libraries.path" >
 		<fileset dir="." >
 			<include name="jsch-0.1.53.jar"/>
 			<include name="postgresql-9.3-1104.jdbc4.jar" />
 		</fileset>
-		<fileset dir="../../../innoz-workspace/matsim-0.7.0/" >
-			<include name="*.jar"/>
+		<fileset dir="poi-3.14">
+			<include name="poi-3.14-20160307.jar" />
+			<include name="poi-ooxml-3.14-20160307.jar" />
+		</fileset>
+		<fileset dir="../../../innoz-workspace/matsim-0.8.0/" >
+			<include name="matsim-0.8.0.jar"/>
 		</fileset>
 	</path>
 
+	<!-- Cleans the build directory from class files of the last build  -->
 	<target name="clean" description="remove old files" >
 		<delete dir="build"/>
 	</target>
 
+	<!-- Procedure to build the class files in preparation of the jar  -->
 	<target name="compile" description="create class files" depends="test"  >
 		<mkdir dir="build/classes"/>
 		<javac srcdir="../code/scenarioGeneration/InnoZtools/src" destdir="build/classes/">
@@ -22,6 +29,7 @@
 		</javac>
 	</target>
 
+	<!-- Execute junit tests to ensure the functionality of the program -->
 	<target name="test" description="run junit tests">
 		<junit printsummary="on" haltonerror="yes" haltonfailure="yes" fork="true">
 			<batchtest>
@@ -30,6 +38,7 @@
 		</junit>
 	</target>
 
+	<!-- Bundle class files, resources and external libraries into a jar -->
 	<target name="jar" description="build jar file" depends="compile" >
 		<mkdir dir="build/classes/lib"/>
 		<copy todir="build/classes/lib">
@@ -53,6 +62,7 @@
 
 	</target>
 
+	<!-- Same as jar, only runnable (main class given)  -->
 	<target name="xjar" description="build runnable jar file" depends="compile" >
 		<mkdir dir="build/classes/lib"/>
 		<copy todir="build/classes/lib">
@@ -77,8 +87,10 @@
 		</jar>
 	</target>
 
+	<!-- convenience function for creating a plain jar -->
 	<target name="build" depends="jar,clean" description="build plain jar file" />
 
+	<!-- convenience function for creating runnable jar -->
 	<target name="buildGui" depends="xjar,clean" description="build runnable jar file with gui" />
 
 </project>
