@@ -1,6 +1,7 @@
 package innoz.scenarioGeneration.config;
 
 import innoz.config.Configuration;
+import innoz.config.Configuration.PopulationType;
 import innoz.scenarioGeneration.utils.ActivityTypes;
 
 import org.matsim.api.core.v01.TransportMode;
@@ -22,7 +23,12 @@ public class InitialConfigCreator {
 		
 		// Plans config group
 		config.plans().setInputFile(configuration.getOutputDirectory() + "plans.xml.gz");
-		config.plans().setInputPersonAttributeFile(configuration.getOutputDirectory() + "personAttributes.xml.gz");
+		
+		if(configuration.getPopulationType().equals(PopulationType.survey)){
+			
+			config.plans().setInputPersonAttributeFile(configuration.getOutputDirectory() + "personAttributes.xml.gz");
+		
+		}
 	
 		// If households are used, adapt the parameters that define the usage in MATSim
 		if(configuration.isUsingHouseholds()){
