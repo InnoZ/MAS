@@ -39,6 +39,7 @@ public class DatabaseUpdater {
 	
 	private Scenario scenario;
 	private boolean writePersons = false;
+	private boolean writeVehicles = false;
 	
 	/**
 	 * 
@@ -128,6 +129,12 @@ public class DatabaseUpdater {
 				}
 				
 				processPlans(connection, configuration.getDatabaseSchemaName(), configuration.getTripsTableName());
+				
+				if(this.writeVehicles){
+					
+					processVehicles(connection, scenario.getNetwork(), "");
+					
+				}
 				
 			}
 			

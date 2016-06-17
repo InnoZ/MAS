@@ -112,6 +112,21 @@ public class Runner {
 								
 								ConfigurationUtils.set(c, "intoMobilityDatahub", true);
 								
+								if(!serverConnection){
+									
+									try {
+										
+										serverConnection = SshConnector.connectShell(c, reader);
+										reader.setPrompt("> ");
+										
+									} catch (JSchException e) {
+
+										e.printStackTrace();
+										
+									}
+									
+								}
+								
 							} else if(part.equals("-write-persons") || part.equals("-p")){
 								
 								writePersons = true;
@@ -225,7 +240,7 @@ public class Runner {
 		writer.println("> connect (c)                        : Initiates a process to connect your computer with the MobilityDatahub server.");
 		writer.println("> disconnect (d)                     : Closes an existing ssh connection to the MobilityDatahub.");
 		writer.println("> quit (q)                           : Exits the program");
-		writer.println("> write-tables [options] (wt) <path>  : Writes the specified plans file into a database table.");
+		writer.println("> write-table (wt) [options] <path>  : Writes the specified plans file into a database table.");
 		writer.println("> options:");
 		writer.println("> -write-persons (-p)                : Writes a table containing the person data of the given plans file (default is 'false').");
 		writer.println("> -remote (-r)                       : Tells the database updater to write the table into a remote database (the MobilityDatabase).");
