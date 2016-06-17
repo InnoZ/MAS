@@ -53,7 +53,7 @@
 		<manifestclasspath property="manifest.classpath" jarfile="InnoZscenarioGeneration.jar" maxParentLevels="5">
                     <classpath refid="libraries.path"/>
                 </manifestclasspath>
-		<jar destfile="InnoZscenarioGeneration.jar" basedir="build/classes">
+		<jar destfile="InnoZscenarioGeneration.jar" basedir="build/classes" compress="true">
 			<fileset dir="../code/scenarioGeneration/InnoZtools/src" includes="**/*.java"/>
 			<manifest>
 				<attribute name="Class-Path" value="${manifest.classpath}" />
@@ -79,7 +79,7 @@
         	    <classpath refid="libraries.path"/>
 	        </manifestclasspath>
 
-		<jar destfile="InnoZtoolbox.jar" basedir="build/classes" update="true">
+		<jar destfile="InnoZtoolbox.jar" basedir="build/classes" compress="true">
 			<manifest>
 				<attribute name="Main-Class" value="innoz/gui/MainFrame" />
 				<attribute name="Class-Path" value="${manifest.classpath}" />
