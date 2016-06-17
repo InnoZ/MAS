@@ -3,8 +3,10 @@ package innoz.run;
 import innoz.config.Configuration;
 import innoz.config.ConfigurationUtils;
 import innoz.config.SshConnector;
+import innoz.run.controller.DatabaseUpdaterControler;
 import innoz.run.controller.ScenarioGenerationController;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 import com.jcraft.jsch.JSchException;
@@ -26,7 +28,7 @@ import com.jcraft.jsch.JSchException;
  */
 public class Runner {
 
-	public static void main(String args[]){
+	public static void main(String args[]) throws IOException{
 		
 		try {
 			
@@ -77,6 +79,64 @@ public class Runner {
 						
 					} else if(command.equals("")){
 						
+						// Nothing to do
+						
+					} else if(command.startsWith("write-table") || command.startsWith("wt")){
+						
+						String inputPlansFile = null;
+						boolean writePersons = false;
+						
+						String[] parts = command.split(" ");
+						
+						int i = 0;
+						
+						for(String part : parts){
+						
+							if(part.startsWith("-")){
+								
+								if(part.equals("-schema-name") || part.equals("-s")){
+									
+									ConfigurationUtils.set(c, "databaseSchemaName", parts[i + 1]);
+									
+								} else if(part.equals("-table-name") || part.equals("-t")){
+									
+									ConfigurationUtils.set(c, "tripsTableName", parts[i + 1]);
+									
+								} else if(part.equals("-remote") || part.equals("-r")){
+									
+									ConfigurationUtils.set(c, "intoMobilityDatahub", true);
+									
+								} else if(part.equals("-write-persons") || part.equals("-p")){
+									
+									writePersons = true;
+									
+								}
+								
+							} else {
+								
+								if(!part.equals("write-table") || !part.equals("wt")){
+									
+									inputPlansFile = part;
+									
+								}
+								
+							}
+							
+							i++;
+							
+						}
+						
+						if(inputPlansFile != null){
+							
+							new DatabaseUpdaterControler(c, inputPlansFile, writePersons).run();
+							
+						} else {
+							
+							System.err.println("No plans file specified! Aborting...");
+							
+						}
+						
+						c.reset();
 						
 					} else {
 						
@@ -121,6 +181,12 @@ public class Runner {
 		System.out.println("> Usage:");
 		System.out.println("> build-scenario (bs) <path-to-file> : Build a new scenario based on the specifications in the given configuration file");
 		System.out.println("> quit (q)                           : Exits the program");
+		System.out.println("> write-tables [options] (wt) <path>  : Writes the specified plans file into a database table.");
+		System.out.println("> options:");
+		System.out.println("> -write-persons (-p)                : Writes a table containing the person data of the given plans file (default is 'false').");
+		System.out.println("> -remote (-r)                       : Tells the database updater to write the table into a remote database (the MobilityDatabase).");
+		System.out.println("> -schema-name (-s)                  : Defines the schema name of the table.");
+		System.out.println("> -table-name (-t)                   : Defines the name of the table.");
 		System.out.println("> ");
 		
 	}

@@ -114,6 +114,10 @@ public class ConfigurationReaderXml extends DefaultHandler {
 			
 			this.configuration.writeIntoDatahub = Boolean.parseBoolean(attributes.getValue("v"));
 			
+		} else if(qName.equalsIgnoreCase(Configuration.DB_TRIPS_TABLE_NAME)){
+			
+			this.configuration.tripsTableName = attributes.getValue("v");
+			
 		}
 		
 	}

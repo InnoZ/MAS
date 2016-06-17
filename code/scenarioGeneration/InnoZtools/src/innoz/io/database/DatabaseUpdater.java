@@ -24,6 +24,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.io.IOUtils;
+import org.matsim.core.utils.misc.Time;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 
 /**
@@ -37,6 +38,7 @@ public class DatabaseUpdater {
 	private static final Logger log = Logger.getLogger(DatabaseUpdater.class);
 	
 	private Scenario scenario;
+	private boolean writePersons = false;
 	
 	/**
 	 * 
@@ -47,11 +49,11 @@ public class DatabaseUpdater {
 	 * or into a local database
 	 * 
 	 */
-	public void update(Configuration configuration, Scenario scenario, String databaseSchemaName,
-			boolean intoMobilityDatahub){
+	public void update(Configuration configuration, Scenario scenario, boolean writePersons){
 		
 		this.scenario = scenario;
-		this.writeIntoDatabase(configuration, databaseSchemaName, intoMobilityDatahub);
+		this.writeIntoDatabase(configuration);
+		this.writePersons = writePersons;
 		
 	}
 
@@ -63,8 +65,7 @@ public class DatabaseUpdater {
 	 * @param databaseSchemaName The schema name (namespace) of the database tables to be written.
 	 * @param intoMobilityDatahub Defines if the MATSim data should be written directly into the MobilityDatahub or into a local database.
 	 */
-	public void writeIntoDatabase(Configuration configuration, String databaseSchemaName,
-			boolean intoMobilityDatahub){
+	public void writeIntoDatabase(Configuration configuration){
 		
 		// Initialize database, user, password and port for the MobilityDatahub
 		String dbName = DatabaseConstants.SIMULATIONS_DB;
@@ -74,7 +75,7 @@ public class DatabaseUpdater {
 		
 		try {
 			
-			if(!intoMobilityDatahub){
+			if(!configuration.isWritingIntoMobilityDatahub()){
 				
 				// Change these parameters if the tables are only written into a local database
 				dbName = DatabaseConstants.SIMULATIONS_DB_LOCAL;
@@ -122,9 +123,11 @@ public class DatabaseUpdater {
 				log.info("Connection to database established.");
 				
 				// ...could be established - proceed
-				//TODO Persons don't need to be updated for every scenario dump. on/off switch?
-				processPersons(connection, databaseSchemaName);
-				processPlans(connection, databaseSchemaName);
+				if(this.writePersons){
+					processPersons(connection, configuration.getDatabaseSchemaName());
+				}
+				
+				processPlans(connection, configuration.getDatabaseSchemaName(), configuration.getTripsTableName());
 				
 			}
 			
@@ -148,58 +151,67 @@ public class DatabaseUpdater {
 	 * @param databaseSchemaName The schema name (namespace) of the database tables to be written.
 	 * @throws SQLException
 	 */
-	private void processPersons(Connection connection, String databaseSchemaName) throws SQLException{
+	private void processPersons(Connection connection, String databaseSchemaName) {
 		
 		log.info("Creating persons table and inserting the values found in the given scenario...");
 		
-		Statement statement = connection.createStatement();
+		Statement statement;
+		try {
 
-		// Create the schema only if it doesn't exist already
-		statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS \"" + databaseSchemaName + "\";");
-		// Drop the old table
-		statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\".persons;");
-		// Create a new database table
-		statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\".persons(id character varying,"
-				+ "sex character varying,age integer,car_available boolean DEFAULT FALSE, has_driving_license"
-				+ " boolean DEFAULT FALSE, is_emplyed boolean DEFAULT FALSE);");
+			statement = connection.createStatement();
+			
+			// Create the schema only if it doesn't exist already
+			statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS \"" + databaseSchemaName + "\";");
+			// Drop the old table
+			statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\".persons;");
+			// Create a new database table
+			statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\".persons(id character varying,"
+					+ "sex character varying,age integer,car_available boolean DEFAULT FALSE, has_driving_license"
+					+ " boolean DEFAULT FALSE, is_emplyed boolean DEFAULT FALSE);");
 
-		// Write new columns for all persons in the MATSim population
-		for(Person person : scenario.getPopulation().getPersons().values()){
+			// Write new columns for all persons in the MATSim population
+			for(Person person : scenario.getPopulation().getPersons().values()){
+				
+				String id = person.getId().toString();
+				String sex = (String) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_SEX);
+				Integer age = (Integer) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_AGE);
+				String carAvail = (String ) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_CAR_AVAIL);
+				String hasLicense = (String) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_LICENSE);
+				Boolean isEmployed = (Boolean) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_EMPLOYED);
+				
+				if(sex == null) sex = "";
+				else if(sex.equals("0")) sex = "m";
+				else if(sex.equals("1")) sex = "f";
+				
+				if(age == null) age = -1;
+				
+				if(carAvail == null) carAvail = "false";
+				else if(carAvail.equals("always") || carAvail.equals("sometimes")) carAvail = "true";
+				else if(carAvail.equals("never")) carAvail = "false";
+				
+				if(hasLicense == null) hasLicense = "false";
+				else if(hasLicense.equals("yes")) hasLicense = "true";
+				else if(hasLicense.equals("no")) hasLicense = "false";
+				
+				if(isEmployed == null) isEmployed = false;
+				
+				statement.executeUpdate("INSERT INTO \"" + databaseSchemaName + "\".persons VALUES('"
+						+ id + "','" + sex + "'," + age + ",'" + Boolean.parseBoolean(carAvail) + "'," + Boolean.parseBoolean(hasLicense)
+						+ "," + isEmployed + ");");
+				
+			}
 			
-			String id = person.getId().toString();
-			String sex = (String) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_SEX);
-			Integer age = (Integer) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_AGE);
-			String carAvail = (String ) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_CAR_AVAIL);
-			String hasLicense = (String) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_LICENSE);
-			Boolean isEmployed = (Boolean) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_EMPLOYED);
+			// Close the statement after all persons have been processed
+			statement.close();
 			
-			if(sex == null) sex = "";
-			else if(sex.equals("0")) sex = "m";
-			else if(sex.equals("1")) sex = "f";
-			
-			if(age == null) age = -1;
-			
-			if(carAvail == null) carAvail = "false";
-			else if(carAvail.equals("always") || carAvail.equals("sometimes")) carAvail = "true";
-			else if(carAvail.equals("never")) carAvail = "false";
-			
-			if(hasLicense == null) hasLicense = "false";
-			else if(hasLicense.equals("yes")) hasLicense = "true";
-			else if(hasLicense.equals("no")) hasLicense = "false";
-			
-			if(isEmployed == null) isEmployed = false;
-			
-			statement.executeUpdate("INSERT INTO \"" + databaseSchemaName + "\".persons VALUES('"
-					+ id + "','" + sex + "'," + age + ",'" + Boolean.parseBoolean(carAvail) + "'," + Boolean.parseBoolean(hasLicense)
-					+ "," + isEmployed + ");");
+			log.info("Done.");
+		
+		} catch (SQLException e) {
+		
+			e.printStackTrace();
 			
 		}
-		
-		// Close the statement after all persons have been processed
-		statement.close();
-		
-		log.info("Done.");
-		
+
 	}
 	
 	/**
@@ -210,7 +222,7 @@ public class DatabaseUpdater {
 	 * @param databaseSchemaName
 	 * @throws SQLException
 	 */
-	private void processPlans(Connection connection, String databaseSchemaName)
+	private void processPlans(Connection connection, String databaseSchemaName, String tableName)
 			throws SQLException{
 		
 		log.info("Inserting trips from persons' selected plans into database...");
@@ -219,13 +231,16 @@ public class DatabaseUpdater {
 		// Create the schema only if it doesn't exist already
 		statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS \"" + databaseSchemaName + "\";");
 		// Drop the old table
-		statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\".trips;");
+		statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\"." + tableName + ";");
 		// Create a new database table
-		statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\".trips(person_id character varying,"
+		statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\"." + tableName + "(person_id character varying,"
 				+ "trip_index integer, travel_time numeric, distance numeric, departure_time numeric,"
 				+ " arrival_time numeric, from_act_type character varying, from_x numeric, from_y numeric,"
 				+ " to_act_type character varying, to_x numeric, to_y numeric, main_mode character varying,"
 				+ " access_time numeric, access_distance numeric, egress_time numeric, egress_distance numeric);");
+
+		long counter = 0;
+		int nextMsg = 1;
 		
 		for(Person person : scenario.getPopulation().getPersons().values()){
 			
@@ -246,7 +261,7 @@ public class DatabaseUpdater {
 //					String geometry = ""; TODO
 					String personId = person.getId().toString();
 					String tripIndex = Integer.toString(tripCounter);
-					String travelTime = Double.toString(leg.getTravelTime());
+					String travelTime = leg.getTravelTime() == Time.UNDEFINED_TIME ? "'NaN'" : Double.toString(leg.getTravelTime());
 					String distance = leg.getRoute() != null ? Double.toString(leg.getRoute().getDistance()): "0";
 					String startTime = Double.toString(fromAct.getEndTime());
 					String endTime = Double.toString(fromAct.getEndTime() + leg.getTravelTime());
@@ -278,7 +293,7 @@ public class DatabaseUpdater {
 									+ mainModeLeg.getTravelTime());
 							distance = Double.toString(mainModeLeg.getRoute().getDistance());
 							
-							travelTime = Double.toString(mainModeLeg.getTravelTime());
+							travelTime = travelTime.equals("undefined") ? "'NaN'" : Double.toString(mainModeLeg.getTravelTime());
 							
 							Leg egressLeg = (Leg)plan.getPlanElements().get(i + 4);
 							egressTime = Double.toString(egressLeg.getTravelTime());
@@ -321,15 +336,26 @@ public class DatabaseUpdater {
 					if(egressDistance.contains("NaN")){
 						egressDistance = "'NaN'";
 					}
-					
-					statement.executeUpdate("INSERT INTO \"" + databaseSchemaName + "\".trips VALUES('"
+					if(distance.equals("NaN")){
+						distance = "'NaN'";
+					}
+
+					statement.executeUpdate("INSERT INTO \"" + databaseSchemaName + "\"." + tableName + " VALUES('"
 							+ personId + "'," + tripIndex + "," + travelTime + "," + distance + "," +
 							startTime + "," + endTime + ",'" + fromActType + "'," + fromX + "," + fromY +
 							",'" + toActType + "'," + toX + "," + toY + ",'" + mainMode + "'," + accessTime +
 							"," + accessDistance + "," + egressTime + "," + egressDistance + ");");
 					
+					tripCounter++;
+					
 				}
 				
+			}
+			
+			counter++;
+			if(counter % nextMsg == 0){
+				log.info("person # " + counter);
+				nextMsg *= 2;
 			}
 			
 		}

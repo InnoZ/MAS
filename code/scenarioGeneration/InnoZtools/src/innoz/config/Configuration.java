@@ -38,6 +38,7 @@ public class Configuration {
 	
 	public static final String LOCAL_PORT = "localPort";
 	public static final String DB_SCHEMA_NAME = "databaseSchemaName";
+	public static final String DB_TRIPS_TABLE_NAME = "tripsTableName";
 	public static final String WRITE_DB_OUTPUT = "writeTables";
 	public static final String WRITE_INTO_DATAHUB = "intoMobilityDatahub";
 	
@@ -69,6 +70,7 @@ public class Configuration {
 	boolean writeDatabaseTables = false;
 	boolean writeIntoDatahub = false;
 	String dbNameSpace;
+	String tripsTableName;
 	
 	boolean overwriteExistingFiles = false;
 	
@@ -173,6 +175,15 @@ public class Configuration {
 				break;
 				
 			case USE_HOUSEHOLDS: this.useHouseholds = (Boolean) value;
+				break;
+				
+			case DB_SCHEMA_NAME: this.dbNameSpace = (String) value;
+				break;
+				
+			case DB_TRIPS_TABLE_NAME: this.tripsTableName = (String) value;
+				break;
+				
+			case WRITE_INTO_DATAHUB: this.writeIntoDatahub = (Boolean) value;
 				break;
 			
 			default: return ;
@@ -421,6 +432,18 @@ public class Configuration {
 	public String getDatabaseSchemaName(){
 		
 		return this.dbNameSpace;
+		
+	}
+	
+	/**
+	 * 
+	 * Getter for the name of the psql trips table.
+	 * 
+	 * @return The name of the trips psql table.
+	 */
+	public String getTripsTableName(){
+		
+		return this.tripsTableName;
 		
 	}
 	

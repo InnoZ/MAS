@@ -115,9 +115,7 @@ public class ScenarioGenerationController implements DefaultController {
 			
 			if(configuration.isWritingDatabaseOutput()){
 				
-				new DatabaseUpdater().update(configuration, scenario,
-						configuration.getDatabaseSchemaName(),
-						configuration.isWritingIntoMobilityDatahub());
+				new DatabaseUpdater().update(configuration, scenario, true);
 				
 			}
 		
