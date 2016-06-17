@@ -105,14 +105,10 @@ public class SshConnector {
 		log.info("Trying to establish ssh tunnel to mobility database server...");
 		
 		// Set user names and passwords for ssh and database
-		System.out.print("> Enter ssh user name: ");
-		String sshuser = reader.readLine();
-		System.out.print("> Enter ssh password: ");
-		String sshpassword = new String(reader.readLine(new Character('*')));
-		System.out.print("> Enter database user name: ");
-		configuration.setDatabaseUser(reader.readLine());
-		System.out.print("> Enter database password: ");
-		configuration.setDatabasePassword(new String(reader.readLine(new Character('*'))));
+		String sshuser = reader.readLine("> Enter ssh user name: ");
+		String sshpassword = new String(reader.readLine("> Enter ssh password: ", new Character('*')));
+		configuration.setDatabaseUser(reader.readLine("> Enter database user name: "));
+		configuration.setDatabasePassword(new String(reader.readLine("> Enter database password: ", new Character('*'))));
 		
 		// Set hosts and ports for the connection
 		String sshhost = "playground";
