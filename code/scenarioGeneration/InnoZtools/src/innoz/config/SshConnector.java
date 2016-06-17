@@ -12,6 +12,8 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import jline.console.ConsoleReader;
+
 import org.apache.log4j.Logger;
 
 import com.jcraft.jsch.JSch;
@@ -93,23 +95,24 @@ public class SshConnector {
 	
 	public static void disconnect(){
 		
+		log.info("Closing existing ssh connection...");
 		session.disconnect();
 		
 	}
 	
-	public static boolean connectShell(Configuration configuration) throws JSchException{
+	public static boolean connectShell(Configuration configuration, ConsoleReader reader) throws JSchException, IOException{
 		
 		log.info("Trying to establish ssh tunnel to mobility database server...");
 		
 		// Set user names and passwords for ssh and database
-		System.out.print("Enter ssh user name: ");
-		String sshuser = System.console().readLine();
-		System.out.print("Enter ssh password: ");
-		String sshpassword = new String(System.console().readPassword());
-		System.out.print("Enter database user name: ");
-		configuration.setDatabaseUser(System.console().readLine());
-		System.out.print("Enter database password: ");
-		configuration.setDatabasePassword(new String(System.console().readPassword()));
+		System.out.print("> Enter ssh user name: ");
+		String sshuser = reader.readLine();
+		System.out.print("> Enter ssh password: ");
+		String sshpassword = new String(reader.readLine(new Character('*')));
+		System.out.print("> Enter database user name: ");
+		configuration.setDatabaseUser(reader.readLine());
+		System.out.print("> Enter database password: ");
+		configuration.setDatabasePassword(new String(reader.readLine(new Character('*'))));
 		
 		// Set hosts and ports for the connection
 		String sshhost = "playground";

@@ -7,7 +7,11 @@ import innoz.run.controller.DatabaseUpdaterControler;
 import innoz.run.controller.ScenarioGenerationController;
 
 import java.io.IOException;
-import java.util.Scanner;
+import java.io.PrintWriter;
+
+import jline.console.ConsoleReader;
+import jline.console.completer.CandidateListCompletionHandler;
+import jline.console.completer.FileNameCompleter;
 
 import com.jcraft.jsch.JSchException;
 
@@ -28,145 +32,182 @@ import com.jcraft.jsch.JSchException;
  */
 public class Runner {
 
-	public static void main(String args[]) throws IOException{
+	public static void main(String args[]) throws IOException {
 		
-		try {
-			
-			// Create an empty configuration
-			Configuration c = ConfigurationUtils.createConfiguration();
-			
-			boolean alive = false;
-			
-			// If a network connection to the remote server could be established,
-			// proceed with the execution
-			if(SshConnector.connectShell(c)){
-				alive = true;
-			}
+		// Create an empty configuration
+		Configuration c = ConfigurationUtils.createConfiguration();
+		
+		boolean serverConnection = false;
 
-			// If no runtime argument was given, start the infinite loop
-			if(args.length == 0){
+		// If no runtime argument was given, start the infinite loop
+		if(args.length == 0){
+			
+			ConsoleReader reader = new ConsoleReader();
+			reader.addCompleter(new FileNameCompleter());
+			reader.setCompletionHandler(new CandidateListCompletionHandler());
+			reader.setPrompt("> ");
+			
+			PrintWriter writer = new PrintWriter(reader.getOutput());
+			
+			printWelcomeMessage(writer);
+			printHelpStack(writer);
+			
+			String command;
+			
+			while((command = reader.readLine()) != null){
 				
-				System.out.println("> Welcome user!");
+				// Evaluate which command was given by the user and execute it
+				if(command.equals("quit") || command.equals("q")){
 				
-				Scanner scanner = new Scanner(System.in);
-				
-				while(alive){
-					
-					System.out.print("> ");
-					String command = scanner.nextLine();
-					
-					// Evaluate which command was given by the user and execute it
-					if(command.equals("quit") || command.equals("q")){
-					
-						// If the command was to exit the program, close the existing ssh connection
-						// and everything else (e.g. the input stream).
+					// If the command was to exit the program, close the existing ssh connection
+					// and everything else (e.g. the input stream).
+					if(serverConnection){
+						
 						SshConnector.disconnect();
-						alive = false;
-						scanner.close();
-						System.out.println("> Goodbye!");
 					
-					} else if(command.startsWith("build-scenario") || command.startsWith("bs")){
-						
-						ConfigurationUtils.loadConfiguration(command.split(" ")[1], c);
-						
-						new ScenarioGenerationController(c).run();
-						
-						c.reset();
-						
-					} else if(command.equals("help") || command.equals("h")){
-						
-						printHelpStack();
-						
-					} else if(command.equals("")){
-						
-						// Nothing to do
-						
-					} else if(command.startsWith("write-table") || command.startsWith("wt")){
-						
-						String inputPlansFile = null;
-						boolean writePersons = false;
-						
-						String[] parts = command.split(" ");
-						
-						int i = 0;
-						
-						for(String part : parts){
-						
-							if(part.startsWith("-")){
-								
-								if(part.equals("-schema-name") || part.equals("-s")){
-									
-									ConfigurationUtils.set(c, "databaseSchemaName", parts[i + 1]);
-									
-								} else if(part.equals("-table-name") || part.equals("-t")){
-									
-									ConfigurationUtils.set(c, "tripsTableName", parts[i + 1]);
-									
-								} else if(part.equals("-remote") || part.equals("-r")){
-									
-									ConfigurationUtils.set(c, "intoMobilityDatahub", true);
-									
-								} else if(part.equals("-write-persons") || part.equals("-p")){
-									
-									writePersons = true;
-									
-								}
-								
-							} else {
-								
-								if(!part.equals("write-table") || !part.equals("wt")){
-									
-									inputPlansFile = part;
-									
-								}
-								
-							}
-							
-							i++;
-							
-						}
-						
-						if(inputPlansFile != null){
-							
-							new DatabaseUpdaterControler(c, inputPlansFile, writePersons).run();
-							
-						} else {
-							
-							System.err.println("No plans file specified! Aborting...");
-							
-						}
-						
-						c.reset();
-						
-					} else {
-						
-						System.out.println("> Unknown command '" + command + "'!");
-						System.out.println("> Enter h(elp) for usage information.");
-						
 					}
-					
-				}
+					writer.println("> Goodbye");
+					writer.close();
+					reader.close();
+					break;
 				
-			} else {
-				
-				if(args[0].equals("build-scenario") || args[0].equals("bs")){
+				} else if(command.startsWith("build-scenario") || command.startsWith("bs")){
 					
-					ConfigurationUtils.loadConfiguration(args[1], c);
+					ConfigurationUtils.loadConfiguration(command.split(" ")[1], c);
 					
 					new ScenarioGenerationController(c).run();
 					
-					SshConnector.disconnect();
-					alive = false;
+					c.reset();
+					
+				} else if(command.equals("help") || command.equals("h")){
+					
+					printHelpStack(writer);
+					
+				} else if(command.equals("")){
+					
+					// Nothing to do
+					
+				} else if(command.startsWith("write-table") || command.startsWith("wt")){
+					
+					String inputPlansFile = null;
+					boolean writePersons = false;
+					
+					String[] parts = command.split(" ");
+					
+					int i = 0;
+					
+					for(String part : parts){
+					
+						if(part.startsWith("-")){
+							
+							if(part.equals("-schema-name") || part.equals("-s")){
+								
+								ConfigurationUtils.set(c, "databaseSchemaName", parts[i + 1]);
+								
+							} else if(part.equals("-table-name") || part.equals("-t")){
+								
+								ConfigurationUtils.set(c, "tripsTableName", parts[i + 1]);
+								
+							} else if(part.equals("-remote") || part.equals("-r")){
+								
+								ConfigurationUtils.set(c, "intoMobilityDatahub", true);
+								
+							} else if(part.equals("-write-persons") || part.equals("-p")){
+								
+								writePersons = true;
+								
+							}
+							
+						} else {
+							
+							if(!part.equals("write-table") || !part.equals("wt")){
+								
+								inputPlansFile = part;
+								
+							}
+							
+						}
+						
+						i++;
+						
+					}
+					
+					if(inputPlansFile != null){
+						
+						new DatabaseUpdaterControler(c, inputPlansFile, writePersons).run();
+						
+					} else {
+						
+						System.err.println("No plans file specified! Aborting...");
+						
+					}
+					
+					c.reset();
+					
+				} else if(command.equals("connect") || command.equals("c")){
+					
+					if(!serverConnection){
+						
+						try {
+						
+							serverConnection = SshConnector.connectShell(c, reader);
+						
+						} catch (JSchException e) {
+
+							e.printStackTrace();
+							
+						}
+						
+					} else {
+
+						writer.println("> You already are connected to the MobilityDatahub!");
+						writer.println("> Ignoring this command...");
+						
+					}
+					
+				} else if(command.equals("disconnect") || command.equals("d")){
+					
+					if(serverConnection){
+						
+						SshConnector.disconnect();
+						serverConnection = false;
+						
+					} else {
+						
+						writer.println("> You are not connected to the MobilityDatahub yet!");
+						writer.println("> Ignoring this command...");
+						
+					}
+					
+				} else {
+					
+					writer.println("> Unknown command '" + command + "'!");
+					writer.println("> Enter h(elp) for usage information.");
 					
 				}
 				
 			}
 			
-		} catch (JSchException e) {
-
-			e.printStackTrace();
+		} else {
+			
+			if(args[0].equals("build-scenario") || args[0].equals("bs")){
+				
+				ConfigurationUtils.loadConfiguration(args[1], c);
+				
+				new ScenarioGenerationController(c).run();
+				
+				SshConnector.disconnect();
+				
+			}
 			
 		}
+		
+	}
+	
+	private static void printWelcomeMessage(PrintWriter writer){
+		
+		writer.println("> Welcome user.");
+		writer.println("> This program can either be used for local development or you can connect to the MobilityDatahub.");
 		
 	}
 	
@@ -175,19 +216,21 @@ public class Runner {
 	 * Prints all possible commands this application can execute.
 	 * 
 	 */
-	private static void printHelpStack(){
+	private static void printHelpStack(PrintWriter writer){
 		
-		System.out.println("> ");
-		System.out.println("> Usage:");
-		System.out.println("> build-scenario (bs) <path-to-file> : Build a new scenario based on the specifications in the given configuration file");
-		System.out.println("> quit (q)                           : Exits the program");
-		System.out.println("> write-tables [options] (wt) <path>  : Writes the specified plans file into a database table.");
-		System.out.println("> options:");
-		System.out.println("> -write-persons (-p)                : Writes a table containing the person data of the given plans file (default is 'false').");
-		System.out.println("> -remote (-r)                       : Tells the database updater to write the table into a remote database (the MobilityDatabase).");
-		System.out.println("> -schema-name (-s)                  : Defines the schema name of the table.");
-		System.out.println("> -table-name (-t)                   : Defines the name of the table.");
-		System.out.println("> ");
+		writer.println(">");
+		writer.println("> Usage:");
+		writer.println("> build-scenario (bs) <path-to-file> : Build a new scenario based on the specifications in the given configuration file");
+		writer.println("> connect (c)                        : Initiates a process to connect your computer with the MobilityDatahub server.");
+		writer.println("> disconnect (d)                     : Closes an existing ssh connection to the MobilityDatahub.");
+		writer.println("> quit (q)                           : Exits the program");
+		writer.println("> write-tables [options] (wt) <path>  : Writes the specified plans file into a database table.");
+		writer.println("> options:");
+		writer.println("> -write-persons (-p)                : Writes a table containing the person data of the given plans file (default is 'false').");
+		writer.println("> -remote (-r)                       : Tells the database updater to write the table into a remote database (the MobilityDatabase).");
+		writer.println("> -schema-name (-s)                  : Defines the schema name of the table.");
+		writer.println("> -table-name (-t)                   : Defines the name of the table.");
+		writer.println(">");
 		
 	}
 	
