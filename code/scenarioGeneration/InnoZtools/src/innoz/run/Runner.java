@@ -89,10 +89,10 @@ public class Runner {
 					
 				} else if(command.startsWith("write-table") || command.startsWith("wt")){
 					
-					boolean writePersons = false;
 					String inputPlansFile = null;
 					String networkFile = null;
 					String vehiclesFile = null;
+					String attributesFile = null;
 					
 					String[] parts = command.split(" ");
 					
@@ -129,9 +129,9 @@ public class Runner {
 									
 								}
 								
-							} else if(part.equals("-write-persons") || part.equals("-p")){
+							} else if(part.equals("-attributes-file") || part.equals("-af")){
 								
-								writePersons = true;
+								attributesFile = parts[i + 1];
 								
 							} else if(part.equals("-vehicles-file") || part.equals("-vf")){
 								
@@ -153,7 +153,7 @@ public class Runner {
 						
 					}
 					
-					new DatabaseUpdaterControler(c, inputPlansFile, networkFile, vehiclesFile, writePersons).run();
+					new DatabaseUpdaterControler(c, inputPlansFile, networkFile, vehiclesFile, attributesFile).run();
 						
 					c.reset();
 					
@@ -240,13 +240,13 @@ public class Runner {
 		writer.println("> quit (q)                           : Exits the program");
 		writer.println("> write-table (wt) [options] <path>  : Writes the specified plans file into a database table.");
 		writer.println("> options:");
-		writer.println("> -network-file (-nf)                : Path to a MATSim network file.");
-		writer.println("> -plans-file (-pf)                  : Path to a MATSim plans file.");
-		writer.println("> -write-persons (-p)                : Writes a table containing the person data of the given plans file (default is 'false').");
+		writer.println("> -attributes-file (-a)              : Path to a MATSim person attributes file. Tells the program to write a persons table.");
+		writer.println("> -network-file (-nf)                : Path to a MATSim network file. Mandatory for creating the carsharing stations table.");
+		writer.println("> -plans-file (-pf)                  : Path to a MATSim plans file. Tells the program to write a trips table.");
 		writer.println("> -remote (-r)                       : Tells the database updater to write the table into a remote database (the MobilityDatabase).");
 		writer.println("> -schema-name (-s)                  : Defines the schema name of the table.");
 		writer.println("> -table-suffix (-t)                 : Defines a suffix for the tables to be created. This string is APPENDED to the kind of table that is being created (e.g. trips_<table-name>)");
-		writer.println("> -vehicles-file (-vf)               : Path to a carsharing vehicles file.");
+		writer.println("> -vehicles-file (-vf)               : Path to a carsharing vehicles file. Tells the program to write a carsharing stations table.");
 		writer.println(">");
 		
 	}

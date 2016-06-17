@@ -38,7 +38,6 @@ public class DatabaseUpdater {
 	private static final Logger log = Logger.getLogger(DatabaseUpdater.class);
 	
 	private Scenario scenario;
-	private boolean writePersons = false;
 	private String vehiclesFile = null;
 	
 	/**
@@ -50,10 +49,9 @@ public class DatabaseUpdater {
 	 * or into a local database
 	 * 
 	 */
-	public void update(Configuration configuration, Scenario scenario, String vehiclesFile, boolean writePersons){
+	public void update(Configuration configuration, Scenario scenario, String vehiclesFile){
 		
 		this.scenario = scenario;
-		this.writePersons = writePersons;
 		this.vehiclesFile = vehiclesFile;
 		this.writeIntoDatabase(configuration);
 		
@@ -127,8 +125,8 @@ public class DatabaseUpdater {
 				// ...could be established - proceed
 				if(scenario.getPopulation().getPersons().size() > 0){
 
-					if(this.writePersons){
-						
+					if(scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES) != null){
+
 						processPersons(connection, configuration.getDatabaseSchemaName());
 							
 					}
@@ -181,6 +179,9 @@ public class DatabaseUpdater {
 				+ "sex character varying,age integer,car_available boolean DEFAULT FALSE, has_driving_license"
 				+ " boolean DEFAULT FALSE, is_emplyed boolean DEFAULT FALSE);");
 
+		long counter = 0;
+		int nextMsg = 1;
+		
 		// Write new columns for all persons in the MATSim population
 		for(Person person : scenario.getPopulation().getPersons().values()){
 			
@@ -210,6 +211,12 @@ public class DatabaseUpdater {
 			statement.executeUpdate("INSERT INTO \"" + databaseSchemaName + "\".persons VALUES('"
 					+ id + "','" + sex + "'," + age + ",'" + Boolean.parseBoolean(carAvail) + "'," + Boolean.parseBoolean(hasLicense)
 					+ "," + isEmployed + ");");
+			
+			counter++;
+			if(counter % nextMsg == 0){
+				log.info("person # " + counter);
+				nextMsg *= 2;
+			}
 			
 		}
 		

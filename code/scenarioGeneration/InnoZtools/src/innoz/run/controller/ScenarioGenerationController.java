@@ -115,7 +115,7 @@ public class ScenarioGenerationController implements DefaultController {
 			
 			if(configuration.isWritingDatabaseOutput()){
 				
-				new DatabaseUpdater().update(configuration, scenario, null, true);
+				new DatabaseUpdater().update(configuration, scenario, null);
 				
 			}
 		
