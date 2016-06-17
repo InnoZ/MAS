@@ -151,67 +151,58 @@ public class DatabaseUpdater {
 	 * @param databaseSchemaName The schema name (namespace) of the database tables to be written.
 	 * @throws SQLException
 	 */
-	private void processPersons(Connection connection, String databaseSchemaName) {
+	private void processPersons(Connection connection, String databaseSchemaName) throws SQLException {
 		
 		log.info("Creating persons table and inserting the values found in the given scenario...");
 		
-		Statement statement;
-		try {
+		Statement statement = connection.createStatement();
+			
+		// Create the schema only if it doesn't exist already
+		statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS \"" + databaseSchemaName + "\";");
+		// Drop the old table
+		statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\".persons;");
+		// Create a new database table
+		statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\".persons(id character varying,"
+				+ "sex character varying,age integer,car_available boolean DEFAULT FALSE, has_driving_license"
+				+ " boolean DEFAULT FALSE, is_emplyed boolean DEFAULT FALSE);");
 
-			statement = connection.createStatement();
+		// Write new columns for all persons in the MATSim population
+		for(Person person : scenario.getPopulation().getPersons().values()){
 			
-			// Create the schema only if it doesn't exist already
-			statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS \"" + databaseSchemaName + "\";");
-			// Drop the old table
-			statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\".persons;");
-			// Create a new database table
-			statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\".persons(id character varying,"
-					+ "sex character varying,age integer,car_available boolean DEFAULT FALSE, has_driving_license"
-					+ " boolean DEFAULT FALSE, is_emplyed boolean DEFAULT FALSE);");
-
-			// Write new columns for all persons in the MATSim population
-			for(Person person : scenario.getPopulation().getPersons().values()){
-				
-				String id = person.getId().toString();
-				String sex = (String) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_SEX);
-				Integer age = (Integer) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_AGE);
-				String carAvail = (String ) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_CAR_AVAIL);
-				String hasLicense = (String) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_LICENSE);
-				Boolean isEmployed = (Boolean) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_EMPLOYED);
-				
-				if(sex == null) sex = "";
-				else if(sex.equals("0")) sex = "m";
-				else if(sex.equals("1")) sex = "f";
-				
-				if(age == null) age = -1;
-				
-				if(carAvail == null) carAvail = "false";
-				else if(carAvail.equals("always") || carAvail.equals("sometimes")) carAvail = "true";
-				else if(carAvail.equals("never")) carAvail = "false";
-				
-				if(hasLicense == null) hasLicense = "false";
-				else if(hasLicense.equals("yes")) hasLicense = "true";
-				else if(hasLicense.equals("no")) hasLicense = "false";
-				
-				if(isEmployed == null) isEmployed = false;
-				
-				statement.executeUpdate("INSERT INTO \"" + databaseSchemaName + "\".persons VALUES('"
-						+ id + "','" + sex + "'," + age + ",'" + Boolean.parseBoolean(carAvail) + "'," + Boolean.parseBoolean(hasLicense)
-						+ "," + isEmployed + ");");
-				
-			}
+			String id = person.getId().toString();
+			String sex = (String) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_SEX);
+			Integer age = (Integer) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_AGE);
+			String carAvail = (String ) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_CAR_AVAIL);
+			String hasLicense = (String) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_LICENSE);
+			Boolean isEmployed = (Boolean) ((ObjectAttributes) scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES)).getAttribute(id, PersonUtils.ATT_EMPLOYED);
 			
-			// Close the statement after all persons have been processed
-			statement.close();
+			if(sex == null) sex = "";
+			else if(sex.equals("0")) sex = "m";
+			else if(sex.equals("1")) sex = "f";
 			
-			log.info("Done.");
-		
-		} catch (SQLException e) {
-		
-			e.printStackTrace();
+			if(age == null) age = -1;
+			
+			if(carAvail == null) carAvail = "false";
+			else if(carAvail.equals("always") || carAvail.equals("sometimes")) carAvail = "true";
+			else if(carAvail.equals("never")) carAvail = "false";
+			
+			if(hasLicense == null) hasLicense = "false";
+			else if(hasLicense.equals("yes")) hasLicense = "true";
+			else if(hasLicense.equals("no")) hasLicense = "false";
+			
+			if(isEmployed == null) isEmployed = false;
+			
+			statement.executeUpdate("INSERT INTO \"" + databaseSchemaName + "\".persons VALUES('"
+					+ id + "','" + sex + "'," + age + ",'" + Boolean.parseBoolean(carAvail) + "'," + Boolean.parseBoolean(hasLicense)
+					+ "," + isEmployed + ");");
 			
 		}
-
+		
+		// Close the statement after all persons have been processed
+		statement.close();
+		
+		log.info("Done.");
+		
 	}
 	
 	/**
