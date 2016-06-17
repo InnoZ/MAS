@@ -39,7 +39,7 @@ public class DatabaseUpdater {
 	
 	private Scenario scenario;
 	private boolean writePersons = false;
-	private boolean writeVehicles = false;
+	private String vehiclesFile = null;
 	
 	/**
 	 * 
@@ -50,11 +50,12 @@ public class DatabaseUpdater {
 	 * or into a local database
 	 * 
 	 */
-	public void update(Configuration configuration, Scenario scenario, boolean writePersons){
+	public void update(Configuration configuration, Scenario scenario, String vehiclesFile, boolean writePersons){
 		
 		this.scenario = scenario;
-		this.writeIntoDatabase(configuration);
 		this.writePersons = writePersons;
+		this.vehiclesFile = vehiclesFile;
+		this.writeIntoDatabase(configuration);
 		
 	}
 
@@ -124,15 +125,22 @@ public class DatabaseUpdater {
 				log.info("Connection to database established.");
 				
 				// ...could be established - proceed
-				if(this.writePersons){
-					processPersons(connection, configuration.getDatabaseSchemaName());
-				}
-				
-				processPlans(connection, configuration.getDatabaseSchemaName(), configuration.getTripsTableName());
-				
-				if(this.writeVehicles){
+				if(scenario.getPopulation().getPersons().size() > 0){
+
+					if(this.writePersons){
+						
+						processPersons(connection, configuration.getDatabaseSchemaName());
+							
+					}
+						
+					processPlans(connection, configuration.getDatabaseSchemaName(), configuration.getTableSuffix());
 					
-					processVehicles(connection, scenario.getNetwork(), "");
+				}
+			
+				if(this.vehiclesFile != null && scenario.getNetwork().getLinks().size() > 0) {
+					
+					processVehicles(connection, scenario.getNetwork(), this.vehiclesFile, configuration.getDatabaseSchemaName(),
+							configuration.getTableSuffix());
 					
 				}
 				
@@ -220,7 +228,7 @@ public class DatabaseUpdater {
 	 * @param databaseSchemaName
 	 * @throws SQLException
 	 */
-	private void processPlans(Connection connection, String databaseSchemaName, String tableName)
+	private void processPlans(Connection connection, String databaseSchemaName, String tableSuffix)
 			throws SQLException{
 		
 		log.info("Inserting trips from persons' selected plans into database...");
@@ -229,9 +237,9 @@ public class DatabaseUpdater {
 		// Create the schema only if it doesn't exist already
 		statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS \"" + databaseSchemaName + "\";");
 		// Drop the old table
-		statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\"." + tableName + ";");
+		statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\".trips_" + tableSuffix + ";");
 		// Create a new database table
-		statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\"." + tableName + "(person_id character varying,"
+		statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\".trips_" + tableSuffix + "(person_id character varying,"
 				+ "trip_index integer, travel_time numeric, distance numeric, departure_time numeric,"
 				+ " arrival_time numeric, from_act_type character varying, from_x numeric, from_y numeric,"
 				+ " to_act_type character varying, to_x numeric, to_y numeric, main_mode character varying,"
@@ -338,7 +346,7 @@ public class DatabaseUpdater {
 						distance = "'NaN'";
 					}
 
-					statement.executeUpdate("INSERT INTO \"" + databaseSchemaName + "\"." + tableName + " VALUES('"
+					statement.executeUpdate("INSERT INTO \"" + databaseSchemaName + "\".trips_" + tableSuffix + " VALUES('"
 							+ personId + "'," + tripIndex + "," + travelTime + "," + distance + "," +
 							startTime + "," + endTime + ",'" + fromActType + "'," + fromX + "," + fromY +
 							",'" + toActType + "'," + toX + "," + toY + ",'" + mainMode + "'," + accessTime +
@@ -399,7 +407,8 @@ public class DatabaseUpdater {
 	 * @throws IOException
 	 * @throws SQLException
 	 */
-	private static void processVehicles(Connection connection, Network network, String vehicleLocationsFile) throws IOException, SQLException{
+	private static void processVehicles(Connection connection, Network network, String vehicleLocationsFile,
+				String databaseSchemaName, String tableSuffix) throws IOException, SQLException{
 
 		log.info("Inserting carsharing vehicle locations into mobility database...");
 		
@@ -427,13 +436,13 @@ public class DatabaseUpdater {
 		reader.close();
 		
 		Statement statement = connection.createStatement();
-		statement.executeUpdate("DROP TABLE IF EXISTS \"garmisch-partenkirchen\".carsharing_stations_extended;");
-		statement.executeUpdate("CREATE TABLE \"garmisch-partenkirchen\".carsharing_stations_extended(station_id character varying,"
+		statement.executeUpdate("DROP TABLE IF EXISTS \"" + databaseSchemaName + "\".carsharing_stations_" + tableSuffix + ";");
+		statement.executeUpdate("CREATE TABLE \"" + databaseSchemaName + "\",carsharing_stations_" + tableSuffix + "(station_id character varying,"
 				+ "x numeric, y numeric, link_id character varying, name character varying, n_vehicles integer);");
 		
 		for(CsStation station : stations){
 			
-			statement.executeUpdate("INSERT INTO \"garmisch-partenkirchen\".carsharing_stations_extended VALUES('"
+			statement.executeUpdate("INSERT INTO \"" + databaseSchemaName + "\".carsharing_stations_" + tableSuffix + " VALUES('"
 					+ station.id + "'," + station.x + "," + station.y + ",'" + station.linkId + "','" + station.name + "'," +
 					station.nVehicles + ");");
 			

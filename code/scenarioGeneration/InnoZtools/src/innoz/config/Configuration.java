@@ -38,7 +38,7 @@ public class Configuration {
 	
 	public static final String LOCAL_PORT = "localPort";
 	public static final String DB_SCHEMA_NAME = "databaseSchemaName";
-	public static final String DB_TRIPS_TABLE_NAME = "tripsTableName";
+	public static final String DB_TABLE_SUFFIX = "tableSuffix";
 	public static final String WRITE_DB_OUTPUT = "writeTables";
 	public static final String WRITE_INTO_DATAHUB = "intoMobilityDatahub";
 	
@@ -70,7 +70,7 @@ public class Configuration {
 	boolean writeDatabaseTables = false;
 	boolean writeIntoDatahub = false;
 	String dbNameSpace;
-	String tripsTableName;
+	String tableSuffix;
 	
 	boolean overwriteExistingFiles = false;
 	
@@ -180,7 +180,7 @@ public class Configuration {
 			case DB_SCHEMA_NAME: this.dbNameSpace = (String) value;
 				break;
 				
-			case DB_TRIPS_TABLE_NAME: this.tripsTableName = (String) value;
+			case DB_TABLE_SUFFIX: this.tableSuffix = (String) value;
 				break;
 				
 			case WRITE_INTO_DATAHUB: this.writeIntoDatahub = (Boolean) value;
@@ -441,9 +441,9 @@ public class Configuration {
 	 * 
 	 * @return The name of the trips psql table.
 	 */
-	public String getTripsTableName(){
+	public String getTableSuffix(){
 		
-		return this.tripsTableName;
+		return this.tableSuffix;
 		
 	}
 	

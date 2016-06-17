@@ -89,8 +89,10 @@ public class Runner {
 					
 				} else if(command.startsWith("write-table") || command.startsWith("wt")){
 					
-					String inputPlansFile = null;
 					boolean writePersons = false;
+					String inputPlansFile = null;
+					String networkFile = null;
+					String vehiclesFile = null;
 					
 					String[] parts = command.split(" ");
 					
@@ -102,15 +104,15 @@ public class Runner {
 							
 							if(part.equals("-schema-name") || part.equals("-s")){
 								
-								ConfigurationUtils.set(c, "databaseSchemaName", parts[i + 1]);
+								ConfigurationUtils.set(c, Configuration.DB_SCHEMA_NAME, parts[i + 1]);
 								
-							} else if(part.equals("-table-name") || part.equals("-t")){
+							} else if(part.equals("-table-suffix") || part.equals("-t")){
 								
-								ConfigurationUtils.set(c, "tripsTableName", parts[i + 1]);
+								ConfigurationUtils.set(c, Configuration.DB_TABLE_SUFFIX, parts[i + 1]);
 								
 							} else if(part.equals("-remote") || part.equals("-r")){
 								
-								ConfigurationUtils.set(c, "intoMobilityDatahub", true);
+								ConfigurationUtils.set(c, Configuration.WRITE_INTO_DATAHUB, true);
 								
 								if(!serverConnection){
 									
@@ -131,13 +133,17 @@ public class Runner {
 								
 								writePersons = true;
 								
-							}
-							
-						} else {
-							
-							if(!part.equals("write-table") || !part.equals("wt")){
+							} else if(part.equals("-vehicles-file") || part.equals("-vf")){
 								
-								inputPlansFile = part;
+								vehiclesFile = parts[i + 1];
+								
+							} else if(part.equals("-network-file") || part.equals("-nf")){
+								
+								networkFile = parts[i+1];
+								
+							} else if(part.equals("-plans-file") || part.equals("-pf")){
+								
+								inputPlansFile = parts[i+1];
 								
 							}
 							
@@ -147,16 +153,8 @@ public class Runner {
 						
 					}
 					
-					if(inputPlansFile != null){
+					new DatabaseUpdaterControler(c, inputPlansFile, networkFile, vehiclesFile, writePersons).run();
 						
-						new DatabaseUpdaterControler(c, inputPlansFile, writePersons).run();
-						
-					} else {
-						
-						System.err.println("No plans file specified! Aborting...");
-						
-					}
-					
 					c.reset();
 					
 				} else if(command.equals("connect") || command.equals("c")){
@@ -242,10 +240,13 @@ public class Runner {
 		writer.println("> quit (q)                           : Exits the program");
 		writer.println("> write-table (wt) [options] <path>  : Writes the specified plans file into a database table.");
 		writer.println("> options:");
+		writer.println("> -network-file (-nf)                : Path to a MATSim network file.");
+		writer.println("> -plans-file (-pf)                  : Path to a MATSim plans file.");
 		writer.println("> -write-persons (-p)                : Writes a table containing the person data of the given plans file (default is 'false').");
 		writer.println("> -remote (-r)                       : Tells the database updater to write the table into a remote database (the MobilityDatabase).");
 		writer.println("> -schema-name (-s)                  : Defines the schema name of the table.");
-		writer.println("> -table-name (-t)                   : Defines the name of the table.");
+		writer.println("> -table-suffix (-t)                 : Defines a suffix for the tables to be created. This string is APPENDED to the kind of table that is being created (e.g. trips_<table-name>)");
+		writer.println("> -vehicles-file (-vf)               : Path to a carsharing vehicles file.");
 		writer.println(">");
 		
 	}
