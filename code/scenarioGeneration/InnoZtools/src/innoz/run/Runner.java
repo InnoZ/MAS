@@ -151,6 +151,7 @@ public class Runner {
 						try {
 						
 							serverConnection = SshConnector.connectShell(c, reader);
+							reader.setPrompt("> ");
 						
 						} catch (JSchException e) {
 
