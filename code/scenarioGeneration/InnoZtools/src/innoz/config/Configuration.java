@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
  * @author dhosse
  *
  */
-public class Configuration {
+public final class Configuration {
 
 	//TAGS///////////////////////////////////////////////////////////////////////////////////
 	static final String SEP = "\t";
@@ -22,6 +22,10 @@ public class Configuration {
 	
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	private static final Logger log = Logger.getLogger(Configuration.class);
+	
+	public static final String SURVEY_AREA = "surveyArea";
+	public static final String VICINITY = "vicinity";
+	
 	public static final String SURVEY_AREA_IDS = "surveyAreaIds";
 	public static final String VICINITY_IDS = "vicinityIds";
 	public static final String CRS = "coordinateSystem";
@@ -51,7 +55,7 @@ public class Configuration {
 	String surveyAreaIds;
 	String vicinityIds;
 	String crs = "EPSG:32632";
-	String outputDirectory;
+	String outputDirectory = ".";
 	PopulationType popType = PopulationType.survey;
 	
 	boolean useHouseholds = true;
