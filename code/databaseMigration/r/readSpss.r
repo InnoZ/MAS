@@ -6,7 +6,7 @@ library(foreign)
 #use.value.labels = if labels that are assigned to numeric values should be displayed instead of the values (e.g. 1 for "has driving license" in column "license")
 #to.data.frame = packs the data into a data frame. makes some of the stuff in this script easier
 #re-encoding is needed for non-utf8 characters (e.g. umlaute)
-d <- read.spss("/home/dhosse/Dokumente/10_data/MiD2008/spss/MiD2008_PUF_Wege.sav", use.value.labels=FALSE, to.data.frame=TRUE, reencode="UTF(")
+d <- read.spss("/home/dhosse/Dokumente/10_data/MiD2008/spss/MiD2008_PUF_Wege.sav", use.value.labels=FALSE, to.data.frame=TRUE, reencode="UTF8")
 
 #The part down to write.data is not used for the actual process
 ###############################################################
