@@ -75,6 +75,21 @@ public class Runner {
 					
 					ConfigurationUtils.loadConfiguration(command.split(" ")[1], c);
 					
+					if(!serverConnection){
+						
+						try {
+						
+							serverConnection = SshConnector.connectShell(c, reader);
+							reader.setPrompt("> ");
+						
+						} catch (JSchException e) {
+
+							e.printStackTrace();
+							
+						}
+						
+					}
+					
 					new ScenarioGenerationController(c).run();
 					
 					c.reset();
