@@ -49,7 +49,7 @@ public class SurveyPerson {
 	public SurveyPerson(String id, String sex, String age, String carAvailable, String hasLicense, String isEmployed){
 		
 		this.id = id;
-		this.sex = sex.equals(MiDConstants.SEX_MALE) ? "male" : "female";
+		this.sex = sex.equals(MiDConstants.SEX_MALE) ? "m" : "f";
 		this.age = !age.equals(MiDConstants.NAN) ? Integer.parseInt(age) : Integer.MIN_VALUE;
 		
 		if(carAvailable.equals("1") || carAvailable.equals("2")){
