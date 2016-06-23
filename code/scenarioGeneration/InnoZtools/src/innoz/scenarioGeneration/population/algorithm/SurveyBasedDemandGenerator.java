@@ -1,7 +1,9 @@
 package innoz.scenarioGeneration.population.algorithm;
 
 import innoz.config.Configuration;
+import innoz.io.database.DemandDatabaseParser;
 import innoz.io.database.MidDatabaseParser;
+import innoz.io.database.SrvDatabaseParser;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.geoinformation.Distribution;
 import innoz.scenarioGeneration.geoinformation.District;
@@ -79,7 +81,12 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	private void createCompletePopulation(Configuration configuration, Scenario scenario){
 		
 		// Run the survey data parser that stores all of the travel information
-		MidDatabaseParser parser = new MidDatabaseParser();
+		DemandDatabaseParser parser = null;
+		if(configuration.getDatasource().equals("mid")){
+			parser = new MidDatabaseParser();
+		} else {
+			parser = new SrvDatabaseParser();
+		}
 		SurveyDataContainer container = new SurveyDataContainer(configuration);
 		parser.run(configuration, container, this.geoinformation);
 		
