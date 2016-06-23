@@ -12,6 +12,7 @@ import innoz.scenarioGeneration.population.surveys.SurveyPlanTrip;
 import innoz.scenarioGeneration.population.utils.HashGenerator;
 import innoz.scenarioGeneration.utils.ActivityTypes;
 import innoz.scenarioGeneration.utils.Hydrograph;
+import innoz.scenarioGeneration.utils.Modes;
 import innoz.utils.matsim.RecursiveStatsContainer;
 
 import java.sql.Connection;
@@ -460,12 +461,21 @@ public class SrvDatabaseParser implements DemandDatabaseParser {
 		
 			case "1": return TransportMode.walk;
 			case "2": return TransportMode.bike;
-//			case "3": return Modes.SCOOTER;
-//			case "4": return Modes.MOTORCYCLE;
-			case "3": return TransportMode.ride;
+			case "3": //return Modes.SCOOTER;
 			case "4": return TransportMode.car;
-			default: return TransportMode.pt;
-//			default: return TransportMode.other;
+			case "5": //return "freefloating";
+			case "6": return TransportMode.car;
+			case "7":
+			case "8":
+			case "9": return TransportMode.ride;
+			case "10":
+			case "11":
+			case "12":
+			case "13":
+			case "14":
+			case "15": return TransportMode.pt;
+			case "16": //return Modes.TAXI;
+			default: return TransportMode.other;
 		
 		}
 		
