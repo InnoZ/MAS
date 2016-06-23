@@ -54,7 +54,7 @@ public class Distribution {
 				ActivityTypes.SERVICE, ActivityTypes.HEALTH, ActivityTypes.EVENT, ActivityTypes.ERRAND,
 				ActivityTypes.PRIMARY_SCHOOL, ActivityTypes.SECONDARY_SCHOOL, ActivityTypes.PROFESSIONAL_SCHOOL,
 				ActivityTypes.UNIVERSITY};
-		String[] modes = {TransportMode.bike, TransportMode.car, TransportMode.pt, TransportMode.ride, TransportMode.walk};
+		String[] modes = {TransportMode.bike, TransportMode.car, TransportMode.pt, TransportMode.ride, TransportMode.walk, TransportMode.other};
 		
 		distances = new Matrix("distances", "");
 		
