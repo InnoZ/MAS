@@ -1,6 +1,6 @@
 package innoz.scenarioGeneration.geoinformation;
 
-import innoz.io.database.MidDatabaseParser;
+import innoz.io.database.DemandDatabaseParser;
 import innoz.scenarioGeneration.utils.ActivityTypes;
 import innoz.scenarioGeneration.utils.Modes;
 
@@ -34,7 +34,7 @@ public class Distribution {
 	private LeastCostPathCalculator lcpc;
 	private final Network network;
 	
-	public Distribution(final Network network, final Geoinformation geoinformation, MidDatabaseParser parser,
+	public Distribution(final Network network, final Geoinformation geoinformation, DemandDatabaseParser parser,
 			final CoordinateTransformation transformation){
 
 		this.network = network;
@@ -46,7 +46,7 @@ public class Distribution {
 		
 	}
 	
-	private void create(MidDatabaseParser parser, final Geoinformation geoinformation){
+	private void create(DemandDatabaseParser parser, final Geoinformation geoinformation){
 		
 		String[] activityTypes = {ActivityTypes.WORK, ActivityTypes.EDUCATION, ActivityTypes.SHOPPING,
 				ActivityTypes.LEISURE, ActivityTypes.OTHER, ActivityTypes.KINDERGARTEN, ActivityTypes.SUPPLY,
