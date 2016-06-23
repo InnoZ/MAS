@@ -43,7 +43,7 @@ import org.matsim.core.utils.misc.Time;
  * @author dhosse
  *
  */
-public class MidDatabaseParser {
+public class MidDatabaseParser implements DemandDatabaseParser {
 	
 	private static final Logger log = Logger.getLogger(MidDatabaseParser.class);
 	

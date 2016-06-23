@@ -26,10 +26,23 @@ public class SrVConstants {
 	public static final String P_AGE = "v_alter";
 	public static final String P_SEX= "v_geschlecht";
 	public static final String P_EMPL = "v_erw";
+	public static final String P_CARAVAIL = "v_pkw_verfueg";
 	public static final String P_LICENSE_CAR = "v_fuehr_pkw";
 	public static final String P_LICENSE_MOT1 = "v_fuehr_mot";
 	public static final String P_LICENSE_MOT2 = "v_fuehr_mopmot";
 	public static final String P_BS = "v_bikeshare";
 	public static final String P_CS = "v_carshare";
+	
+	// ways
+	public static final String W_NR = "wnr";
+	public static final String W_TAG= "stichtag_wtag";
+	public static final String W_WEIGHT = "gewicht_w";
+	public static final String W_START = "v_start_lage";
+	public static final String W_DEP_H = "v_beginn_stunde";
+	public static final String W_DEP_MIN = "v_beginn_minute";
+	public static final String W_ARR_H = "v_ankunft_stunde";
+	public static final String W_ARR_MIN = "v_ankunft_minute";
+	public static final String W_PURPOSE = "v_zweck";
+	public static final String W_HVM = "e_hvm";
 	
 }
