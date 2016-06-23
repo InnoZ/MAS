@@ -118,6 +118,10 @@ public class ConfigurationReaderXml extends DefaultHandler {
 			
 			this.configuration.tableSuffix = attributes.getValue("v");
 			
+		} else if(qName.equalsIgnoreCase(Configuration.DEMAND_DATA_SOURCE)){
+			
+			this.configuration.demandSource = attributes.getValue("v");
+			
 		}
 		
 	}

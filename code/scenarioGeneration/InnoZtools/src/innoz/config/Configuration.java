@@ -39,6 +39,7 @@ public final class Configuration {
 	public static final String USE_VEHICLES = "useVehicles";
 	public static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
 	public static final String LOD_NETWORK = "networkDetail";
+	public static final String DEMAND_DATA_SOURCE = "demandSource";
 	
 	public static final String LOCAL_PORT = "localPort";
 	public static final String DB_SCHEMA_NAME = "databaseSchemaName";
@@ -62,6 +63,8 @@ public final class Configuration {
 	boolean useVehicles = false;
 	boolean onlyWorkingDays = true;
 	boolean useBuildings = true;
+	
+	String demandSource = "mid";
 	
 	int numberOfHouseholds = 0;
 	
@@ -577,6 +580,10 @@ public final class Configuration {
 	 */
 	public Map<String, AdminUnitEntry> getAdminUnitEntries(){
 		return this.adminUnits;
+	}
+	
+	public String getDatasource(){
+		return this.demandSource;
 	}
 	
 }
