@@ -55,163 +55,148 @@ public class Runner {
 			String command;
 			
 			while((command = reader.readLine()) != null){
+			
+				try {
 				
-				// Evaluate which command was given by the user and execute it
-				if(command.equals("quit") || command.equals("q")){
-				
-					// If the command was to exit the program, close the existing ssh connection
-					// and everything else (e.g. the input stream).
-					if(serverConnection){
-						
-						SshConnector.disconnect();
+					// Evaluate which command was given by the user and execute it
+					if(command.equals("quit") || command.equals("q")){
 					
-					}
-					writer.println("> Goodbye");
-					writer.close();
-					reader.close();
-					break;
-				
-				} else if(command.startsWith("build-scenario") || command.startsWith("bs")){
-					
-					ConfigurationUtils.loadConfiguration(command.split(" ")[1], c);
-					
-					if(!serverConnection){
+						// If the command was to exit the program, close the existing ssh connection
+						// and everything else (e.g. the input stream).
+						if(serverConnection){
+							
+							SshConnector.disconnect();
 						
-						try {
+						}
+						writer.println("> Goodbye");
+						writer.close();
+						reader.close();
+						break;
+					
+					} else if(command.startsWith("build-scenario") || command.startsWith("bs")){
 						
+						ConfigurationUtils.loadConfiguration(command.split(" ")[1], c);
+						
+						if(!serverConnection){
+							
 							serverConnection = SshConnector.connectShell(c, reader);
 							reader.setPrompt("> ");
-						
-						} catch (JSchException e) {
-
-							e.printStackTrace();
 							
 						}
 						
-					}
-					
-					new ScenarioGenerationController(c).run();
-					
-					c.reset();
-					
-				} else if(command.equals("help") || command.equals("h")){
-					
-					printHelpStack(writer);
-					
-				} else if(command.equals("")){
-					
-					// Nothing to do
-					
-				} else if(command.startsWith("write-table") || command.startsWith("wt")){
-					
-					String inputPlansFile = null;
-					String networkFile = null;
-					String vehiclesFile = null;
-					String attributesFile = null;
-					
-					String[] parts = command.split(" ");
-					
-					int i = 0;
-					
-					for(String part : parts){
-					
-						if(part.startsWith("-")){
-							
-							if(part.equals("-schema-name") || part.equals("-s")){
+						new ScenarioGenerationController(c).run();
+						
+						c.reset();
+						
+					} else if(command.equals("help") || command.equals("h")){
+						
+						printHelpStack(writer);
+						
+					} else if(command.equals("")){
+						
+						// Nothing to do
+						
+					} else if(command.startsWith("write-table") || command.startsWith("wt")){
+						
+						String inputPlansFile = null;
+						String networkFile = null;
+						String vehiclesFile = null;
+						String attributesFile = null;
+						
+						String[] parts = command.split(" ");
+						
+						int i = 0;
+						
+						for(String part : parts){
+						
+							if(part.startsWith("-")){
 								
-								ConfigurationUtils.set(c, Configuration.DB_SCHEMA_NAME, parts[i + 1]);
-								
-							} else if(part.equals("-table-suffix") || part.equals("-t")){
-								
-								ConfigurationUtils.set(c, Configuration.DB_TABLE_SUFFIX, parts[i + 1]);
-								
-							} else if(part.equals("-remote") || part.equals("-r")){
-								
-								ConfigurationUtils.set(c, Configuration.WRITE_INTO_DATAHUB, true);
-								
-								if(!serverConnection){
+								if(part.equals("-schema-name") || part.equals("-s")){
 									
-									try {
+									ConfigurationUtils.set(c, Configuration.DB_SCHEMA_NAME, parts[i + 1]);
+									
+								} else if(part.equals("-table-suffix") || part.equals("-t")){
+									
+									ConfigurationUtils.set(c, Configuration.DB_TABLE_SUFFIX, parts[i + 1]);
+									
+								} else if(part.equals("-remote") || part.equals("-r")){
+									
+									ConfigurationUtils.set(c, Configuration.WRITE_INTO_DATAHUB, true);
+									
+									if(!serverConnection){
 										
 										serverConnection = SshConnector.connectShell(c, reader);
 										reader.setPrompt("> ");
-										
-									} catch (JSchException e) {
-
-										e.printStackTrace();
-										
+											
 									}
+									
+								} else if(part.equals("-attributes-file") || part.equals("-af")){
+									
+									attributesFile = parts[i + 1];
+									
+								} else if(part.equals("-vehicles-file") || part.equals("-vf")){
+									
+									vehiclesFile = parts[i + 1];
+									
+								} else if(part.equals("-network-file") || part.equals("-nf")){
+									
+									networkFile = parts[i+1];
+									
+								} else if(part.equals("-plans-file") || part.equals("-pf")){
+									
+									inputPlansFile = parts[i+1];
 									
 								}
 								
-							} else if(part.equals("-attributes-file") || part.equals("-af")){
-								
-								attributesFile = parts[i + 1];
-								
-							} else if(part.equals("-vehicles-file") || part.equals("-vf")){
-								
-								vehiclesFile = parts[i + 1];
-								
-							} else if(part.equals("-network-file") || part.equals("-nf")){
-								
-								networkFile = parts[i+1];
-								
-							} else if(part.equals("-plans-file") || part.equals("-pf")){
-								
-								inputPlansFile = parts[i+1];
-								
 							}
 							
+							i++;
+							
 						}
 						
-						i++;
+						new DatabaseUpdaterControler(c, inputPlansFile, networkFile, vehiclesFile, attributesFile).run();
+							
+						c.reset();
 						
-					}
-					
-					new DatabaseUpdaterControler(c, inputPlansFile, networkFile, vehiclesFile, attributesFile).run();
+					} else if(command.equals("connect") || command.equals("c")){
 						
-					c.reset();
-					
-				} else if(command.equals("connect") || command.equals("c")){
-					
-					if(!serverConnection){
-						
-						try {
-						
+						if(!serverConnection){
+							
 							serverConnection = SshConnector.connectShell(c, reader);
 							reader.setPrompt("> ");
+							
+						} else {
+	
+							writer.println("> You already are connected to the MobilityDatahub!");
+							writer.println("> Ignoring this command...");
+							
+						}
 						
-						} catch (JSchException e) {
-
-							e.printStackTrace();
+					} else if(command.equals("disconnect") || command.equals("d")){
+						
+						if(serverConnection){
+							
+							SshConnector.disconnect();
+							serverConnection = false;
+							
+						} else {
+							
+							writer.println("> You are not connected to the MobilityDatahub yet!");
+							writer.println("> Ignoring this command...");
 							
 						}
 						
 					} else {
+						
+						writer.println("> Unknown command '" + command + "'!");
+						writer.println("> Enter h(elp) for usage information.");
+						
+					}
 
-						writer.println("> You already are connected to the MobilityDatahub!");
-						writer.println("> Ignoring this command...");
-						
-					}
+				} catch(JSchException e){
 					
-				} else if(command.equals("disconnect") || command.equals("d")){
-					
-					if(serverConnection){
-						
-						SshConnector.disconnect();
-						serverConnection = false;
-						
-					} else {
-						
-						writer.println("> You are not connected to the MobilityDatahub yet!");
-						writer.println("> Ignoring this command...");
-						
-					}
-					
-				} else {
-					
-					writer.println("> Unknown command '" + command + "'!");
-					writer.println("> Enter h(elp) for usage information.");
+					e.printStackTrace();
+					reader.setPrompt("> ");
 					
 				}
 				
