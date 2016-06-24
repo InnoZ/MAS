@@ -5,6 +5,8 @@ public class SurveyConstants {
 	private enum SurveyConstant{
 		
 		WTAG("stichtag", "stichtag_wtag"),
+		DATEST("st_date", null),
+		DATEEN("en_date", null),
 		BLAND("bland", null),
 		RTYP("rtypd7", null),
 		
@@ -25,14 +27,18 @@ public class SurveyConstants {
 		
 		WID("wid", "wnr"),
 		WWEIGHT("w_gew", "gewicht_w"),
+		WDEP("st_time", "e_beginn"),
 		WDEPH("st_std", "v_beginn_stunde"),
 		WDEPM("st_min", "v_beginn_minute"),
+		WARR("en_time", "e_ankunft"),
 		WARRH("en_std", "v_ankunft_stunde"),
 		WARRM("en_min", "v_ankunft_minute"),
 		WTD("wegkm_k", "v_laenge"),
+		WTT("wegmin_k", "e_dauer"),
 		WPUR("w04", "v_zweck"),
-		WMODE("hvm", "e_hvm");
-		
+		WMODE("hvm", "e_hvm"),
+		WSOURCE("w01", "v_start_lage"),
+		WSINK("w13", "v_ziel_lage");
 		
 		private String midName;
 		private String srvName;
@@ -44,7 +50,7 @@ public class SurveyConstants {
 			
 		}
 		
-		private String Name(String namespace){
+		private String getName(String namespace){
 			
 			if("mid".equalsIgnoreCase(namespace)){
 				
@@ -68,153 +74,201 @@ public class SurveyConstants {
 		
 	}
 	
+	public String getNamespace(){
+		
+		return this.namespace;
+		
+	}
+	
 	public String dayOfTheWeek(){
 		
-		return SurveyConstant.WTAG.Name(this.namespace);
+		return SurveyConstant.WTAG.getName(this.namespace);
+		
+	}
+	
+	public String startDate(){
+		
+		return SurveyConstant.DATEST.getName(this.namespace);
+		
+	}
+	
+	public String endDate(){
+		
+		return SurveyConstant.DATEEN.getName(this.namespace);
 		
 	}
 	
 	public String bundesland(){
 		
-		return SurveyConstant.BLAND.Name(this.namespace);
+		return SurveyConstant.BLAND.getName(this.namespace);
 		
 	}
 	
 	public String regionType(){
 		
-		return SurveyConstant.RTYP.Name(this.namespace);
+		return SurveyConstant.RTYP.getName(this.namespace);
 		
 	}
 	
 	public String householdId(){
 		
-		return SurveyConstant.HHID.Name(this.namespace);
+		return SurveyConstant.HHID.getName(this.namespace);
 		
 	}
 	
 	public String householdWeight(){
 		
-		return SurveyConstant.HHWEIGHT.Name(this.namespace);
+		return SurveyConstant.HHWEIGHT.getName(this.namespace);
 		
 	}
 	
 	public String householdSize(){
 		
-		return SurveyConstant.HHSIZE.Name(this.namespace);
+		return SurveyConstant.HHSIZE.getName(this.namespace);
 		
 	}
 	
 	public String numberOfHouseholdVehicles(){
 		
-		return SurveyConstant.HHVEHICLES.Name(this.namespace);
+		return SurveyConstant.HHVEHICLES.getName(this.namespace);
 		
 	}
 	
 	public String householdIncomePerMonth(){
 		
-		return SurveyConstant.HHINCOME.Name(this.namespace);
+		return SurveyConstant.HHINCOME.getName(this.namespace);
 		
 	}
 	
 	public String personId(){
 		
-		return SurveyConstant.PID.Name(this.namespace);
+		return SurveyConstant.PID.getName(this.namespace);
 		
 	}
 	
 	public String personWeight(){
 		
-		return SurveyConstant.PWEIGHT.Name(this.namespace);
+		return SurveyConstant.PWEIGHT.getName(this.namespace);
 		
 	}
 	
 	public String personSex(){
 		
-		return SurveyConstant.PSEX.Name(this.namespace);
+		return SurveyConstant.PSEX.getName(this.namespace);
 		
 	}
 	
 	public String personAge(){
 		
-		return SurveyConstant.PAGE.Name(this.namespace);
+		return SurveyConstant.PAGE.getName(this.namespace);
 		
 	}
 	
 	public String personCarAvailability(){
 		
-		return SurveyConstant.PCARAVAIL.Name(this.namespace);
+		return SurveyConstant.PCARAVAIL.getName(this.namespace);
 		
 	}
 	
 	public String personDrivingLicense(){
 		
-		return SurveyConstant.PLICENSE.Name(this.namespace);
+		return SurveyConstant.PLICENSE.getName(this.namespace);
 		
 	}
 	
 	public String personEmployment(){
 		
-		return SurveyConstant.PEMPLOYED.Name(this.namespace);
+		return SurveyConstant.PEMPLOYED.getName(this.namespace);
 		
 	}
 	
 	public String personIsCarsharingUser(){
 		
-		return SurveyConstant.PCSUSER.Name(this.namespace);
+		return SurveyConstant.PCSUSER.getName(this.namespace);
 		
 	}
 	
 	public String wayId(){
 		
-		return SurveyConstant.WID.Name(this.namespace);
+		return SurveyConstant.WID.getName(this.namespace);
 		
 	}
 	
 	public String wayWeight(){
 		
-		return SurveyConstant.WWEIGHT.Name(this.namespace);
+		return SurveyConstant.WWEIGHT.getName(this.namespace);
+		
+	}
+	
+	public String wayDeparture(){
+		
+		return SurveyConstant.WDEP.getName(this.namespace);
 		
 	}
 	
 	public String wayDepartureHour(){
 		
-		return SurveyConstant.WDEPH.Name(this.namespace);
+		return SurveyConstant.WDEPH.getName(this.namespace);
 		
 	}
 	
 	public String wayDepartureMinute(){
 		
-		return SurveyConstant.WDEPM.Name(this.namespace);
+		return SurveyConstant.WDEPM.getName(this.namespace);
+		
+	}
+	
+	public String wayArrival(){
+		
+		return SurveyConstant.WARR.getName(this.namespace);
 		
 	}
 	
 	public String wayArrivalHour(){
 		
-		return SurveyConstant.WARRH.Name(this.namespace);
+		return SurveyConstant.WARRH.getName(this.namespace);
 		
 	}
 	
 	public String wayArrivalMinute(){
 		
-		return SurveyConstant.WARRM.Name(this.namespace);
+		return SurveyConstant.WARRM.getName(this.namespace);
 		
 	}
 	
 	public String wayTravelDistance(){
 		
-		return SurveyConstant.WTD.Name(this.namespace);
+		return SurveyConstant.WTD.getName(this.namespace);
+		
+	}
+	
+	public String wayTravelTime(){
+		
+		return SurveyConstant.WTT.getName(this.namespace);
 		
 	}
 	
 	public String wayMode(){
 	
-		return SurveyConstant.WMODE.Name(this.namespace);
+		return SurveyConstant.WMODE.getName(this.namespace);
 		
 	}
 	
 	public String wayPurpose(){
 		
-		return SurveyConstant.WPUR.Name(this.namespace);
+		return SurveyConstant.WPUR.getName(this.namespace);
+		
+	}
+	
+	public String waySource(){
+		
+		return SurveyConstant.WSOURCE.getName(this.namespace);
+		
+	}
+	
+	public String waySink(){
+		
+		return SurveyConstant.WSINK.getName(this.namespace);
 		
 	}
 	
