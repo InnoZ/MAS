@@ -337,6 +337,11 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				innoz.scenarioGeneration.population.utils.PersonUtils.ATT_CAR_AVAIL, carAvail);
 		personAttributes.putAttribute(person.getId().toString(),
 				innoz.scenarioGeneration.population.utils.PersonUtils.ATT_LICENSE, hasLicense);
+		if(personTemplate.isCarsharingUser()){
+			personAttributes.putAttribute(person.getId().toString(), "OW_CARD", "true");
+			personAttributes.putAttribute(person.getId().toString(), "RT_CARD", "true");
+			personAttributes.putAttribute(person.getId().toString(), "FF_CARD", "true");
+		}
 		
 		// Check if there are any plans for the person (if it is a mobile person)
 		if(personTemplate.getPlans().size() > 0){

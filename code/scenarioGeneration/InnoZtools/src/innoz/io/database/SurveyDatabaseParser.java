@@ -109,19 +109,26 @@ public class SurveyDatabaseParser {
 	
 		String table = this.constants.getNamespace().equals("mid") ? "mid2008.households_raw" : "srv2013.households";
 		
-		String q = "select * from " + table + " where ";
+		String q = "select * from " + table;
 		
-		int cntOut = 0;
 		
-		for(Entry<Integer, Set<Integer>> entry : geoinformation.getRegionTypes().entrySet()){
-
-			cntOut++;
+		if(this.constants.getNamespace().equals("mid")){
 			
-			q += this.constants.regionType() + " = " + entry.getKey();
+			q +=  " where ";
+			
+			int cntOut = 0;
+			
+			for(Entry<Integer, Set<Integer>> entry : geoinformation.getRegionTypes().entrySet()){
 
-			if(cntOut < geoinformation.getRegionTypes().size()){
+				cntOut++;
+				
+				q += this.constants.regionType() + " = " + entry.getKey();
 
-				q += " or ";
+				if(cntOut < geoinformation.getRegionTypes().size()){
+
+					q += " or ";
+					
+				}
 				
 			}
 			
@@ -145,7 +152,7 @@ public class SurveyDatabaseParser {
 			container.incrementSumOfHouseholdWeigtsBy(hh.getWeight());
 			
 //			int bland = set.getInt(this.constants.bundesland());
-			int rtyp = set.getInt(this.constants.regionType());
+			int rtyp = this.constants.getNamespace().equals("mid") ? set.getInt(this.constants.regionType()) : 3;
 			
 			if(container.getHouseholdsForRegionType(rtyp) == null){
 				container.getStateId2Households().put(rtyp, new HashSet<String>());
@@ -214,10 +221,15 @@ public class SurveyDatabaseParser {
 			String age = set.getString(this.constants.personAge());
 			String employed = set.getString(this.constants.personEmployment());
 			
+			String carshare = "2";
+			if(this.constants.getNamespace().equalsIgnoreCase("srv")){
+				carshare = set.getString(this.constants.personIsCarsharingUser());
+			}
+			
 			int personGroup = this.constants.getNamespace().equalsIgnoreCase("mid") ? set.getInt(this.constants.personGroup()) : 0; //TODO
 			int phase = this.constants.getNamespace().equalsIgnoreCase("mid") ? set.getInt(this.constants.personLifephase()) : 0; //TODO
 			
-			SurveyPerson person = new SurveyPerson(hhId + personId, sex, age, carAvail, license, employed, this.constants);
+			SurveyPerson person = new SurveyPerson(hhId + personId, sex, age, carAvail, license, employed, this.constants, carshare);
 			person.setWeight(personWeight);
 			person.setPersonGroup(personGroup);
 			person.setLifePhase(phase);
@@ -301,9 +313,9 @@ public class SurveyDatabaseParser {
 			String hhId = set.getString(this.constants.householdId());
 			String personId = set.getString(this.constants.personId());
 			SurveyPerson person = container.getPersons().get(hhId + personId);
-			
+		
 			if(person != null){
-			
+				
 				SurveyPlan plan = null;
 				
 				int currentWayIdx = set.getInt(this.constants.wayId());
@@ -324,7 +336,7 @@ public class SurveyDatabaseParser {
 				}
 				
 				//the act type index at the destination
-				int purpose = set.getInt(this.constants.wayPurpose());
+				double purpose = set.getDouble(this.constants.wayPurpose());
 				double detailedPurpose = this.constants.getNamespace().equalsIgnoreCase("mid") ? set.getDouble(this.constants.wayDetailedPurpose()) : 0d;
 				
 				//the main mode of the leg and the mode combination
@@ -387,7 +399,8 @@ public class SurveyDatabaseParser {
 				}
 				
 				int dp = Double.isNaN(detailedPurpose) ? 0 : (int)detailedPurpose;
-				String actType = handleActType(purpose, dp);
+				int p = Double.isNaN(purpose) ? 0 : (int)purpose;
+				String actType = handleActType(p, dp);
 
 				int id = plan.getPlanElements().size() + 1;
 				
@@ -544,7 +557,7 @@ public class SurveyDatabaseParser {
 				for(Iterator<String> it = household.getMemberIds().iterator(); it.hasNext();){
 					
 					String pid = it.next();
-					
+			
 					boolean b = this.postprocessPerson(container.getPersons().get(pid));
 					
 					if(!b){

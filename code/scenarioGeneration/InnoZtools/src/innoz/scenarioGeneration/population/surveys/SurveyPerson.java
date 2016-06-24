@@ -30,6 +30,7 @@ public class SurveyPerson {
 	private boolean carAvailable;
 	private boolean hasLicense;
 	private boolean isEmployed;
+	private boolean carsharingUser;
 	
 	private List<SurveyPlan> plans;
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -48,6 +49,12 @@ public class SurveyPerson {
 	 */
 	public SurveyPerson(String id, String sex, String age, String carAvailable, String hasLicense, String isEmployed, SurveyConstants constants){
 		
+		this(id, sex, age, carAvailable, hasLicense, isEmployed, constants, "2");
+		
+	}
+	
+	public SurveyPerson(String id, String sex, String age, String carAvailable, String hasLicense, String isEmployed, SurveyConstants constants, String isCarsharingUser){
+		
 		this.id = id;
 		this.sex = sex.equals(constants.getSexMale()) ? "m" : "f";
 		this.age = !age.equals("NaN") ? Integer.parseInt(age) : Integer.MIN_VALUE;
@@ -64,6 +71,7 @@ public class SurveyPerson {
 		
 		this.hasLicense = hasLicense.equals("1") ? true : false;
 		this.isEmployed = isEmployed.equals("1") ? true : false;
+		this.carsharingUser = isCarsharingUser.equals("1") ? true : false;
 		
 		this.plans = new ArrayList<>();
 		
@@ -149,6 +157,10 @@ public class SurveyPerson {
 	 */
 	public boolean isEmployed() {
 		return isEmployed;
+	}
+	
+	public boolean isCarsharingUser(){
+		return this.carsharingUser;
 	}
 
 	/**
