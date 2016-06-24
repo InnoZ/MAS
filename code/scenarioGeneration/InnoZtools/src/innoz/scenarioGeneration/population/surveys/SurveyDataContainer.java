@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.matsim.core.utils.collections.Tuple;
-
 /**
  * 
  * Container class to store survey data (i.e. MiD, SrV, MoP) for further demand generation.
@@ -24,8 +22,8 @@ public class SurveyDataContainer {
 	private Map<String, SurveyPerson> persons;
 	private Map<String, SurveyVehicle> vehicles;
 	
-	private Map<Tuple<Integer, Integer>, Set<String>> state2Households;
-	private Map<Tuple<Integer, Integer>, Double> stateAndRegionType2HouseholdWeights;
+	private Map<Integer, Set<String>> regionType2Households;
+	private Map<Integer, Double> stateAndRegionType2HouseholdWeights;
 	
 	private Map<String, ArrayList<SurveyPerson>> classifiedPersons;
 	
@@ -52,8 +50,8 @@ public class SurveyDataContainer {
 		this.modeStatsContainer = new HashMap<String, RecursiveStatsContainer>();
 		this.activityTypeHydrographs = new HashMap<String, Hydrograph>();
 		
-		this.state2Households = new HashMap<Tuple<Integer, Integer>, Set<String>>();
-		this.stateAndRegionType2HouseholdWeights = new HashMap<Tuple<Integer,Integer>, Double>();
+		this.regionType2Households = new HashMap<Integer, Set<String>>();
+		this.stateAndRegionType2HouseholdWeights = new HashMap<Integer, Double>();
 		
 	}
 	
@@ -117,23 +115,25 @@ public class SurveyDataContainer {
 		
 	}
 	
-	public Map<Tuple<Integer,Integer>,Set<String>> getStateId2Households(){
-		return this.state2Households;
-	}
-	
-	public Set<String> getHouseholdsForState(int stateId, int rtyp){
+	public Map<Integer,Set<String>> getStateId2Households(){
 		
-		return this.state2Households.get(new Tuple<Integer, Integer>(stateId, rtyp));
+		return this.regionType2Households;
 		
 	}
 	
-	public double getWeightForHouseholdsInState(int stateId, int rtyp){
+	public Set<String> getHouseholdsForRegionType(int rtyp){
+		
+		return this.regionType2Households.get(rtyp);
+		
+	}
+	
+	public double getWeightForHouseholdsInRegionType(int rtyp){
 
-		if(this.stateAndRegionType2HouseholdWeights.get(new Tuple<Integer, Integer>(stateId, rtyp)) == null){
+		if(this.stateAndRegionType2HouseholdWeights.get(rtyp) == null){
 			
 			double w = 0;
 			
-			for(String hhId : this.state2Households.get(new Tuple<Integer, Integer>(stateId, rtyp))){
+			for(String hhId : this.regionType2Households.get(rtyp)){
 
 				if(this.households.get(hhId)!=null){
 					
@@ -143,11 +143,11 @@ public class SurveyDataContainer {
 				
 			}
 			
-			this.stateAndRegionType2HouseholdWeights.put(new Tuple<Integer, Integer>(stateId, rtyp), w);
+			this.stateAndRegionType2HouseholdWeights.put(rtyp, w);
 			
 		}
 		
-		return this.stateAndRegionType2HouseholdWeights.get(new Tuple<Integer, Integer>(stateId, rtyp));
+		return this.stateAndRegionType2HouseholdWeights.get(rtyp);
 		
 	}
 	

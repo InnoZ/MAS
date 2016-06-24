@@ -43,7 +43,7 @@ public class Geoinformation {
 //	private Map<String, AdministrativeUnit> adminUnits;
 	
 	private Set<Integer> states;
-	private Map<Integer, Set<Integer>> stateToRegionType;
+	private Map<Integer, Set<Integer>> regionTypesToDistricts;
 	
 	private Geometry surveyAreaBoundingBox;
 	private Geometry vicinityBoundingBox;
@@ -61,7 +61,7 @@ public class Geoinformation {
 		this.actType2QT = new HashMap<String, QuadTree<Geometry>>();
 		
 		this.states = new HashSet<Integer>();
-		this.stateToRegionType = new HashMap<Integer, Set<Integer>>();
+		this.regionTypesToDistricts = new HashMap<Integer, Set<Integer>>();
 		
 	}
 	
@@ -231,8 +231,8 @@ public class Geoinformation {
 		return this.states;
 	}
 	
-	public Map<Integer,Set<Integer>> getStateId2RegionTypes(){
-		return this.stateToRegionType;
+	public Map<Integer, Set<Integer>> getRegionTypes(){
+		return this.regionTypesToDistricts;
 	}
 	
 	public AdministrativeUnit getAdminUnitById(String id){

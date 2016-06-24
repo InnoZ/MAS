@@ -5,8 +5,8 @@ public class SurveyConstants {
 	private enum SurveyConstant{
 		
 		WTAG("stichtag", "stichtag_wtag"),
-		DATEST("st_date", null),
-		DATEEN("en_date", null),
+		DATEST("st_dat", null),
+		DATEEN("en_dat", null),
 		BLAND("bland", null),
 		RTYP("rtypd7", null),
 

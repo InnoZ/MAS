@@ -55,15 +55,15 @@ public class BbsrDataReader {
 				
 				unit.setRegionType(regionType);
 				
-				geoinformation.getStatesSet().add(unit.getBland());
+//				geoinformation.getStatesSet().add(unit.getBland());
 				
-				if(!geoinformation.getStateId2RegionTypes().containsKey(unit.getBland())){
-				
-					geoinformation.getStateId2RegionTypes().put(unit.getBland(), new HashSet<Integer>());
+				if(!geoinformation.getRegionTypes().containsKey(unit.getRegionType())){
+					
+					geoinformation.getRegionTypes().put(unit.getRegionType(), new HashSet<Integer>());
 					
 				}
 				
-				geoinformation.getStateId2RegionTypes().get(unit.getBland()).add(this.key2Type.get(subKey));
+				geoinformation.getRegionTypes().get(unit.getRegionType()).add(this.key2Type.get(subKey));
 				
 			}
 			
@@ -114,15 +114,15 @@ public class BbsrDataReader {
 					
 					unit.setRegionType(regionType);
 					
-					geoinformation.getStatesSet().add(unit.getBland());
+//					geoinformation.getStatesSet().add(unit.getBland());
 					
-					if(!geoinformation.getStateId2RegionTypes().containsKey(unit.getBland())){
+					if(!geoinformation.getRegionTypes().containsKey(unit.getRegionType())){
 					
-						geoinformation.getStateId2RegionTypes().put(unit.getBland(), new HashSet<Integer>());
+						geoinformation.getRegionTypes().put(unit.getRegionType(), new HashSet<Integer>());
 						
 					}
 					
-					geoinformation.getStateId2RegionTypes().get(unit.getBland()).add(this.key2Type.get(subKey));
+					geoinformation.getRegionTypes().get(unit.getRegionType()).add(this.key2Type.get(subKey));
 					
 				}
 				

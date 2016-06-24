@@ -131,17 +131,15 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				
 				this.currentHomeCell = chooseAdminUnitInsideDistrict(d, ActivityTypes.HOME);
 				
-				int blandId = this.currentHomeCell.getBland();
 				int rtyp = this.currentHomeCell.getRegionType();
 				
 				// Choose a template household (weighted, same method as above)
 				SurveyHousehold template = null;
 				
 				double accumulatedWeight = 0.;
-				double rand = this.random.nextDouble() * container.getWeightForHouseholdsInState(
-						blandId, rtyp);
+				double rand = this.random.nextDouble() * container.getWeightForHouseholdsInRegionType(rtyp);
 				
-				for(String hhId : container.getHouseholdsForState(blandId, rtyp)){
+				for(String hhId : container.getHouseholdsForRegionType(rtyp)){
 					
 					SurveyHousehold hh = container.getHouseholds().get(hhId);
 					

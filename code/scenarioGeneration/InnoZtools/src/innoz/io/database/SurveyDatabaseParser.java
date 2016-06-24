@@ -32,7 +32,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.misc.Time;
 
 public class SurveyDatabaseParser {
@@ -110,39 +109,19 @@ public class SurveyDatabaseParser {
 	
 		String table = this.constants.getNamespace().equals("mid") ? "mid2008.households_raw" : "srv2013.households";
 		
-		String q = "select * from " + table + " where (";
+		String q = "select * from " + table + " where ";
 		
 		int cntOut = 0;
 		
-		for(Entry<Integer, Set<Integer>> entry : geoinformation.getStateId2RegionTypes().entrySet()){
+		for(Entry<Integer, Set<Integer>> entry : geoinformation.getRegionTypes().entrySet()){
 
 			cntOut++;
 			
-			Integer bland = entry.getKey();
-			
-			q += this.constants.bundesland() + " = " + bland + " and (" + this.constants.regionType() + "=";
+			q += this.constants.regionType() + " = " + entry.getKey();
 
-			int cnt = 0;
-			
-			for(Integer i : entry.getValue()){
+			if(cntOut < geoinformation.getRegionTypes().size()){
 
-				cnt++;
-				
-				if(cnt < entry.getValue().size()){
-
-					q += i + " or " + this.constants.regionType() + "=";
-					
-				} else {
-					
-					q += i + "))";
-					
-				}
-				
-			}
-			
-			if(cntOut < geoinformation.getStateId2RegionTypes().size()){
-				
-				q += " or (";
+				q += " or ";
 				
 			}
 			
@@ -165,14 +144,14 @@ public class SurveyDatabaseParser {
 			container.getHouseholds().put(hhId, hh);
 			container.incrementSumOfHouseholdWeigtsBy(hh.getWeight());
 			
-			int bland = set.getInt(this.constants.bundesland());
+//			int bland = set.getInt(this.constants.bundesland());
 			int rtyp = set.getInt(this.constants.regionType());
 			
-			if(container.getHouseholdsForState(bland, rtyp) == null){
-				container.getStateId2Households().put(new Tuple<Integer, Integer>(bland, rtyp), new HashSet<String>());
+			if(container.getHouseholdsForRegionType(rtyp) == null){
+				container.getStateId2Households().put(rtyp, new HashSet<String>());
 			}
 			
-			container.getStateId2Households().get(new Tuple<Integer,Integer>(bland,rtyp)).add(hhId);
+			container.getStateId2Households().get(rtyp).add(hhId);
 
 		}
 		
@@ -371,10 +350,10 @@ public class SurveyDatabaseParser {
 				
 				//if the way ends on the next day, add 24 hrs to the departure / arrival time
 				if(startDate != 0){
-					continue;
+					startTime += Time.MIDNIGHT;
 				}
 				if(endDate != 0){
-					endTime = Time.MIDNIGHT;
+					endTime += Time.MIDNIGHT;
 				}
 				
 				double weight = set.getDouble(this.constants.wayWeight());
@@ -610,6 +589,8 @@ public class SurveyDatabaseParser {
 			if(person.getPlans().size() < 1) return false;
 			
 			for(SurveyPlan plan : person.getPlans()){
+				
+				if(plan.getPlanElements().size() < 1) continue;
 				
 				person.incrementPlansWeight(plan.getWeigt());
 
