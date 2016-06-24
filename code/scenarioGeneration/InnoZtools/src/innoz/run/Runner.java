@@ -79,7 +79,7 @@ public class Runner {
 						
 						try {
 						
-							serverConnection = SshConnector.connectShell(c, reader);
+							serverConnection = SshConnector.connect(c);
 							reader.setPrompt("> ");
 						
 						} catch (JSchException e) {
@@ -133,7 +133,7 @@ public class Runner {
 									
 									try {
 										
-										serverConnection = SshConnector.connectShell(c, reader);
+										serverConnection = SshConnector.connect(c);
 										reader.setPrompt("> ");
 										
 									} catch (JSchException e) {
@@ -178,7 +178,7 @@ public class Runner {
 						
 						try {
 						
-							serverConnection = SshConnector.connectShell(c, reader);
+							serverConnection = SshConnector.connect(c);
 							reader.setPrompt("> ");
 						
 						} catch (JSchException e) {

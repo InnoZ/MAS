@@ -2,6 +2,7 @@ package innoz.io.database;
 
 import innoz.config.Configuration;
 import innoz.io.SurveyConstants;
+import innoz.io.database.SurveyDatabaseParser.Subtour.subtourType;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
 import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
@@ -26,12 +27,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.misc.Time;
 
@@ -235,10 +235,10 @@ public class SurveyDatabaseParser {
 			String age = set.getString(this.constants.personAge());
 			String employed = set.getString(this.constants.personEmployment());
 			
-			int personGroup = set.getInt(MiDConstants.PERSON_GROUP_12);
-			int phase = set.getInt(MiDConstants.PERSON_LIFE_PHASE);
+			int personGroup = this.constants.getNamespace().equalsIgnoreCase("mid") ? set.getInt(this.constants.personGroup()) : 0; //TODO
+			int phase = this.constants.getNamespace().equalsIgnoreCase("mid") ? set.getInt(this.constants.personLifephase()) : 0; //TODO
 			
-			SurveyPerson person = new SurveyPerson(hhId + personId, sex, age, carAvail, license, employed);
+			SurveyPerson person = new SurveyPerson(hhId + personId, sex, age, carAvail, license, employed, this.constants);
 			person.setWeight(personWeight);
 			person.setPersonGroup(personGroup);
 			person.setLifePhase(phase);
@@ -346,7 +346,7 @@ public class SurveyDatabaseParser {
 				
 				//the act type index at the destination
 				int purpose = set.getInt(this.constants.wayPurpose());
-				double detailedPurpose = this.constants.getNamespace().equalsIgnoreCase("mid") ? set.getDouble(MiDConstants.PURPOSE_DIFF) : 0d;
+				double detailedPurpose = this.constants.getNamespace().equalsIgnoreCase("mid") ? set.getDouble(this.constants.wayDetailedPurpose()) : 0d;
 				
 				//the main mode of the leg and the mode combination
 				String mainMode = handleMainMode(set.getString(this.constants.wayMode()));
@@ -498,10 +498,10 @@ public class SurveyDatabaseParser {
 		
 		while(results.next()){
 			
-			String hhid = results.getString(MiDConstants.HOUSEHOLD_ID);
-			String vid = results.getString(MiDConstants.VEHICLE_ID);
-			int fuelType = results.getInt(MiDConstants.VEHICLE_FUEL);
-			int kbaClass = results.getInt(MiDConstants.SEG_KBA);
+			String hhid = results.getString(this.constants.householdId());
+			String vid = results.getString(this.constants.vehicleId());
+			int fuelType = results.getInt(this.constants.vehicleFuelType());
+			int kbaClass = results.getInt(this.constants.vehicleSegmentKBA());
 			
 			SurveyHousehold household = container.getHouseholds().get(hhid);
 			
@@ -716,31 +716,31 @@ public class SurveyDatabaseParser {
 				breakpointsList.addAll(breakpoints);
 				Collections.sort(breakpointsList);
 				
-//				for(int i = 0; i < breakpointsList.size() - 1; i++){
-//					
-//					SurveyPlanActivity act1 = (SurveyPlanActivity) plan.getPlanElements().get(breakpointsList.get(i));
-//					SurveyPlanActivity act2 = (SurveyPlanActivity) plan.getPlanElements().get(breakpointsList.get(i + 1));
-//
-//					Subtour subtour = new Subtour(breakpointsList.get(i), breakpointsList.get(i+1));
-//					
-//					if(act1.getActType().equals(act2.getActType())){
-//						
-//						subtour.type = subtourType.inter;
-//						plan.getSubtours().add(subtour);
-//						
-//					} else if(act2.getActType().equals(plan.getMainActType())){
-//						
-//						subtour.type = subtourType.forth;
-//						plan.getSubtours().add(subtour);
-//
-//					} else if(act1.getActType().equals(plan.getMainActType())){
-//
-//						subtour.type = subtourType.back;
-//						plan.getSubtours().add(subtour);
-//
-//					}
-//					
-//				}
+				for(int i = 0; i < breakpointsList.size() - 1; i++){
+					
+					SurveyPlanActivity act1 = (SurveyPlanActivity) plan.getPlanElements().get(breakpointsList.get(i));
+					SurveyPlanActivity act2 = (SurveyPlanActivity) plan.getPlanElements().get(breakpointsList.get(i + 1));
+
+					Subtour subtour = new Subtour(breakpointsList.get(i), breakpointsList.get(i+1));
+					
+					if(act1.getActType().equals(act2.getActType())){
+						
+						subtour.type = subtourType.inter;
+						plan.getSubtours().add(subtour);
+						
+					} else if(act2.getActType().equals(plan.getMainActType())){
+						
+						subtour.type = subtourType.forth;
+						plan.getSubtours().add(subtour);
+
+					} else if(act1.getActType().equals(plan.getMainActType())){
+
+						subtour.type = subtourType.back;
+						plan.getSubtours().add(subtour);
+
+					}
+					
+				}
 				
 			}
 			
@@ -836,6 +836,20 @@ public class SurveyDatabaseParser {
 	
 	private String handleActType(int idx, int idxD){
 		
+		if(this.constants.getNamespace().equalsIgnoreCase("mid")){
+			
+			return handleMiDActType(idx, idxD);
+			
+		} else {
+			
+			return handleSrVActType(idx);
+			
+		}
+
+	}
+	
+	private String handleMiDActType(int idx, int idxD){
+	
 		switch(idx){
 		
 			case 1: return ActivityTypes.WORK;
@@ -846,7 +860,7 @@ public class SurveyDatabaseParser {
 			case 9: return "return";
 			case 32: return ActivityTypes.KINDERGARTEN;
 			default: return handleActTypeDetailed(idxD); //other
-		
+	
 		}
 		
 	}
@@ -887,6 +901,31 @@ public class SurveyDatabaseParser {
 		
 	}
 	
+	private String handleSrVActType(int idx){
+		
+		switch(idx){
+		
+			case 1: return ActivityTypes.WORK;
+			case 2: return ActivityTypes.WORK;
+			case 3: return ActivityTypes.KINDERGARTEN;
+			case 4:
+			case 5:
+			case 6:
+			case 7: return ActivityTypes.EDUCATION;
+			case 8: return ActivityTypes.SUPPLY;
+			case 9: return ActivityTypes.SHOPPING;
+			case 10: return ActivityTypes.ERRAND;
+			case 12: return ActivityTypes.CULTURE;
+			case 15:
+			case 16:
+			case 17: return ActivityTypes.LEISURE;
+			case 18: return ActivityTypes.HOME;
+			default: return ActivityTypes.OTHER;
+		
+		}
+		
+	}
+	
 	private String handleActTypeAtStart(double idx){
 		
 		switch((int)idx){
@@ -903,16 +942,56 @@ public class SurveyDatabaseParser {
 	
 	private String handleMainMode(String modeIdx){
 		
+		if(this.constants.getNamespace().equalsIgnoreCase("mid")){
+			
+			return handleMainModeMiD(modeIdx);
+			
+		} else{
+			
+			return handleMainModeSrV(modeIdx);
+			
+		}
+		
+	}
+	
+	private String handleMainModeMiD(String modeIdx){
+
 		switch(modeIdx){
 		
 			case "1": return TransportMode.walk;
 			case "2": return TransportMode.bike;
-//			case "3": return Modes.SCOOTER;
-//			case "4": return Modes.MOTORCYCLE;
+	//		case "3": return Modes.SCOOTER;
+	//		case "4": return Modes.MOTORCYCLE;
 			case "3": return TransportMode.ride;
 			case "4": return TransportMode.car;
 			default: return TransportMode.pt;
-//			default: return TransportMode.other;
+	//		default: return TransportMode.other;
+	
+		}
+		
+	}
+	
+	private String handleMainModeSrV(String modeIdx){
+		
+		switch(modeIdx){
+		
+			case "1": return TransportMode.walk;
+			case "2": return TransportMode.bike;
+			case "3": //return Modes.SCOOTER;
+			case "4": return TransportMode.car;
+			case "5": //return "freefloating";
+			case "6": return TransportMode.car;
+			case "7":
+			case "8":
+			case "9": return TransportMode.ride;
+			case "10":
+			case "11":
+			case "12":
+			case "13":
+			case "14":
+			case "15": return TransportMode.pt;
+			case "16": //return Modes.TAXI;
+			default: return TransportMode.other;
 		
 		}
 		

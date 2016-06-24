@@ -1,10 +1,10 @@
 package innoz.scenarioGeneration.population.surveys;
 
+import innoz.io.database.SurveyDatabaseParser.Subtour;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import innoz.io.database.MidDatabaseParser.Subtour;
 
 public class SurveyPlan {
 

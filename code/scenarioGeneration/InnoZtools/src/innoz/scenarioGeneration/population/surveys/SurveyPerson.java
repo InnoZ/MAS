@@ -1,6 +1,6 @@
 package innoz.scenarioGeneration.population.surveys;
 
-import innoz.io.database.MiDConstants;
+import innoz.io.SurveyConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,11 +46,11 @@ public class SurveyPerson {
 	 * @param hasLicense Defines if the person is allowed to drive a car (prerequisite for 'car' mode).
 	 * @param isEmployed Defines if the person has a job or not.
 	 */
-	public SurveyPerson(String id, String sex, String age, String carAvailable, String hasLicense, String isEmployed){
+	public SurveyPerson(String id, String sex, String age, String carAvailable, String hasLicense, String isEmployed, SurveyConstants constants){
 		
 		this.id = id;
-		this.sex = sex.equals(MiDConstants.SEX_MALE) ? "m" : "f";
-		this.age = !age.equals(MiDConstants.NAN) ? Integer.parseInt(age) : Integer.MIN_VALUE;
+		this.sex = sex.equals(constants.getSexMale()) ? "m" : "f";
+		this.age = !age.equals("NaN") ? Integer.parseInt(age) : Integer.MIN_VALUE;
 		
 		if(carAvailable.equals("1") || carAvailable.equals("2")){
 			

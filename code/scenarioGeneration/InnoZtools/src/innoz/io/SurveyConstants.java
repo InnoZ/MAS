@@ -9,7 +9,7 @@ public class SurveyConstants {
 		DATEEN("en_date", null),
 		BLAND("bland", null),
 		RTYP("rtypd7", null),
-		
+
 		HHID("hhid","hhnr"),
 		HHWEIGHT("hh_gew", "gewicht_hh"),
 		HHSIZE("h02", "v_anz_pers"),
@@ -24,6 +24,8 @@ public class SurveyConstants {
 		PLICENSE("hp_pkwfs", "v_fuehr_pkw"),
 		PEMPLOYED("hp_beruf", "v_erw"),
 		PCSUSER(null, "v_carshare"),
+		PG12("pergrup1", null),
+		PLPHASE("lebensph", null),
 		
 		WID("wid", "wnr"),
 		WWEIGHT("w_gew", "gewicht_w"),
@@ -36,13 +38,18 @@ public class SurveyConstants {
 		WTD("wegkm_k", "v_laenge"),
 		WTT("wegmin_k", "e_dauer"),
 		WPUR("w04", "v_zweck"),
+		WPURD("w04_dzw", null),
 		WMODE("hvm", "e_hvm"),
 		WSOURCE("w01", "v_start_lage"),
-		WSINK("w13", "v_ziel_lage");
+		WSINK("w13", "v_ziel_lage"),
+		
+		VID("vmid", null),
+		VFUEL("h048", null),
+		VSEG("seg_kba", null);
 		
 		private String midName;
 		private String srvName;
-		
+
 		SurveyConstant(String midName, String srvName){
 			
 			this.midName = midName;
@@ -65,7 +72,9 @@ public class SurveyConstants {
 		}
 		
 	}
-	
+
+	private final String PSEX_MALE = "1";
+
 	final String namespace;
 	
 	public SurveyConstants(String namespace) {
@@ -269,6 +278,48 @@ public class SurveyConstants {
 	public String waySink(){
 		
 		return SurveyConstant.WSINK.getName(this.namespace);
+		
+	}
+	
+	public String personGroup(){
+		
+		return SurveyConstant.PG12.getName(this.namespace);
+		
+	}
+
+	public String personLifephase(){
+		
+		return SurveyConstant.PLPHASE.getName(this.namespace);
+		
+	}
+	
+	public String wayDetailedPurpose(){
+		
+		return SurveyConstant.WPURD.getName(this.namespace);
+		
+	}
+	
+	public String vehicleId(){
+		
+		return SurveyConstant.VID.getName(this.namespace);
+		
+	}
+	
+	public String vehicleFuelType(){
+		
+		return SurveyConstant.VFUEL.getName(this.namespace);
+		
+	}
+	
+	public String vehicleSegmentKBA(){
+		
+		return SurveyConstant.VSEG.getName(this.namespace);
+		
+	}
+	
+	public String getSexMale(){
+		
+		return this.PSEX_MALE;
 		
 	}
 	
