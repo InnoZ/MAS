@@ -24,6 +24,9 @@
 		<scaleFactor v="1.0" />
 		<outputDirectory v="/" />
 		<overwriteExistingFiles v="false"/>
+		<demandSource v="mid" />
+		<!-- Set to 'true' if you want to use InnoZ' mobility attitudegroups (Mobilitätstypen) -->
+		<useMobilityAttitudeGroups v="false" />
 	</scenario>
 
 	<surveyData>
