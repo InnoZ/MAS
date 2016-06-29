@@ -1,6 +1,7 @@
 package innoz.scenarioGeneration.population.mobilityAttitude;
 
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
@@ -73,6 +74,10 @@ public class MobilityAttitudeGroups {
 			
 		}
 		
+	}
+	
+	public static String assignPersonToGroup(Person person){
+		return null;
 	}
 	
 }

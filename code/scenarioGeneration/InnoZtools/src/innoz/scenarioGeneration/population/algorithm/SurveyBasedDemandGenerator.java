@@ -6,6 +6,7 @@ import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.geoinformation.Distribution;
 import innoz.scenarioGeneration.geoinformation.District;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
+import innoz.scenarioGeneration.population.mobilityAttitude.MobilityAttitudeGroups;
 import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
 import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
 import innoz.scenarioGeneration.population.surveys.SurveyPerson;
@@ -185,7 +186,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 					String personId = template.getMemberIds().get(j);
 					SurveyPerson templatePerson = container.getPersons().get(personId);
 					
-					Person person = createPerson(templatePerson, population, personAttributes, this.random.nextDouble(),
+					Person person = createPerson(configuration, templatePerson, population, personAttributes, this.random.nextDouble(),
 							population.getPersons().size(), homeLocation, container);
 					
 					// If the resulting MATSim person is not null, add it
@@ -280,7 +281,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				for(int i = 0; i < 10000 * configuration.getScaleFactor(); i++){
 					
 					Coord homeCoord = chooseActivityCoordInAdminUnit(au, ActivityTypes.HOME);
-					population.addPerson(createPerson(personTemplate, population, personAttributes, personalRandom, i, homeCoord, container));
+					population.addPerson(createPerson(configuration, personTemplate, population, personAttributes, personalRandom, i, homeCoord, container));
 					
 				}
 				
@@ -304,7 +305,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	 * @return A MATSim person with an initial daily plan.
 	 */
 	@SuppressWarnings("deprecation")
-	private Person createPerson(SurveyPerson personTemplate, Population population,
+	private Person createPerson(Configuration configuration, SurveyPerson personTemplate, Population population,
 			ObjectAttributes personAttributes, double personalRandom, int i, Coord homeCoord, SurveyDataContainer container) {
 
 		// Initialize main act location, last leg, last act cell and the coordinate of the last activity as null to avoid errors...
@@ -341,6 +342,10 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			personAttributes.putAttribute(person.getId().toString(), "OW_CARD", "true");
 			personAttributes.putAttribute(person.getId().toString(), "RT_CARD", "true");
 			personAttributes.putAttribute(person.getId().toString(), "FF_CARD", "true");
+		}
+		
+		if(configuration.isUsingMobilityAttitudeGroups()){
+			MobilityAttitudeGroups.assignPersonToGroup(person);
 		}
 		
 		// Check if there are any plans for the person (if it is a mobile person)
