@@ -2,6 +2,7 @@ package innoz.scenarioGeneration.config;
 
 import innoz.config.Configuration;
 import innoz.config.Configuration.PopulationType;
+import innoz.scenarioGeneration.population.mobilityAttitude.MobilityAttitudeGroups;
 import innoz.scenarioGeneration.utils.ActivityTypes;
 
 import org.matsim.api.core.v01.TransportMode;
@@ -36,12 +37,20 @@ public class InitialConfigCreator {
 			config.households().setInputFile(configuration.getOutputDirectory() + "households.xml.gz");
 			
 		}
-		
-		// Add activity types to the scoring parameters
-		addBasicActivityParams(config);
-		
-		// Add mode parameters
-		addBasicModeParams(config);
+
+		if(configuration.isUsingMobilityAttitudeGroups()){
+			
+			MobilityAttitudeGroups.addScoringParameterSets(config);
+			
+		} else {
+			
+			// Add activity types to the scoring parameters
+			addBasicActivityParams(config);
+			
+			// Add mode parameters
+			addBasicModeParams(config);
+			
+		}
 		
 		// QSim config group
 		config.qsim().setFlowCapFactor(configuration.getScaleFactor());

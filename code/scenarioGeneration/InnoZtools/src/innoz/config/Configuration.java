@@ -41,6 +41,8 @@ public final class Configuration {
 	public static final String LOD_NETWORK = "networkDetail";
 	public static final String DEMAND_DATA_SOURCE = "demandSource";
 	
+	public static final String USE_MAG = "useMobilityAttitudeGroups";
+	
 	public static final String LOCAL_PORT = "localPort";
 	public static final String DB_SCHEMA_NAME = "databaseSchemaName";
 	public static final String DB_TABLE_SUFFIX = "tableSuffix";
@@ -63,6 +65,7 @@ public final class Configuration {
 	boolean useVehicles = false;
 	boolean onlyWorkingDays = true;
 	boolean useBuildings = true;
+	boolean useMobilityAttitudeGroups = false;
 	
 	String demandSource = "mid";
 	
@@ -584,6 +587,12 @@ public final class Configuration {
 	
 	public String getDatasource(){
 		return this.demandSource;
+	}
+	
+	public boolean isUsingMobilityAttitudeGroups(){
+		
+		return this.useMobilityAttitudeGroups;
+		
 	}
 	
 }

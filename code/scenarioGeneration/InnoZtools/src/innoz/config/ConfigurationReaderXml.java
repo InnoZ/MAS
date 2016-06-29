@@ -122,6 +122,10 @@ public class ConfigurationReaderXml extends DefaultHandler {
 			
 			this.configuration.demandSource = attributes.getValue("v");
 			
+		} else if(qName.equalsIgnoreCase(Configuration.USE_MAG)){
+
+			this.configuration.useMobilityAttitudeGroups = Boolean.parseBoolean(attributes.getValue("v"));
+			
 		}
 		
 	}

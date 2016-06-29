@@ -19,14 +19,13 @@ public class MobilityAttitudeGroups {
 	 * Umweltbewusste ÖV- und Rad-Affine
 	 * Innovative technikaffine Multioptionale
 	 */
-	
-	public void addScoringParameterSets(final Config config){
+	public static void addScoringParameterSets(final Config config){
 
 		String[] modes = new String[]{TransportMode.bike, TransportMode.car,
 				TransportMode.other, TransportMode.pt, TransportMode.ride,
 				TransportMode.walk, Modes.OW, Modes.TW, Modes.FF};
 		
-		String[] subpops = new String[]{"tradCar", "flexCar", "urbanPt",
+		String[] subpops = new String[]{null, "tradCar", "flexCar", "urbanPt",
 				"convBike", "envtPtBike", "multiOpt"};
 		
 		for(String subpop : subpops){
