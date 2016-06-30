@@ -12,7 +12,7 @@
 			<include name="poi-3.14-20160307.jar" />
 			<include name="poi-ooxml-3.14-20160307.jar" />
 		</fileset>
-		<fileset dir="../../../innoz-workspace/matsim-0.8.0/" >
+		<fileset dir="../../matsim-0.8.0/" >
 			<include name="matsim-0.8.0.jar"/>
 		</fileset>
 	</path>
@@ -23,7 +23,7 @@
 	</target>
 
 	<!-- Procedure to build the class files in preparation of the jar  -->
-	<target name="compile" description="create class files" depends="test"  >
+	<target name="compile" description="create class files" depends=""  >
 		<mkdir dir="build/classes"/>
 		<javac srcdir="../code/scenarioGeneration/InnoZtools/src" destdir="build/classes/" debug="on">
 			<classpath refid="libraries.path"/>
