@@ -7,12 +7,8 @@
 			<include name="jsch-0.1.53.jar"/>
 			<include name="postgresql-9.3-1104.jdbc4.jar" />
 			<include name="jline-2.15-SNAPSHOT.jar" />
-		</fileset>
-		<fileset dir="poi-3.14">
 			<include name="poi-3.14-20160307.jar" />
 			<include name="poi-ooxml-3.14-20160307.jar" />
-		</fileset>
-		<fileset dir="../../matsim-0.8.0/" >
 			<include name="matsim-0.8.0.jar"/>
 		</fileset>
 	</path>
