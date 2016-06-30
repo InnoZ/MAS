@@ -345,7 +345,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		}
 		
 		if(configuration.isUsingMobilityAttitudeGroups()){
-			MobilityAttitudeGroups.assignPersonToGroup(person, hhIncome);
+			String mag = MobilityAttitudeGroups.assignPersonToGroup(person, hhIncome);
+			personAttributes.putAttribute(person.getId().toString(), "mobilityAttitude", mag);
 		}
 		
 		// Check if there are any plans for the person (if it is a mobile person)
