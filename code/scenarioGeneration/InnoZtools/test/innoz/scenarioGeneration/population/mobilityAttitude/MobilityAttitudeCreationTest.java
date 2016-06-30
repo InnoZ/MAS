@@ -30,20 +30,27 @@ public class MobilityAttitudeCreationTest {
 			Person person = scenario.getPopulation().getFactory().createPerson(
 					Id.createPersonId(i));
 			PersonUtils.setAge(person, ages[i]);
+			String sex = null;
+			if(MatsimRandom.getLocalInstance().nextDouble() >= 0.5){
+				sex = "m";
+			} else {
+				sex = "f";
+			}
+			PersonUtils.setSex(person, sex);
 			results[i] = MobilityAttitudeGroups.assignPersonToGroup(person, MatsimRandom.getLocalInstance().nextInt(5000));
 			
 		}
 		
 		assertTrue(results[0] == null);
-		assertTrue(results[1].equals("multiOpt"));
-		assertTrue(results[2].equals("flexCar"));
-		assertTrue(results[3].equals("multiOpt"));
+		assertTrue(results[1].equals("flexCar"));
+		assertTrue(results[2].equals("convBike"));
+		assertTrue(results[3].equals("flexCar"));
 		assertTrue(results[4].equals("envtPtBike"));
-		assertTrue(results[5].equals("tradCar"));
-		assertTrue(results[6].equals("multiOpt"));
+		assertTrue(results[5].equals("multiOpt"));
+		assertTrue(results[6].equals("flexCar"));
 		assertTrue(results[7].equals("flexCar"));
-		assertTrue(results[8].equals("urbanPt"));
-		assertTrue(results[9].equals("urbanPt"));
+		assertTrue(results[8].equals("flexCar"));
+		assertTrue(results[9].equals("convBike"));
 		
 	}
 	

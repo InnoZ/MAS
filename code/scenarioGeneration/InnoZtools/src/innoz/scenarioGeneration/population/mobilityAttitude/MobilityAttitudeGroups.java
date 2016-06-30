@@ -21,6 +21,10 @@ public class MobilityAttitudeGroups {
 	final static String[] subpops = new String[]{null, "tradCar", "flexCar", "urbanPt",
 			"convBike", "envtPtBike", "multiOpt"};
 	
+	final static double[] pWomen = new double[]{
+			0.554, 0.505, 0.732, 0.607, 0.467, 0.358
+	};
+	
 	final static double[][] ageIndices = new double[][]{
 		//18-20
 		{0.0812307343, 0.1599753649, 0.1377107523, 0.0439406019, 0.2226323829,
@@ -181,18 +185,20 @@ public class MobilityAttitudeGroups {
 			
 		}
 		
-		return getMobilityAttitudeGroupForAgeAndIncome(ageIndex, incomeIndex);
+		return getMobilityAttitudeGroupForAgeAndIncome(ageIndex, incomeIndex, sex);
 	
 	}
 	
-	private static String getMobilityAttitudeGroupForAgeAndIncome(int ageIndex, int incomeIndex){
+	private static String getMobilityAttitudeGroupForAgeAndIncome(int ageIndex, int incomeIndex, String sex){
 		
 		double[] indices = new double[6];
 		double sum = 0.0d;
 		
 		for(int i = 0; i < 6; i++){
 			
-			indices[i] = ageIndices[ageIndex][i] * incomeIndices[incomeIndex][i];
+			double pSex = sex.equals("m") ? 1- pWomen[i] : pWomen[i];
+			
+			indices[i] = ageIndices[ageIndex][i] * incomeIndices[incomeIndex][i] * pSex;
 			sum += indices[i];
 			
 		}
