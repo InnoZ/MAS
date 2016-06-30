@@ -1,16 +1,5 @@
 package innoz.run.controller;
 
-import innoz.config.Configuration;
-import innoz.config.Configuration.PopulationType;
-import innoz.io.BbsrDataReader;
-import innoz.io.database.DatabaseReader;
-import innoz.io.database.DatabaseUpdater;
-import innoz.scenarioGeneration.config.InitialConfigCreator;
-import innoz.scenarioGeneration.geoinformation.Geoinformation;
-import innoz.scenarioGeneration.network.NetworkCreatorFromPsql;
-import innoz.scenarioGeneration.population.PopulationCreator;
-import innoz.scenarioGeneration.population.utils.PersonUtils;
-
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,12 +14,21 @@ import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.PopulationWriter;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.households.HouseholdsWriterV10;
-import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.matsim.vehicles.VehicleWriterV1;
 import org.opengis.referencing.FactoryException;
 
 import com.vividsolutions.jts.io.ParseException;
+
+import innoz.config.Configuration;
+import innoz.config.Configuration.PopulationType;
+import innoz.io.BbsrDataReader;
+import innoz.io.database.DatabaseReader;
+import innoz.io.database.DatabaseUpdater;
+import innoz.scenarioGeneration.config.InitialConfigCreator;
+import innoz.scenarioGeneration.geoinformation.Geoinformation;
+import innoz.scenarioGeneration.network.NetworkCreatorFromPsql;
+import innoz.scenarioGeneration.population.PopulationCreator;
 
 public class ScenarioGenerationController implements DefaultController {
 
@@ -89,14 +87,10 @@ public class ScenarioGenerationController implements DefaultController {
 				new PopulationWriter(scenario.getPopulation()).write(configuration
 						.getOutputDirectory() + "plans.xml.gz");
 				
-//				if(scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES) != null){
+				new ObjectAttributesXmlWriter(scenario.getPopulation().
+						getPersonAttributes()).writeFile(configuration.getOutputDirectory()
+								+ "personAttributes.xml.gz");
 					
-					new ObjectAttributesXmlWriter(scenario.getPopulation().
-							getPersonAttributes()).writeFile(configuration.getOutputDirectory()
-									+ "personAttributes.xml.gz");
-					
-//				}
-
 				if(configuration.isUsingHouseholds()){
 					
 					new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration
