@@ -62,7 +62,7 @@ public class ScenarioGenerationController implements DefaultController {
 			DatabaseReader dbReader = new DatabaseReader(geoinformation);
 			dbReader.readGeodataFromDatabase(configuration, scenario);
 			InputStream in = this.getClass().getClassLoader().getResourceAsStream("regionstypen.csv");
-			new BbsrDataReader().read(geoinformation, new InputStreamReader(in));
+			new BbsrDataReader().read(geoinformation);//, new InputStreamReader(in));
 			
 			// Create a MATSim network from OpenStreetMap data
 			NetworkCreatorFromPsql nc;
@@ -89,14 +89,14 @@ public class ScenarioGenerationController implements DefaultController {
 				new PopulationWriter(scenario.getPopulation()).write(configuration
 						.getOutputDirectory() + "plans.xml.gz");
 				
-				if(scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES) != null){
+//				if(scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES) != null){
 					
-					new ObjectAttributesXmlWriter((ObjectAttributes) scenario.getScenarioElement(
-							PersonUtils.PERSON_ATTRIBUTES)).writeFile(configuration.getOutputDirectory()
+					new ObjectAttributesXmlWriter(scenario.getPopulation().
+							getPersonAttributes()).writeFile(configuration.getOutputDirectory()
 									+ "personAttributes.xml.gz");
 					
-				}
-				
+//				}
+
 				if(configuration.isUsingHouseholds()){
 					
 					new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration

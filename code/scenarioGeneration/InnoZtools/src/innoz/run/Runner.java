@@ -39,13 +39,13 @@ public class Runner {
 		
 		boolean serverConnection = false;
 
+		ConsoleReader reader = new ConsoleReader();
+		reader.addCompleter(new FileNameCompleter());
+		reader.setCompletionHandler(new CandidateListCompletionHandler());
+		reader.setPrompt("> ");
+		
 		// If no runtime argument was given, start the infinite loop
 		if(args.length == 0){
-			
-			ConsoleReader reader = new ConsoleReader();
-			reader.addCompleter(new FileNameCompleter());
-			reader.setCompletionHandler(new CandidateListCompletionHandler());
-			reader.setPrompt("> ");
 			
 			PrintWriter writer = new PrintWriter(reader.getOutput());
 			
@@ -77,7 +77,7 @@ public class Runner {
 						
 						ConfigurationUtils.loadConfiguration(command.split(" ")[1], c);
 						
-						if(!serverConnection){
+						if(!serverConnection && command.contains(" -c ")){
 							
 							serverConnection = SshConnector.connectShell(c, reader);
 							reader.setPrompt("> ");
@@ -206,11 +206,23 @@ public class Runner {
 			
 			if(args[0].equals("build-scenario") || args[0].equals("bs")){
 				
-				ConfigurationUtils.loadConfiguration(args[1], c);
+				try {
 				
-				new ScenarioGenerationController(c).run();
+					ConfigurationUtils.loadConfiguration(args[1], c);
+					
+					if(args[0].contains(" -c ")){
+						
+							SshConnector.connectShell(c, reader);
+						
+					}
+					
+					new ScenarioGenerationController(c).run();
+					
+					SshConnector.disconnect();
 				
-				SshConnector.disconnect();
+				} catch (JSchException e) {
+					e.printStackTrace();
+				}
 				
 			}
 			

@@ -8,21 +8,23 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ScoringParameterSet;
-import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.PersonUtils;
+import org.matsim.utils.objectattributes.ObjectAttributes;
 
 import innoz.scenarioGeneration.utils.ActivityTypes;
 import innoz.scenarioGeneration.utils.Modes;
 
 public class MobilityAttitudeGroups {
 
-	private static final Random random = MatsimRandom.getLocalInstance();
-
 	final static String[] subpops = new String[]{null, "tradCar", "flexCar", "urbanPt",
 			"convBike", "envtPtBike", "multiOpt"};
 	
 	final static double[] pWomen = new double[]{
 			0.554, 0.505, 0.732, 0.607, 0.467, 0.358
+	};
+	
+	final static double[] pCSmembers = new double[]{
+		0.006, 0.01, 0.0, 0.0, 0.04, 0.044	
 	};
 	
 	final static double[][] ageIndices = new double[][]{
@@ -84,31 +86,31 @@ public class MobilityAttitudeGroups {
 			
 			ActivityParams education = new ActivityParams(ActivityTypes.EDUCATION);
 			education.setTypicalDuration(6 * 3600);
-			config.planCalcScore().addActivityParams(education);
+			set.addActivityParams(education);
 			
 			ActivityParams home = new ActivityParams(ActivityTypes.HOME);
 			home.setTypicalDuration(12 * 3600);
-			config.planCalcScore().addActivityParams(home);
+			set.addActivityParams(home);
 			
 			ActivityParams leisure = new ActivityParams(ActivityTypes.LEISURE);
 			leisure.setTypicalDuration(4 * 3600);
-			config.planCalcScore().addActivityParams(leisure);
+			set.addActivityParams(leisure);
 			
 			ActivityParams other = new ActivityParams(ActivityTypes.OTHER);
 			other.setTypicalDuration(2 * 3600);
-			config.planCalcScore().addActivityParams(other);
+			set.addActivityParams(other);
 			
 			ActivityParams shopping = new ActivityParams(ActivityTypes.SHOPPING);
 			shopping.setTypicalDuration(1 * 3600);
-			config.planCalcScore().addActivityParams(shopping);
+			set.addActivityParams(shopping);
 			
 			ActivityParams work = new ActivityParams(ActivityTypes.WORK);
 			work.setTypicalDuration(8 * 3600);
-			config.planCalcScore().addActivityParams(work);
+			set.addActivityParams(work);
 			
 			ActivityParams kindergarten = new ActivityParams(ActivityTypes.KINDERGARTEN);
 			kindergarten.setTypicalDuration(3 * 3600);
-			config.planCalcScore().addActivityParams(kindergarten);
+			set.addActivityParams(kindergarten);
 			
 			for(String mode : modes){
 				
@@ -125,7 +127,7 @@ public class MobilityAttitudeGroups {
 		
 	}
 	
-	public static String assignPersonToGroup(Person person, double hhIncome){
+	public static String assignPersonToGroup(Person person, Random random, double hhIncome, ObjectAttributes personAttributes){
 		
 		int age = PersonUtils.getAge(person);
 		String sex = PersonUtils.getSex(person);
@@ -185,11 +187,13 @@ public class MobilityAttitudeGroups {
 			
 		}
 		
-		return getMobilityAttitudeGroupForAgeAndIncome(ageIndex, incomeIndex, sex);
+		return getMobilityAttitudeGroupForAgeAndIncome(person, ageIndex,
+				incomeIndex, sex, personAttributes, random);
 	
 	}
 	
-	private static String getMobilityAttitudeGroupForAgeAndIncome(int ageIndex, int incomeIndex, String sex){
+	private static String getMobilityAttitudeGroupForAgeAndIncome(Person person,
+			int ageIndex, int incomeIndex, String sex, ObjectAttributes atts,  Random random){
 		
 		double[] indices = new double[6];
 		double sum = 0.0d;
@@ -206,17 +210,32 @@ public class MobilityAttitudeGroups {
 		double p = random.nextDouble() * sum;
 		double accumulatedWeight = 0.0d;
 		
+		String result = null;
+		
 		for(int i = 0; i < 6; i++){
 			
 			accumulatedWeight += indices[i];
 			
 			if(p <= accumulatedWeight){
-				return subpops[i+1];
+				result = subpops[i+1];
+				
+				double pCS = random.nextDouble();
+				
+				if(pCS <= pCSmembers[i]){
+					
+					atts.putAttribute(person.getId().toString(), "OW_CARD", "true");
+					atts.putAttribute(person.getId().toString(), "RT_CARD", "true");
+					atts.putAttribute(person.getId().toString(), "FF_CARD", "true");
+					
+				}
+				
+				break;
+				
 			}
 			
 		}
 		
-		return null;
+		return result;
 		
 	}
 	

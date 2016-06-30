@@ -1,6 +1,8 @@
 package innoz.scenarioGeneration.population.mobilityAttitude;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
 
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
@@ -10,6 +12,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.PersonUtils;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.utils.objectattributes.ObjectAttributes;
 
 public class MobilityAttitudeCreationTest {
 
@@ -37,7 +40,11 @@ public class MobilityAttitudeCreationTest {
 				sex = "f";
 			}
 			PersonUtils.setSex(person, sex);
-			results[i] = MobilityAttitudeGroups.assignPersonToGroup(person, MatsimRandom.getLocalInstance().nextInt(5000));
+			
+			Random random = MatsimRandom.getLocalInstance();
+			
+			results[i] = MobilityAttitudeGroups.assignPersonToGroup(person,
+					random, random.nextInt(5000), new ObjectAttributes());
 			
 		}
 		

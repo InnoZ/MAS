@@ -114,8 +114,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
 		// Get the MATSim population and initialize person attributes
 		Population population = scenario.getPopulation();
-		ObjectAttributes personAttributes = new ObjectAttributes();
-		scenario.addScenarioElement(innoz.scenarioGeneration.population.utils.PersonUtils.PERSON_ATTRIBUTES, personAttributes);
+		ObjectAttributes personAttributes = scenario.getPopulation().getPersonAttributes();
+//		scenario.addScenarioElement(innoz.scenarioGeneration.population.utils.PersonUtils.PERSON_ATTRIBUTES, personAttributes);
 		
 		// Sort the households by their weight (according to the survey data)
 		List<SurveyHousehold> households = new ArrayList<>();
@@ -345,8 +345,11 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		}
 		
 		if(configuration.isUsingMobilityAttitudeGroups()){
-			String mag = MobilityAttitudeGroups.assignPersonToGroup(person, hhIncome);
-			personAttributes.putAttribute(person.getId().toString(), "mobilityAttitude", mag);
+			String mag = MobilityAttitudeGroups.assignPersonToGroup(person, random,
+					hhIncome, personAttributes);
+			if(mag != null){
+				personAttributes.putAttribute(person.getId().toString(), "mobilityAttitude", mag);
+			}
 		}
 		
 		// Check if there are any plans for the person (if it is a mobile person)
