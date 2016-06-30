@@ -20,7 +20,7 @@
 		</areaSet>	
 		<coordinateSystem v="EPSG:32632" />
 		<createTransit v="false" />
-		<populationType v="none" />
+		<populationType v="survey" />
 		<scaleFactor v="1.0" />
 		<outputDirectory v="/home/dhosse/dessau/foo/" />
 		<overwriteExistingFiles v="true"/>
