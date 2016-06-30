@@ -84,6 +84,9 @@ public class Runner {
 							
 						}
 						
+						SshConnector.setDbUserData(c, reader);
+						reader.setPrompt("> ");
+						
 						new ScenarioGenerationController(c).run();
 						
 						c.reset();

@@ -33,6 +33,8 @@ public class SshConnector {
 	private static final Logger log = Logger.getLogger(SshConnector.class);
 	static Session session;
 	
+	private static boolean connected = false;
+	
 	public static boolean connect(Configuration configuration) throws JSchException, IOException{
 		
 		log.info("Trying to establish ssh tunnel to mobility database server...");
@@ -66,6 +68,8 @@ public class SshConnector {
 	    
 	    log.info("Ssh tunnel established.");
 		
+	    connected = true;
+	    
 	    return session != null;
 	    
 	}
@@ -98,6 +102,8 @@ public class SshConnector {
 		log.info("Closing existing ssh connection...");
 		session.disconnect();
 		
+		connected = false;
+		
 	}
 	
 	public static boolean connectShell(Configuration configuration, ConsoleReader reader) throws JSchException, IOException{
@@ -107,8 +113,6 @@ public class SshConnector {
 		// Set user names and passwords for ssh and database
 		String sshuser = reader.readLine("> Enter ssh user name: ");
 		String sshpassword = new String(reader.readLine("> Enter ssh password: ", new Character('*')));
-		configuration.setDatabaseUser(reader.readLine("> Enter database user name: "));
-		configuration.setDatabasePassword(new String(reader.readLine("> Enter database password: ", new Character('*'))));
 		
 		// Set hosts and ports for the connection
 		String sshhost = "playground";
@@ -130,9 +134,19 @@ public class SshConnector {
 	    session.setPortForwardingL(nLocalPort, remoteHost, nRemotePort);
 	    
 	    log.info("Ssh tunnel established.");
+	    
+	    connected = true;
 		
 	    return session != null;
 		
+	}
+	
+	public static void setDbUserData(Configuration configuration, ConsoleReader reader) throws IOException{
+		configuration.setDatabaseUser(reader.readLine("> Enter database user name: "));
+		configuration.setDatabasePassword(new String(reader.readLine("> Enter database password: ", new Character('*'))));
+		if(!connected){
+			ConfigurationUtils.set(configuration, Configuration.LOCAL_PORT, 5432);
+		}
 	}
 
 	/**

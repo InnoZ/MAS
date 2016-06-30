@@ -195,6 +195,9 @@ public final class Configuration {
 				
 			case WRITE_INTO_DATAHUB: this.writeIntoDatahub = (Boolean) value;
 				break;
+				
+			case LOCAL_PORT: this.localPort = (Integer) value;
+				break;
 			
 			default: return ;
 			
