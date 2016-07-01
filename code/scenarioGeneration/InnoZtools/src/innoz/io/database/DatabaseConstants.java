@@ -40,11 +40,11 @@ public final class DatabaseConstants {
 	public static final String ATT_ID = "id";
 	public static final String ATT_JUNCTION = "junction";
 	public static final String ATT_LANDUSE = "landuse";
-//	public static final String TAG_LANES = "lanes";
+	public static final String TAG_LANES = "lanes";
 	public static final String ATT_LAT = "lat";
 	public static final String ATT_LEISURE = "leisure";
 	public static final String ATT_LON = "lon";
-//	public static final String TAG_MAXSPEED = "maxspeed";
+	public static final String TAG_MAXSPEED = "maxspeed";
 	public static final String ATT_MEMBERS = "members";
 	public static final String ATT_NODES = "nodes";
 	public static final String ATT_ONEWAY = "oneway";

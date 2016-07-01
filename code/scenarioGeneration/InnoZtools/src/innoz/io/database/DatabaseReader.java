@@ -999,9 +999,8 @@ public class DatabaseReader {
 				entry.setAccessTag(result.getString(DatabaseConstants.ATT_ACCESS));
 				entry.setHighwayTag(result.getString(DatabaseConstants.ATT_HIGHWAY));
 				entry.setJunctionTag(result.getString(DatabaseConstants.ATT_JUNCTION));
-				//TODO add lanes and maxspeed as attributes into db table
-//				entry.lanesTag = result.getString(TAG_LANES);
-//				entry.maxspeedTag = result.getString(TAG_MAXSPEED);
+				entry.setLanesTag(result.getString(DatabaseConstants.TAG_LANES));
+				entry.setMaxspeedTag(result.getString(DatabaseConstants.TAG_MAXSPEED));
 				entry.setOnewayTag(result.getString(DatabaseConstants.ATT_ONEWAY));
 				entry.setGeometry(this.wktReader.read(result.getString(DatabaseConstants.functions.st_astext.name())));
 				wayEntries.add(entry);
