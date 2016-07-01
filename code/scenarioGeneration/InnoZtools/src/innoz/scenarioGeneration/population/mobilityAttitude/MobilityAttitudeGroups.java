@@ -16,8 +16,8 @@ import innoz.scenarioGeneration.utils.Modes;
 
 public class MobilityAttitudeGroups {
 
-	final static String[] subpops = new String[]{"null", "none", "tradCar", "flexCar", "urbanPt",
-			"convBike", "envtPtBike", "multiOpt"};
+	final static String[] subpops = new String[]{"none", "tradCar", "flexCar", "urbanPt",
+			"convBike", "envtPtBike", "multiOpt",null};
 	
 	final static double[] pWomen = new double[]{
 			0.554, 0.505, 0.732, 0.607, 0.467, 0.358
