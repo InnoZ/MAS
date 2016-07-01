@@ -15,7 +15,7 @@ import innoz.scenarioGeneration.utils.ActivityTypes;
 import innoz.scenarioGeneration.utils.Modes;
 
 public class MobilityAttitudeGroups {
-
+	
 	final static String[] subpops = new String[]{"none", "tradCar", "flexCar", "urbanPt",
 			"convBike", "envtPtBike", "multiOpt",null};
 	
