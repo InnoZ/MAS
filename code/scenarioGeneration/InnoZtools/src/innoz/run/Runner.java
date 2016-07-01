@@ -77,7 +77,7 @@ public class Runner {
 						
 						ConfigurationUtils.loadConfiguration(command.split(" ")[1], c);
 						
-						if(!serverConnection && command.contains(" -c ")){
+						if(!serverConnection && command.contains(" -c")){
 							
 							serverConnection = SshConnector.connectShell(c, reader);
 							reader.setPrompt("> ");

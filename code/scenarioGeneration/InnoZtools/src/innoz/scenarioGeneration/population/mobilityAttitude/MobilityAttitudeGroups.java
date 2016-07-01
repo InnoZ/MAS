@@ -16,7 +16,7 @@ import innoz.scenarioGeneration.utils.Modes;
 
 public class MobilityAttitudeGroups {
 
-	final static String[] subpops = new String[]{null, "tradCar", "flexCar", "urbanPt",
+	final static String[] subpops = new String[]{"null", "none", "tradCar", "flexCar", "urbanPt",
 			"convBike", "envtPtBike", "multiOpt"};
 	
 	final static double[] pWomen = new double[]{
@@ -27,6 +27,7 @@ public class MobilityAttitudeGroups {
 		0.006, 0.01, 0.0, 0.0, 0.04, 0.044	
 	};
 	
+	//THE FOLLOWING IS ONLY VALID FOR OSNABRÜCK!!!
 	final static double[][] ageIndices = new double[][]{
 		//18-20
 		{0.0812307343, 0.1599753649, 0.1377107523, 0.0439406019, 0.2226323829,
@@ -66,14 +67,6 @@ public class MobilityAttitudeGroups {
 			0.1988371028}
 	};
 	
-	/*
-	 * Traditionelle Auto-Affine
-	 * Flexible Auto-Affine
-	 * Urban-orientierte ÖV-Affine
-	 * Konventionelle Fahrrad-Affine
-	 * Umweltbewusste ÖV- und Rad-Affine
-	 * Innovative technikaffine Multioptionale
-	 */
 	public static void addScoringParameterSets(final Config config){
 
 		String[] modes = new String[]{TransportMode.bike, TransportMode.car,
@@ -137,7 +130,7 @@ public class MobilityAttitudeGroups {
 		
 		if(age < 18){
 			
-			return null;
+			return "none";
 			
 		} else if(age > 17 && age < 21){
 			
