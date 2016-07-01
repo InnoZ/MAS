@@ -1,26 +1,13 @@
 package innoz.io.database;
 
-import innoz.config.Configuration;
-import innoz.config.Configuration.AdminUnitEntry;
-import innoz.config.Configuration.PopulationType;
-import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
-import innoz.scenarioGeneration.geoinformation.Building;
-import innoz.scenarioGeneration.geoinformation.District;
-import innoz.scenarioGeneration.geoinformation.Geoinformation;
-import innoz.scenarioGeneration.network.WayEntry;
-import innoz.scenarioGeneration.utils.ActivityTypes;
-import innoz.utils.osm.OsmKey2ActivityType;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -44,10 +31,20 @@ import org.opengis.referencing.operation.TransformException;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
+
+import innoz.config.Configuration;
+import innoz.config.Configuration.AdminUnitEntry;
+import innoz.config.Configuration.PopulationType;
+import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
+import innoz.scenarioGeneration.geoinformation.Building;
+import innoz.scenarioGeneration.geoinformation.District;
+import innoz.scenarioGeneration.geoinformation.Geoinformation;
+import innoz.scenarioGeneration.network.WayEntry;
+import innoz.scenarioGeneration.utils.ActivityTypes;
+import innoz.utils.osm.OsmKey2ActivityType;
 
 /**
  * 
@@ -359,22 +356,22 @@ public class DatabaseReader {
 					
 				}
 				
-				this.geoinformation.getQuadTreeForActType(ActivityTypes.SUPPLY).clear();
-				this.geoinformation.getQuadTreeForActType(ActivityTypes.KINDERGARTEN).clear();
-				this.geoinformation.getQuadTreeForActType(ActivityTypes.HOME).clear();
-				this.geoinformation.getQuadTreeForActType(ActivityTypes.WORK).clear();
-				this.geoinformation.getQuadTreeForActType(ActivityTypes.SHOPPING).clear();
-				this.geoinformation.getQuadTreeForActType(ActivityTypes.OTHER).clear();
-				this.geoinformation.getQuadTreeForActType(ActivityTypes.LEISURE).clear();
-				this.geoinformation.getQuadTreeForActType(ActivityTypes.EDUCATION).clear();
-				this.geoinformation.getQuadTreeForActType(ActivityTypes.EATING).clear();
-				this.geoinformation.getQuadTreeForActType(ActivityTypes.CULTURE).clear();
-				this.geoinformation.getQuadTreeForActType(ActivityTypes.SPORTS).clear();
-				this.geoinformation.getQuadTreeForActType(ActivityTypes.FURTHER).clear();
-				this.geoinformation.getQuadTreeForActType(ActivityTypes.EVENT).clear();
-				this.geoinformation.getQuadTreeForActType(ActivityTypes.HEALTH).clear();
-				this.geoinformation.getQuadTreeForActType(ActivityTypes.SERVICE).clear();
-				this.geoinformation.getQuadTreeForActType(ActivityTypes.ERRAND).clear();
+//				this.geoinformation.getQuadTreeForActType(ActivityTypes.SUPPLY).clear();
+//				this.geoinformation.getQuadTreeForActType(ActivityTypes.KINDERGARTEN).clear();
+//				this.geoinformation.getQuadTreeForActType(ActivityTypes.HOME).clear();
+//				this.geoinformation.getQuadTreeForActType(ActivityTypes.WORK).clear();
+//				this.geoinformation.getQuadTreeForActType(ActivityTypes.SHOPPING).clear();
+//				this.geoinformation.getQuadTreeForActType(ActivityTypes.OTHER).clear();
+//				this.geoinformation.getQuadTreeForActType(ActivityTypes.LEISURE).clear();
+//				this.geoinformation.getQuadTreeForActType(ActivityTypes.EDUCATION).clear();
+//				this.geoinformation.getQuadTreeForActType(ActivityTypes.EATING).clear();
+//				this.geoinformation.getQuadTreeForActType(ActivityTypes.CULTURE).clear();
+//				this.geoinformation.getQuadTreeForActType(ActivityTypes.SPORTS).clear();
+//				this.geoinformation.getQuadTreeForActType(ActivityTypes.FURTHER).clear();
+//				this.geoinformation.getQuadTreeForActType(ActivityTypes.EVENT).clear();
+//				this.geoinformation.getQuadTreeForActType(ActivityTypes.HEALTH).clear();
+//				this.geoinformation.getQuadTreeForActType(ActivityTypes.SERVICE).clear();
+//				this.geoinformation.getQuadTreeForActType(ActivityTypes.ERRAND).clear();
 			
 				for(Building b : this.buildings){
 					
@@ -487,29 +484,43 @@ public class DatabaseReader {
 			if(landuse != null){
 				
 				// Add the landuse geometry to the geoinformation if we have a valid activity option for it
-				addGeometry(landuse, geometry);
+				
 				
 				if(configuration.isUsingBuildings()){
+					
+					if(!geoinformation.getSurveyAreaBoundingBox().contains(geometry) ||
+							!geoinformation.getSurveyAreaBoundingBox().touches(geometry) ||
+							!geoinformation.getSurveyAreaBoundingBox().intersects(geometry)){
 
-					for(Building b : this.buildings){
+						for(Building b : this.buildings){
 
-						if(b.getActivityOptions().isEmpty()){
+							if(b.getActivityOptions().isEmpty()){
 
-							if(geometry.contains(b.getGeometry())){
-								
-								b.addActivityOption(landuse);
-								
-								if(!landuse.startsWith(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
-								
-									b.addActivityOption(ActivityTypes.WORK);
-								
+								if(geometry.contains(b.getGeometry())){
+									
+									b.addActivityOption(landuse);
+									
+									if(!landuse.startsWith(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
+									
+										b.addActivityOption(ActivityTypes.WORK);
+									
+									}
+									
 								}
 								
 							}
 							
 						}
 						
+					} else {
+						
+						addGeometry(landuse, geometry);
+						
 					}
+
+				} else {
+					
+					addGeometry(landuse, geometry);
 					
 				}
 				
@@ -583,7 +594,7 @@ public class DatabaseReader {
 				+ "), "	+ DatabaseConstants.ATT_AMENITY + ", " + DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + " from "
 				+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_point.name() + " where "
 				+ DatabaseConstants.functions.st_within + "(" + DatabaseConstants.ATT_WAY + "," + DatabaseConstants.functions.st_geomfromtext.name()
-				+ "('" + this.geoinformation.getSurveyAreaBoundingBox().toString() + "',4326)) and (" + DatabaseConstants.ATT_AMENITY
+				+ "('" + this.geoinformation.getCompleteGeometry().toString() + "',4326)) and (" + DatabaseConstants.ATT_AMENITY
 				+ " is not null or " + DatabaseConstants.ATT_LEISURE + " is not null or " + DatabaseConstants.ATT_SHOP + " is not null)");
 		
 		while(set.next()){
@@ -753,7 +764,7 @@ public class DatabaseReader {
 				+ DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + ", " + DatabaseConstants.functions.st_astext.name() + "("
 				+ DatabaseConstants.ATT_WAY	+ ") from " + DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_polygon
 				+ " where " + DatabaseConstants.functions.st_within + "(" + DatabaseConstants.ATT_WAY + ","
-				+ DatabaseConstants.functions.st_geomfromtext.name() + "('" + this.geoinformation.getCompleteGeometry().toString() + "',4326))"
+				+ DatabaseConstants.functions.st_geomfromtext.name() + "('" + this.geoinformation.getSurveyAreaBoundingBox().toString() + "',4326))"
 				+ " and " + DatabaseConstants.ATT_BUILDING + " is not null";
 		ResultSet set = statement.executeQuery(s);
 		
