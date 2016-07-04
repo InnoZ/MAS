@@ -10,21 +10,23 @@ import innoz.config.Configuration.AdminUnitEntry;
 public class ConfigurationWriterHandler {
 
 	private static String indent = "";
+	private static final String TAB = "\t";
+	private static final String NEWLINE = "\n";
 	
 	public void startConfiguration(final BufferedWriter out) throws IOException{
 		
 		out.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>");
-		out.write("\n");
+		out.write(NEWLINE);
 		out.write("<configuration>");
-		out.write("\n");
-		out.write("\n");
-		indent = indent.concat("\t");
+		out.write(NEWLINE);
+		out.write(NEWLINE);
+		indent = indent.concat(TAB);
 		
 	}
 	
 	public void endConfiguration(final BufferedWriter out) throws IOException{
 		
-		indent = indent.replaceFirst("\t", "");
+		indent = indent.replaceFirst(TAB, "");
 		out.write("</configuration>");
 		
 	}
@@ -33,8 +35,8 @@ public class ConfigurationWriterHandler {
 		
 		out.write(indent);
 		out.write("<areaSet k=\"surveyArea\">");
-		indent = indent.concat("\t");
-		out.write("\n");
+		indent = indent.concat(TAB);
+		out.write(NEWLINE);
 		if(configuration.getSurveyAreaIds() != null){
 		
 			for(String s : configuration.getSurveyAreaIds().split(",")){
@@ -46,21 +48,21 @@ public class ConfigurationWriterHandler {
 				out.write(indent);
 				out.write("<adminUnit id =\"" + id + "\" numberOfHouseholds=\"" + nHouseholds + "\" networkDetail=\"" 
 						+ networkDetail + "\" />");
-				out.write("\n");
+				out.write(NEWLINE);
 				
 			}
 			
 		}
-		indent = indent.replaceFirst("\t", "");
+		indent = indent.replaceFirst(NEWLINE, "");
 		out.write(indent);
 		out.write("</areaSet>");
-		out.write("\n");
-		out.write("\n");
+		out.write(NEWLINE);
+		out.write(NEWLINE);
 		
 		out.write(indent);
 		out.write("<areaSet k=\"vicinity\">");
-		out.write("\n");
-		indent = indent.concat("\t");
+		out.write(NEWLINE);
+		indent = indent.concat(TAB);
 		if(configuration.getVicinityIds() != null){
 		
 			for(String s : configuration.getVicinityIds().split(",")){
@@ -72,16 +74,16 @@ public class ConfigurationWriterHandler {
 				Integer networkDetail = entry.getNetworkDetail() != null ? entry.getNetworkDetail() : 4;
 				out.write("<adminUnit id =\"" + id + "\" numberOfHouseholds=\"" + nHouseholds + "\" networkDetail=\"" 
 						+ networkDetail + "\" />");
-				out.write("\n");
+				out.write(NEWLINE);
 				
 			}
 			
 		}
-		indent = indent.replaceFirst("\t", "");
+		indent = indent.replaceFirst(TAB, "");
 		out.write(indent);
 		out.write("</areaSet>");
-		out.write("\n");
-		out.write("\n");
+		out.write(NEWLINE);
+		out.write(NEWLINE);
 		
 		Map<String, String> params = configuration.getParams();
 		Map<String, String> comments = configuration.getComments();
@@ -92,17 +94,17 @@ public class ConfigurationWriterHandler {
 			if(comment != null){
 				out.write(indent);
 				out.write("<!--" + comment + " -->");
-				out.write("\n");
+				out.write(NEWLINE);
 			}
 			
 			out.write(indent);
 			out.write("<" + param.getKey() + " v=\"" + param.getValue() + "\"/>");
-			out.write("\n");
-			out.write("\n");
+			out.write(NEWLINE);
+			out.write(NEWLINE);
 			
 		}
 		
-		out.write("\n");
+		out.write(NEWLINE);
 		
 	}
 	
