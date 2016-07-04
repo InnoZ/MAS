@@ -229,6 +229,13 @@ public final class Configuration {
 			
 		}
 		
+		if((this.useMobilityAttitudeGroups || this.demandSource.equals("srv")) && !this.surveyAreaIds.contains("03404")){
+			
+			validationError = true;
+			log.error("SrV data as well as data for mobility attitude groups (Mobilitätstypen) are only valid for Osnabrück!");
+			
+		}
+		
 		// Check if the output directory exists and has files in it.
 		File f = new File(this.outputDirectory);
 		if(f.exists()){
