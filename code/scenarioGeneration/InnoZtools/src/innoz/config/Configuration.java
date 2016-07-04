@@ -33,6 +33,7 @@ public final class Configuration {
 	public static final String POPULATION_TYPE = "populationType";
 	public static final String SCALE_FACTOR = "scaleFactor";
 	public static final String USE_BUILDINGS = "useBuildings";
+	public static final String CREATE_TRANSIT = "createTransit";
 	
 	public static final String ONLY_WORKING_DAYS = "onlyWorkingDays";
 	public static final String USE_HOUSEHOLDS = "useHouseholds";
@@ -66,6 +67,7 @@ public final class Configuration {
 	boolean onlyWorkingDays = true;
 	boolean useBuildings = true;
 	boolean useMobilityAttitudeGroups = false;
+	boolean useTransit = false;
 	
 	String demandSource = "mid";
 	
@@ -602,6 +604,35 @@ public final class Configuration {
 	public boolean isUsingMobilityAttitudeGroups(){
 		
 		return this.useMobilityAttitudeGroups;
+		
+	}
+	
+	public boolean isUsingTransit(){
+		
+		return this.useTransit;
+		
+	}
+	
+	public Map<String, String> getParams(){
+		
+		Map<String, String> map = new HashMap<>();
+		
+		map.put(CRS, this.crs);
+		map.put(CREATE_TRANSIT, Boolean.toString(this.useTransit));
+		map.put(POPULATION_TYPE, this.popType.name());
+		map.put(SCALE_FACTOR, Double.toString(this.scaleFactor));
+		map.put(OUTPUT_DIR, this.outputDirectory);
+		map.put(OVERWRITE_FILES, Boolean.toString(this.overwriteExistingFiles));
+		map.put(DEMAND_DATA_SOURCE, this.demandSource);
+		map.put(USE_MAG, Boolean.toString(this.useMobilityAttitudeGroups));
+		map.put(USE_BUILDINGS, Boolean.toString(this.useBuildings));
+		map.put(USE_HOUSEHOLDS, Boolean.toString(this.useHouseholds));
+		map.put(ONLY_WORKING_DAYS, Boolean.toString(this.onlyWorkingDays));
+		map.put(USE_VEHICLES, Boolean.toString(this.useVehicles));
+		map.put(LOCAL_PORT, Integer.toString(this.localPort));
+		map.put(WRITE_DB_OUTPUT, Boolean.toString(this.writeDatabaseTables));
+		
+		return map;
 		
 	}
 	
