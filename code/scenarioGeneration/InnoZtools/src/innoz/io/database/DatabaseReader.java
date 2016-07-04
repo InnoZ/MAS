@@ -373,19 +373,27 @@ public class DatabaseReader {
 //				this.geoinformation.getQuadTreeForActType(ActivityTypes.SERVICE).clear();
 //				this.geoinformation.getQuadTreeForActType(ActivityTypes.ERRAND).clear();
 			
-				for(Building b : this.buildings){
-					
-					for(String actType : b.getActivityOptions()){
-						
-						if(actType != null){
-					
-							addGeometry(actType, b.getGeometry());
-						
-						}
-					
-					}
-					
-				}
+				int n = 2;
+				
+				List<Building> b1 = this.buildings.subList(0, this.buildings.size()/n);
+				List<Building> b2 = this.buildings.subList(this.buildings.size()/n, this.buildings.size());
+				
+				new BuildingsThread(b1).start();
+				new BuildingsThread(b2).start();
+				
+//				for(Building b : this.buildings){
+//					
+//					for(String actType : b.getActivityOptions()){
+//						
+//						if(actType != null){
+//					
+//							addGeometry(actType, b.getGeometry());
+//						
+//						}
+//					
+//					}
+//					
+//				}
 				
 			}
 			
@@ -394,6 +402,34 @@ public class DatabaseReader {
 		} catch (SQLException | ParseException e) {
 		
 			e.printStackTrace();
+			
+		}
+		
+	}
+	
+	class BuildingsThread extends Thread{
+		
+		List<Building> buildings;
+		
+		public BuildingsThread(List<Building> buildings){
+			this.buildings = buildings;
+		}
+		
+		public void run(){
+			
+			for(Building b : this.buildings){
+				
+				for(String actType : b.getActivityOptions()){
+					
+					if(actType != null){
+				
+						addGeometry(actType, b.getGeometry());
+					
+					}
+				
+				}
+				
+			}
 			
 		}
 		
@@ -863,7 +899,7 @@ public class DatabaseReader {
 				+ DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + ", " + DatabaseConstants.functions.st_astext.name() + "("
 				+ DatabaseConstants.ATT_WAY	+ ") from " + DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_polygon
 				+ " where " + DatabaseConstants.functions.st_within + "(" + DatabaseConstants.ATT_WAY + ","
-				+ DatabaseConstants.functions.st_geomfromtext.name() + "('" + this.geoinformation.getSurveyAreaBoundingBox().toString() + "',4326))"
+				+ DatabaseConstants.functions.st_geomfromtext.name() + "('" + this.geoinformation.getCompleteGeometry().toString() + "',4326))"
 				+ " and " + DatabaseConstants.ATT_BUILDING + " is not null";
 		ResultSet set = statement.executeQuery(s);
 		
