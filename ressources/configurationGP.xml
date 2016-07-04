@@ -5,7 +5,7 @@
 	<!-- The basic settings -->
 	<scenario>
 		<areaSet k="surveyArea">
-			<adminUnit id="09180" numberOfHouseholds="41838" />
+			<adminUnit id="09180" numberOfHouseholds="41838" networkDetail="6" />
 		</areaSet>
 		<areaSet k="vicinity" >
 		<!--	<adminUnit id="09173" numberOfHouseholds="0" /> --> <!-- 52832 -->
@@ -22,7 +22,7 @@
 		<createTransit v="false" />
 		<populationType v="survey" />
 		<scaleFactor v="1.0" />
-		<outputDirectory v="/home/dhosse/dessau/foo/" />
+		<outputDirectory v="/home/dhosse/eGAP/" />
 		<overwriteExistingFiles v="true"/>
 	</scenario>
 

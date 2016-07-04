@@ -10,8 +10,8 @@
 		<areaSet k="vicinity" >
 			<adminUnit id="03459" numberOfHouseholds="0" networkDetail="5" /> <!-- 52832 -->
 			<adminUnit id="05566" numberOfHouseholds="0" networkDetail="5" /> <!-- 56365 -->
-			<adminUnit id="05515" numberOfHouseholds="0" networkDetail="4" />  <!-- 20111  -->
-			<adminUnit id="05570" numberOfHouseholds="0" networkDetail="4" /> <!-- 58063  -->
+			<adminUnit id="05515" numberOfHouseholds="0" networkDetail="4" /> <!-- 20111  -->
+		<!--	<adminUnit id="05570" numberOfHouseholds="0" networkDetail="4" /> --> <!-- 58063  -->
 		<!--	<adminUnit id="05558" numberOfHouseholds="0" networkDetail="4" /> -->
 		<!--	<adminUnit id="05554" numberOfHouseholds="0" networkDetail="4" /> -->
 		<!--	<adminUnit id="05754" numberOfHouseholds="0" networkDetail="4" /> -->
