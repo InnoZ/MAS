@@ -636,4 +636,27 @@ public final class Configuration {
 		
 	}
 	
+	public Map<String, String> getComments(){
+		
+		Map<String, String> map = new HashMap<>();
+		
+		map.put(CRS, "The coordinate reference system that applies to the study area.");
+		map.put(CREATE_TRANSIT, "NOT IMPLEMENTED YET! Defines if MATSim transit should be modeled or not. Default: false.");
+		map.put(POPULATION_TYPE, "The type of population that is created as initial demand. Possible values are: none, dummy, commuter, survey.");
+		map.put(SCALE_FACTOR, "The scale factor for the amount of households / persons to be created and for the supply side to reduce capacities. Any numeric value between 0 and 1.");
+		map.put(OUTPUT_DIR, "The directory containing all output files of the scenario generation process.");
+		map.put(OVERWRITE_FILES, "Switch to 'yes' to overwrite existing files in the output directory. Default: false.");
+		map.put(DEMAND_DATA_SOURCE, "The data source for demand generation. Only applies to population type 'survey' at the moment. Default is 'mid', for Osnabrück, also 'srv' is possible.");
+		map.put(USE_MAG, "Defines if mobility attitude groups (Mobilitätstypen) should be created as persons' subpopulation attributes. At the moment, this is only possible for Osnabrück!");
+		map.put(USE_BUILDINGS, "'Yes' means: Demand is spatially distributed on the level of individual buildings. If switched to 'no', activities will be randomly distributed in landuse areas. Default: yes.");
+		map.put(USE_HOUSEHOLDS, "Defines if househols should be created or not. Default: yes.");
+		map.put(ONLY_WORKING_DAYS, "Defines if all days or only working days (Mo-Fr) should be used for generating plans. Default: yes.");
+		map.put(USE_VEHICLES, "Defines if household vehicles should be created or not. This only works, if 'useHouseholds' is set to 'true'. Default: no.");
+		map.put(LOCAL_PORT, "The local network port for the ssh connection.");
+		map.put(WRITE_DB_OUTPUT, "Defines if the data created according to this configuration should be written into database tables or not. Default: no.");
+		
+		return map;
+		
+	}
+	
 }
