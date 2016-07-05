@@ -459,7 +459,7 @@ public class DatabaseReader {
 		log.info("...done");
 		
 	}
-
+	
 	/**
 	 * 
 	 * Retrieves polygon OpenStreetMap data containing a landuse key.
@@ -626,9 +626,9 @@ public class DatabaseReader {
 					
 					if(configuration.isUsingBuildings()){
 						
-						if(!geoinformation.getSurveyAreaBoundingBox().contains(dataset.getGeometry()) ||
-								!geoinformation.getSurveyAreaBoundingBox().touches(dataset.getGeometry()) ||
-								!geoinformation.getSurveyAreaBoundingBox().intersects(dataset.getGeometry())){
+//						if(!geoinformation.getSurveyAreaBoundingBox().contains(dataset.getGeometry()) ||
+//								!geoinformation.getSurveyAreaBoundingBox().touches(dataset.getGeometry()) ||
+//								!geoinformation.getSurveyAreaBoundingBox().intersects(dataset.getGeometry())){
 
 							for(Building b : buildings){
 
@@ -650,11 +650,11 @@ public class DatabaseReader {
 								
 							}
 							
-						} else {
-							
-							addGeometry(landuse, dataset.getGeometry());
-							
-						}
+//						} else {
+//							
+//							addGeometry(landuse, dataset.getGeometry());
+//							
+//						}
 
 					} else {
 						
@@ -1120,6 +1120,7 @@ public class DatabaseReader {
 			Statement statement = connection.createStatement();
 			ResultSet result = statement.executeQuery("select " + DatabaseConstants.ATT_OSM_ID + ", " + DatabaseConstants.ATT_ACCESS + ", "
 					+ DatabaseConstants.ATT_HIGHWAY + ", " + DatabaseConstants.ATT_JUNCTION + ", " + DatabaseConstants.ATT_ONEWAY + ", "
+					+ DatabaseConstants.TAG_LANES + " ," + DatabaseConstants.TAG_MAXSPEED + ", "
 					+ DatabaseConstants.functions.st_astext.name() + "(" + DatabaseConstants.ATT_WAY + ") from "
 					+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_line.name() + " where "
 					+ DatabaseConstants.ATT_HIGHWAY + " is not null and " + DatabaseConstants.functions.st_within.name() + "("
@@ -1134,8 +1135,8 @@ public class DatabaseReader {
 				entry.setAccessTag(result.getString(DatabaseConstants.ATT_ACCESS));
 				entry.setHighwayTag(result.getString(DatabaseConstants.ATT_HIGHWAY));
 				entry.setJunctionTag(result.getString(DatabaseConstants.ATT_JUNCTION));
-//				entry.setLanesTag(result.getString(DatabaseConstants.TAG_LANES));
-//				entry.setMaxspeedTag(result.getString(DatabaseConstants.TAG_MAXSPEED));
+				entry.setLanesTag(result.getString(DatabaseConstants.TAG_LANES));
+				entry.setMaxspeedTag(result.getString(DatabaseConstants.TAG_MAXSPEED));
 				entry.setOnewayTag(result.getString(DatabaseConstants.ATT_ONEWAY));
 				entry.setGeometry(this.wktReader.read(result.getString(DatabaseConstants.functions.st_astext.name())));
 				wayEntries.add(entry);
