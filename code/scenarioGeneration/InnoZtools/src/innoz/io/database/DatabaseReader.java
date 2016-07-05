@@ -509,80 +509,79 @@ public class DatabaseReader {
 		set.close();
 		statement.close();
 		
-		List<LanduseDataset> l1 = data.subList(0, data.size()/2);
-		List<LanduseDataset> l2 = data.subList(data.size()/2, data.size());
+//		List<LanduseDataset> l1 = data.subList(0, data.size()/2);
+//		List<LanduseDataset> l2 = data.subList(data.size()/2, data.size());
+//		
+//		new LanduseThread(l1, configuration).start();
+//		new LanduseThread(l2, configuration).start();
 		
-		new LanduseThread(l1, configuration).start();
-		new LanduseThread(l2, configuration).start();
-		
-//		for(LanduseDataset dataset : data){
-//
-//			String landuse = dataset.getLanduse();
-//			
-//			// Set the landuse type by checking the amenity, leisure and shop tags
-//			if(dataset.getAmenity() != null){
-//				
-//				landuse = dataset.getAmenity();
-//				
-//			} else if(dataset.getLeisure() != null){
-//				
-//				landuse = dataset.getLeisure();
-//				
-//			} else if(dataset.getShop() != null){
-//				
-//				landuse = dataset.getShop();
-//				
-//			}
-//
-//			// Convert the osm landuse tag into a MATSim activity type
-//			landuse = getLanduseType(landuse);
-//			
-//			if(landuse != null){
-//				
-//				// Add the landuse geometry to the geoinformation if we have a valid activity option for it
-//				
-//				
-//				if(configuration.isUsingBuildings()){
-//					
-//					if(!geoinformation.getSurveyAreaBoundingBox().contains(dataset.getGeometry()) ||
-//							!geoinformation.getSurveyAreaBoundingBox().touches(dataset.getGeometry()) ||
-//							!geoinformation.getSurveyAreaBoundingBox().intersects(dataset.getGeometry())){
-//
-//						for(Building b : this.buildings){
-//
-//							if(b.getActivityOptions().isEmpty()){
-//
-//								if(dataset.getGeometry().contains(b.getGeometry())){
-//									
-//									b.addActivityOption(landuse);
-//									
-//									if(!landuse.startsWith(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
-//									
-//										b.addActivityOption(ActivityTypes.WORK);
-//									
-//									}
-//									
-//								}
-//								
-//							}
-//							
-//						}
-//						
-//					} else {
-//						
-//						addGeometry(landuse, dataset.getGeometry());
-//						
-//					}
-//
-//				} else {
-//					
-//					addGeometry(landuse, dataset.getGeometry());
-//					
-//				}
-//				
-//			}
-//			
-//		}
+		for(LanduseDataset dataset : data){
+
+			String landuse = dataset.getLanduse();
+			
+			// Set the landuse type by checking the amenity, leisure and shop tags
+			if(dataset.getAmenity() != null){
+				
+				landuse = dataset.getAmenity();
+				
+			} else if(dataset.getLeisure() != null){
+				
+				landuse = dataset.getLeisure();
+				
+			} else if(dataset.getShop() != null){
+				
+				landuse = dataset.getShop();
+				
+			}
+
+			// Convert the osm landuse tag into a MATSim activity type
+			landuse = getLanduseType(landuse);
+			
+			if(landuse != null){
+				
+				// Add the landuse geometry to the geoinformation if we have a valid activity option for it
+				
+				if(configuration.isUsingBuildings()){
+					
+					if(!geoinformation.getSurveyAreaBoundingBox().contains(dataset.getGeometry()) ||
+							!geoinformation.getSurveyAreaBoundingBox().touches(dataset.getGeometry()) ||
+							!geoinformation.getSurveyAreaBoundingBox().intersects(dataset.getGeometry())){
+
+						for(Building b : this.buildings){
+
+							if(b.getActivityOptions().isEmpty()){
+
+								if(dataset.getGeometry().contains(b.getGeometry())){
+									
+									b.addActivityOption(landuse);
+									
+									if(!landuse.startsWith(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
+									
+										b.addActivityOption(ActivityTypes.WORK);
+									
+									}
+									
+								}
+								
+							}
+							
+						}
+						
+					} else {
+						
+						addGeometry(landuse, dataset.getGeometry());
+						
+					}
+
+				} else {
+					
+					addGeometry(landuse, dataset.getGeometry());
+					
+				}
+				
+			}
+			
+		}
 		
 	}
 	
