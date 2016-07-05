@@ -31,7 +31,7 @@ public class CommuterDatabaseParser {
 			this.commuterData = new HashMap<Tuple<String,String>, CommuterDataElement>();
 			
 			Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
-			Connection connection = DriverManager.getConnection(DatabaseConstants.PSQL_PREFIX + configuration.getLocalPort() +
+			Connection connection = DriverManager.getConnection(DatabaseConstants.PSQL_URL + configuration.getLocalPort() +
 					"/" + DatabaseConstants.SURVEYS_DB, configuration.getDatabaseUsername(), configuration.getDatabasePassword());
 		
 			if(connection != null){

@@ -71,7 +71,7 @@ public class CommuterSpreadsheetFileHandler {
 				
 				// Instantiate a postgresql driver and establish a connection to the remote database
 				Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
-				handler.connection = DriverManager.getConnection(DatabaseConstants.PSQL_PREFIX + configuration.getLocalPort() +
+				handler.connection = DriverManager.getConnection(DatabaseConstants.PSQL_URL + configuration.getLocalPort() +
 						"/" + DatabaseConstants.SURVEYS_DB, configuration.getDatabaseUsername(), configuration.getDatabasePassword());
 				
 				// If the connection could be established, proceed
