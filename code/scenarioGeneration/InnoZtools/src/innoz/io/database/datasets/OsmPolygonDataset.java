@@ -1,8 +1,8 @@
-package innoz.io.database;
+package innoz.io.database.datasets;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-public class OsmPolygonDataset {
+public class OsmPolygonDataset implements OsmDataset {
 
 	private final Geometry geometry;
 	private final String landuseKey;
@@ -11,7 +11,7 @@ public class OsmPolygonDataset {
 	private final String leisureKey;
 	private final String buildingKey;
 	
-	protected OsmPolygonDataset(Geometry geometry, String landuse, String amenity, String shop, String leisure,
+	public OsmPolygonDataset(Geometry geometry, String landuse, String amenity, String shop, String leisure,
 			String building){
 		
 		this.amenityKey = amenity;
@@ -23,27 +23,27 @@ public class OsmPolygonDataset {
 		
 	}
 	
-	Geometry getGeometry() {
+	public Geometry getGeometry() {
 		return geometry;
 	}
 
-	String getLanduseKey() {
+	public String getLanduseKey() {
 		return landuseKey;
 	}
 
-	String getAmenityKey() {
+	public String getAmenityKey() {
 		return amenityKey;
 	}
 
-	String getShopKey() {
+	public String getShopKey() {
 		return shopKey;
 	}
 
-	String getLeisureKey() {
+	public String getLeisureKey() {
 		return leisureKey;
 	}
 
-	String getBuildingKey() {
+	public String getBuildingKey() {
 		return buildingKey;
 	}
 	

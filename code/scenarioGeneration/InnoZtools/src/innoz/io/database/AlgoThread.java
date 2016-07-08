@@ -3,13 +3,16 @@ package innoz.io.database;
 import java.util.ArrayList;
 import java.util.List;
 
+import innoz.io.database.datasets.OsmDataset;
+import innoz.io.database.datasets.OsmPointDataset;
+import innoz.io.database.datasets.OsmPolygonDataset;
 import innoz.scenarioGeneration.geoinformation.Building;
 import innoz.scenarioGeneration.utils.ActivityTypes;
 import innoz.utils.osm.OsmKey2ActivityType;
 
 public class AlgoThread implements Runnable {
 
-	private List<OsmPolygonDataset> data = new ArrayList<>();
+	private List<OsmDataset> data = new ArrayList<>();
 	private final String type;
 	private final DatabaseReader reader;
 	
@@ -18,7 +21,7 @@ public class AlgoThread implements Runnable {
 		this.type = type;
 	}
 	
-	public void addDatasetToThread(OsmPolygonDataset set){
+	public void addDatasetToThread(OsmDataset set){
 		
 		this.data.add(set);
 		
@@ -28,17 +31,25 @@ public class AlgoThread implements Runnable {
 		
 		if(this.type.equals("landuse")){
 			
-			for(OsmPolygonDataset dataset : this.data){
+			for(OsmDataset dataset : this.data){
 				
-				processLanduseDataset(dataset);
+				processLanduseDataset((OsmPolygonDataset)dataset);
+				
+			}
+			
+		} else if(this.type.equals("buildings")) {
+			
+			for(OsmDataset dataset : this.data){
+				
+				processBuildingDataset((OsmPolygonDataset)dataset);
 				
 			}
 			
 		} else {
 			
-			for(OsmPolygonDataset dataset : this.data){
-				
-				processBuildingDataset(dataset);
+			for(OsmDataset dataset : this.data){
+
+				processAmenityDataset((OsmPointDataset)dataset);
 				
 			}
 			
@@ -288,6 +299,46 @@ public class AlgoThread implements Runnable {
 		}
 		
 		return null;
+		
+	}
+	
+	private void processAmenityDataset(OsmPointDataset dataset){
+		
+		String landuse = null;
+		
+		// Set the landuse type by checking the amenity, leisure and shop tags
+		if(dataset.getAmenityKey() != null){
+			
+			landuse = dataset.getAmenityKey();
+			
+		} else if(dataset.getLeisureKey() != null){
+			
+			landuse = dataset.getLeisureKey();
+			
+		} else if(dataset.getShopKey() != null){
+			
+			landuse = dataset.getShopKey();
+			
+		}
+
+		// Convert the OSM landuse tag into a MATSim activity type
+		String actType = getAmenityType(landuse);
+		
+		if(actType != null){
+
+			// Add the landuse geometry to the geoinformation if we have a valid activity option for it
+			this.reader.addGeometry(actType, dataset.getGeometry());
+			
+			Building closest = this.reader.getBuildingsQuadTree().getClosest(dataset.getGeometry().getCentroid().getX(), dataset.getGeometry().getCentroid().getY());
+			
+			if(closest != null){
+			
+				closest.addActivityOption(actType);
+				
+			}
+			
+		}
+
 		
 	}
 	

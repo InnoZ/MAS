@@ -41,6 +41,8 @@ import com.vividsolutions.jts.io.WKTReader;
 import innoz.config.Configuration;
 import innoz.config.Configuration.AdminUnitEntry;
 import innoz.config.Configuration.PopulationType;
+import innoz.io.database.datasets.OsmPointDataset;
+import innoz.io.database.datasets.OsmPolygonDataset;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.geoinformation.Building;
 import innoz.scenarioGeneration.geoinformation.District;
@@ -70,7 +72,6 @@ public class DatabaseReader {
 	private Geometry boundingBox;
 	private CoordinateTransformation ct;
 	private int counter = 0;
-	private List<Building> buildings;
 	private List<Building> buildingList = Collections.synchronizedList(new ArrayList<>());
 	private QuadTree<Building> buildingsQuadTree;
 	private final Configuration configuration;
@@ -354,9 +355,7 @@ public class DatabaseReader {
 		log.info("Reading osm data...");
 		
 		try {
-			
-			this.buildings = new ArrayList<Building>();
-			
+
 			for(Coordinate coord : this.geoinformation.getCompleteGeometry().getCoordinates()){
 				if(coord.x < minX) minX = coord.x;
 				if(coord.x > maxX) maxX = coord.x;
@@ -366,17 +365,10 @@ public class DatabaseReader {
 			
 			this.buildingsQuadTree = new QuadTree<Building>(minX, minY, maxX, maxY);
 			
-			getPolygonData(connection, configuration);
-
-			// If buildings should be considered, also read their geometries
-//			if(configuration.isUsingBuildings()){
-//				
-//				readBuildings(connection);
-//				
-//			}
+			readPolygonData(connection, configuration);
 
 			// Read amenity geometries
-			readAmenities(connection);
+			readPointData(connection);
 			
 			// Read landuse geometries
 //			readLanduseData(connection, configuration);
@@ -467,8 +459,9 @@ public class DatabaseReader {
 	}
 	
 	private Map<String, List<OsmPolygonDataset>> polygonData = new HashMap<>();
+	private List<OsmPointDataset> pointData = Collections.synchronizedList(new ArrayList<>());
 	
-	private void getPolygonData(Connection connection, Configuration configuration) throws SQLException, ParseException{
+	private void readPolygonData(Connection connection, Configuration configuration) throws SQLException, ParseException{
 		
 		log.info("Processing osm polygon data...");
 		
@@ -546,7 +539,7 @@ public class DatabaseReader {
 	 * @throws SQLException
 	 * @throws ParseException
 	 */
-	private void readAmenities(Connection connection) throws SQLException, ParseException{
+	private void readPointData(Connection connection) throws SQLException, ParseException{
 		
 		log.info("Reading in amenities...");
 
@@ -561,50 +554,27 @@ public class DatabaseReader {
 				+ " is not null or " + DatabaseConstants.ATT_LEISURE + " is not null or " + DatabaseConstants.ATT_SHOP + " is not null)");
 		
 		while(set.next()){
-			
+		
 			Geometry geometry = wktReader.read(set.getString(DatabaseConstants.functions.st_astext.name()));
-			
 			String amenity = set.getString(DatabaseConstants.ATT_AMENITY);
 			String leisure = set.getString(DatabaseConstants.ATT_LEISURE);
 			String shop = set.getString(DatabaseConstants.ATT_SHOP);
 			
-			String landuse = null;
-			
-			// Set the landuse type by checking the amenity, leisure and shop tags
-			if(amenity != null){
-				
-				landuse = amenity;
-				
-			} else if(leisure != null){
-				
-				landuse = leisure;
-				
-			} else if(shop != null){
-				
-				landuse = shop;
-				
-			}
-
-			// Convert the OSM landuse tag into a MATSim activity type
-			String actType = getAmenityType(landuse);
-			
-			if(actType != null){
-
-				// Add the landuse geometry to the geoinformation if we have a valid activity option for it
-				addGeometry(actType, geometry);
-				
-				Building closest = this.buildingsQuadTree.getClosest(geometry.getCentroid().getX(), geometry.getCentroid().getY());
-				if(closest != null){
-					closest.addActivityOption(actType);
-				}
-				
-			}
+			this.pointData.add(new OsmPointDataset(geometry, amenity, shop, leisure));
 			
 		}
 		
 		// Close everything in the end
 		set.close();
 		statement.close();
+		
+		//post process
+		MultithreadedDataModule module = new MultithreadedDataModule(this);
+		module.initThreads("amenities");
+		for(OsmPointDataset dataset : this.pointData){
+			module.handle(dataset);
+		}
+		module.execute();
 		
 	}
 	
@@ -704,65 +674,6 @@ public class DatabaseReader {
 	double minY = Double.MAX_VALUE;
 	double maxX = Double.MIN_VALUE;
 	double maxY = Double.MIN_VALUE; 
-	
-	void readBuildings(Connection connection) throws SQLException, ParseException{
-	
-		//TODO this method implies we are eventually using facilities in MATSim...
-		//alternatively: use buildings to "bound" activities
-		log.info("Reading in buildings...");
-		
-		for(Coordinate coord : this.geoinformation.getCompleteGeometry().getCoordinates()){
-			if(coord.x < minX) minX = coord.x;
-			if(coord.x > maxX) maxX = coord.x;
-			if(coord.y < minY) minY = coord.y;
-			if(coord.y > maxY) maxY = coord.y;
-		}
-		
-		this.buildingsQuadTree = new QuadTree<Building>(minX, minY, maxX, maxY);
-		
-		WKTReader wktReader = new WKTReader();
-		
-		Statement statement = connection.createStatement();
-		String s = "select name," + DatabaseConstants.ATT_BUILDING + "," + DatabaseConstants.ATT_AMENITY +  ", "
-				+ DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + ", " + DatabaseConstants.functions.st_astext.name() + "("
-				+ DatabaseConstants.ATT_WAY	+ ") from " + DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_polygon
-				+ " where " + DatabaseConstants.functions.st_within + "(" + DatabaseConstants.ATT_WAY + ","
-				+ DatabaseConstants.functions.st_geomfromtext.name() + "('" + this.geoinformation.getCompleteGeometry().toString() + "',4326))"
-				+ " and " + DatabaseConstants.ATT_BUILDING + " is not null";
-		ResultSet set = statement.executeQuery(s);
-		
-		while(set.next()){
-			
-			Geometry geometry = wktReader.read(set.getString(DatabaseConstants.functions.st_astext.name()));
-			String building = set.getString(DatabaseConstants.ATT_BUILDING);
-			
-			String type = getTypeOfBuilding(building);
-			String amenity = set.getString(DatabaseConstants.ATT_AMENITY);
-			String leisure = set.getString(DatabaseConstants.ATT_LEISURE);
-			String shop = set.getString(DatabaseConstants.ATT_SHOP);
-			
-			Building b = new Building(geometry);
-			if(type != null){
-				b.addActivityOption(type);
-			}
-			if(amenity != null){
-				
-				b.addActivityOption(getAmenityType(amenity));
-				
-			}
-			if(leisure != null){
-				b.addActivityOption(getAmenityType(leisure));
-			}
-			if(shop != null){
-				b.addActivityOption(getAmenityType(shop));
-			}
-			
-			this.buildings.add(b);
-			this.buildingsQuadTree.put(geometry.getCentroid().getX(), geometry.getCentroid().getY(), b);
-				
-		}
-		
-	}
 	
 	@SuppressWarnings("unused")
 	private void readPtStops(Connection connection) throws SQLException, ParseException{

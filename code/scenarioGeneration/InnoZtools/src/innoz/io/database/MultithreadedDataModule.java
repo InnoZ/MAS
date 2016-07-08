@@ -1,5 +1,7 @@
 package innoz.io.database;
 
+import innoz.io.database.datasets.OsmDataset;
+
 public class MultithreadedDataModule {
 
 	private Thread[] threads;
@@ -28,7 +30,7 @@ public class MultithreadedDataModule {
 		
 	}
 	
-	public final void handle(OsmPolygonDataset dataset){
+	public final void handle(OsmDataset dataset){
 		
 		this.algothreads[this.count % this.numberOfThreads].addDatasetToThread(dataset);
 		
