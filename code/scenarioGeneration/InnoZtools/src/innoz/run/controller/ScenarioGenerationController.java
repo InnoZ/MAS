@@ -1,6 +1,7 @@
 package innoz.run.controller;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
@@ -10,6 +11,7 @@ import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
+import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.PopulationWriter;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -47,6 +49,8 @@ public class ScenarioGenerationController implements DefaultController {
 			configuration.dumpSettings();
 			new File(configuration.getOutputDirectory()).mkdirs();
 			
+			OutputDirectoryLogging.initLoggingWithOutputDirectory(configuration.getOutputDirectory());
+			
 			// Reset the random seed
 			MatsimRandom.reset(configuration.getRandomSeed());
 			
@@ -57,7 +61,7 @@ public class ScenarioGenerationController implements DefaultController {
 			Geoinformation geoinformation = new Geoinformation();
 	
 			// A class that reads data from database tables into local containers
-			DatabaseReader dbReader = new DatabaseReader(geoinformation);
+			DatabaseReader dbReader = new DatabaseReader(configuration, geoinformation);
 			dbReader.readGeodataFromDatabase(configuration, scenario);
 			InputStream in = this.getClass().getClassLoader().getResourceAsStream("regionstypen.csv");
 			new BbsrDataReader().read(geoinformation, new InputStreamReader(in));
@@ -112,8 +116,11 @@ public class ScenarioGenerationController implements DefaultController {
 				new DatabaseUpdater().update(configuration, scenario, null);
 				
 			}
+			
+			OutputDirectoryLogging.closeOutputDirLogging();
 		
-		} catch (FactoryException | InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException | ParseException e) {
+		} catch (FactoryException | InstantiationException | IllegalAccessException | ClassNotFoundException |
+				SQLException | ParseException | IOException e) {
 			e.printStackTrace();
 			return;
 		}

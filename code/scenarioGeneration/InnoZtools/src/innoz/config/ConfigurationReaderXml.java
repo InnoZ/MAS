@@ -126,6 +126,10 @@ public class ConfigurationReaderXml extends DefaultHandler {
 
 			this.configuration.useMobilityAttitudeGroups = Boolean.parseBoolean(attributes.getValue("v"));
 			
+		} else if(qName.equalsIgnoreCase(Configuration.N_THREADS)){
+			
+			this.configuration.numberOfThreads = Integer.parseInt(attributes.getValue("v"));
+			
 		}
 		
 	}
