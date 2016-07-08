@@ -6,8 +6,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -68,22 +71,41 @@ public class DatabaseReader {
 	private CoordinateTransformation ct;
 	private int counter = 0;
 	private List<Building> buildings;
+	private List<Building> buildingList = Collections.synchronizedList(new ArrayList<>());
 	private QuadTree<Building> buildingsQuadTree;
+	private final Configuration configuration;
 	/////////////////////////////////////////////////////////////////////////////////////////
 
+	public List<Building> getBuildingList(){
+		return buildingList;
+	}
+	
+	public QuadTree<Building> getBuildingsQuadTree(){
+		return this.buildingsQuadTree;
+	}
+	
 	/**
 	 * 
 	 * Constructor.
 	 * 
 	 * @param geoinformation The geoinformation container.
 	 */
-	public DatabaseReader(final Geoinformation geoinformation){
+	public DatabaseReader(final Configuration configuration, final Geoinformation geoinformation){
 		
 		// Initialize all final fields
 		this.gFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.maximumPreciseValue));
 		this.wktReader = new WKTReader();
 		this.geoinformation = geoinformation;
+		this.configuration = configuration;
 		
+	}
+	
+	Configuration getConfiguration(){
+		return this.configuration;
+	}
+	
+	Geoinformation getGeoinformation(){
+		return this.geoinformation;
 	}
 	
 	/**
@@ -197,7 +219,7 @@ public class DatabaseReader {
 		
 		getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, true);
 		this.geoinformation.setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection)
-				.convexHull());
+				.convexHull().buffer(5000));
 		if(configuration.getVicinityIds() != null){
 			getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, false);
 			this.geoinformation.setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection)
@@ -334,19 +356,30 @@ public class DatabaseReader {
 		try {
 			
 			this.buildings = new ArrayList<Building>();
+			
+			for(Coordinate coord : this.geoinformation.getCompleteGeometry().getCoordinates()){
+				if(coord.x < minX) minX = coord.x;
+				if(coord.x > maxX) maxX = coord.x;
+				if(coord.y < minY) minY = coord.y;
+				if(coord.y > maxY) maxY = coord.y;
+			}
+			
+			this.buildingsQuadTree = new QuadTree<Building>(minX, minY, maxX, maxY);
+			
+			getPolygonData(connection, configuration);
 
 			// If buildings should be considered, also read their geometries
-			if(configuration.isUsingBuildings()){
-				
-				readBuildings(connection);
-				
-			}
+//			if(configuration.isUsingBuildings()){
+//				
+//				readBuildings(connection);
+//				
+//			}
 
 			// Read amenity geometries
 			readAmenities(connection);
 			
 			// Read landuse geometries
-			readLanduseData(connection, configuration);
+//			readLanduseData(connection, configuration);
 			
 			if(configuration.isUsingBuildings()){
 				
@@ -373,27 +406,25 @@ public class DatabaseReader {
 //				this.geoinformation.getQuadTreeForActType(ActivityTypes.SERVICE).clear();
 //				this.geoinformation.getQuadTreeForActType(ActivityTypes.ERRAND).clear();
 			
-				int n = 2;
+//				List<Building> b1 = this.buildingList.subList(0, this.buildingList.size()/n);
+//				List<Building> b2 = this.buildingList.subList(this.buildingList.size()/n, this.buildingList.size());
+//				
+//				new BuildingsThread(b1).start();
+//				new BuildingsThread(b2).start();
 				
-				List<Building> b1 = this.buildings.subList(0, this.buildings.size()/n);
-				List<Building> b2 = this.buildings.subList(this.buildings.size()/n, this.buildings.size());
-				
-				new BuildingsThread(b1).start();
-				new BuildingsThread(b2).start();
-				
-//				for(Building b : this.buildings){
-//					
-//					for(String actType : b.getActivityOptions()){
-//						
-//						if(actType != null){
-//					
-//							addGeometry(actType, b.getGeometry());
-//						
-//						}
-//					
-//					}
-//					
-//				}
+				for(Building b : this.buildingList){
+					
+					for(String actType : b.getActivityOptions()){
+						
+						if(actType != null){
+					
+							addGeometry(actType, b.getGeometry());
+						
+						}
+					
+					}
+					
+				}
 				
 			}
 			
@@ -435,48 +466,18 @@ public class DatabaseReader {
 		
 	}
 	
-	/**
-	 * 
-	 * Reads OpenStreetMap landuse data from a database.
-	 * 
-	 * @param connection The database connection
-	 */
-	private void readLanduseData(Connection connection, Configuration configuration){
-		
-		log.info("Reading in landuse data...");
-		
-		try {
-
-			// Parse polygons for landuse data
-			getPolygonBasedLanduseData(connection, configuration);
-		
-		} catch (SQLException | ParseException e) {
-
-			e.printStackTrace();
-			
-		}
-		
-		log.info("...done");
-		
-	}
+	private Map<String, List<OsmPolygonDataset>> polygonData = new HashMap<>();
 	
-	/**
-	 * 
-	 * Retrieves polygon OpenStreetMap data containing a landuse key.
-	 * 
-	 * @param connection The database connection
-	 * @throws ParseException
-	 * @throws SQLException
-	 */
-	private void getPolygonBasedLanduseData(Connection connection, Configuration configuration) throws ParseException,
-		SQLException {
+	private void getPolygonData(Connection connection, Configuration configuration) throws SQLException, ParseException{
 		
-		log.info("Processing polygon landuse data...");
+		log.info("Processing osm polygon data...");
 		
-		// Create a new statement to execute the sql query
+		this.polygonData.put("landuse", new ArrayList<>());
+		this.polygonData.put("buildings", new ArrayList<>());
+		
 		Statement statement = connection.createStatement();
-		// Execute the query and store the returned valued inside a set.
-		ResultSet set = statement.executeQuery("select " + DatabaseConstants.ATT_LANDUSE + ", "
+		
+		String query = "select " + DatabaseConstants.ATT_LANDUSE + ", " + DatabaseConstants.ATT_BUILDING + ", "
 				+ DatabaseConstants.ATT_AMENITY +  ", " + DatabaseConstants.ATT_LEISURE + ", "
 				+ DatabaseConstants.ATT_SHOP + ", " + DatabaseConstants.functions.st_astext.name()
 				+ "(" + DatabaseConstants.ATT_WAY + ") from " + DatabaseConstants.schemata.osm
@@ -486,226 +487,54 @@ public class DatabaseReader {
 				+ this.geoinformation.getCompleteGeometry().toString() + "', 4326)) and ("
 				+ DatabaseConstants.ATT_LANDUSE + " is not null" + " or " + DatabaseConstants
 				.ATT_AMENITY + " is not null or " + DatabaseConstants.ATT_LEISURE + " is not null"
-				+ " or " + DatabaseConstants.ATT_SHOP + " is not null) and " 
-				+ DatabaseConstants.ATT_BUILDING + " is null;");
-
-		List<LanduseDataset> data = new ArrayList<>();
+				+ " or " + DatabaseConstants.ATT_SHOP + " is not null or " 
+				+ DatabaseConstants.ATT_BUILDING + " is not null);";
 		
-		// Go through all results
-		while(set.next()){
+		ResultSet resultSet = statement.executeQuery(query);
+		
+		while(resultSet.next()){
 			
-			Geometry geometry = wktReader.read(set.getString(DatabaseConstants.functions.st_astext
-					.name()));
-			String landuse = set.getString(DatabaseConstants.ATT_LANDUSE);
-			String amenity = set.getString(DatabaseConstants.ATT_AMENITY);
-			String leisure = set.getString(DatabaseConstants.ATT_LEISURE);
-			String shop = set.getString(DatabaseConstants.ATT_SHOP);
+			Geometry geometry = wktReader.read(resultSet.getString(DatabaseConstants.functions.st_astext.name()));
+			String landuse = resultSet.getString(DatabaseConstants.ATT_LANDUSE);
+			String amenity = resultSet.getString(DatabaseConstants.ATT_AMENITY);
+			String leisure = resultSet.getString(DatabaseConstants.ATT_LEISURE);
+			String shop = resultSet.getString(DatabaseConstants.ATT_SHOP);
+			String building = resultSet.getString(DatabaseConstants.ATT_BUILDING);
 			
-			data.add(new LanduseDataset(geometry, landuse, amenity, leisure, shop));
+			String type = null;
+			
+			if(building != null){
+			
+				type = "buildings";
+				
+			} else {
+				
+				type = "landuse";
+				
+			}
+			
+			this.polygonData.get(type).add(new OsmPolygonDataset(geometry, landuse, amenity, shop, leisure, building));
 			
 		}
 		
-		// Close everything in the end
-		set.close();
+		resultSet.close();
 		statement.close();
 		
-//		List<LanduseDataset> l1 = data.subList(0, data.size()/2);
-//		List<LanduseDataset> l2 = data.subList(data.size()/2, data.size());
-//		
-//		new LanduseThread(l1, configuration).start();
-//		new LanduseThread(l2, configuration).start();
-		
-		for(LanduseDataset dataset : data){
-
-			String landuse = dataset.getLanduse();
-			
-			// Set the landuse type by checking the amenity, leisure and shop tags
-			if(dataset.getAmenity() != null){
-				
-				landuse = dataset.getAmenity();
-				
-			} else if(dataset.getLeisure() != null){
-				
-				landuse = dataset.getLeisure();
-				
-			} else if(dataset.getShop() != null){
-				
-				landuse = dataset.getShop();
-				
-			}
-
-			// Convert the osm landuse tag into a MATSim activity type
-			landuse = getLanduseType(landuse);
-			
-			if(landuse != null){
-				
-				// Add the landuse geometry to the geoinformation if we have a valid activity option for it
-				
-				if(configuration.isUsingBuildings()){
-					
-					if(!geoinformation.getSurveyAreaBoundingBox().contains(dataset.getGeometry()) ||
-							!geoinformation.getSurveyAreaBoundingBox().touches(dataset.getGeometry()) ||
-							!geoinformation.getSurveyAreaBoundingBox().intersects(dataset.getGeometry())){
-
-						for(Building b : this.buildings){
-
-							if(b.getActivityOptions().isEmpty()){
-
-								if(dataset.getGeometry().contains(b.getGeometry())){
-									
-									b.addActivityOption(landuse);
-									
-									if(!landuse.startsWith(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
-									
-										b.addActivityOption(ActivityTypes.WORK);
-									
-									}
-									
-								}
-								
-							}
-							
-						}
-						
-					} else {
-						
-						addGeometry(landuse, dataset.getGeometry());
-						
-					}
-
-				} else {
-					
-					addGeometry(landuse, dataset.getGeometry());
-					
-				}
-				
-			}
-			
+		//post process
+		MultithreadedDataModule module = new MultithreadedDataModule(this);
+		module.initThreads("buildings");
+		for(OsmPolygonDataset dataset : this.polygonData.get("buildings")){
+			module.handle(dataset);
 		}
+		module.execute();
 		
-	}
-	
-	class LanduseThread extends Thread{
-
-		Configuration configuration;
-		List<LanduseDataset>data;
-		
-		LanduseThread(List<LanduseDataset>data, Configuration config){
-			this.data = data;
-			this.configuration = config;
+//		module = new MultithreadedDataModule(this);
+		module.initThreads("landuse");
+		for(OsmPolygonDataset dataset : this.polygonData.get("landuse")){
+			module.handle(dataset);
 		}
-		
-		public void run(){
-			for(LanduseDataset dataset : data){
-
-				String landuse = dataset.getLanduse();
-				
-				// Set the landuse type by checking the amenity, leisure and shop tags
-				if(dataset.getAmenity() != null){
-					
-					landuse = dataset.getAmenity();
-					
-				} else if(dataset.getLeisure() != null){
-					
-					landuse = dataset.getLeisure();
-					
-				} else if(dataset.getShop() != null){
-					
-					landuse = dataset.getShop();
-					
-				}
-
-				// Convert the osm landuse tag into a MATSim activity type
-				landuse = getLanduseType(landuse);
-				
-				if(landuse != null){
-					
-					// Add the landuse geometry to the geoinformation if we have a valid activity option for it
-					
-					
-					if(configuration.isUsingBuildings()){
-						
-//						if(!geoinformation.getSurveyAreaBoundingBox().contains(dataset.getGeometry()) ||
-//								!geoinformation.getSurveyAreaBoundingBox().touches(dataset.getGeometry()) ||
-//								!geoinformation.getSurveyAreaBoundingBox().intersects(dataset.getGeometry())){
-
-							for(Building b : buildings){
-
-								if(b.getActivityOptions().isEmpty()){
-
-									if(dataset.getGeometry().contains(b.getGeometry())){
-										
-										b.addActivityOption(landuse);
-										
-										if(!landuse.startsWith(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
-										
-											b.addActivityOption(ActivityTypes.WORK);
-										
-										}
-										
-									}
-									
-								}
-								
-							}
-							
-//						} else {
-//							
-//							addGeometry(landuse, dataset.getGeometry());
-//							
-//						}
-
-					} else {
-						
-						addGeometry(landuse, dataset.getGeometry());
-						
-					}
-					
-				}
-				
-			}
-		}
-		
-	}
-	
-	/**
-	 * 
-	 * Creates a MATSim activity type from a given OSM landuse tag.
-	 * 
-	 * @param landuseTag The tag for the landuse.
-	 * @return An activity type that can be used in MATSim.
-	 */
-	private static String getLanduseType(String landuseTag){
-		
-		if(landuseTag.equals("college") || landuseTag.equals("school") || landuseTag.equals(
-				"university")){
-			
-			return ActivityTypes.EDUCATION;
-			
-		} else if(landuseTag.equals("commercial") || landuseTag.equals("industrial")){
-			
-			return ActivityTypes.WORK;
-			
-		} else if(landuseTag.equals("hospital")){
-			
-			return ActivityTypes.OTHER;
-			
-		} else if(landuseTag.equals("recreation_ground") || landuseTag.equals("park")
-				|| landuseTag.equals("village_green")){
-			
-			return ActivityTypes.LEISURE;
-			
-		} else if(landuseTag.equals("residential")){
-			
-			return ActivityTypes.HOME;
-			
-		} else if(landuseTag.equals("retail")){
-			
-			return ActivityTypes.SHOPPING;
-			
-		}
-		
-		return null;
+		module.execute();
+		//
 		
 	}
 	
@@ -779,7 +608,7 @@ public class DatabaseReader {
 		
 	}
 	
-	boolean set = false;
+	boolean resultSet = false;
 	
 	/**
 	 * 
@@ -788,11 +617,11 @@ public class DatabaseReader {
 	 * @param landuse The MATSim activity option that can be performed at this location.
 	 * @param g The geometry of the activity location.
 	 */
-	private void addGeometry(String landuse, Geometry g){
+	/*private */void addGeometry(String landuse, Geometry g){
 		
-		if(!set){
+		if(!resultSet){
 			
-			set = true;
+			resultSet = true;
 			minX = Double.MAX_VALUE;
 			minY = Double.MAX_VALUE;
 			maxX = Double.MIN_VALUE;

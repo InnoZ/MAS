@@ -57,7 +57,7 @@ public class ScenarioGenerationController implements DefaultController {
 			Geoinformation geoinformation = new Geoinformation();
 	
 			// A class that reads data from database tables into local containers
-			DatabaseReader dbReader = new DatabaseReader(geoinformation);
+			DatabaseReader dbReader = new DatabaseReader(configuration, geoinformation);
 			dbReader.readGeodataFromDatabase(configuration, scenario);
 			InputStream in = this.getClass().getClassLoader().getResourceAsStream("regionstypen.csv");
 			new BbsrDataReader().read(geoinformation, new InputStreamReader(in));
