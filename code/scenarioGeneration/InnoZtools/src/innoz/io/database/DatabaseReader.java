@@ -49,7 +49,6 @@ import innoz.scenarioGeneration.geoinformation.District;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.network.WayEntry;
 import innoz.scenarioGeneration.utils.ActivityTypes;
-import innoz.utils.osm.OsmKey2ActivityType;
 
 /**
  * 
@@ -75,16 +74,14 @@ public class DatabaseReader {
 	private List<Building> buildingList = Collections.synchronizedList(new ArrayList<>());
 	private QuadTree<Building> buildingsQuadTree;
 	private final Configuration configuration;
+	private Map<String, List<OsmPolygonDataset>> polygonData = new HashMap<>();
+	private List<OsmPointDataset> pointData = Collections.synchronizedList(new ArrayList<>());
+	double minX = Double.MAX_VALUE;
+	double minY = Double.MAX_VALUE;
+	double maxX = Double.MIN_VALUE;
+	double maxY = Double.MIN_VALUE;
 	/////////////////////////////////////////////////////////////////////////////////////////
 
-	public List<Building> getBuildingList(){
-		return buildingList;
-	}
-	
-	public QuadTree<Building> getBuildingsQuadTree(){
-		return this.buildingsQuadTree;
-	}
-	
 	/**
 	 * 
 	 * Constructor.
@@ -365,13 +362,11 @@ public class DatabaseReader {
 			
 			this.buildingsQuadTree = new QuadTree<Building>(minX, minY, maxX, maxY);
 			
+			// Read polygon geometries
 			readPolygonData(connection, configuration);
 
-			// Read amenity geometries
+			// Read point geometries
 			readPointData(connection);
-			
-			// Read landuse geometries
-//			readLanduseData(connection, configuration);
 			
 			if(configuration.isUsingBuildings()){
 				
@@ -380,29 +375,6 @@ public class DatabaseReader {
 					au.getLanduseGeometries().clear();
 					
 				}
-				
-//				this.geoinformation.getQuadTreeForActType(ActivityTypes.SUPPLY).clear();
-//				this.geoinformation.getQuadTreeForActType(ActivityTypes.KINDERGARTEN).clear();
-//				this.geoinformation.getQuadTreeForActType(ActivityTypes.HOME).clear();
-//				this.geoinformation.getQuadTreeForActType(ActivityTypes.WORK).clear();
-//				this.geoinformation.getQuadTreeForActType(ActivityTypes.SHOPPING).clear();
-//				this.geoinformation.getQuadTreeForActType(ActivityTypes.OTHER).clear();
-//				this.geoinformation.getQuadTreeForActType(ActivityTypes.LEISURE).clear();
-//				this.geoinformation.getQuadTreeForActType(ActivityTypes.EDUCATION).clear();
-//				this.geoinformation.getQuadTreeForActType(ActivityTypes.EATING).clear();
-//				this.geoinformation.getQuadTreeForActType(ActivityTypes.CULTURE).clear();
-//				this.geoinformation.getQuadTreeForActType(ActivityTypes.SPORTS).clear();
-//				this.geoinformation.getQuadTreeForActType(ActivityTypes.FURTHER).clear();
-//				this.geoinformation.getQuadTreeForActType(ActivityTypes.EVENT).clear();
-//				this.geoinformation.getQuadTreeForActType(ActivityTypes.HEALTH).clear();
-//				this.geoinformation.getQuadTreeForActType(ActivityTypes.SERVICE).clear();
-//				this.geoinformation.getQuadTreeForActType(ActivityTypes.ERRAND).clear();
-			
-//				List<Building> b1 = this.buildingList.subList(0, this.buildingList.size()/n);
-//				List<Building> b2 = this.buildingList.subList(this.buildingList.size()/n, this.buildingList.size());
-//				
-//				new BuildingsThread(b1).start();
-//				new BuildingsThread(b2).start();
 				
 				for(Building b : this.buildingList){
 					
@@ -457,9 +429,6 @@ public class DatabaseReader {
 		}
 		
 	}
-	
-	private Map<String, List<OsmPolygonDataset>> polygonData = new HashMap<>();
-	private List<OsmPointDataset> pointData = Collections.synchronizedList(new ArrayList<>());
 	
 	private void readPolygonData(Connection connection, Configuration configuration) throws SQLException, ParseException{
 		
@@ -670,165 +639,6 @@ public class DatabaseReader {
 		
 	}
 	
-	double minX = Double.MAX_VALUE;
-	double minY = Double.MAX_VALUE;
-	double maxX = Double.MIN_VALUE;
-	double maxY = Double.MIN_VALUE; 
-	
-	@SuppressWarnings("unused")
-	private void readPtStops(Connection connection) throws SQLException, ParseException{
-		
-//		Statement statement = connection.createStatement();
-//		ResultSet set = statement.executeQuery("select " + DatabaseConstants.functions.st_astext + "(" + DatabaseConstants.ATT_WAY
-//				+ ") from "	+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_point.name() + " where "
-//				+ DatabaseConstants.functions.st_within + " (" + DatabaseConstants.ATT_WAY + "," + DatabaseConstants.functions.st_geomfromtext.name()
-//				+ "('" + this.geoinformation.getCompleteGeometry().toString() + "',4326));");
-//		
-//		Set<Geometry> ptStops = new HashSet<>();
-//		
-//		while(set.next()){
-//			
-//			Geometry g = wktReader.read(set.getString(DatabaseConstants.functions.st_astext.name()));
-//			
-//			for(AdministrativeUnit au : this.geoinformation.getSurveyArea().values()){
-//				
-//				if(au.getGeometry().contains(g)){
-//					
-//					//TODO set the buffer radius to whatever the search radius of the transit router is...
-//					//default is 1000, so we will leave it like this for the time being
-//					ptStops.add(g.buffer(1000));
-//					
-//				}
-//				
-//			}
-//			
-//			this.geoinformation.setCatchmentAreaPt(gFactory.buildGeometry(ptStops));
-//			
-//		}
-		
-	}
-	
-	/**
-	 * 
-	 * Creates a MATSim activity type from a given OSM amenity tag.
-	 * 
-	 * @param tag The OSM amenity tag.
-	 * @return A MATsim activity type.
-	 */
-	private static String getAmenityType(String tag){
-		
-		if(OsmKey2ActivityType.education.contains(tag)){
-			
-			return ActivityTypes.EDUCATION;
-			
-		} else if(OsmKey2ActivityType.groceryShops.contains(tag) || OsmKey2ActivityType.miscShops.contains(tag) || OsmKey2ActivityType.serviceShops.contains(tag)){
-			
-			if(OsmKey2ActivityType.groceryShops.contains(tag)){
-				
-				return ActivityTypes.SUPPLY;
-				
-			} else if(OsmKey2ActivityType.serviceShops.contains(tag)){
-				
-				return ActivityTypes.SERVICE;
-				
-			} else {
-				
-				return ActivityTypes.SHOPPING;
-				
-			}
-			
-		} else if(OsmKey2ActivityType.leisure.contains(tag) || OsmKey2ActivityType.eating.contains(tag) || OsmKey2ActivityType.culture.contains(tag) || OsmKey2ActivityType.sports.contains(tag)
-				|| OsmKey2ActivityType.furtherEducation.contains(tag) || OsmKey2ActivityType.events.contains(tag)){
-			
-			if(OsmKey2ActivityType.eating.contains(tag)){
-				
-				return ActivityTypes.EATING;
-				
-			} else if(OsmKey2ActivityType.culture.contains(tag)){
-				
-				return ActivityTypes.CULTURE;
-				
-			} else if(OsmKey2ActivityType.sports.contains(tag)){
-				
-				return ActivityTypes.SPORTS;
-				
-			} else if(OsmKey2ActivityType.furtherEducation.contains(tag)){
-				
-				return ActivityTypes.FURTHER;
-				
-			} else if(OsmKey2ActivityType.events.contains(tag)){
-				
-				return ActivityTypes.EVENT;
-				
-			} else {
-				
-				return ActivityTypes.LEISURE;
-				
-			}
-			
-		} else if(OsmKey2ActivityType.otherPlaces.contains(tag) || OsmKey2ActivityType.healthcare.contains(tag) || OsmKey2ActivityType.errand.contains(tag)) {
-		
-			if(OsmKey2ActivityType.healthcare.contains(tag)){
-				
-				return ActivityTypes.HEALTH;
-				
-			} else if(OsmKey2ActivityType.errand.contains(tag)){
-				
-				return ActivityTypes.ERRAND;
-						
-			} else {
-				
-				return ActivityTypes.OTHER;
-				
-			}
-			
-		} else if(ActivityTypes.KINDERGARTEN.equals(tag)){
-			
-			return ActivityTypes.KINDERGARTEN;
-			
-		} else{
-			
-			return null;
-			
-		}
-		
-	}
-
-	private String getTypeOfBuilding(String buildingTag){
-		
-		if(buildingTag.equals("apartments") || buildingTag.equals("detached") || buildingTag.equals("house") || buildingTag.equals("semi")
-				|| buildingTag.equals("terrace")){
-			
-			return ActivityTypes.HOME;
-			
-		} else if(buildingTag.equals("barn") || buildingTag.equals("brewery") || buildingTag.equals("factory") || buildingTag.equals("office")
-				|| buildingTag.equals("warehouse")){
-			
-			return ActivityTypes.WORK;
-			
-		} else if(buildingTag.equals("castle") || buildingTag.equals("monument") || buildingTag.equals("palace")){
-			
-			//TODO tourism
-			return "tourism";
-			
-		} else if(buildingTag.equals("church") || buildingTag.equals("city_hall") || buildingTag.equals("hall")){
-			
-			return ActivityTypes.OTHER;
-			
-		} else if(buildingTag.equals("stadium")){
-			
-			return ActivityTypes.LEISURE;
-			
-		} else if(buildingTag.equals("store")){
-			
-			return ActivityTypes.SHOPPING;
-			
-		}
-		
-		return null;
-		
-	}
-	
 	/**
 	 * 
 	 * Parses the OSM database for road objects and return them as a set for generating a MATSim network. 
@@ -894,6 +704,14 @@ public class DatabaseReader {
 		
 		return wayEntries;
 		
+	}
+	
+	public List<Building> getBuildingList(){
+		return buildingList;
+	}
+	
+	public QuadTree<Building> getBuildingsQuadTree(){
+		return this.buildingsQuadTree;
 	}
 	
 }
