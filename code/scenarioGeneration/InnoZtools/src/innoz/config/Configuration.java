@@ -52,6 +52,8 @@ public final class Configuration {
 	
 	public static final String RANDOM_SEED = "randomSeed";
 	public static final String OVERWRITE_FILES = "overwriteExistingFiles";
+	
+	public static final String N_THREADS = "numberOfThreads";
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
@@ -76,6 +78,7 @@ public final class Configuration {
 	Map<String,AdminUnitEntry> adminUnits;
 	
 	long randomSeed = 4711L;
+	int numberOfThreads = 1;
 	
 	double scaleFactor = 1.0d;
 
@@ -613,6 +616,12 @@ public final class Configuration {
 		
 	}
 	
+	public int getNumberOfThreads(){
+		
+		return this.numberOfThreads;
+		
+	}
+	
 	public Map<String, String> getParams(){
 		
 		Map<String, String> map = new HashMap<>();
@@ -631,6 +640,7 @@ public final class Configuration {
 		map.put(USE_VEHICLES, Boolean.toString(this.useVehicles));
 		map.put(LOCAL_PORT, Integer.toString(this.localPort));
 		map.put(WRITE_DB_OUTPUT, Boolean.toString(this.writeDatabaseTables));
+		map.put(N_THREADS, Integer.toString(numberOfThreads));
 		
 		return map;
 		
@@ -654,6 +664,7 @@ public final class Configuration {
 		map.put(USE_VEHICLES, "Defines if household vehicles should be created or not. This only works, if 'useHouseholds' is set to 'true'. Default: no.");
 		map.put(LOCAL_PORT, "The local network port for the ssh connection.");
 		map.put(WRITE_DB_OUTPUT, "Defines if the data created according to this configuration should be written into database tables or not. Default: no.");
+		map.put(N_THREADS, "Number of threads that are executed at the same time. Deault value is '1'.");
 		
 		return map;
 		

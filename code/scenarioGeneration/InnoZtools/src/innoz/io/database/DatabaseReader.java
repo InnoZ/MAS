@@ -376,19 +376,55 @@ public class DatabaseReader {
 					
 				}
 				
-				for(Building b : this.buildingList){
+				Thread[] threads = new Thread[configuration.getNumberOfThreads()];
+				BuildingThread[] buildingThreads = new BuildingThread[configuration.getNumberOfThreads()];
+				
+				for(int i = 0; i < configuration.getNumberOfThreads(); i++){
 					
-					for(String actType : b.getActivityOptions()){
-						
-						if(actType != null){
-					
-							addGeometry(actType, b.getGeometry());
-						
-						}
-					
-					}
+					BuildingThread thread = new BuildingThread();
+					threads[i] = new Thread(thread);
+					buildingThreads[i] = thread;
 					
 				}
+				
+				int counter = 0;
+				
+				for(Building b : this.buildingList){
+					buildingThreads[counter % configuration.getNumberOfThreads()].buildings.add(b);
+					counter++;
+				}
+				
+				for(Thread thread : threads){
+					thread.start();
+				}
+				
+				try {
+					
+					for(Thread thread : threads){
+				
+						thread.join();
+						
+					}
+					
+				} catch (InterruptedException e) {
+				
+					e.printStackTrace();
+
+				}
+				
+//				for(Building b : this.buildingList){
+//					
+//					for(String actType : b.getActivityOptions()){
+//						
+//						if(actType != null){
+//					
+//							addGeometry(actType, b.getGeometry());
+//						
+//						}
+//					
+//					}
+//					
+//				}
 				
 			}
 			
@@ -402,15 +438,12 @@ public class DatabaseReader {
 		
 	}
 	
-	class BuildingsThread extends Thread{
+	class BuildingThread implements Runnable{
 		
-		List<Building> buildings;
-		
-		public BuildingsThread(List<Building> buildings){
-			this.buildings = buildings;
-		}
-		
-		public void run(){
+		List<Building> buildings = new ArrayList<>();
+
+		@Override
+		public void run() {
 			
 			for(Building b : this.buildings){
 				
@@ -483,7 +516,7 @@ public class DatabaseReader {
 		statement.close();
 		
 		//post process
-		MultithreadedDataModule module = new MultithreadedDataModule(this);
+		MultithreadedDataModule module = new MultithreadedDataModule(this, configuration);
 		module.initThreads("buildings");
 		for(OsmPolygonDataset dataset : this.polygonData.get("buildings")){
 			module.handle(dataset);
@@ -510,7 +543,7 @@ public class DatabaseReader {
 	 */
 	private void readPointData(Connection connection) throws SQLException, ParseException{
 		
-		log.info("Reading in amenities...");
+		log.info("Processing osm point data...");
 
 		// Create a statement and execute an SQL query to retrieve all amenities that have a tag
 		// containing a shopping, leisure or any other activity.
@@ -538,7 +571,7 @@ public class DatabaseReader {
 		statement.close();
 		
 		//post process
-		MultithreadedDataModule module = new MultithreadedDataModule(this);
+		MultithreadedDataModule module = new MultithreadedDataModule(this, configuration);
 		module.initThreads("amenities");
 		for(OsmPointDataset dataset : this.pointData){
 			module.handle(dataset);

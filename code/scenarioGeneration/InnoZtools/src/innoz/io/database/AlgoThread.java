@@ -126,31 +126,38 @@ public class AlgoThread implements Runnable {
 	
 	void processBuildingDataset(OsmPolygonDataset dataset){
 		
-		Building b = new Building(dataset.getGeometry());
-		String buildingType = getTypeOfBuilding(dataset.getBuildingKey());
-		if(buildingType != null){
+		if(dataset.getGeometry().isValid()){
+
+			Building b = new Building(dataset.getGeometry());
+			String buildingType = getTypeOfBuilding(dataset.getBuildingKey());
 			
-			b.addActivityOption(buildingType);
+			if(buildingType != null){
+				
+				b.addActivityOption(buildingType);
+				
+			}
+			
+			if(dataset.getAmenityKey() != null){
+				
+				b.addActivityOption(getAmenityType(dataset.getAmenityKey()));
+				
+			}
+			
+			if(dataset.getLeisureKey()!= null){
+				b.addActivityOption(getAmenityType(dataset.getLeisureKey()));
+			}
+			
+			if(dataset.getShopKey()!= null){
+				
+				b.addActivityOption(getAmenityType(dataset.getShopKey()));
+				
+			}
+			
+			this.reader.getBuildingList().add(b);
+			this.reader.getBuildingsQuadTree().put(dataset.getGeometry().getCentroid().getX(),
+					dataset.getGeometry().getCentroid().getY(), b);
 			
 		}
-		if(dataset.getAmenityKey() != null){
-			
-			b.addActivityOption(getAmenityType(dataset.getAmenityKey()));
-			
-		}
-		
-		if(dataset.getLeisureKey()!= null){
-			b.addActivityOption(getAmenityType(dataset.getLeisureKey()));
-		}
-		
-		if(dataset.getShopKey()!= null){
-			
-			b.addActivityOption(getAmenityType(dataset.getShopKey()));
-			
-		}
-		
-		this.reader.getBuildingList().add(b);
-		this.reader.getBuildingsQuadTree().put(dataset.getGeometry().getCentroid().getX(), dataset.getGeometry().getCentroid().getY(), b);
 		
 	}
 	
@@ -160,7 +167,8 @@ public class AlgoThread implements Runnable {
 			
 			return ActivityTypes.EDUCATION;
 			
-		} else if(OsmKey2ActivityType.groceryShops.contains(tag) || OsmKey2ActivityType.miscShops.contains(tag) || OsmKey2ActivityType.serviceShops.contains(tag)){
+		} else if(OsmKey2ActivityType.groceryShops.contains(tag) || OsmKey2ActivityType.miscShops.contains(tag) ||
+				OsmKey2ActivityType.serviceShops.contains(tag)){
 			
 			if(OsmKey2ActivityType.groceryShops.contains(tag)){
 				
@@ -176,7 +184,8 @@ public class AlgoThread implements Runnable {
 				
 			}
 			
-		} else if(OsmKey2ActivityType.leisure.contains(tag) || OsmKey2ActivityType.eating.contains(tag) || OsmKey2ActivityType.culture.contains(tag) || OsmKey2ActivityType.sports.contains(tag)
+		} else if(OsmKey2ActivityType.leisure.contains(tag) || OsmKey2ActivityType.eating.contains(tag)
+				|| OsmKey2ActivityType.culture.contains(tag) || OsmKey2ActivityType.sports.contains(tag)
 				|| OsmKey2ActivityType.furtherEducation.contains(tag) || OsmKey2ActivityType.events.contains(tag)){
 			
 			if(OsmKey2ActivityType.eating.contains(tag)){
@@ -205,7 +214,8 @@ public class AlgoThread implements Runnable {
 				
 			}
 			
-		} else if(OsmKey2ActivityType.otherPlaces.contains(tag) || OsmKey2ActivityType.healthcare.contains(tag) || OsmKey2ActivityType.errand.contains(tag)) {
+		} else if(OsmKey2ActivityType.otherPlaces.contains(tag) || OsmKey2ActivityType.healthcare.contains(tag)
+				|| OsmKey2ActivityType.errand.contains(tag)) {
 		
 			if(OsmKey2ActivityType.healthcare.contains(tag)){
 				
@@ -269,13 +279,13 @@ public class AlgoThread implements Runnable {
 	
 	private String getTypeOfBuilding(String buildingTag){
 		
-		if(buildingTag.equals("apartments") || buildingTag.equals("detached") || buildingTag.equals("house") || buildingTag.equals("semi")
-				|| buildingTag.equals("terrace")){
+		if(buildingTag.equals("apartments") || buildingTag.equals("detached") || buildingTag.equals("house")
+				|| buildingTag.equals("semi")|| buildingTag.equals("terrace")){
 			
 			return ActivityTypes.HOME;
 			
-		} else if(buildingTag.equals("barn") || buildingTag.equals("brewery") || buildingTag.equals("factory") || buildingTag.equals("office")
-				|| buildingTag.equals("warehouse")){
+		} else if(buildingTag.equals("barn") || buildingTag.equals("brewery") || buildingTag.equals("factory")
+				|| buildingTag.equals("office")	|| buildingTag.equals("warehouse")){
 			
 			return ActivityTypes.WORK;
 			
@@ -329,7 +339,8 @@ public class AlgoThread implements Runnable {
 			// Add the landuse geometry to the geoinformation if we have a valid activity option for it
 			this.reader.addGeometry(actType, dataset.getGeometry());
 			
-			Building closest = this.reader.getBuildingsQuadTree().getClosest(dataset.getGeometry().getCentroid().getX(), dataset.getGeometry().getCentroid().getY());
+			Building closest = this.reader.getBuildingsQuadTree().getClosest(dataset.getGeometry().getCentroid().getX(),
+					dataset.getGeometry().getCentroid().getY());
 			
 			if(closest != null){
 			
@@ -338,7 +349,6 @@ public class AlgoThread implements Runnable {
 			}
 			
 		}
-
 		
 	}
 	

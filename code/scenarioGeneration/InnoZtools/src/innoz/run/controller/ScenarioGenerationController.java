@@ -60,7 +60,7 @@ public class ScenarioGenerationController implements DefaultController {
 			DatabaseReader dbReader = new DatabaseReader(configuration, geoinformation);
 			dbReader.readGeodataFromDatabase(configuration, scenario);
 			InputStream in = this.getClass().getClassLoader().getResourceAsStream("regionstypen.csv");
-			new BbsrDataReader().read(geoinformation, new InputStreamReader(in));
+			new BbsrDataReader().read(geoinformation);//, new InputStreamReader(in));
 			
 			// Create a MATSim network from OpenStreetMap data
 			NetworkCreatorFromPsql nc;
