@@ -29,9 +29,9 @@ public class DummyDemandGenerator extends DemandGenerationAlgorithm {
 	}
 
 	@Override
-	public void run(final Scenario scenario, final Configuration configuration) {
+	public void run(final Scenario scenario, final Configuration configuration, String ids) {
 
-		this.createDummyPopulation(scenario);
+		this.createDummyPopulation(scenario, ids);
 		
 	}
 	
@@ -50,13 +50,15 @@ public class DummyDemandGenerator extends DemandGenerationAlgorithm {
 	 * 
 	 * @param scenario The MATsim scenario eventually containing all of the information about network, demand etc.
 	 */
-	private void createDummyPopulation(Scenario scenario){
+	private void createDummyPopulation(Scenario scenario, String ids){
 		
 		log.info("Creating a dummy population without any preferences...");
 		
 		// From each administrative unit to each administrative unit, create a certain amount of commuters
-		for(District d : this.geoinformation.getAdminUnits().values()){
+		for(String s : ids.split(",")){
 
+			District d = this.geoinformation.getAdminUnits().get(s);
+			
 			for(Entry<String,AdministrativeUnit> fromEntry : d.getAdminUnits().entrySet()){
 				
 				for(Entry<String,AdministrativeUnit> toEntry : d.getAdminUnits().entrySet()){

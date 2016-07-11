@@ -217,7 +217,7 @@ public class DatabaseReader {
 		
 		getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, true);
 		this.geoinformation.setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection)
-				.convexHull().buffer(5000));
+				.convexHull());
 		if(configuration.getVicinityIds() != null){
 			getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, false);
 			this.geoinformation.setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection)

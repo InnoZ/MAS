@@ -66,7 +66,7 @@ public abstract class DemandGenerationAlgorithm {
 		
 	}
 	
-	public abstract void run(final Scenario scenario, final Configuration configuration);
+	public abstract void run(final Scenario scenario, final Configuration configuration, String ids);
 
 	AdministrativeUnit chooseAdminUnitInsideDistrict(District district, String activityType){
 		
