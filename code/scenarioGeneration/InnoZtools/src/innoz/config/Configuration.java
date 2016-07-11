@@ -631,6 +631,10 @@ public final class Configuration {
 		
 	}
 	
+	public PopulationType getVicinityPopulationType(){
+		return this.popTypeV;
+	}
+	
 	public Map<String, String> getParams(){
 		
 		Map<String, String> map = new HashMap<>();
@@ -651,6 +655,8 @@ public final class Configuration {
 		map.put(LOCAL_PORT, Integer.toString(this.localPort));
 		map.put(WRITE_DB_OUTPUT, Boolean.toString(this.writeDatabaseTables));
 		map.put(N_THREADS, Integer.toString(numberOfThreads));
+		map.put(SURVEY_AREA_IDS, this.surveyAreaIds);
+		map.put(VICINITY_IDS, this.vicinityIds);
 		
 		return map;
 		
