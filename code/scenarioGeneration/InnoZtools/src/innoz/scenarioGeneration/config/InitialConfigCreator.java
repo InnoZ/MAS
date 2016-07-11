@@ -47,10 +47,10 @@ public class InitialConfigCreator {
 			// Add activity types to the scoring parameters
 			addBasicActivityParams(config);
 			
-			// Add mode parameters
-			addBasicModeParams(config);
-			
 		}
+		
+		// Add mode parameters
+		addBasicModeParams(config);
 		
 		// QSim config group
 		config.qsim().setFlowCapFactor(configuration.getScaleFactor());

@@ -63,9 +63,9 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	}
 
 	@Override
-	public void run(Scenario scenario, Configuration configuration) {
+	public void run(Scenario scenario, Configuration configuration, String ids) {
 
-		createCompletePopulation(configuration, scenario);
+		createCompletePopulation(configuration, scenario, ids);
 		
 	}
 	
@@ -77,7 +77,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	 * @param configuration The scenario generation configuration file.
 	 * @param scenario A MATSim scenario.
 	 */
-	private void createCompletePopulation(Configuration configuration, Scenario scenario){
+	private void createCompletePopulation(Configuration configuration, Scenario scenario, String ids){
 		
 		// Run the survey data parser that stores all of the travel information
 		SurveyDatabaseParser parser = new SurveyDatabaseParser();
@@ -92,11 +92,11 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		// Choose the method for demand generation that has been specified in the configuration
 		if(configuration.isUsingHouseholds()){
 		
-			createHouseholds(configuration, scenario, container);
+			createHouseholds(configuration, scenario, container, ids);
 			
 		} else {
 			
-			createPersons(configuration, scenario, container);
+			createPersons(configuration, scenario, container, ids);
 			
 		}
 		
@@ -110,7 +110,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	 * @param scenario A MATSim scenario.
 	 * @param parser The survey parser containing all of the information.
 	 */
-	private void createHouseholds(Configuration configuration, Scenario scenario, SurveyDataContainer container){
+	private void createHouseholds(Configuration configuration, Scenario scenario, SurveyDataContainer container,
+			String ids){
 
 		// Get the MATSim population and initialize person attributes
 		Population population = scenario.getPopulation();
@@ -126,8 +127,10 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		// Initialize a pseudo-random number and iterate over all administrative units.
 		// Accumulate their weights and as soon as the random number is smaller or equal to the accumulated weight
 		// pick the current admin unit.
-		for(District d : this.geoinformation.getAdminUnits().values()){
+		for(String s : ids.split(",")){
 
+			District d = this.geoinformation.getAdminUnits().get(s);
+			
 			for(int i = 0; i < d.getnHouseholds() * configuration.getScaleFactor(); i++){
 				
 				this.currentHomeCell = chooseAdminUnitInsideDistrict(d, ActivityTypes.HOME);
@@ -257,7 +260,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	 * @param scenario The MATSim scenario.
 	 * @param parser The survey parser.
 	 */
-	private void createPersons(Configuration configuration, Scenario scenario, SurveyDataContainer container){
+	private void createPersons(Configuration configuration, Scenario scenario, SurveyDataContainer container,
+			String ids){
 		
 		// Get the MATSim population and initialize person attributes
 		Population population = scenario.getPopulation();

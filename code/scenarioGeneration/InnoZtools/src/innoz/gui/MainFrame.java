@@ -11,6 +11,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 
 /**
@@ -94,6 +96,10 @@ public final class MainFrame {
 		JScrollPane scrollPane = new JScrollPane(textArea);
 		StatusMessageAppender appender = new StatusMessageAppender(textArea);
 		LogManager.getRootLogger().addAppender(appender);
+
+		LoggingOutputStream los = new LoggingOutputStream(LogManager.getRootLogger(), Level.ERROR);
+		System.setErr(new PrintStream(los, true));
+		
 		panel.add(scrollPane, BorderLayout.CENTER);
 		this.frame.add(panel, BorderLayout.SOUTH);
 		
