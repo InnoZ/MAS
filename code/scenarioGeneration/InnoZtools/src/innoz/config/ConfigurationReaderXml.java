@@ -74,6 +74,10 @@ public class ConfigurationReaderXml extends DefaultHandler {
 			
 			this.configuration.popType = PopulationType.valueOf(attributes.getValue("v"));
 			
+		} else if(qName.equalsIgnoreCase(Configuration.POPULATION_TYPE_V)){
+			
+			this.configuration.popTypeV = PopulationType.valueOf(attributes.getValue("v"));
+			
 		} else if(qName.equalsIgnoreCase(Configuration.SCALE_FACTOR)){
 			
 			this.configuration.scaleFactor = Double.parseDouble(attributes.getValue("v"));

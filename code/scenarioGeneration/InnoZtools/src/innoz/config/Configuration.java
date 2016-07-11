@@ -3,6 +3,7 @@ package innoz.config;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
@@ -31,6 +32,7 @@ public final class Configuration {
 	public static final String CRS = "coordinateSystem";
 	public static final String OUTPUT_DIR = "outputDirectory";
 	public static final String POPULATION_TYPE = "populationType";
+	public static final String POPULATION_TYPE_V = "populationTypeVicinity";
 	public static final String SCALE_FACTOR = "scaleFactor";
 	public static final String USE_BUILDINGS = "useBuildings";
 	public static final String CREATE_TRANSIT = "createTransit";
@@ -63,6 +65,7 @@ public final class Configuration {
 	String crs = "EPSG:32632";
 	String outputDirectory = ".";
 	PopulationType popType = PopulationType.survey;
+	PopulationType popTypeV = PopulationType.none;
 	
 	boolean useHouseholds = true;
 	boolean useVehicles = false;
@@ -517,15 +520,21 @@ public final class Configuration {
 	public void dumpSettings(){
 		
 		log.info("Dump of configuration settings:");
-		log.info("surveyAreaId(s):           " + this.surveyAreaIds);
-		log.info("vicinityId(s):             " + this.vicinityIds);
-		log.info("coordinateReferenceSystem: " + this.crs);
-		log.info("outputDirectory:           " + this.outputDirectory);
-		log.info("populationType:            " + this.popType.name());
-		log.info("onlyWorkingDays:           " + this.onlyWorkingDays);
-		log.info("useBuildings:              " + this.useBuildings);
-		log.info("useMiDHouseholds:          " + this.useHouseholds);
-		log.info("useMiDVehicles:            " + this.useVehicles);
+		
+		for(Entry<String,String> entry : getParams().entrySet()){
+			
+			log.info(entry.getKey() + "\t" + entry.getValue());
+			
+		}
+//		log.info("surveyAreaId(s):           " + this.surveyAreaIds);
+//		log.info("vicinityId(s):             " + this.vicinityIds);
+//		log.info("coordinateReferenceSystem: " + this.crs);
+//		log.info("outputDirectory:           " + this.outputDirectory);
+//		log.info("populationType:            " + this.popType.name());
+//		log.info("onlyWorkingDays:           " + this.onlyWorkingDays);
+//		log.info("useBuildings:              " + this.useBuildings);
+//		log.info("useMiDHouseholds:          " + this.useHouseholds);
+//		log.info("useMiDVehicles:            " + this.useVehicles);
 		
 	}
 	
@@ -629,6 +638,7 @@ public final class Configuration {
 		map.put(CRS, this.crs);
 		map.put(CREATE_TRANSIT, Boolean.toString(this.useTransit));
 		map.put(POPULATION_TYPE, this.popType.name());
+		map.put(POPULATION_TYPE_V, this.popTypeV.name());
 		map.put(SCALE_FACTOR, Double.toString(this.scaleFactor));
 		map.put(OUTPUT_DIR, this.outputDirectory);
 		map.put(OVERWRITE_FILES, Boolean.toString(this.overwriteExistingFiles));
@@ -653,6 +663,7 @@ public final class Configuration {
 		map.put(CRS, "The coordinate reference system that applies to the study area.");
 		map.put(CREATE_TRANSIT, "NOT IMPLEMENTED YET! Defines if MATSim transit should be modeled or not. Default: false.");
 		map.put(POPULATION_TYPE, "The type of population that is created as initial demand. Possible values are: none, dummy, commuter, survey.");
+		map.put(POPULATION_TYPE_V, "The type of population that is created as initial demand for the vicinity. Possible values are: none, dummy, commuter, survey.");
 		map.put(SCALE_FACTOR, "The scale factor for the amount of households / persons to be created and for the supply side to reduce capacities. Any numeric value between 0 and 1.");
 		map.put(OUTPUT_DIR, "The directory containing all output files of the scenario generation process.");
 		map.put(OVERWRITE_FILES, "Switch to 'yes' to overwrite existing files in the output directory. Default: false.");
