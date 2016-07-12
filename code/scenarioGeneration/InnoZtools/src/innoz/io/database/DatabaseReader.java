@@ -43,6 +43,8 @@ import innoz.config.Configuration.AdminUnitEntry;
 import innoz.config.Configuration.PopulationType;
 import innoz.io.database.datasets.OsmPointDataset;
 import innoz.io.database.datasets.OsmPolygonDataset;
+import innoz.run.parallelization.DataProcessingAlgoThread;
+import innoz.run.parallelization.MultithreadedDataModule;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.geoinformation.Building;
 import innoz.scenarioGeneration.geoinformation.District;
@@ -80,6 +82,8 @@ public class DatabaseReader {
 	double minY = Double.MAX_VALUE;
 	double maxX = Double.MIN_VALUE;
 	double maxY = Double.MIN_VALUE;
+
+	boolean resultSet = false;
 	
 	private List<Geometry> bufferedAreasForNetworkGeneration = new ArrayList<>();
 	private Geometry buffer;
@@ -101,7 +105,7 @@ public class DatabaseReader {
 		
 	}
 	
-	Configuration getConfiguration(){
+	public Configuration getConfiguration(){
 		return this.configuration;
 	}
 	
@@ -513,14 +517,14 @@ public class DatabaseReader {
 		
 		//post process
 		MultithreadedDataModule module = new MultithreadedDataModule(this, configuration);
-		module.initThreads("buildings");
+		module.initThreads(DataProcessingAlgoThread.class.getName(), this, "buildings");
 		for(OsmPolygonDataset dataset : this.polygonData.get("buildings")){
 			module.handle(dataset);
 		}
 		module.execute();
 		
 //		module = new MultithreadedDataModule(this);
-		module.initThreads("landuse");
+		module.initThreads(DataProcessingAlgoThread.class.getName(), this, "landuse");
 		for(OsmPolygonDataset dataset : this.polygonData.get("landuse")){
 			module.handle(dataset);
 		}
@@ -568,15 +572,13 @@ public class DatabaseReader {
 		
 		//post process
 		MultithreadedDataModule module = new MultithreadedDataModule(this, configuration);
-		module.initThreads("amenities");
+		module.initThreads(DataProcessingAlgoThread.class.getName(), this, "amenities");
 		for(OsmPointDataset dataset : this.pointData){
 			module.handle(dataset);
 		}
 		module.execute();
 		
 	}
-	
-	boolean resultSet = false;
 	
 	/**
 	 * 
@@ -585,7 +587,7 @@ public class DatabaseReader {
 	 * @param landuse The MATSim activity option that can be performed at this location.
 	 * @param g The geometry of the activity location.
 	 */
-	/*private */void addGeometry(String landuse, Geometry g){
+	public void addGeometry(String landuse, Geometry g){
 		
 		if(!resultSet){
 			

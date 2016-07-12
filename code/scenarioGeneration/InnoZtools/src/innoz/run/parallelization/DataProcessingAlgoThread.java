@@ -1,8 +1,9 @@
-package innoz.io.database;
+package innoz.run.parallelization;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import innoz.io.database.DatabaseReader;
 import innoz.io.database.datasets.OsmDataset;
 import innoz.io.database.datasets.OsmPointDataset;
 import innoz.io.database.datasets.OsmPolygonDataset;
@@ -10,15 +11,18 @@ import innoz.scenarioGeneration.geoinformation.Building;
 import innoz.scenarioGeneration.utils.ActivityTypes;
 import innoz.utils.osm.OsmKey2ActivityType;
 
-public class AlgoThread implements Runnable {
+public class DataProcessingAlgoThread extends AlgoThread {
 
 	private List<OsmDataset> data = new ArrayList<>();
-	private final String type;
-	private final DatabaseReader reader;
-	
-	public AlgoThread(DatabaseReader reader, String type){
-		this.reader = reader;
-		this.type = type;
+	private String type;
+	private DatabaseReader reader;
+
+	@Override
+	public void init(Object... args) {
+		
+		this.reader = (DatabaseReader)args[0];
+		this.type = (String)args[1];
+		
 	}
 	
 	public void addDatasetToThread(OsmDataset set){
@@ -351,5 +355,5 @@ public class AlgoThread implements Runnable {
 		}
 		
 	}
-	
+
 }

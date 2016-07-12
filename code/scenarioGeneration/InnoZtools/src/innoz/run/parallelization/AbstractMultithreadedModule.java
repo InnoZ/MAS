@@ -9,10 +9,10 @@ public abstract class AbstractMultithreadedModule {
 
 	private final static Logger log = Logger.getLogger(AbstractMultithreadedModule.class);
 	
-	int numberOfThreads;
-	Thread[] threads;
-	AlgoThread[] algothreads;
-	int count = 0;
+	protected int numberOfThreads;
+	private Thread[] threads;
+	protected AlgoThread[] algothreads;
+	protected int count = 0;
 	
 	private final AtomicReference<Throwable> hadException = new AtomicReference<>(null);
 	private final ExceptionHandler exceptionHandler = new ExceptionHandler(this.hadException);
@@ -54,6 +54,8 @@ public abstract class AbstractMultithreadedModule {
 	public abstract void handle(Object obj);
 	
 	public final void execute(){
+
+		log.info("Starting " + this.threads.length + " threads");
 		
 		for(Thread thread : this.threads){
 			
