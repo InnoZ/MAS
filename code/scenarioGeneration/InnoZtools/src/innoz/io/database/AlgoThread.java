@@ -84,9 +84,9 @@ public class AlgoThread implements Runnable {
 			
 			if(reader.getConfiguration().isUsingBuildings()){
 				
-				if(!this.reader.getGeoinformation().getSurveyAreaBoundingBox().contains(dataset.getGeometry()) ||
-						!this.reader.getGeoinformation().getSurveyAreaBoundingBox().touches(dataset.getGeometry()) ||
-						!this.reader.getGeoinformation().getSurveyAreaBoundingBox().intersects(dataset.getGeometry())){
+//				if(!this.reader.getGeoinformation().getSurveyAreaBoundingBox().contains(dataset.getGeometry()) ||
+//						!this.reader.getGeoinformation().getSurveyAreaBoundingBox().touches(dataset.getGeometry()) ||
+//						!this.reader.getGeoinformation().getSurveyAreaBoundingBox().intersects(dataset.getGeometry())){
 
 					for(Building b : this.reader.getBuildingList()){
 
@@ -108,11 +108,11 @@ public class AlgoThread implements Runnable {
 						
 					}
 					
-				} else {
-					
-					reader.addGeometry(landuse, dataset.getGeometry());
-					
-				}
+//				} else {
+//					
+//					reader.addGeometry(landuse, dataset.getGeometry());
+//					
+//				}
 
 			} else {
 				
