@@ -718,7 +718,7 @@ public class DatabaseReader {
 					+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_line.name() + " where "
 					+ DatabaseConstants.ATT_HIGHWAY + " is not null and " + DatabaseConstants.functions.st_within.name() + "("
 					+ DatabaseConstants.ATT_WAY + "," + DatabaseConstants.functions.st_geomfromtext.name() + "('"
-					+ buffer.toString() + "',4326));");
+					+ this.geoinformation.getCompleteGeometry().toString() + "',4326));");
 			
 			while(result.next()){
 				
