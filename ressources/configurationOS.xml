@@ -31,11 +31,13 @@
 		<createTransit v="false" />
 		<!-- The type of population that should be created during demand generation. Possible values: complete, dummy, none-->
 		<populationType v="survey" />
+		<populationTypeVicinity v="commuter" />
 		<scaleFactor v="1.0" />
-		<outputDirectory v="/home/dhosse/3connect/" />
+		<outputDirectory v="/home/dhosse/3connect_2/" />
 		<overwriteExistingFiles v="true"/>
 		<demandSource v="srv" />
 		<useMobilityAttitudeGroups v="true" />
+		<numberOfThreads v="2" />
 	</scenario>
 
 	<surveyData>

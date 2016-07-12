@@ -8,11 +8,11 @@
 			<adminUnit id="09180" numberOfHouseholds="41838" networkDetail="6" />
 		</areaSet>
 		<areaSet k="vicinity" >
-		<!--	<adminUnit id="09173" numberOfHouseholds="0" /> --> <!-- 52832 -->
-		<!--	<adminUnit id="09190" numberOfHouseholds="0" /> --> <!-- 56365 -->
-		<!--	<adminUnit id="09762" numberOfHouseholds="0" /> --> <!-- 20111  -->
-		<!--	<adminUnit id="09777" numberOfHouseholds="0" /> --> <!-- 58063  -->
-		<!--	<adminUnit id="703" numberOfHouseholds="0" /> -->
+			<adminUnit id="09173" numberOfHouseholds="0" networkDetail="4" /> <!-- 52832 -->
+			<adminUnit id="09190" numberOfHouseholds="0" networkDetail="4" /> <!-- 56365 -->
+			<adminUnit id="09762" numberOfHouseholds="0" networkDetail="4"/> <!-- 20111  -->
+			<adminUnit id="09777" numberOfHouseholds="0" networkDetail="4" /> <!-- 58063  -->
+		<!--	<adminUnit id="703" numberOfHouseholds="0"  networkDetail="4"/> -->
 		<!--	<adminUnit id="701" numberOfHouseholds="0" /> -->
 		<!--	<adminUnit id="702" numberOfHouseholds="0" /> -->
 		<!--	<adminUnit id="708" numberOfHouseholds="0" /> -->
@@ -21,10 +21,13 @@
 		<coordinateSystem v="EPSG:32632" />
 		<createTransit v="false" />
 		<populationType v="survey" />
+		<populationTypeVicinity v="commuter" />
 		<scaleFactor v="1.0" />
 		<outputDirectory v="/home/dhosse/eGAP/" />
 		<overwriteExistingFiles v="true"/>
 	</scenario>
+
+	<numberOfThreads v="3" />
 
 	<surveyData>
 		<useBuildings v="true" />
