@@ -5,9 +5,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.log4j.Logger;
 
-public abstract class MultithreadedModule {
+public abstract class AbstractMultithreadedModule {
 
-	private final static Logger log = Logger.getLogger(MultithreadedModule.class);
+	private final static Logger log = Logger.getLogger(AbstractMultithreadedModule.class);
 	
 	int numberOfThreads;
 	Thread[] threads;
@@ -17,7 +17,7 @@ public abstract class MultithreadedModule {
 	private final AtomicReference<Throwable> hadException = new AtomicReference<>(null);
 	private final ExceptionHandler exceptionHandler = new ExceptionHandler(this.hadException);
 	
-	public MultithreadedModule(int numberOfThreads){
+	public AbstractMultithreadedModule(int numberOfThreads){
 		
 		this.numberOfThreads = numberOfThreads;
 		
