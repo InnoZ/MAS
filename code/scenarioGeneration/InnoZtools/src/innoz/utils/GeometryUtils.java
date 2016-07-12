@@ -28,6 +28,7 @@ import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.PointFeatureFactory;
+import org.matsim.core.utils.gis.PolygonFeatureFactory;
 import org.matsim.core.utils.gis.PolylineFeatureFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.gis.ShapeFileWriter;
@@ -565,6 +566,26 @@ public class GeometryUtils {
 			
 			log.error("Point feature collection is empty and thus there is no file to write...");
 			log.info("Continuing anyways...");
+			
+		}
+		
+	}
+	
+	public static void writeGeometriesToShapefile(Collection<Geometry> geometries, String crs, String file){
+		
+		Collection<SimpleFeature> features = new ArrayList<SimpleFeature>();
+		PolygonFeatureFactory factory = new PolygonFeatureFactory.Builder()
+				.setCrs(MGC.getCRS(crs)).create();
+		
+		for(Geometry geometry : geometries){
+			
+			features.add(factory.createPolygon(geometry.getCoordinates()));
+			
+		}
+		
+		if(features.size() > 0){
+			
+			ShapeFileWriter.writeGeometries(features, file);
 			
 		}
 		
