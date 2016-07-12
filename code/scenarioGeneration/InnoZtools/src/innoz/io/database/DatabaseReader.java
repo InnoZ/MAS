@@ -80,6 +80,9 @@ public class DatabaseReader {
 	double minY = Double.MAX_VALUE;
 	double maxX = Double.MIN_VALUE;
 	double maxY = Double.MIN_VALUE;
+	
+	private List<Geometry> bufferedAreasForNetworkGeneration = new ArrayList<>();
+	private Geometry buffer;
 	/////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -212,12 +215,17 @@ public class DatabaseReader {
 
 		log.info("Reading administrative borders from database...");
 
+		// This is needed to transform the WGS84 geometries into the specified CRS
+		MathTransform t = CRS.findMathTransform(CRS.decode(Geoinformation.AUTH_KEY_WGS84, true),
+				CRS.decode(configuration.getCrs(), true));
+		
 		// A collection to temporarily store all geometries
 		List<Geometry> geometryCollection = new ArrayList<Geometry>();
 		
 		getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, true);
 		this.geoinformation.setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection)
 				.convexHull());
+		
 		if(configuration.getVicinityIds() != null){
 			getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, false);
 			this.geoinformation.setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection)
@@ -227,10 +235,6 @@ public class DatabaseReader {
 		for(District d : this.geoinformation.getAdminUnits().values()){
 			d.setnHouseholds(configuration.getAdminUnitEntries().get(d.getId()).getNumberOfHouseholds());
 		}
-		
-		// This is needed to transform the WGS84 geometries into the specified CRS
-		MathTransform t = CRS.findMathTransform(CRS.decode(Geoinformation.AUTH_KEY_WGS84, true),
-				CRS.decode(configuration.getCrs(), true));
 		
 		// Get the survey area by building the bounding box of all geometries 
 		this.geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection)
@@ -272,8 +276,9 @@ public class DatabaseReader {
 		
 		// Execute the query and store the returned valued inside a set.
 		String q = "select " + DatabaseConstants.BLAND + "," + DatabaseConstants.MUN_KEY + ", cca_2, ccn_3, "
-				+ DatabaseConstants.functions.st_astext.name() + "(" + DatabaseConstants.ATT_GEOM +
-				")" + " from " + DatabaseConstants.schemata.gadm.name() + "." +
+				+ DatabaseConstants.functions.st_astext.name() + "(geom), "
+				+ DatabaseConstants.functions.st_astext.name() + "(st_transform(st_buffer(st_transform("
+				+ DatabaseConstants.ATT_GEOM + ",32632),5000),4326)) as buffer" + " from " + DatabaseConstants.schemata.gadm.name() + "." +
 				DatabaseConstants.tables.districts.name() + " where" + builder.toString();
 		ResultSet set = statement.executeQuery(q);
 
@@ -298,6 +303,10 @@ public class DatabaseReader {
 					Geometry geometry = wktReader.read(g);
 					au.setGeometry(geometry);
 					au.setBland((int)bland);
+					
+					if(surveyArea){
+						bufferedAreasForNetworkGeneration.add(wktReader.read(set.getString("buffer")));
+					}
 
 					if(district != null){
 						
@@ -698,6 +707,8 @@ public class DatabaseReader {
 	
 		if(connection != null){
 
+			buffer = gFactory.buildGeometry(bufferedAreasForNetworkGeneration).buffer(0);
+			
 			// Create a new statement and execute an SQL query to retrieve OSM road data
 			Statement statement = connection.createStatement();
 			ResultSet result = statement.executeQuery("select " + DatabaseConstants.ATT_OSM_ID + ", " + DatabaseConstants.ATT_ACCESS + ", "
@@ -707,7 +718,7 @@ public class DatabaseReader {
 					+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_line.name() + " where "
 					+ DatabaseConstants.ATT_HIGHWAY + " is not null and " + DatabaseConstants.functions.st_within.name() + "("
 					+ DatabaseConstants.ATT_WAY + "," + DatabaseConstants.functions.st_geomfromtext.name() + "('"
-					+ this.geoinformation.getCompleteGeometry().toString() + "',4326));");
+					+ buffer.toString() + "',4326));");
 			
 			while(result.next()){
 				
@@ -745,6 +756,10 @@ public class DatabaseReader {
 	
 	public QuadTree<Building> getBuildingsQuadTree(){
 		return this.buildingsQuadTree;
+	}
+	
+	public Geometry getBufferedArea(){
+		return this.buffer;
 	}
 	
 }

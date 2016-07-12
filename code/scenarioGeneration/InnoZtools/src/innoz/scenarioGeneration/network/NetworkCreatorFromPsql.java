@@ -1,10 +1,5 @@
 package innoz.scenarioGeneration.network;
 
-import innoz.config.Configuration;
-import innoz.io.database.DatabaseReader;
-import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
-import innoz.scenarioGeneration.geoinformation.Geoinformation;
-
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,8 +25,14 @@ import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
+
+import innoz.config.Configuration;
+import innoz.io.database.DatabaseReader;
+import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
+import innoz.scenarioGeneration.geoinformation.Geoinformation;
 
 /**
  * 
@@ -78,6 +79,8 @@ public class NetworkCreatorFromPsql {
 	private Map<String, HighwayDefaults> highwayDefaults = new HashMap<String, HighwayDefaults>();
 
 	private Map<Coord,Node> coords2Nodes = new HashMap<Coord, Node>();
+	
+	private Geometry bufferedArea;
 	
 	//TODO what can you modify?
 	static enum modification{};
@@ -164,7 +167,9 @@ public class NetworkCreatorFromPsql {
 		}
 		
 		// Convert the way entries into a MATSim network
-		processWayEntries(dbReader.readOsmRoads(this.configuration));
+		Set<WayEntry> entries = dbReader.readOsmRoads(this.configuration);
+		this.bufferedArea = dbReader.getBufferedArea();
+		processWayEntries(entries);
 		
 		// Simplify the network if needed
 		if(this.simplifyNetworK) {
@@ -345,8 +350,9 @@ public class NetworkCreatorFromPsql {
 					com.vividsolutions.jts.geom.Point nextPoint = gf.createPoint(next);
 					
 					// If the coordinates are contained in the survey area, add a new link to the network
-					if(!this.geoinformation.getSurveyAreaBoundingBox().contains(lastPoint) &&
-							!this.geoinformation.getSurveyAreaBoundingBox().contains(nextPoint)){
+					if(!this.bufferedArea.contains(lastPoint) && !this.bufferedArea.contains(nextPoint)){
+//					if(!this.geoinformation.getSurveyAreaBoundingBox().contains(lastPoint) &&
+//							!this.geoinformation.getSurveyAreaBoundingBox().contains(nextPoint)){
 						
 						inSurveyArea = false;
 						
