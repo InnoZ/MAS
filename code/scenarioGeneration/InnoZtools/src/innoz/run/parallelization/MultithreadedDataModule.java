@@ -4,7 +4,7 @@ import innoz.config.Configuration;
 import innoz.io.database.DatabaseReader;
 import innoz.io.database.datasets.OsmDataset;
 
-public class MultithreadedDataModule extends AbstractMultithreadedModule {
+public final class MultithreadedDataModule extends AbstractMultithreadedModule {
 
 	final DatabaseReader reader;
 	

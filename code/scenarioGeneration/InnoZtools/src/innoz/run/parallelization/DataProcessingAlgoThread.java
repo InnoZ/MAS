@@ -11,7 +11,7 @@ import innoz.scenarioGeneration.geoinformation.Building;
 import innoz.scenarioGeneration.utils.ActivityTypes;
 import innoz.utils.osm.OsmKey2ActivityType;
 
-public class DataProcessingAlgoThread extends AlgoThread {
+public final class DataProcessingAlgoThread extends AlgoThread {
 
 	private List<OsmDataset> data = new ArrayList<>();
 	private String type;
