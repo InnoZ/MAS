@@ -170,7 +170,8 @@ public class DatabaseReader {
 					
 				}
 				
-				if(!configuration.getPopulationType().equals(PopulationType.none)){
+				if(!configuration.getPopulationType().equals(PopulationType.none)
+						|| !configuration.getVicinityPopulationType().equals(PopulationType.none)){
 
 					// Otherwise, read in the OSM data
 					this.readOsmData(connection, configuration);
@@ -420,20 +421,6 @@ public class DatabaseReader {
 					e.printStackTrace();
 
 				}
-				
-//				for(Building b : this.buildingList){
-//					
-//					for(String actType : b.getActivityOptions()){
-//						
-//						if(actType != null){
-//					
-//							addGeometry(actType, b.getGeometry());
-//						
-//						}
-//					
-//					}
-//					
-//				}
 				
 			}
 			

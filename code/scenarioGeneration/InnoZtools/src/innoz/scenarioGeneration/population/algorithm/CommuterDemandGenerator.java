@@ -1,15 +1,6 @@
 package innoz.scenarioGeneration.population.algorithm;
 
-import innoz.config.Configuration;
-import innoz.io.database.CommuterDatabaseParser;
-import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
-import innoz.scenarioGeneration.geoinformation.District;
-import innoz.scenarioGeneration.geoinformation.Geoinformation;
-import innoz.scenarioGeneration.population.commuters.CommuterDataElement;
-import innoz.scenarioGeneration.utils.ActivityTypes;
-
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -21,8 +12,15 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.utils.collections.CollectionUtils;
-import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
+
+import innoz.config.Configuration;
+import innoz.io.database.CommuterDatabaseParser;
+import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
+import innoz.scenarioGeneration.geoinformation.District;
+import innoz.scenarioGeneration.geoinformation.Geoinformation;
+import innoz.scenarioGeneration.population.commuters.CommuterDataElement;
+import innoz.scenarioGeneration.utils.ActivityTypes;
 
 public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 
@@ -65,15 +63,21 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 		
 		Set<String> idSet = CollectionUtils.stringToSet(ids);
 		
-		for(Entry<Tuple<String, String>, CommuterDataElement> entry : parser.getCommuterRelations().entrySet()){
+		int n = 0;
+		
+		Set<String> toIds = CollectionUtils.stringToSet(configuration.getSurveyAreaIds());
+		
+		for(CommuterDataElement entry : parser.getCommuterRelations()){
 			
-			if(idSet.contains(entry.getKey().getFirst())){
+			if(idSet.contains(entry.getFromId()) && toIds.contains(entry.getToId())){
 
-				for(int i = 0; i < entry.getValue().getNumberOfCommuters() * configuration.getScaleFactor(); i++){
+				for(int i = n; i < n + (entry.getNumberOfCommuters() * configuration.getScaleFactor()); i++){
 					
-					createOneCommuter(entry.getValue(), population, i);
+					createOneCommuter(entry, population, i);
 					
 				}
+				
+				n += entry.getNumberOfCommuters() * configuration.getScaleFactor();
 				
 			}
 			

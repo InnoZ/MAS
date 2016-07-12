@@ -1,26 +1,23 @@
 package innoz.io.database;
 
-import innoz.config.Configuration;
-import innoz.scenarioGeneration.population.commuters.CommuterDataElement;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.matsim.core.utils.collections.Tuple;
+
+import innoz.config.Configuration;
+import innoz.scenarioGeneration.population.commuters.CommuterDataElement;
 
 public class CommuterDatabaseParser {
 
 	private static final Logger log = Logger.getLogger(CommuterDatabaseParser.class);
 	
-	Map<Tuple<String, String>, CommuterDataElement> commuterData;
+	Set<CommuterDataElement> commuterData;
 	
 	public void run(Configuration configuration){
 		
@@ -28,7 +25,7 @@ public class CommuterDatabaseParser {
 		
 			log.info("Parsing commuter data");
 			
-			this.commuterData = new HashMap<Tuple<String,String>, CommuterDataElement>();
+			this.commuterData = new HashSet<CommuterDataElement> ();
 			
 			Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
 			Connection connection = DriverManager.getConnection(DatabaseConstants.PSQL_URL + configuration.getLocalPort() +
@@ -51,8 +48,8 @@ public class CommuterDatabaseParser {
 				String workString = createChainedStatementFromSet(allAdminUnits, "work_id");
 				
 				this.execute(connection, "2015_commuters", homeString, workString);
-				this.execute(connection, "2015_reverse", homeString, workString);
-				this.execute(connection, "2015_internal", homeString, workString);
+//				this.execute(connection, "2015_reverse", homeString, workString);
+//				this.execute(connection, "2015_internal", homeString, workString);
 				
 				
 			}
@@ -111,8 +108,7 @@ public class CommuterDatabaseParser {
 				
 			}
 			
-			this.commuterData.put(new Tuple<String, String>(fromKey, toKey), new CommuterDataElement(fromKey,
-					fromName, toKey, toName, n, pMale, nTrainees));
+			this.commuterData.add(new CommuterDataElement(fromKey, fromName, toKey, toName, n, pMale, nTrainees));
 			
 		}
 		
@@ -140,7 +136,7 @@ public class CommuterDatabaseParser {
 		
 	}
 	
-	public Map<Tuple<String, String>, CommuterDataElement> getCommuterRelations(){
+	public Set<CommuterDataElement> getCommuterRelations(){
 		return this.commuterData;
 	}
 	
