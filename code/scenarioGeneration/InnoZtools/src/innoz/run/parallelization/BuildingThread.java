@@ -6,7 +6,7 @@ import java.util.List;
 import innoz.io.database.DatabaseReader;
 import innoz.scenarioGeneration.geoinformation.Building;
 
-public class BuildingThread extends AlgoThread {
+public final class BuildingThread extends AlgoThread {
 
 	private DatabaseReader reader;
 	private List<Building> buildings = new ArrayList<>();

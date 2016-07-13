@@ -571,6 +571,8 @@ public class DatabaseReader {
 	 */
 	public void addGeometry(String landuse, Geometry g){
 		
+		synchronized(this.geoinformation){
+		
 		if(!resultSet){
 			
 			resultSet = true;
@@ -648,6 +650,8 @@ public class DatabaseReader {
 				
 			}
 			
+		}
+		
 		}
 		
 	}
