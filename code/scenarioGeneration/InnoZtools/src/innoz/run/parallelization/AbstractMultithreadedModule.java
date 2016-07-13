@@ -17,6 +17,8 @@ public class AbstractMultithreadedModule {
 	private final AtomicReference<Throwable> hadException = new AtomicReference<>(null);
 	private final ExceptionHandler exceptionHandler = new ExceptionHandler(this.hadException);
 	
+	private String className;
+	
 	public AbstractMultithreadedModule(int numberOfThreads){
 		
 		this.numberOfThreads = numberOfThreads;
@@ -25,6 +27,7 @@ public class AbstractMultithreadedModule {
 	
 	public final void initThreads(String className, Object... args){
 		
+		this.className = className;
 		this.hadException.set(null);
 		
 		this.threads = new Thread[this.numberOfThreads];
@@ -60,7 +63,7 @@ public class AbstractMultithreadedModule {
 	
 	public final void execute(){
 
-		log.info("Starting " + this.threads.length + " threads");
+		log.info("Starting " + this.threads.length + " threads for algo threads of type " + this.className);
 		
 		for(Thread thread : this.threads){
 			

@@ -125,7 +125,8 @@ public class ScenarioGenerationController implements DefaultController {
 			return;
 		}
 
-		System.out.println("> Scenario generation complete. All files have been written to " + configuration.getOutputDirectory());
+		System.out.println("> Scenario generation complete. All files have been written to "
+				+ configuration.getOutputDirectory());
 		return;
 		
 	}

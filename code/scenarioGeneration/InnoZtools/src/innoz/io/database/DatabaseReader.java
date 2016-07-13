@@ -44,8 +44,8 @@ import innoz.config.Configuration.PopulationType;
 import innoz.io.database.datasets.OsmPointDataset;
 import innoz.io.database.datasets.OsmPolygonDataset;
 import innoz.run.parallelization.AbstractMultithreadedModule;
+import innoz.run.parallelization.BuildingThread;
 import innoz.run.parallelization.DataProcessingAlgoThread;
-import innoz.run.parallelization.DataRetrievalThread;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.geoinformation.Building;
 import innoz.scenarioGeneration.geoinformation.District;
@@ -391,41 +391,48 @@ public class DatabaseReader {
 					
 				}
 				
-				Thread[] threads = new Thread[configuration.getNumberOfThreads()];
-				BuildingThread[] buildingThreads = new BuildingThread[configuration.getNumberOfThreads()];
-				
-				for(int i = 0; i < configuration.getNumberOfThreads(); i++){
-					
-					BuildingThread thread = new BuildingThread();
-					threads[i] = new Thread(thread);
-					buildingThreads[i] = thread;
-					
-				}
-				
-				int counter = 0;
-				
+				AbstractMultithreadedModule module = new AbstractMultithreadedModule(configuration.getNumberOfThreads());
+				module.initThreads(BuildingThread.class.getName(), this);
 				for(Building b : this.buildingList){
-					buildingThreads[counter % configuration.getNumberOfThreads()].buildings.add(b);
-					counter++;
+					module.handle(b);
 				}
+				module.execute();
 				
-				for(Thread thread : threads){
-					thread.start();
-				}
-				
-				try {
-					
-					for(Thread thread : threads){
-				
-						thread.join();
-						
-					}
-					
-				} catch (InterruptedException e) {
-				
-					e.printStackTrace();
-
-				}
+//				Thread[] threads = new Thread[configuration.getNumberOfThreads()];
+//				BuildingThread[] buildingThreads = new BuildingThread[configuration.getNumberOfThreads()];
+//				
+//				for(int i = 0; i < configuration.getNumberOfThreads(); i++){
+//					
+//					BuildingThread thread = new BuildingThread();
+//					threads[i] = new Thread(thread);
+//					buildingThreads[i] = thread;
+//					
+//				}
+//				
+//				int counter = 0;
+//				
+//				for(Building b : this.buildingList){
+//					buildingThreads[counter % configuration.getNumberOfThreads()].buildings.add(b);
+//					counter++;
+//				}
+//				
+//				for(Thread thread : threads){
+//					thread.start();
+//				}
+//				
+//				try {
+//					
+//					for(Thread thread : threads){
+//				
+//						thread.join();
+//						
+//					}
+//					
+//				} catch (InterruptedException e) {
+//				
+//					e.printStackTrace();
+//
+//				}
 				
 			}
 			
@@ -434,31 +441,6 @@ public class DatabaseReader {
 		} catch (SQLException | ParseException e) {
 		
 			e.printStackTrace();
-			
-		}
-		
-	}
-	
-	class BuildingThread implements Runnable{
-		
-		List<Building> buildings = new ArrayList<>();
-
-		@Override
-		public void run() {
-			
-			for(Building b : this.buildings){
-				
-				for(String actType : b.getActivityOptions()){
-					
-					if(actType != null){
-				
-						addGeometry(actType, b.getGeometry());
-					
-					}
-				
-				}
-				
-			}
 			
 		}
 		
@@ -524,7 +506,6 @@ public class DatabaseReader {
 		}
 		module.execute();
 		
-//		module = new MultithreadedDataModule(this);
 		module.initThreads(DataProcessingAlgoThread.class.getName(), this, "landuse");
 		for(OsmPolygonDataset dataset : this.polygonData.get("landuse")){
 			module.handle(dataset);
