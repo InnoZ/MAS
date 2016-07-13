@@ -102,17 +102,40 @@ public class InitialConfigCreator {
 	
 	private static void addBasicModeParams(Config config){
 		
-		config.planCalcScore().getOrCreateModeParams(TransportMode.bike);
-		config.planCalcScore().getOrCreateModeParams(TransportMode.car);
-		config.planCalcScore().getOrCreateModeParams(TransportMode.other);
-		config.planCalcScore().getOrCreateModeParams(TransportMode.pt);
-		config.planCalcScore().getOrCreateModeParams(TransportMode.ride);
-		config.planCalcScore().getOrCreateModeParams(TransportMode.walk);
+		{
+			ModeRoutingParams pars = new ModeRoutingParams(TransportMode.bike);
+			pars.setBeelineDistanceFactor(1.3);
+			pars.setTeleportedModeSpeed(15/3.6);
+			config.plansCalcRoute().addModeRoutingParams(pars);
+		}
 		
-		ModeRoutingParams pars = new ModeRoutingParams(TransportMode.other);
-		pars.setBeelineDistanceFactor(1.3);
-		pars.setTeleportedModeSpeed(30/3.6);
-		config.plansCalcRoute().addModeRoutingParams(pars);
+		{
+			ModeRoutingParams pars = new ModeRoutingParams(TransportMode.other);
+			pars.setBeelineDistanceFactor(1.3);
+			pars.setTeleportedModeSpeed(30/3.6);
+			config.plansCalcRoute().addModeRoutingParams(pars);
+		}
+		
+		{
+			ModeRoutingParams pars = new ModeRoutingParams(TransportMode.pt);
+			pars.setBeelineDistanceFactor(1.3);
+			pars.setTeleportedModeFreespeedFactor(2.0);
+			config.plansCalcRoute().addModeRoutingParams(pars);
+		}
+		
+		{
+			ModeRoutingParams pars = new ModeRoutingParams(TransportMode.ride);
+			pars.setBeelineDistanceFactor(1.3);
+			pars.setTeleportedModeSpeed(30/3.6);
+			config.plansCalcRoute().addModeRoutingParams(pars);
+		}
+		
+		{
+			ModeRoutingParams pars = new ModeRoutingParams(TransportMode.walk);
+			pars.setBeelineDistanceFactor(1.3);
+			pars.setTeleportedModeSpeed(4/3.6);
+			config.plansCalcRoute().addModeRoutingParams(pars);
+		}
 		
 	}
 
