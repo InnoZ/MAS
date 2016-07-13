@@ -67,8 +67,7 @@ public class ScenarioGenerationController implements DefaultController {
 			new BbsrDataReader().read(geoinformation, new InputStreamReader(in));
 			
 			// Create a MATSim network from OpenStreetMap data
-			NetworkCreatorFromPsql nc;
-			nc = new NetworkCreatorFromPsql(scenario.getNetwork(),
+			NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(),
 						geoinformation,	configuration);
 			nc.setSimplifyNetwork(true);
 			nc.setCleanNetwork(true);
