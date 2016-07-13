@@ -85,7 +85,8 @@ public class ScenarioGenerationController implements DefaultController {
 			new NetworkWriter(scenario.getNetwork()).write(configuration
 					.getOutputDirectory() + "network.xml.gz");
 	
-			if(!configuration.getPopulationType().equals(PopulationType.none)){
+			if(!configuration.getPopulationType().equals(PopulationType.none)&&
+					!configuration.getVicinityPopulationType().equals(PopulationType.none)){
 	
 				new PopulationWriter(scenario.getPopulation()).write(configuration
 						.getOutputDirectory() + "plans.xml.gz");
