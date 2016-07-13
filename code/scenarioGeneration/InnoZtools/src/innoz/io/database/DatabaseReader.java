@@ -43,7 +43,7 @@ import innoz.config.Configuration.AdminUnitEntry;
 import innoz.config.Configuration.PopulationType;
 import innoz.io.database.datasets.OsmPointDataset;
 import innoz.io.database.datasets.OsmPolygonDataset;
-import innoz.run.parallelization.AbstractMultithreadedModule;
+import innoz.run.parallelization.MultithreadedModule;
 import innoz.run.parallelization.BuildingThread;
 import innoz.run.parallelization.DataProcessingAlgoThread;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
@@ -391,7 +391,7 @@ public class DatabaseReader {
 					
 				}
 				
-				AbstractMultithreadedModule module = new AbstractMultithreadedModule(configuration.getNumberOfThreads());
+				MultithreadedModule module = new MultithreadedModule(configuration.getNumberOfThreads());
 				module.initThreads(BuildingThread.class.getName(), this);
 				for(Building b : this.buildingList){
 					module.handle(b);
@@ -499,7 +499,7 @@ public class DatabaseReader {
 		statement.close();
 		
 		//post process
-		AbstractMultithreadedModule module = new AbstractMultithreadedModule(configuration.getNumberOfThreads());
+		MultithreadedModule module = new MultithreadedModule(configuration.getNumberOfThreads());
 		module.initThreads(DataProcessingAlgoThread.class.getName(), this, "buildings");
 		for(OsmPolygonDataset dataset : this.polygonData.get("buildings")){
 			module.handle(dataset);
@@ -553,7 +553,7 @@ public class DatabaseReader {
 		statement.close();
 		
 		//post process
-		AbstractMultithreadedModule module = new AbstractMultithreadedModule(configuration.getNumberOfThreads());
+		MultithreadedModule module = new MultithreadedModule(configuration.getNumberOfThreads());
 		module.initThreads(DataProcessingAlgoThread.class.getName(), this, "amenities");
 		for(OsmPointDataset dataset : this.pointData){
 			module.handle(dataset);
