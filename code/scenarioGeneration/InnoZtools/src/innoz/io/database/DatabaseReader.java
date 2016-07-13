@@ -418,7 +418,7 @@ public class DatabaseReader {
 		this.polygonData.put("buildings", new ArrayList<>());
 		
 		Statement statement = connection.createStatement();
-		
+		statement.setFetchSize(1000);
 		String query = "select " + DatabaseConstants.ATT_LANDUSE + ", " + DatabaseConstants.ATT_BUILDING + ", "
 				+ DatabaseConstants.ATT_AMENITY +  ", " + DatabaseConstants.ATT_LEISURE + ", "
 				+ DatabaseConstants.ATT_SHOP + ", " + DatabaseConstants.functions.st_astext.name()
@@ -494,6 +494,7 @@ public class DatabaseReader {
 		// Create a statement and execute an SQL query to retrieve all amenities that have a tag
 		// containing a shopping, leisure or any other activity.
 		Statement statement = connection.createStatement();
+		statement.setFetchSize(1000);
 		ResultSet set = statement.executeQuery("select " + DatabaseConstants.functions.st_astext.name() + "(" + DatabaseConstants.ATT_WAY
 				+ "), "	+ DatabaseConstants.ATT_AMENITY + ", " + DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + " from "
 				+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_point.name() + " where "
