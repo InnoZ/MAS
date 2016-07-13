@@ -398,42 +398,6 @@ public class DatabaseReader {
 				}
 				module.execute();
 				
-//				Thread[] threads = new Thread[configuration.getNumberOfThreads()];
-//				BuildingThread[] buildingThreads = new BuildingThread[configuration.getNumberOfThreads()];
-//				
-//				for(int i = 0; i < configuration.getNumberOfThreads(); i++){
-//					
-//					BuildingThread thread = new BuildingThread();
-//					threads[i] = new Thread(thread);
-//					buildingThreads[i] = thread;
-//					
-//				}
-//				
-//				int counter = 0;
-//				
-//				for(Building b : this.buildingList){
-//					buildingThreads[counter % configuration.getNumberOfThreads()].buildings.add(b);
-//					counter++;
-//				}
-//				
-//				for(Thread thread : threads){
-//					thread.start();
-//				}
-//				
-//				try {
-//					
-//					for(Thread thread : threads){
-//				
-//						thread.join();
-//						
-//					}
-//					
-//				} catch (InterruptedException e) {
-//				
-//					e.printStackTrace();
-//
-//				}
-				
 			}
 			
 			log.info("Done.");
