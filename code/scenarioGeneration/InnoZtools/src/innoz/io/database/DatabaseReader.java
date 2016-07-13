@@ -43,8 +43,8 @@ import innoz.config.Configuration.AdminUnitEntry;
 import innoz.config.Configuration.PopulationType;
 import innoz.io.database.datasets.OsmPointDataset;
 import innoz.io.database.datasets.OsmPolygonDataset;
+import innoz.run.parallelization.AbstractMultithreadedModule;
 import innoz.run.parallelization.DataProcessingAlgoThread;
-import innoz.run.parallelization.MultithreadedDataModule;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.geoinformation.Building;
 import innoz.scenarioGeneration.geoinformation.District;
@@ -516,7 +516,7 @@ public class DatabaseReader {
 		statement.close();
 		
 		//post process
-		MultithreadedDataModule module = new MultithreadedDataModule(this, configuration);
+		AbstractMultithreadedModule module = new AbstractMultithreadedModule(configuration.getNumberOfThreads());
 		module.initThreads(DataProcessingAlgoThread.class.getName(), this, "buildings");
 		for(OsmPolygonDataset dataset : this.polygonData.get("buildings")){
 			module.handle(dataset);
@@ -571,7 +571,7 @@ public class DatabaseReader {
 		statement.close();
 		
 		//post process
-		MultithreadedDataModule module = new MultithreadedDataModule(this, configuration);
+		AbstractMultithreadedModule module = new AbstractMultithreadedModule(configuration.getNumberOfThreads());
 		module.initThreads(DataProcessingAlgoThread.class.getName(), this, "amenities");
 		for(OsmPointDataset dataset : this.pointData){
 			module.handle(dataset);
@@ -749,6 +749,10 @@ public class DatabaseReader {
 	
 	public Geometry getBufferedArea(){
 		return this.buffer;
+	}
+	
+	public Map<String,List<OsmPolygonDataset>> getPolygonData(){
+		return this.polygonData;
 	}
 	
 }

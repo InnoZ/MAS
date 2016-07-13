@@ -25,9 +25,12 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 		
 	}
 	
-	public void addDatasetToThread(OsmDataset set){
+	@Override
+	void addToThread(Object obj){
 		
-		this.data.add(set);
+		if(obj instanceof OsmDataset){
+			this.data.add(((OsmDataset)obj));
+		}
 		
 	}
 	

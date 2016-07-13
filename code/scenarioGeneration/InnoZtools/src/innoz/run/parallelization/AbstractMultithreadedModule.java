@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.log4j.Logger;
 
-public abstract class AbstractMultithreadedModule {
+public class AbstractMultithreadedModule {
 
 	private final static Logger log = Logger.getLogger(AbstractMultithreadedModule.class);
 	
@@ -51,7 +51,12 @@ public abstract class AbstractMultithreadedModule {
 		
 	}
 	
-	public abstract void handle(Object obj);
+	public final void handle(Object obj){
+		
+		this.algothreads[this.count % this.numberOfThreads].addToThread(obj);
+		this.count++;
+		
+	}
 	
 	public final void execute(){
 
