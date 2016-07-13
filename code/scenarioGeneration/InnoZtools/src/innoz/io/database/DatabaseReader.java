@@ -45,6 +45,7 @@ import innoz.io.database.datasets.OsmPointDataset;
 import innoz.io.database.datasets.OsmPolygonDataset;
 import innoz.run.parallelization.AbstractMultithreadedModule;
 import innoz.run.parallelization.DataProcessingAlgoThread;
+import innoz.run.parallelization.DataRetrievalThread;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.geoinformation.Building;
 import innoz.scenarioGeneration.geoinformation.District;
