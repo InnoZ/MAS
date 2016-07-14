@@ -106,7 +106,7 @@ public class SurveyDatabaseParser {
 			SurveyDataContainer container) throws RuntimeException, SQLException{
 		
 		Statement statement = connection.createStatement();
-		statement.setFetchSize(100);
+		statement.setFetchSize(2000);
 	
 		String table = this.constants.getNamespace().equals("mid") ? "mid2008.households_raw" : "srv2013.households";
 		
@@ -198,7 +198,8 @@ public class SurveyDatabaseParser {
 			SurveyDataContainer container) throws SQLException{
 		
 		Statement statement = connection.createStatement();
-
+		statement.setFetchSize(2000);
+		
 		ResultSet set = null;
 		String q = null;
 		
@@ -293,6 +294,7 @@ public class SurveyDatabaseParser {
 	private void parseWaysDatabase(Connection connection, boolean onlyWorkingDays, SurveyDataContainer container) throws SQLException {
 		
 		Statement statement = connection.createStatement();
+		statement.setFetchSize(2000);
 		
 		String table = this.constants.getNamespace().equals("mid") ? "mid2008.ways_raw" : "srv2013.ways";
 
