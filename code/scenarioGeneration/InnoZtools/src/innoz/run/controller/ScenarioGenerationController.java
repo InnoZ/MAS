@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.core.config.Config;
@@ -15,6 +16,7 @@ import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.PopulationWriter;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.misc.Time;
 import org.matsim.households.HouseholdsWriterV10;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.matsim.vehicles.VehicleWriterV1;
@@ -34,6 +36,8 @@ import innoz.scenarioGeneration.population.PopulationCreator;
 
 public class ScenarioGenerationController implements DefaultController {
 
+	private static final Logger log = Logger.getLogger(ScenarioGenerationController.class);
+	
 	private final Configuration configuration;
 	
 	public ScenarioGenerationController(final Configuration configuration){
@@ -44,6 +48,8 @@ public class ScenarioGenerationController implements DefaultController {
 	public void run() {
 
 		try {
+			
+			double t0 = System.currentTimeMillis();
 		
 			// Dump scenario generation settings on the console and create the output directory
 			configuration.dumpSettings();
@@ -118,6 +124,10 @@ public class ScenarioGenerationController implements DefaultController {
 			}
 			
 			OutputDirectoryLogging.closeOutputDirLogging();
+			
+			double t1 = System.currentTimeMillis();
+			
+			log.info("Total execution time: " + Time.writeTime((t1 - t0) / 1000));
 		
 		} catch (FactoryException | InstantiationException | IllegalAccessException | ClassNotFoundException |
 				SQLException | ParseException | IOException e) {
@@ -125,7 +135,7 @@ public class ScenarioGenerationController implements DefaultController {
 			return;
 		}
 
-		System.out.println("> Scenario generation complete. All files have been written to "
+		log.info("> Scenario generation complete. All files have been written to "
 				+ configuration.getOutputDirectory());
 		return;
 		
