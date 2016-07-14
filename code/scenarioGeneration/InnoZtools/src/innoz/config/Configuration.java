@@ -272,7 +272,13 @@ public final class Configuration {
 		if(this.numberOfThreads > nProcessors){
 			
 			log.warn("Specified number of threads: " + this.numberOfThreads + ", but you have only " + nProcessors + " cores available...");
-			log.info("Thus, the programm will only use these " + nProcessors + "  cores.");
+			log.info("Thus, the programm will only use these " + nProcessors + " cores.");
+			this.numberOfThreads = nProcessors;
+			
+		} else if(this.numberOfThreads == 0){
+			
+			log.warn("Specified number of threads: " + this.numberOfThreads + "!");
+			log.info("Thus, the programm will use all " + nProcessors + " cores.");
 			this.numberOfThreads = nProcessors;
 			
 		}
