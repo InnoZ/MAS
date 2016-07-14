@@ -21,17 +21,17 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 
 public class DummyDemandGenerator extends DemandGenerationAlgorithm {
 
-	public DummyDemandGenerator(Geoinformation geoinformation,
+	public DummyDemandGenerator(final Scenario scenario, Geoinformation geoinformation,
 			final CoordinateTransformation transformation) {
 
-		super(geoinformation, transformation);
+		super(scenario, geoinformation, transformation);
 		
 	}
 
 	@Override
-	public void run(final Scenario scenario, final Configuration configuration, String ids) {
+	public void run(final Configuration configuration, String ids) {
 
-		this.createDummyPopulation(scenario, ids);
+		this.createDummyPopulation(ids);
 		
 	}
 	
@@ -50,7 +50,7 @@ public class DummyDemandGenerator extends DemandGenerationAlgorithm {
 	 * 
 	 * @param scenario The MATsim scenario eventually containing all of the information about network, demand etc.
 	 */
-	private void createDummyPopulation(Scenario scenario, String ids){
+	private void createDummyPopulation(String ids){
 		
 		log.info("Creating a dummy population without any preferences...");
 		

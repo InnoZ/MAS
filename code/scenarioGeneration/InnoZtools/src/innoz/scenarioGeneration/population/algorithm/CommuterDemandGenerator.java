@@ -24,17 +24,17 @@ import innoz.scenarioGeneration.utils.ActivityTypes;
 
 public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 
-	public CommuterDemandGenerator(Geoinformation geoinformation,
+	public CommuterDemandGenerator(final Scenario scenario, Geoinformation geoinformation,
 			final CoordinateTransformation transformation) {
 
-		super(geoinformation, transformation);
+		super(scenario, geoinformation, transformation);
 		
 	}
 
 	@Override
-	public void run(Scenario scenario, Configuration configuration, String ids) {
+	public void run(Configuration configuration, String ids) {
 
-		createCommuterPopulation(configuration, scenario, ids);
+		createCommuterPopulation(configuration, ids);
 		
 	}
 	
@@ -49,12 +49,10 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 	 * 
 	 * The home and work locations are chosen according to landuse data and a gravitation model.</br>
 	 * 
-	 * At the moment, this method is a stub and does nothing. dhosse 05/16
-	 * 
 	 * @param configuration The scenario generation configuration file.
 	 * @param scenario A Matsim scenario.
 	 */
-	private void createCommuterPopulation(Configuration configuration, Scenario scenario, String ids){
+	private void createCommuterPopulation(Configuration configuration, String ids){
 		
 		CommuterDatabaseParser parser = new CommuterDatabaseParser();
 		parser.run(configuration);

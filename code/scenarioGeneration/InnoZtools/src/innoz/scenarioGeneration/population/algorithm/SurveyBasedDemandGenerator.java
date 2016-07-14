@@ -1,24 +1,5 @@
 package innoz.scenarioGeneration.population.algorithm;
 
-import innoz.config.Configuration;
-import innoz.io.database.SurveyDatabaseParser;
-import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
-import innoz.scenarioGeneration.geoinformation.Distribution;
-import innoz.scenarioGeneration.geoinformation.District;
-import innoz.scenarioGeneration.geoinformation.Geoinformation;
-import innoz.scenarioGeneration.population.mobilityAttitude.MobilityAttitudeGroups;
-import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
-import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
-import innoz.scenarioGeneration.population.surveys.SurveyPerson;
-import innoz.scenarioGeneration.population.surveys.SurveyPlan;
-import innoz.scenarioGeneration.population.surveys.SurveyPlanActivity;
-import innoz.scenarioGeneration.population.surveys.SurveyPlanElement;
-import innoz.scenarioGeneration.population.surveys.SurveyPlanTrip;
-import innoz.scenarioGeneration.population.surveys.SurveyVehicle;
-import innoz.scenarioGeneration.utils.ActivityTypes;
-import innoz.scenarioGeneration.vehicles.VehicleTypes;
-import innoz.utils.GeometryUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,19 +34,37 @@ import org.matsim.vehicles.VehicleType;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+import innoz.config.Configuration;
+import innoz.io.database.SurveyDatabaseParser;
+import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
+import innoz.scenarioGeneration.geoinformation.District;
+import innoz.scenarioGeneration.geoinformation.Geoinformation;
+import innoz.scenarioGeneration.population.mobilityAttitude.MobilityAttitudeGroups;
+import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
+import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
+import innoz.scenarioGeneration.population.surveys.SurveyPerson;
+import innoz.scenarioGeneration.population.surveys.SurveyPlan;
+import innoz.scenarioGeneration.population.surveys.SurveyPlanActivity;
+import innoz.scenarioGeneration.population.surveys.SurveyPlanElement;
+import innoz.scenarioGeneration.population.surveys.SurveyPlanTrip;
+import innoz.scenarioGeneration.population.surveys.SurveyVehicle;
+import innoz.scenarioGeneration.utils.ActivityTypes;
+import innoz.scenarioGeneration.vehicles.VehicleTypes;
+import innoz.utils.GeometryUtils;
+
 public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
-	public SurveyBasedDemandGenerator(final Geoinformation geoinformation,
+	public SurveyBasedDemandGenerator(final Scenario scenario, final Geoinformation geoinformation,
 			final CoordinateTransformation transformation) {
 
-		super(geoinformation, transformation);
+		super(scenario, geoinformation, transformation);
 		
 	}
 
 	@Override
-	public void run(Scenario scenario, Configuration configuration, String ids) {
+	public void run(Configuration configuration, String ids) {
 
-		createCompletePopulation(configuration, scenario, ids);
+		createCompletePopulation(configuration, ids);
 		
 	}
 	
@@ -77,26 +76,21 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	 * @param configuration The scenario generation configuration file.
 	 * @param scenario A MATSim scenario.
 	 */
-	private void createCompletePopulation(Configuration configuration, Scenario scenario, String ids){
+	private void createCompletePopulation(Configuration configuration, String ids){
 		
 		// Run the survey data parser that stores all of the travel information
 		SurveyDatabaseParser parser = new SurveyDatabaseParser();
 		SurveyDataContainer container = new SurveyDataContainer(configuration);
 		parser.run(configuration, container, this.geoinformation);
 		
-		// Initialize the disutilities for traveling from each cell to each other cell
-		// to eventually get a gravitation model.
-		this.distribution = new Distribution(scenario.getNetwork(), this.geoinformation, parser,
-				this.transformation);
-		
 		// Choose the method for demand generation that has been specified in the configuration
 		if(configuration.isUsingHouseholds()){
 		
-			createHouseholds(configuration, scenario, container, ids);
+			createHouseholds(configuration, container, ids);
 			
 		} else {
 			
-			createPersons(configuration, scenario, container, ids);
+			createPersons(configuration, container, ids);
 			
 		}
 		
@@ -110,7 +104,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	 * @param scenario A MATSim scenario.
 	 * @param parser The survey parser containing all of the information.
 	 */
-	private void createHouseholds(Configuration configuration, Scenario scenario, SurveyDataContainer container,
+	private void createHouseholds(Configuration configuration, SurveyDataContainer container,
 			String ids){
 
 		// Get the MATSim population and initialize person attributes
@@ -205,7 +199,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				// If we model non-generic cars, create all cars that were reported in the survey and add them to the household
 				if(configuration.isUsingVehicles()){
 					
-					createSurveyVehicles(scenario, container, template,
+					createSurveyVehicles(container, template,
 							household);
 					
 				}
@@ -219,7 +213,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 	}
 
-	private void createSurveyVehicles(Scenario scenario, SurveyDataContainer container, SurveyHousehold template,
+	private void createSurveyVehicles(SurveyDataContainer container, SurveyHousehold template,
 			Household household) {
 		
 		int vehicleCounter = 0;
@@ -260,7 +254,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	 * @param scenario The MATSim scenario.
 	 * @param parser The survey parser.
 	 */
-	private void createPersons(Configuration configuration, Scenario scenario, SurveyDataContainer container,
+	private void createPersons(Configuration configuration, SurveyDataContainer container,
 			String ids){
 		
 		// Get the MATSim population and initialize person attributes

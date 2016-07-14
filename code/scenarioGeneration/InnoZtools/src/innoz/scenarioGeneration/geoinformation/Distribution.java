@@ -34,7 +34,7 @@ public class Distribution {
 	private LeastCostPathCalculator lcpc;
 	private final Network network;
 	
-	public Distribution(final Network network, final Geoinformation geoinformation, SurveyDatabaseParser parser,
+	public Distribution(final Network network, final Geoinformation geoinformation,
 			final CoordinateTransformation transformation){
 
 		this.network = network;
@@ -42,11 +42,11 @@ public class Distribution {
 		TravelTime ttime = new FreespeedTravelTimeAndDisutility(-6, 6, 0);
 		this.lcpc = new Dijkstra(network, tdis, ttime);
 		this.transformation = transformation;
-		this.create(parser, geoinformation);
+		this.create(geoinformation);
 		
 	}
 	
-	private void create(SurveyDatabaseParser parser, final Geoinformation geoinformation){
+	private void create(final Geoinformation geoinformation){
 		
 		String[] activityTypes = {ActivityTypes.WORK, ActivityTypes.EDUCATION, ActivityTypes.SHOPPING,
 				ActivityTypes.LEISURE, ActivityTypes.OTHER, ActivityTypes.KINDERGARTEN, ActivityTypes.SUPPLY,

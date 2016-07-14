@@ -1,16 +1,5 @@
 package innoz.scenarioGeneration.population.algorithm;
 
-import innoz.config.Configuration;
-import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
-import innoz.scenarioGeneration.geoinformation.Distribution;
-import innoz.scenarioGeneration.geoinformation.District;
-import innoz.scenarioGeneration.geoinformation.Geoinformation;
-import innoz.scenarioGeneration.population.PopulationCreator;
-import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
-import innoz.scenarioGeneration.population.surveys.SurveyPlanTrip;
-import innoz.scenarioGeneration.utils.ActivityTypes;
-import innoz.utils.GeometryUtils;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
@@ -22,6 +11,16 @@ import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 
 import com.vividsolutions.jts.geom.Geometry;
+
+import innoz.config.Configuration;
+import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
+import innoz.scenarioGeneration.geoinformation.Distribution;
+import innoz.scenarioGeneration.geoinformation.District;
+import innoz.scenarioGeneration.geoinformation.Geoinformation;
+import innoz.scenarioGeneration.population.PopulationCreator;
+import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
+import innoz.scenarioGeneration.population.surveys.SurveyPlanTrip;
+import innoz.utils.GeometryUtils;
 
 public abstract class DemandGenerationAlgorithm {
 
@@ -47,6 +46,8 @@ public abstract class DemandGenerationAlgorithm {
 	CoordinateTransformation transformation;
 	Distribution distribution;
 	
+	final Scenario scenario;
+	
 	Coord currentHomeLocation = null;
 	Coord currentMainActLocation = null;
 	SurveyPlanTrip lastLeg = null;
@@ -58,15 +59,21 @@ public abstract class DemandGenerationAlgorithm {
 	AdministrativeUnit lastActCell = null;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
-	public DemandGenerationAlgorithm(final Geoinformation geoinformation,
+	public DemandGenerationAlgorithm(final Scenario scenario, final Geoinformation geoinformation,
 			final CoordinateTransformation transformation){
 		
 		this.geoinformation = geoinformation;
 		this.transformation = transformation;
+		this.scenario = scenario;
+		
+		// Initialize the disutilities for traveling from each cell to each other cell
+				// to eventually get a gravitation model.
+		this.distribution = new Distribution(scenario.getNetwork(), this.geoinformation, 
+				this.transformation);
 		
 	}
 	
-	public abstract void run(final Scenario scenario, final Configuration configuration, String ids);
+	public abstract void run(final Configuration configuration, String ids);
 
 	AdministrativeUnit chooseAdminUnitInsideDistrict(District district, String activityType){
 		

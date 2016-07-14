@@ -157,8 +157,8 @@ public class PopulationCreator {
 		if(className != null){
 			
 			((DemandGenerationAlgorithm)Class.forName(className).getConstructor(
-					Geoinformation.class, CoordinateTransformation.class).newInstance(
-							this.geoinformation, transformation)).run(scenario, configuration,
+					Scenario.class, Geoinformation.class, CoordinateTransformation.class).newInstance(
+									scenario, this.geoinformation, transformation)).run(configuration,
 									ids);
 			
 		}
