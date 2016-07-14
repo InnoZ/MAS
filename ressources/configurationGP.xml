@@ -27,7 +27,7 @@
 		<overwriteExistingFiles v="true"/>
 	</scenario>
 
-	<numberOfThreads v="3" />
+	<numberOfThreads v="1" />
 
 	<surveyData>
 		<useBuildings v="true" />
