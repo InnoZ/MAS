@@ -16,7 +16,7 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 	private List<OsmDataset> data = new ArrayList<>();
 	private String type;
 	private DatabaseReader reader;
-
+	
 	@Override
 	public void init(Object... args) {
 		

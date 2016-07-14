@@ -6,6 +6,13 @@ import java.util.List;
 import innoz.io.database.DatabaseReader;
 import innoz.scenarioGeneration.geoinformation.Building;
 
+/**
+ * 
+ * Thread that adds building geometries to a landuse dataset.
+ * 
+ * @author dhosse
+ *
+ */
 public final class BuildingThread extends AlgoThread {
 
 	private DatabaseReader reader;

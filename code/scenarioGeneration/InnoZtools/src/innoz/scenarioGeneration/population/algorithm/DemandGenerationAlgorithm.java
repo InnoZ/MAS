@@ -1,14 +1,12 @@
 package innoz.scenarioGeneration.population.algorithm;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
@@ -64,7 +62,7 @@ public abstract class DemandGenerationAlgorithm {
 	double c = 0d;
 	AdministrativeUnit currentHomeCell;
 	AdministrativeUnit currentMainActCell;
-	List<AdministrativeUnit> currentSearchSpace;
+	Set<AdministrativeUnit> currentSearchSpace;
 	AdministrativeUnit lastActCell = null;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -114,8 +112,8 @@ public abstract class DemandGenerationAlgorithm {
 			accumulatedWeight += g.getArea();
 			
 			if(p <= accumulatedWeight){
-				// Shoot the work location
-			
+
+				// Shoot the location
 				return transformation.transform(GeometryUtils.shoot(g, random));
 
 			}
@@ -201,7 +199,7 @@ public abstract class DemandGenerationAlgorithm {
 		
 		// Set the search space to the person's search space if it's not null.
 		// Else consider the whole survey area.
-		List<AdministrativeUnit> adminUnits = null;
+		Set<AdministrativeUnit> adminUnits = null;
 		if(this.currentSearchSpace != null){
 			
 			if(this.currentSearchSpace.size() > 0){
@@ -214,7 +212,7 @@ public abstract class DemandGenerationAlgorithm {
 		
 		if(adminUnits == null){
 			
-			adminUnits = new ArrayList<AdministrativeUnit>();
+			adminUnits = new HashSet<AdministrativeUnit>();
 			adminUnits.addAll(this.geoinformation.getSubUnits().values());
 			
 		}

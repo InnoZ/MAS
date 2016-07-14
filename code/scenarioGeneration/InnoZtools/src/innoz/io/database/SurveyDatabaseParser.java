@@ -1,8 +1,22 @@
 package innoz.io.database;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.core.utils.misc.Time;
+
 import innoz.config.Configuration;
 import innoz.io.SurveyConstants;
-import innoz.io.database.SurveyDatabaseParser.Subtour.subtourType;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
 import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
@@ -17,40 +31,47 @@ import innoz.scenarioGeneration.utils.ActivityTypes;
 import innoz.scenarioGeneration.utils.Hydrograph;
 import innoz.utils.matsim.RecursiveStatsContainer;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.TransportMode;
-import org.matsim.core.utils.misc.Time;
-
+/**
+ * 
+ * "Parser" for database tables containing information of traffic surveys (e.g. SrV, MiD).
+ * Creates survey data classes from the retrieved information.
+ * 
+ * @author dhosse
+ *
+ */
 public class SurveyDatabaseParser {
 
+	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	private static final Logger log = Logger.getLogger(SurveyDatabaseParser.class);
+	/////////////////////////////////////////////////////////////////////////////////////////
 	
+	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	private SurveyConstants constants;
+	/////////////////////////////////////////////////////////////////////////////////////////
 	
+	/**
+	 * 
+	 * Executes the data retrieval process. Depending on the specifications in the configuration household, person,
+	 * travel and vehicle data is read from the survey database tables.
+	 * 
+	 * @param configuration The scenario generation configuration.
+	 * @param container The class containing all survey information needed for demand generation.
+	 * @param geoinformation
+	 */
 	public void run(Configuration configuration, SurveyDataContainer container, Geoinformation geoinformation){
 		
+		// Initialize the survey constants according to what datasource was specified.
 		this.constants = new SurveyConstants(configuration.getDatasource());
 		
 		try {
 			
 			log.info("Parsing surveys database to create a synthetic population");
 			
+			// Instantiate a new postgreSQL driver and establish a connection to the mobility database
 			Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
-			Connection connection = DriverManager.getConnection(DatabaseConstants.PSQL_URL + configuration.getLocalPort() +
-					"/" + DatabaseConstants.SURVEYS_DB, configuration.getDatabaseUsername(), configuration.getDatabasePassword());
+			Connection connection = DriverManager.getConnection(DatabaseConstants.PSQL_URL +
+					configuration.getLocalPort() + "/" + DatabaseConstants.SURVEYS_DB, 
+					configuration.getDatabaseUsername(), configuration.getDatabasePassword());
 		
 			if(connection != null){
 				
@@ -606,7 +627,7 @@ public class SurveyDatabaseParser {
 
 			boolean licenseAndCarAvailabilitySet = false;
 			
-			if(person.getPlans().size() < 1) return false;
+//			if(person.getPlans().size() < 1) return false;
 			
 			for(SurveyPlan plan : person.getPlans()){
 				
@@ -673,6 +694,24 @@ public class SurveyDatabaseParser {
 				plan.setMainActId(mainAct.getId());
 				plan.setMainActIndex(plan.getPlanElements().indexOf(mainAct));
 				
+				if(plan.getMainActType().equals(ActivityTypes.HOME) && plan.getPlanElements().size() > 1){
+					
+					boolean first = true;
+					
+					for(Iterator<SurveyPlanElement> it = plan.getPlanElements().iterator(); it.hasNext();){
+						
+						it.next();
+						
+						if(!first){
+							it.remove();
+						}
+						
+						first = false;
+						
+					}
+					
+				}
+				
 				for(SurveyPlanElement pe : plan.getPlanElements()){
 					
 					if(pe instanceof SurveyPlanActivity){
@@ -693,55 +732,55 @@ public class SurveyDatabaseParser {
 				
 				}
 				
-				List<Subtour> subtours = createSubtours(plan);
-				
-				Set<Integer> breakpoints = new HashSet<>();
-				
-				for(Subtour subtour : subtours){
-					
-					breakpoints.add(subtour.startIndex);
-					breakpoints.add(subtour.endIndex);
-					
-				}
-				
-				for(SurveyPlanElement pe : plan.getPlanElements()){
-					if(pe instanceof SurveyPlanActivity){
-						SurveyPlanActivity act = (SurveyPlanActivity)pe;
-						if(act.getId() == plan.getMainActId()){
-							breakpoints.add(plan.getPlanElements().indexOf(pe));
-						}
-					}
-				}
-				
-				List<Integer> breakpointsList = new ArrayList<>();
-				breakpointsList.addAll(breakpoints);
-				Collections.sort(breakpointsList);
-				
-				for(int i = 0; i < breakpointsList.size() - 1; i++){
-					
-					SurveyPlanActivity act1 = (SurveyPlanActivity) plan.getPlanElements().get(breakpointsList.get(i));
-					SurveyPlanActivity act2 = (SurveyPlanActivity) plan.getPlanElements().get(breakpointsList.get(i + 1));
-
-					Subtour subtour = new Subtour(breakpointsList.get(i), breakpointsList.get(i+1));
-					
-					if(act1.getActType().equals(act2.getActType())){
-						
-						subtour.type = subtourType.inter;
-						plan.getSubtours().add(subtour);
-						
-					} else if(act2.getActType().equals(plan.getMainActType())){
-						
-						subtour.type = subtourType.forth;
-						plan.getSubtours().add(subtour);
-
-					} else if(act1.getActType().equals(plan.getMainActType())){
-
-						subtour.type = subtourType.back;
-						plan.getSubtours().add(subtour);
-
-					}
-					
-				}
+//				List<Subtour> subtours = createSubtours(plan);
+//				
+//				Set<Integer> breakpoints = new HashSet<>();
+//				
+//				for(Subtour subtour : subtours){
+//					
+//					breakpoints.add(subtour.startIndex);
+//					breakpoints.add(subtour.endIndex);
+//					
+//				}
+//				
+//				for(SurveyPlanElement pe : plan.getPlanElements()){
+//					if(pe instanceof SurveyPlanActivity){
+//						SurveyPlanActivity act = (SurveyPlanActivity)pe;
+//						if(act.getId() == plan.getMainActId()){
+//							breakpoints.add(plan.getPlanElements().indexOf(pe));
+//						}
+//					}
+//				}
+//				
+//				List<Integer> breakpointsList = new ArrayList<>();
+//				breakpointsList.addAll(breakpoints);
+//				Collections.sort(breakpointsList);
+//				
+//				for(int i = 0; i < breakpointsList.size() - 1; i++){
+//					
+//					SurveyPlanActivity act1 = (SurveyPlanActivity) plan.getPlanElements().get(breakpointsList.get(i));
+//					SurveyPlanActivity act2 = (SurveyPlanActivity) plan.getPlanElements().get(breakpointsList.get(i + 1));
+//
+//					Subtour subtour = new Subtour(breakpointsList.get(i), breakpointsList.get(i+1));
+//					
+//					if(act1.getActType().equals(act2.getActType())){
+//						
+//						subtour.type = subtourType.inter;
+//						plan.getSubtours().add(subtour);
+//						
+//					} else if(act2.getActType().equals(plan.getMainActType())){
+//						
+//						subtour.type = subtourType.forth;
+//						plan.getSubtours().add(subtour);
+//
+//					} else if(act1.getActType().equals(plan.getMainActType())){
+//
+//						subtour.type = subtourType.back;
+//						plan.getSubtours().add(subtour);
+//
+//					}
+//					
+//				}
 				
 			}
 			
@@ -763,77 +802,77 @@ public class SurveyDatabaseParser {
 		
 	}
 	
-	private List<Subtour> createSubtours(SurveyPlan plan){
-		
-		List<Subtour> subtours = new ArrayList<>();
-		
-		if(plan.getPlanElements().size() > 1){
-			
-			List<Integer> originIds = new ArrayList<>();
-			
-			Integer destinationId = null;
-			
-			for(SurveyPlanElement pe : plan.getPlanElements()){
-				
-				if(pe instanceof SurveyPlanTrip){
-					
-					SurveyPlanActivity from = (SurveyPlanActivity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)-1);
-					
-					SurveyPlanActivity to = (SurveyPlanActivity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)+1);
-					
-					originIds.add(from.getId());
-					originIds.add(null);
-					
-					destinationId = to.getId();
-					
-					if(originIds.contains(destinationId)){
-						
-						subtours.add(new Subtour(originIds.lastIndexOf(destinationId), originIds.size()));
-						
-						for(int i = originIds.lastIndexOf(destinationId); i < originIds.size(); i++){
-							originIds.set(i, null);
-						}
-						
-					} else if(plan.getPlanElements().indexOf(pe) >= plan.getPlanElements().size() - 2){
-						
-						subtours.add(new Subtour(0, originIds.size()));
-						
-					}
-					
-				}
-				
-			}
-			
-		}
-		
-		return subtours;
-		
-	}
-	
-	public static class Subtour{
-		
-		private subtourType type;
-		private int startIndex;
-		private int endIndex;
-		
-		enum subtourType{back,forth,inter};
-		
-		Subtour(int from, int to){this.startIndex=from;this.endIndex=to;}
-		@Override
-		public String toString(){
-			return ("[" + startIndex + "," + endIndex + "], type: " + this.type.name());
-		}
-		public int getStartIndex(){
-			return this.startIndex;
-		}
-		public int getEndIndex(){
-			return this.endIndex;
-		}
-		public subtourType getType(){
-			return type;
-		}
-		
-	}
+//	private List<Subtour> createSubtours(SurveyPlan plan){
+//		
+//		List<Subtour> subtours = new ArrayList<>();
+//		
+//		if(plan.getPlanElements().size() > 1){
+//			
+//			List<Integer> originIds = new ArrayList<>();
+//			
+//			Integer destinationId = null;
+//			
+//			for(SurveyPlanElement pe : plan.getPlanElements()){
+//				
+//				if(pe instanceof SurveyPlanTrip){
+//					
+//					SurveyPlanActivity from = (SurveyPlanActivity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)-1);
+//					
+//					SurveyPlanActivity to = (SurveyPlanActivity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)+1);
+//					
+//					originIds.add(from.getId());
+//					originIds.add(null);
+//					
+//					destinationId = to.getId();
+//					
+//					if(originIds.contains(destinationId)){
+//						
+//						subtours.add(new Subtour(originIds.lastIndexOf(destinationId), originIds.size()));
+//						
+//						for(int i = originIds.lastIndexOf(destinationId); i < originIds.size(); i++){
+//							originIds.set(i, null);
+//						}
+//						
+//					} else if(plan.getPlanElements().indexOf(pe) >= plan.getPlanElements().size() - 2){
+//						
+//						subtours.add(new Subtour(0, originIds.size()));
+//						
+//					}
+//					
+//				}
+//				
+//			}
+//			
+//		}
+//		
+//		return subtours;
+//		
+//	}
+//	
+//	public static class Subtour{
+//		
+//		private subtourType type;
+//		private int startIndex;
+//		private int endIndex;
+//		
+//		enum subtourType{back,forth,inter};
+//		
+//		Subtour(int from, int to){this.startIndex=from;this.endIndex=to;}
+//		@Override
+//		public String toString(){
+//			return ("[" + startIndex + "," + endIndex + "], type: " + this.type.name());
+//		}
+//		public int getStartIndex(){
+//			return this.startIndex;
+//		}
+//		public int getEndIndex(){
+//			return this.endIndex;
+//		}
+//		public subtourType getType(){
+//			return type;
+//		}
+//		
+//	}
 	
 	private String handleActType(int idx, int idxD){
 		

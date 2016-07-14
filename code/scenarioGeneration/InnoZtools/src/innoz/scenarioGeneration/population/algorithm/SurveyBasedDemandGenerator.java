@@ -2,6 +2,7 @@ package innoz.scenarioGeneration.population.algorithm;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -446,6 +447,9 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		String mainMode = plan.getMainActIndex() > 0 ? 
 				((SurveyPlanTrip)plan.getPlanElements().get(plan.getMainActIndex()-1)).getMainMode() :
 					((SurveyPlanTrip)plan.getPlanElements().get(plan.getMainActIndex()+1)).getMainMode();
+		
+				this.currentSearchSpace = new HashSet<>();
+				
 		this.currentMainActCell = locateActivityInCell(plan.getMainActType(), mainMode, person);
 		
 		double distance = container.getModeStatsContainer().get(mainMode).getMean();
@@ -454,10 +458,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				plan.getMainActType(), distance, plan, mainMode, person);
 
 		// To locate intermediate activities, create a search space and add the home and main activity cells
-		this.currentSearchSpace = new ArrayList<>();
 		this.currentSearchSpace.add(this.currentHomeCell);
 		this.currentSearchSpace.add(this.currentMainActCell);
-		
 		c = CoordUtils.calcEuclideanDistance(this.currentHomeLocation, this.currentMainActLocation);
 		
 		// Also, add all cells of which the sum of the distances between their centroid and the centroids of

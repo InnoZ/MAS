@@ -12,7 +12,7 @@ import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.network.NetworkCreatorFromPsql;
 import innoz.scenarioGeneration.network.WayEntry;
 
-public class WayEntryThread extends AlgoThread {
+public final class WayEntryThread extends AlgoThread {
 
 	private NetworkCreatorFromPsql networkCreator;
 	private Set<WayEntry> wayEntries;
@@ -52,8 +52,6 @@ public class WayEntryThread extends AlgoThread {
 					
 					// If the coordinates are contained in the survey area, add a new link to the network
 					if(!this.networkCreator.getBufferedArea().contains(lastPoint) && !this.networkCreator.getBufferedArea().contains(nextPoint)){
-//							if(!this.geoinformation.getSurveyAreaBoundingBox().contains(lastPoint) &&
-//									!this.geoinformation.getSurveyAreaBoundingBox().contains(nextPoint)){
 						
 						inSurveyArea = false;
 						
