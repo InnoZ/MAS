@@ -67,47 +67,11 @@ public class PopulationCreator {
 	public void run(Configuration configuration, Scenario scenario) {
 		
 		log.info("Creating population for MATSim scenario...");
-//		log.info("Selected type of population: " + configuration.getPopulationType().name());
-//
-//		// Create the coordinate transformation for all of the geometries
-//		// This could also be done by just passing the auth id strings, but doing it this way suppresses
-//		// warnings.
-//		CoordinateReferenceSystem from = CRS.decode("EPSG:4326", true);
-//		CoordinateReferenceSystem to = CRS.decode(configuration.getCrs(), true);
-//		final CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(
-//				from.toString(), to.toString());
-//		
-//		String className = null;
-//		
-//		// Choose the demand generation method according to what type of population was defined in the configuration
-//		switch(configuration.getPopulationType()){
-//		
-//			case dummy: 	className = DummyDemandGenerator.class.getName();
-//							break;
-//							
-//			case commuter:	className = CommuterDemandGenerator.class.getName();
-//							break;
-//							
-//			case survey:	className = SurveyBasedDemandGenerator.class.getName();
-//							break;
-//							
-//			default: 		break;
-//		
-//		}
 		
 		try {
 			
 			runI(configuration, scenario, configuration.getPopulationType(), configuration.getSurveyAreaIds());
 			runI(configuration, scenario, configuration.getVicinityPopulationType(), configuration.getVicinityIds());
-			
-//			if(className != null){
-//				
-//				((DemandGenerationAlgorithm)Class.forName(className).getConstructor(
-//						Geoinformation.class, CoordinateTransformation.class).newInstance(
-//								this.geoinformation, transformation)).run(scenario, configuration,
-//										configuration.getSurveyAreaIds());
-//				
-//			}
 		
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException |
 				IllegalArgumentException | InvocationTargetException | NoSuchMethodException |
