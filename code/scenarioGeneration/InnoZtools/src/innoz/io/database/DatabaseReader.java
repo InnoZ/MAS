@@ -651,6 +651,7 @@ public class DatabaseReader {
 			
 			// Create a new statement and execute an SQL query to retrieve OSM road data
 			Statement statement = connection.createStatement();
+			statement.setFetchSize(1000);
 			ResultSet result = statement.executeQuery("select " + DatabaseConstants.ATT_OSM_ID + ", " + DatabaseConstants.ATT_ACCESS + ", "
 					+ DatabaseConstants.ATT_HIGHWAY + ", " + DatabaseConstants.ATT_JUNCTION + ", " + DatabaseConstants.ATT_ONEWAY + ", "
 					+ DatabaseConstants.TAG_LANES + " ," + DatabaseConstants.TAG_MAXSPEED + ", "
