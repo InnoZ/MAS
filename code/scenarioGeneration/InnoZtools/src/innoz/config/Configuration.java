@@ -268,6 +268,15 @@ public final class Configuration {
 			
 		}
 		
+		int nProcessors = Runtime.getRuntime().availableProcessors();
+		if(this.numberOfThreads > nProcessors){
+			
+			log.warn("Specified number of threads: " + this.numberOfThreads + ", but you have only " + nProcessors + " cores available...");
+			log.info("Thus, the programm will only use these " + nProcessors + "  cores.");
+			this.numberOfThreads = nProcessors;
+			
+		}
+		
 		// If anything should cause the configuration to be invalid, abort!
 		if(validationError){
 			
