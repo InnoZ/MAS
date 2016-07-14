@@ -134,7 +134,7 @@ public class SurveyDatabaseParser {
 			
 		} else {
 			
-			q += " where st_code=44;"; //Osnabrück 
+			q += " where st_code=44"; //Osnabrück 
 			
 		}
 		
@@ -565,12 +565,13 @@ public class SurveyDatabaseParser {
 					boolean b = this.postprocessPerson(container.getPersons().get(pid));
 					
 					if(!b){
+						personsToRemove.add(pid);
 						it.remove();
 					}
 					
 				}
 				
-				if(household.getMemberIds().size()<1)
+				if(household.getMemberIds().size() < 1)
 					emptyHouseholdIds.add(household.getId());
 				
 			}
