@@ -17,6 +17,7 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import innoz.config.Configuration;
 import innoz.io.database.CommuterDatabaseParser;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
+import innoz.scenarioGeneration.geoinformation.Distribution;
 import innoz.scenarioGeneration.geoinformation.District;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.population.commuters.CommuterDataElement;
@@ -24,10 +25,10 @@ import innoz.scenarioGeneration.utils.ActivityTypes;
 
 public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 
-	public CommuterDemandGenerator(final Scenario scenario, Geoinformation geoinformation,
-			final CoordinateTransformation transformation) {
+	public CommuterDemandGenerator(final Scenario scenario, final Geoinformation geoinformation,
+			final CoordinateTransformation transformation, final Distribution distribution) {
 
-		super(scenario, geoinformation, transformation);
+		super(scenario, geoinformation, transformation, distribution);
 		
 	}
 

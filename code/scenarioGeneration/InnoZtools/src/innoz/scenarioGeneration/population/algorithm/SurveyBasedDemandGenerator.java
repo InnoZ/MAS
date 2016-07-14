@@ -2,24 +2,18 @@ package innoz.scenarioGeneration.population.algorithm;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.population.PersonUtils;
-import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -37,6 +31,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import innoz.config.Configuration;
 import innoz.io.database.SurveyDatabaseParser;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
+import innoz.scenarioGeneration.geoinformation.Distribution;
 import innoz.scenarioGeneration.geoinformation.District;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.population.mobilityAttitude.MobilityAttitudeGroups;
@@ -55,9 +50,9 @@ import innoz.utils.GeometryUtils;
 public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
 	public SurveyBasedDemandGenerator(final Scenario scenario, final Geoinformation geoinformation,
-			final CoordinateTransformation transformation) {
+			final CoordinateTransformation transformation, final Distribution distribution) {
 
-		super(scenario, geoinformation, transformation);
+		super(scenario, geoinformation, transformation, distribution);
 		
 	}
 
@@ -562,151 +557,6 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		this.lastLeg = way;
 		
 		return leg;
-		
-	}
-
-	/**
-	 * 
-	 * Randomly chooses an administrative unit in which an activity of a certain type should be located.
-	 * The randomness depends on the distribution computed earlier, the activity type and the transport mode.
-	 * 
-	 * @param activityType The type of the activity to locate.
-	 * @param mode The transport mode used to get to the activity.
-	 * @param personTemplate The survey person.
-	 * @return The administrative unit in which the activity most likely is located.
-	 */
-	private AdministrativeUnit locateActivityInCell(String activityType, String mode, SurveyPerson personTemplate){
-		
-		return locateActivityInCell(null, activityType, mode, personTemplate);
-		
-	}
-
-	/**
-	 * 
-	 * Same method as {@link #locateActivityInCell(String, String, SurveyPerson)}, only that this method locates an activity of a sequence
-	 * where the last activity and the distance traveled between the two locations is known.
-	 * 
-	 * @param fromId The identifier of the last administrative unit.
-	 * @param activityType The type of the current activity.
-	 * @param mode The transport mode used.
-	 * @param personTemplate The survey person.
-	 * @param distance The distance traveled between the last and the current activity.
-	 * @return
-	 */
-	private AdministrativeUnit locateActivityInCell(String fromId, String activityType, String mode, SurveyPerson personTemplate){
-		
-		Set<String> modes = new HashSet<String>();
-		
-		if(fromId == null){
-			fromId = this.currentHomeCell.getId();
-		}
-		
-		if(mode != null){
-
-			// If the person walked, it most likely didn't leave the last cell (to avoid very long walk legs)
-			if(mode.equals(TransportMode.walk) && fromId != null){
-				
-				return this.geoinformation.getAdminUnitById(fromId);
-				
-			}
-			
-			// Add the transport mode used
-			modes.add(mode);
-			
-		} else {
-			
-			// If the transport mode wasn't reported, consider all modes the person could have used
-			modes = CollectionUtils.stringToSet(TransportMode.bike + "," + TransportMode.pt + ","
-					+ TransportMode.walk);
-			
-			if(personTemplate.hasCarAvailable()){
-			
-				modes.add(TransportMode.ride);
-				
-				if(personTemplate.hasLicense()){
-					
-					modes.add(TransportMode.car);
-					
-				}
-				
-			}
-			
-		}
-		
-		AdministrativeUnit result = null;
-		
-		Map<String, Double> toId2Disutility = new HashMap<String, Double>();
-		double sumOfWeights = 0d;
-		
-		// Set the search space to the person's search space if it's not null.
-		// Else consider the whole survey area.
-		List<AdministrativeUnit> adminUnits = null;
-		if(this.currentSearchSpace != null){
-			
-			if(this.currentSearchSpace.size() > 0){
-				
-				adminUnits = this.currentSearchSpace;
-				
-			}
-			
-		}
-		
-		if(adminUnits == null){
-			
-			adminUnits = new ArrayList<AdministrativeUnit>();
-			adminUnits.addAll(this.geoinformation.getSubUnits().values());
-			
-		}
-		
-		// Go through all administrative units in the search space
-		// Sum up the disutilities of all connections and map the entries for further work
-		for(AdministrativeUnit au : adminUnits){
-			
-			double disutility = Double.NEGATIVE_INFINITY;
-				
-			for(String m : modes){
-				
-				if(fromId != null){
-					
-					disutility = this.distribution.getDisutilityForActTypeAndMode(fromId, au.getId(),
-							activityType, m);
-					
-				} else {
-					
-					disutility = this.distribution.getDisutilityForActTypeAndMode(
-							this.currentHomeCell.getId(), au.getId(), activityType, m);
-					
-				}
-				
-				if(Double.isFinite(disutility)){
-					
-					toId2Disutility.put(au.getId(), disutility);
-					sumOfWeights += disutility;
-					
-				}
-				
-			}
-			
-		}
-		
-		// Randomly choose a connection out of the search space
-		double r = this.random.nextDouble() * sumOfWeights;
-		double accumulatedWeight = 0d;
-		
-		for(Entry<String, Double> entry : toId2Disutility.entrySet()){
-			
-			accumulatedWeight += entry.getValue();
-			if(r <= accumulatedWeight){
-				result = this.geoinformation.getSubUnits().get(entry.getKey());
-				if(result == null){
-					result = this.geoinformation.getSubUnits().get(entry.getKey());
-				}
-				break;
-			}
-			
-		}
-		
-		return result;
 		
 	}
 

@@ -2,6 +2,7 @@ package innoz.scenarioGeneration.population.algorithm;
 
 import innoz.config.Configuration;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
+import innoz.scenarioGeneration.geoinformation.Distribution;
 import innoz.scenarioGeneration.geoinformation.District;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.utils.ActivityTypes;
@@ -21,10 +22,10 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 
 public class DummyDemandGenerator extends DemandGenerationAlgorithm {
 
-	public DummyDemandGenerator(final Scenario scenario, Geoinformation geoinformation,
-			final CoordinateTransformation transformation) {
+	public DummyDemandGenerator(final Scenario scenario, final Geoinformation geoinformation,
+			final CoordinateTransformation transformation, final Distribution distribution) {
 
-		super(scenario, geoinformation, transformation);
+		super(scenario, geoinformation, transformation, distribution);
 		
 	}
 

@@ -13,6 +13,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import innoz.config.Configuration;
 import innoz.config.Configuration.PopulationType;
+import innoz.scenarioGeneration.geoinformation.Distribution;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.population.algorithm.CommuterDemandGenerator;
 import innoz.scenarioGeneration.population.algorithm.DemandGenerationAlgorithm;
@@ -41,6 +42,11 @@ public class PopulationCreator {
 	private static final Logger log = Logger.getLogger(PopulationCreator.class);
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
+	//MEMBERS////////////////////////////////////////////////////////////////////////////////
+	private Distribution distribution;
+	private CoordinateTransformation transformation;
+	/////////////////////////////////////////////////////////////////////////////////////////
+	
 	/**
 	 * 
 	 * Constructor.
@@ -65,10 +71,20 @@ public class PopulationCreator {
 	 * @throws FactoryException
 	 */
 	public void run(Configuration configuration, Scenario scenario) {
-		
-		log.info("Creating population for MATSim scenario...");
+
 		
 		try {
+			// Create the coordinate transformation for all of the geometries
+			// This could also be done by just passing the auth id strings, but doing it this way suppresses
+			// warnings.
+			CoordinateReferenceSystem from = CRS.decode("EPSG:4326", true);
+			CoordinateReferenceSystem to = CRS.decode(configuration.getCrs(), true);
+			transformation = TransformationFactory.getCoordinateTransformation(
+					from.toString(), to.toString());
+			
+			this.distribution = new Distribution(scenario.getNetwork(), this.geoinformation, transformation);
+			
+			log.info("Creating population for MATSim scenario...");
 			
 			runI(configuration, scenario, configuration.getPopulationType(), configuration.getSurveyAreaIds());
 			runI(configuration, scenario, configuration.getVicinityPopulationType(), configuration.getVicinityIds());
@@ -92,14 +108,6 @@ public class PopulationCreator {
 		
 		log.info("Selected type of population: " + populationType.name());
 
-		// Create the coordinate transformation for all of the geometries
-		// This could also be done by just passing the auth id strings, but doing it this way suppresses
-		// warnings.
-		CoordinateReferenceSystem from = CRS.decode("EPSG:4326", true);
-		CoordinateReferenceSystem to = CRS.decode(configuration.getCrs(), true);
-		final CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(
-				from.toString(), to.toString());
-		
 		String className = null;
 		
 		// Choose the demand generation method according to what type of population was defined in the configuration
@@ -121,8 +129,8 @@ public class PopulationCreator {
 		if(className != null){
 			
 			((DemandGenerationAlgorithm)Class.forName(className).getConstructor(
-					Scenario.class, Geoinformation.class, CoordinateTransformation.class).newInstance(
-									scenario, this.geoinformation, transformation)).run(configuration,
+					Scenario.class, Geoinformation.class, CoordinateTransformation.class, Distribution.class).newInstance(
+									scenario, this.geoinformation, transformation, distribution)).run(configuration,
 									ids);
 			
 		}
