@@ -106,11 +106,11 @@ public class SurveyDatabaseParser {
 			SurveyDataContainer container) throws RuntimeException, SQLException{
 		
 		Statement statement = connection.createStatement();
+		statement.setFetchSize(100);
 	
 		String table = this.constants.getNamespace().equals("mid") ? "mid2008.households_raw" : "srv2013.households";
 		
 		String q = "select * from " + table;
-		
 		
 		if(this.constants.getNamespace().equals("mid")){
 			
@@ -131,6 +131,10 @@ public class SurveyDatabaseParser {
 				}
 				
 			}
+			
+		} else {
+			
+			q += " where st_code=44;"; //Osnabrück 
 			
 		}
 		
