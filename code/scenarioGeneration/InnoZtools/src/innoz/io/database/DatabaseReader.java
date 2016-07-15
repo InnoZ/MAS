@@ -661,8 +661,6 @@ public class DatabaseReader {
 					+ DatabaseConstants.ATT_WAY + "," + DatabaseConstants.functions.st_geomfromtext.name() + "('"
 					+ this.geoinformation.getCompleteGeometry().toString() + "',4326)) order by " + DatabaseConstants.ATT_OSM_ID + ";");
 			
-			int cnt = 0;
-			
 			while(result.next()){
 				
 				// Create a new way entry for each result and set its attributes according to the table entries
@@ -690,7 +688,7 @@ public class DatabaseReader {
 							nodeEntries.put(nEntry.getId(), nEntry);
 							
 						} else {
-							cnt++;
+
 							nEntry = coordinates2Nodes.get(coordinate);
 							
 						}
@@ -705,9 +703,6 @@ public class DatabaseReader {
 				}
 				
 			}
-			
-			System.out.println("reused nodes: " + cnt);
-			
 			
 			// After all road data is retrieved, close the statement and the connection.
 			result.close();
