@@ -659,7 +659,7 @@ public class DatabaseReader {
 					+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_line.name() + " where "
 					+ DatabaseConstants.ATT_HIGHWAY + " is not null and " + DatabaseConstants.functions.st_within.name() + "("
 					+ DatabaseConstants.ATT_WAY + "," + DatabaseConstants.functions.st_geomfromtext.name() + "('"
-					+ this.geoinformation.getCompleteGeometry().toString() + "',4326));");
+					+ this.geoinformation.getCompleteGeometry().toString() + "',4326)) order by " + DatabaseConstants.ATT_OSM_ID + ";");
 			
 			while(result.next()){
 				

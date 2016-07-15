@@ -608,7 +608,7 @@ public class SurveyDatabaseParser {
 				container.incrementSumOfHouseholdWeigtsBy(-container.getHouseholds().get(s).getWeight());
 				container.getHouseholds().remove(s);
 			}
-			
+
 		} else {
 			
 			for(SurveyPerson person : container.getPersons().values()){
@@ -631,22 +631,23 @@ public class SurveyDatabaseParser {
 			
 			for(SurveyPlan plan : person.getPlans()){
 				
+				double w = plan.getWeigt() > 0 ? plan.getWeigt() : 0.00001;
+				person.incrementPlansWeight(w);
+
 				if(plan.getPlanElements().size() < 1) continue;
 				
-				person.incrementPlansWeight(plan.getWeigt());
-
 				SurveyPlanActivity firstAct = (SurveyPlanActivity) plan.getPlanElements().get(0);
 				SurveyPlanActivity lastAct = (SurveyPlanActivity) plan.getPlanElements().get(plan.getPlanElements().size()-1);
 				
 				plan.setFirstActEqualsLastAct(firstAct.getActType().equals(lastAct.getActType()));
 				
-				if(firstAct.getActType().equals(ActivityTypes.HOME) && lastAct.getActType().equals(ActivityTypes.HOME) && plan.getPlanElements().size() == 3){
-					
-					//remove the last element twice to leave only one home act in the plan
-					plan.getPlanElements().removeLast();
-					plan.getPlanElements().removeLast();
-					
-				}
+//				if(firstAct.getActType().equals(ActivityTypes.HOME) && lastAct.getActType().equals(ActivityTypes.HOME) && plan.getPlanElements().size() == 3){
+//					
+//					//remove the last element twice to leave only one home act in the plan
+//					plan.getPlanElements().removeLast();
+//					plan.getPlanElements().removeLast();
+//					
+//				}
 				
 				SurveyPlanActivity mainAct = null;
 				
