@@ -9,13 +9,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.geotools.referencing.CRS;
-import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.network.LinkImpl;
 import org.matsim.core.network.algorithms.NetworkCleaner;
+import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -24,7 +24,6 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
@@ -66,7 +65,6 @@ public class NetworkCreatorFromPsql {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////	
-	private static AtomicInteger nodeCounter = new AtomicInteger(0);
 	private static AtomicInteger linkCounter = new AtomicInteger(0);
 	
 	private Map<String, OsmNodeEntry> nodes = new HashMap<>();
@@ -82,8 +80,6 @@ public class NetworkCreatorFromPsql {
 	
 	private Map<String, HighwayDefaults> highwayDefaults = new HashMap<String, HighwayDefaults>();
 
-	private Map<Coord,Node> coords2Nodes = new HashMap<Coord, Node>();
-	
 	private Geometry bufferedArea;
 	
 	//TODO what can you modify?
@@ -235,10 +231,10 @@ public class NetworkCreatorFromPsql {
 	 * @param oneway Road type is only accessible in one direction or not.
 	 */
 	public void setHighwayDefaults(final int hierarchyLevel, final String highwayType, final double lanesPerDirection, final double freespeed,
-			final double freespeedFactor, final double laneCapacity_vehPerHour, final boolean oneway){
+			final double freespeedFactor, final double laneCapacity_vehPerHour, final boolean oneway, String modes){
 		
 		this.highwayDefaults.put(highwayType, new HighwayDefaults(hierarchyLevel, freespeed, freespeedFactor, lanesPerDirection,
-				laneCapacity_vehPerHour, oneway));
+				laneCapacity_vehPerHour, oneway, modes));
 		
 	}
 	
@@ -253,41 +249,41 @@ public class NetworkCreatorFromPsql {
 	 * @param laneCapacity_vehPerHour The capacity of one lane on this road type per hour.
 	 */
 	public void setHighwayDefaults(final int hierarchyLevel, final String highwayType, final double lanesPerDirection, final double freespeed,
-			final double freespeedFactor, final double laneCapacity_vehPerHour){
+			final double freespeedFactor, final double laneCapacity_vehPerHour, String modes){
 		
-		this.setHighwayDefaults(hierarchyLevel, highwayType, lanesPerDirection, freespeed, freespeedFactor, laneCapacity_vehPerHour, false);
+		this.setHighwayDefaults(hierarchyLevel, highwayType, lanesPerDirection, freespeed, freespeedFactor, laneCapacity_vehPerHour, false, modes);
 		
 	}
 	
 	private void setHighwayDefaultsAccordingToLevelOfDetail(){
 
-		this.setHighwayDefaults(1, MOTORWAY, 2.0, 100/3.6, 1.2, 2000.0, true);
-		this.setHighwayDefaults(1, MOTORWAY_LINK, 1,  60.0/3.6, 1.2, 1500, true);
+		this.setHighwayDefaults(1, MOTORWAY, 2.0, 100/3.6, 1.2, 2000.0, true, "car");
+		this.setHighwayDefaults(1, MOTORWAY_LINK, 1,  60.0/3.6, 1.2, 1500, true, "car");
 		
 		if(this.levelOfDetail > 1){
 			
-			this.setHighwayDefaults(2, TRUNK, 1,  80.0/3.6, 0.5, 1000);
-			this.setHighwayDefaults(2, TRUNK_LINK, 1,  60.0/3.6, 0.5, 1500);
+			this.setHighwayDefaults(2, TRUNK, 1,  80.0/3.6, 0.5, 1000, "car");
+			this.setHighwayDefaults(2, TRUNK_LINK, 1,  60.0/3.6, 0.5, 1500, "car");
 			
 			if(this.levelOfDetail > 2){
 				
-				this.setHighwayDefaults(3, PRIMARY, 1,  50.0/3.6, 0.5, 1000);
-				this.setHighwayDefaults(3, PRIMARY_LINK, 1,  50.0/3.6, 0.5, 1000);
+				this.setHighwayDefaults(3, PRIMARY, 1,  50.0/3.6, 0.5, 1000, "car");
+				this.setHighwayDefaults(3, PRIMARY_LINK, 1,  50.0/3.6, 0.5, 1000, "car");
 				
 				if(this.levelOfDetail > 3){
 					
-					this.setHighwayDefaults(4, SECONDARY, 1,  50.0/3.6, 0.5, 1000);
+					this.setHighwayDefaults(4, SECONDARY, 1,  50.0/3.6, 0.5, 1000, "car");
 					
 					if(this.levelOfDetail > 4){
 						
-						this.setHighwayDefaults(5, TERTIARY, 1,  30.0/3.6, 0.8,  600);
+						this.setHighwayDefaults(5, TERTIARY, 1,  30.0/3.6, 0.8,  600, "car");
 						
 						if(this.levelOfDetail > 5){
 							
-							this.setHighwayDefaults(6, MINOR, 1,  30.0/3.6, 0.8,  600);
-							this.setHighwayDefaults(6, UNCLASSIFIED, 1,  30.0/3.6, 0.8,  600);
-							this.setHighwayDefaults(6, RESIDENTIAL, 1,  30.0/3.6, 0.6,  600);
-							this.setHighwayDefaults(6, LIVING_STREET, 1,  15.0/3.6, 1.0,  600);
+							this.setHighwayDefaults(6, MINOR, 1,  30.0/3.6, 0.8,  600, "car");
+							this.setHighwayDefaults(6, UNCLASSIFIED, 1,  30.0/3.6, 0.8,  600, "car");
+							this.setHighwayDefaults(6, RESIDENTIAL, 1,  30.0/3.6, 0.6,  600, "car");
+							this.setHighwayDefaults(6, LIVING_STREET, 1,  15.0/3.6, 1.0,  600, "car");
 							
 						}
 						
@@ -480,6 +476,7 @@ public class NetworkCreatorFromPsql {
 			double laneCapacity = defaults.laneCapacity;
 			boolean oneway = defaults.oneway;
 			boolean onewayReverse = false;
+			Set<String> modes = CollectionUtils.stringToSet(defaults.modes);
 
 			// Handle the freespeed tag
 			String freespeedTag = entry.getMaxspeedTag();
@@ -600,6 +597,7 @@ public class NetworkCreatorFromPsql {
 					link.setFreespeed(freespeed);
 					link.setLength(length);
 					link.setNumberOfLanes(lanesPerDirection);
+					link.setAllowedModes(modes);
 					
 					if(link instanceof LinkImpl){
 						
@@ -621,6 +619,7 @@ public class NetworkCreatorFromPsql {
 					link.setFreespeed(freespeed);
 					link.setLength(length);
 					link.setNumberOfLanes(lanesPerDirection);
+					link.setAllowedModes(modes);
 					
 					if(link instanceof LinkImpl){
 						
@@ -642,30 +641,6 @@ public class NetworkCreatorFromPsql {
 			
 	}
 		
-	/**
-	/**
-	 * 
-	 * Creates a new MATSim node.
-	 * 
-	 * @param coord The location of the node.
-	 * @return A MATSim node.
-	 */
-	private Node createNode(Coord coord){
-
-		Node node = null;
-		
-		synchronized(nodeCounter){
-			
-			node = network.getFactory().createNode(Id.createNodeId(nodeCounter.get()), coord);
-			network.addNode(node);
-			nodeCounter.incrementAndGet();
-			
-		}
-		
-		return node;
-		
-	}
-	
 	public Geometry getBufferedArea(){
 		return this.bufferedArea;
 	}
@@ -697,15 +672,17 @@ public class NetworkCreatorFromPsql {
 		double lanesPerDirection;
 		double laneCapacity;
 		boolean oneway;
+		String modes;
 		
 		HighwayDefaults(int hierarchyLevel, double freespeed, double freespeedFactor, double lanesPerDirection, double laneCapacity, 
-				boolean oneway){
+				boolean oneway, String modes){
 			this.hierarchyLevel = hierarchyLevel;
 			this.freespeed = freespeed;
 			this.freespeedFactor = freespeedFactor;
 			this.lanesPerDirection = lanesPerDirection;
 			this.laneCapacity = laneCapacity;
 			this.oneway = oneway;
+			this.modes = modes;
 		}
 		
 	}
