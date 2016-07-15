@@ -74,20 +74,27 @@ public class PopulationCreator {
 
 		
 		try {
-			// Create the coordinate transformation for all of the geometries
-			// This could also be done by just passing the auth id strings, but doing it this way suppresses
-			// warnings.
-			CoordinateReferenceSystem from = CRS.decode("EPSG:4326", true);
-			CoordinateReferenceSystem to = CRS.decode(configuration.getCrs(), true);
-			transformation = TransformationFactory.getCoordinateTransformation(
-					from.toString(), to.toString());
 			
-			this.distribution = new Distribution(scenario.getNetwork(), this.geoinformation, transformation);
+			if(!configuration.getPopulationType().equals(PopulationType.none) &&
+					!configuration.getVicinityPopulationType().equals(PopulationType.none)){
+				
+				// Create the coordinate transformation for all of the geometries
+				// This could also be done by just passing the auth id strings, but doing it this way suppresses
+				// warnings.
+				CoordinateReferenceSystem from = CRS.decode("EPSG:4326", true);
+				CoordinateReferenceSystem to = CRS.decode(configuration.getCrs(), true);
+				transformation = TransformationFactory.getCoordinateTransformation(
+						from.toString(), to.toString());
+				
+				this.distribution = new Distribution(scenario.getNetwork(), this.geoinformation, transformation);
 			
-			log.info("Creating population for MATSim scenario...");
+				
+				log.info("Creating population for MATSim scenario...");
 			
-			runI(configuration, scenario, configuration.getPopulationType(), configuration.getSurveyAreaIds());
-			runI(configuration, scenario, configuration.getVicinityPopulationType(), configuration.getVicinityIds());
+				runI(configuration, scenario, configuration.getPopulationType(), configuration.getSurveyAreaIds());
+				runI(configuration, scenario, configuration.getVicinityPopulationType(), configuration.getVicinityIds());
+			
+			}
 		
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException |
 				IllegalArgumentException | InvocationTargetException | NoSuchMethodException |
