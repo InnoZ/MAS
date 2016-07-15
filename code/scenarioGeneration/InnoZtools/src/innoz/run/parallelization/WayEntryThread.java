@@ -45,28 +45,19 @@ public final class WayEntryThread extends AlgoThread {
 							MGC.coordinate2Coord(lastTo)), this.networkCreator.getTransformation().transform(
 									MGC.coordinate2Coord(next)));
 
-					boolean inSurveyArea = true;
+					boolean inSurveyArea = false;
 					
 					com.vividsolutions.jts.geom.Point lastPoint = this.networkCreator.getGeomFactory().createPoint(lastTo);
 					com.vividsolutions.jts.geom.Point nextPoint = this.networkCreator.getGeomFactory().createPoint(next);
 					
 					// If the coordinates are contained in the survey area, add a new link to the network
-					if(!this.networkCreator.getBufferedArea().contains(lastPoint) && !this.networkCreator.getBufferedArea().contains(nextPoint)){
+					if(this.networkCreator.getBufferedArea().contains(lastPoint) || this.networkCreator.getBufferedArea().contains(nextPoint)){
 						
-						inSurveyArea = false;
+						inSurveyArea = true;
 						
 					}
 					
-					String adminUnitId = null;
-					
-					for(AdministrativeUnit au : this.networkCreator.getGeoinformation().getSubUnits().values()){
-						if(au.getGeometry().contains(lastPoint) || au.getGeometry().contains(nextPoint)){
-							adminUnitId = au.getId();
-							break;
-						}
-					}
-					
-					this.networkCreator.createLink(entry, length, lastTo, next, inSurveyArea, adminUnitId);
+					this.networkCreator.createLink(entry, length, lastTo, next, inSurveyArea);
 						
 					//Update last visited coordinate in the sequence
 					lastTo = next;

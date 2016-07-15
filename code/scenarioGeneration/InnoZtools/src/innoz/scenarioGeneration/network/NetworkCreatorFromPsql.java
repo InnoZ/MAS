@@ -406,8 +406,7 @@ public class NetworkCreatorFromPsql {
 	 * @param from The coordinate at the beginning of the link.
 	 * @param to The coordinate at the end of the link.
 	 */
-	public void createLink(WayEntry entry, double length, Coordinate from, Coordinate to, boolean inSurveyArea,
-			String adminUnitId){
+	public void createLink(WayEntry entry, double length, Coordinate from, Coordinate to, boolean inSurveyArea){
 		
 		HighwayDefaults defaults = this.highwayDefaults.get(entry.getHighwayTag());
 		
@@ -415,41 +414,11 @@ public class NetworkCreatorFromPsql {
 		// Else the way is simply skipped
 		if(defaults != null){
 
-			if(adminUnitId != null){
-
-				Integer lod = this.geoinformation.getAdminUnitById(adminUnitId).getNetworkDetail();
+			if(!inSurveyArea){
 				
-				if(lod != null){
+				if(defaults.hierarchyLevel > (this.levelOfDetail - 2)){
 					
-					if(defaults.hierarchyLevel > lod){
-						
-						return;
-						
-					}
-					
-				} else {
-
-					if(!inSurveyArea){
-						
-						if(defaults.hierarchyLevel > this.levelOfDetail - 2){
-							
-							return;
-							
-						}
-						
-					}
-					
-				}
-				
-			} else {
-
-				if(!inSurveyArea){
-					
-					if(defaults.hierarchyLevel > this.levelOfDetail - 2){
-						
-						return;
-						
-					}
+					return;
 					
 				}
 				
