@@ -16,7 +16,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.network.LinkImpl;
 import org.matsim.core.network.algorithms.NetworkCleaner;
-import org.matsim.core.network.algorithms.NetworkSimplifier;
+import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
@@ -31,8 +31,6 @@ import com.vividsolutions.jts.io.ParseException;
 
 import innoz.config.Configuration;
 import innoz.io.database.DatabaseReader;
-import innoz.run.parallelization.MultithreadedModule;
-import innoz.run.parallelization.WayEntryThread;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 
 /**
@@ -70,6 +68,9 @@ public class NetworkCreatorFromPsql {
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////	
 	private static AtomicInteger nodeCounter = new AtomicInteger(0);
 	private static AtomicInteger linkCounter = new AtomicInteger(0);
+	
+	private Map<String, OsmNodeEntry> nodes = new HashMap<>();
+	private Map<String, WayEntry> ways = new HashMap<>();
 	
 	private boolean scaleMaxSpeed = false;
 	private boolean cleanNetwork = false;
@@ -170,16 +171,16 @@ public class NetworkCreatorFromPsql {
 		}
 		
 		// Convert the way entries into a MATSim network
-		Set<WayEntry> entries = dbReader.readOsmRoads(this.configuration);
+		dbReader.readOsmRoads(this.configuration, ways, nodes);
 		this.bufferedArea = dbReader.getBufferedArea();
-		processWayEntries(entries);
+		processEntries();
 		
 		// Simplify the network if needed
-		if(this.simplifyNetworK) {
-			
-			new NetworkSimplifier().run(network);
-			
-		}
+//		if(this.simplifyNetworK) {
+//			
+//			new NetworkSimplifier().run(network);
+//			
+//		}
 		
 		// Clean the network to avoid dead ends during simulation (clustered network)
 		if(this.cleanNetwork){
@@ -316,97 +317,155 @@ public class NetworkCreatorFromPsql {
 	 * 
 	 * @param wayEntries The collection of entries for each OSM way.
 	 */
-	private void processWayEntries(Set<WayEntry> wayEntries){
+	private void processEntries(){
 		
 		this.gf = new GeometryFactory();
 		
-		MultithreadedModule module = new MultithreadedModule(configuration.getNumberOfThreads());
-		module.initThreads(WayEntryThread.class.getName(), this);
-		for(WayEntry entry : wayEntries){
-			module.handle(entry);
+		for(WayEntry entry : this.ways.values()){
+			
+			String highway = entry.getHighwayTag();
+			
+			if(highway != null && this.highwayDefaults.containsKey(highway)){
+
+				nodes.get(entry.getNodes().get(0)).incrementWays();
+				nodes.get(entry.getNodes().get(entry.getNodes().size()-1)).incrementWays();
+				
+				for(String id : entry.getNodes()){
+
+					OsmNodeEntry node = nodes.get(id);
+					node.incrementWays();
+						
+					boolean inSurveyArea = this.bufferedArea.contains(MGC.coord2Point(node.getCoord()));
+					int hierarchyLevel = inSurveyArea ? this.levelOfDetail : this.levelOfDetail - 2;
+				
+					if(this.highwayDefaults.get(entry.getHighwayTag()).hierarchyLevel <= hierarchyLevel){
+						
+						node.setUsed(true);
+						
+					}
+					
+				}
+				
+			}
+			
 		}
-		module.execute();
 		
-//		// Create a new geometry factory to create points for MATSim nodes
-//		// This makes it easier to perform methods like contains
-//		gf = new GeometryFactory();
-//		
-//		// Iterate over all OSM ways
-//		for(WayEntry entry : wayEntries){
-//
-//			// If access is restricted, we skip the way
-//			if("no".equals(entry.getAccessTag())) continue;
-//			
-//			Coordinate[] coordinates = entry.geometry.getCoordinates();
-//			
-//			if(coordinates.length > 1){
-//				
-//				// Set the from coordinate initially and the current way length to zero
-//				Coordinate from = coordinates[0];
-//				double length = 0.;
-//				Coordinate lastTo = from;
-//				
-//				// Go through all coordinates contained in the way
-//				for(int i = 1; i < coordinates.length; i++){
-//					
-//					// Get the next coordinate in the sequence and calculate the length between it and the last coordinate
-//					Coordinate next = coordinates[i];
-//					
-//					length = CoordUtils.calcEuclideanDistance(this.transformation.transform(
-//							MGC.coordinate2Coord(lastTo)), this.transformation.transform(
-//									MGC.coordinate2Coord(next)));
-//
-//					boolean inSurveyArea = true;
-//					
-//					com.vividsolutions.jts.geom.Point lastPoint = gf.createPoint(lastTo);
-//					com.vividsolutions.jts.geom.Point nextPoint = gf.createPoint(next);
-//					
-//					// If the coordinates are contained in the survey area, add a new link to the network
-//					if(!this.bufferedArea.contains(lastPoint) && !this.bufferedArea.contains(nextPoint)){
-////					if(!this.geoinformation.getSurveyAreaBoundingBox().contains(lastPoint) &&
-////							!this.geoinformation.getSurveyAreaBoundingBox().contains(nextPoint)){
-//						
-//						inSurveyArea = false;
-//						
-//					}
-//					
-//					String adminUnitId = null;
-//					
-//					for(AdministrativeUnit au : this.geoinformation.getSubUnits().values()){
-//						if(au.getGeometry().contains(lastPoint) || au.getGeometry().contains(nextPoint)){
-//							adminUnitId = au.getId();
-//							break;
-//						}
-//					}
-//						
-//					createLink(entry, length, lastTo, next, inSurveyArea, adminUnitId);
-//						
-//					//Update last visited coordinate in the sequence
-//					lastTo = next;
-//					
-//				}
-//				
-//			}
-//			
-//		}
+		if(this.simplifyNetworK){
+
+			for(OsmNodeEntry entry : this.nodes.values()){
+				
+				if(entry.getWays() == 1){
+					
+					entry.setUsed(false);
+					
+				}
+				
+			}
+			
+		}
+		
+		for(WayEntry entry : this.ways.values()){
+			
+			String highway = entry.getHighwayTag();
+			
+			if(highway != null && this.highwayDefaults.containsKey(highway)){
+				
+				int prevRealNodeIndex = 0;
+				OsmNodeEntry prevRealNode = this.nodes.get(entry.getNodes().get(prevRealNodeIndex));
+				
+				for (int i = 1; i < entry.getNodes().size(); i++) {
+					
+					OsmNodeEntry node = this.nodes.get(entry.getNodes().get(i));
+					
+					if(node.isUsed()){
+						
+						if(prevRealNode == node){
+							
+							double increment = Math.sqrt(i - prevRealNodeIndex);
+							double nextNodeToKeep = prevRealNodeIndex + increment;
+						
+							for (double j = nextNodeToKeep; j < i; j += increment) {
+								
+								int index = (int) Math.floor(j);
+								OsmNodeEntry intermediaryNode = this.nodes.get(entry.getNodes().get(index));
+								intermediaryNode.setUsed(true);
+								
+							}
+							
+						}
+						
+						prevRealNodeIndex = i;
+						prevRealNode = node;
+						
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+		for(OsmNodeEntry node : this.nodes.values()){
+			
+			if(node.isUsed()){
+				
+				Node nn = this.network.getFactory().createNode(Id.createNodeId(node.getId()), this.transformation.transform(node.getCoord()));
+				this.network.addNode(nn);
+				
+			}
+			
+		}
+		
+		for(WayEntry way : this.ways.values()){
+			
+			String highway = way.getHighwayTag();
+			
+			if(highway != null){
+				
+				OsmNodeEntry fromNode = this.nodes.get(way.getNodes().get(0));
+				double length = 0.0d;
+				OsmNodeEntry lastToNode = fromNode;
+				if(fromNode.isUsed()){
+					
+					for (int i = 1, n = way.getNodes().size(); i < n; i++) {
+						
+						OsmNodeEntry toNode = this.nodes.get(way.getNodes().get(i));
+						
+						if(toNode != lastToNode){
+							
+							length += CoordUtils.calcEuclideanDistance(this.transformation.transform(lastToNode.getCoord()),
+									this.transformation.transform(toNode.getCoord()));
+							
+							if(toNode.isUsed()){
+								
+								this.createLink(way, length, fromNode, toNode);
+								
+								fromNode = toNode;
+								length = 0.0;
+								
+							}
+							
+							lastToNode = toNode;
+							
+						}
+						
+					}
+					
+				}
+				
+			}
+			
+		}
 		
 		log.info("Conversion statistics:");
-		log.info("OSM ways:     " + wayEntries.size());
+		log.info("OSM nodes:    " + nodes.size());
+		log.info("OSM ways:     " + ways.size());
 		log.info("MATSim nodes: " + network.getNodes().size());
 		log.info("MATSim links: " + network.getLinks().size());
-		
+
 	}
-	
-	/**
-	 * 
-	 * The actual conversion from OSM into MATSim data.
-	 * 
-	 * @param entry The OSM way entry.
-	 * @param length The euclidean length of the link.
-	 * @param from The coordinate at the beginning of the link.
-	 * @param to The coordinate at the end of the link.
-	 */
-	public void createLink(WayEntry entry, double length, Coordinate from, Coordinate to, boolean inSurveyArea){
+		
+	public void createLink(WayEntry entry, double length, OsmNodeEntry fromNode, OsmNodeEntry toNode){
 		
 		HighwayDefaults defaults = this.highwayDefaults.get(entry.getHighwayTag());
 		
@@ -414,16 +473,6 @@ public class NetworkCreatorFromPsql {
 		// Else the way is simply skipped
 		if(defaults != null){
 
-			if(!inSurveyArea){
-				
-				if(defaults.hierarchyLevel > (this.levelOfDetail - 2)){
-					
-					return;
-					
-				}
-				
-			}
-			
 			//set all values to default
 			double freespeed = defaults.freespeed;
 			double freespeedFactor = defaults.freespeedFactor;
@@ -533,40 +582,20 @@ public class NetworkCreatorFromPsql {
 				
 			}
 
-			Node fromNode = null;
-			Node toNode = null;
-			
-			synchronized(coords2Nodes){
-
-				// If a node already exists at the from location, use it as from node, else create a new one
-				Coord fromCoord = this.transformation.transform(MGC.coordinate2Coord(from));
-				if(!coords2Nodes.containsKey(fromCoord)){
-					fromNode = createNode(fromCoord);
-					coords2Nodes.put(fromCoord, fromNode);
-				} else {
-					fromNode = coords2Nodes.get(fromCoord);
-				}
-				
-				// If a node already exists at the to location, use it as to node, else create a new one			
-				Coord toCoord = this.transformation.transform(MGC.coordinate2Coord(to));
-				if(!coords2Nodes.containsKey(toCoord)){
-					toNode = createNode(toCoord);
-					coords2Nodes.put(toCoord, toNode);
-				} else {
-					toNode = coords2Nodes.get(toCoord);
-				}
-				
-			}
-			
 			
 			String origId = entry.getOsmId();
 
 			synchronized(linkCounter){
+				
+				Id<Node> from = Id.createNodeId(fromNode.getId());
+				Id<Node> to = Id.createNodeId(toNode.getId());
+				
+				if(this.network.getNodes().get(from) != null && this.network.getNodes().get(to) != null){
 
 				// Create a link in one direction
 				if(!onewayReverse){
 					
-					Link link = network.getFactory().createLink(Id.createLinkId(linkCounter.get()), fromNode, toNode);
+					Link link = network.getFactory().createLink(Id.createLinkId(linkCounter.get()), this.network.getNodes().get(from), this.network.getNodes().get(to));
 					link.setCapacity(capacity);
 					link.setFreespeed(freespeed);
 					link.setLength(length);
@@ -587,7 +616,7 @@ public class NetworkCreatorFromPsql {
 				// If it's not a oneway link, create another link in the opposite direction
 				if(!oneway){
 					
-					Link link = network.getFactory().createLink(Id.createLinkId(linkCounter.get()), toNode, fromNode);
+					Link link = network.getFactory().createLink(Id.createLinkId(linkCounter.get()), this.network.getNodes().get(to), this.network.getNodes().get(from));
 					link.setCapacity(capacity);
 					link.setFreespeed(freespeed);
 					link.setLength(length);
@@ -606,11 +635,14 @@ public class NetworkCreatorFromPsql {
 				}
 				
 			}
-			
+				
 		}
-		
+
+		}
+			
 	}
-	
+		
+	/**
 	/**
 	 * 
 	 * Creates a new MATSim node.

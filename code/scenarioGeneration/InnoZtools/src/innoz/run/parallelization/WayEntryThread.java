@@ -8,7 +8,6 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
-import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.network.NetworkCreatorFromPsql;
 import innoz.scenarioGeneration.network.WayEntry;
 
@@ -57,7 +56,7 @@ public final class WayEntryThread extends AlgoThread {
 						
 					}
 					
-					this.networkCreator.createLink(entry, length, lastTo, next, inSurveyArea);
+//					this.networkCreator.createLink(entry, length, lastTo, next, inSurveyArea);
 						
 					//Update last visited coordinate in the sequence
 					lastTo = next;

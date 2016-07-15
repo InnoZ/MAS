@@ -8,10 +8,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.geotools.geometry.jts.JTS;
@@ -43,13 +41,14 @@ import innoz.config.Configuration.AdminUnitEntry;
 import innoz.config.Configuration.PopulationType;
 import innoz.io.database.datasets.OsmPointDataset;
 import innoz.io.database.datasets.OsmPolygonDataset;
-import innoz.run.parallelization.MultithreadedModule;
 import innoz.run.parallelization.BuildingThread;
 import innoz.run.parallelization.DataProcessingAlgoThread;
+import innoz.run.parallelization.MultithreadedModule;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.geoinformation.Building;
 import innoz.scenarioGeneration.geoinformation.District;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
+import innoz.scenarioGeneration.network.OsmNodeEntry;
 import innoz.scenarioGeneration.network.WayEntry;
 import innoz.scenarioGeneration.utils.ActivityTypes;
 
@@ -633,14 +632,15 @@ public class DatabaseReader {
 	 * @throws ClassNotFoundException
 	 * @throws ParseException
 	 */
-	public Set<WayEntry> readOsmRoads(final Configuration configuration) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException, ParseException{
+	public /*Set<WayEntry>*/void readOsmRoads(final Configuration configuration, final Map<String, WayEntry> wayEntries,
+			final Map<String, OsmNodeEntry> nodeEntries) throws SQLException, InstantiationException, IllegalAccessException,
+			ClassNotFoundException, ParseException{
 		
 		log.info("Reading osm ways from database...");
 		
-		// Initialize an empty set
-		Set<WayEntry> wayEntries = new HashSet<>();
-
-		// COnnect to the geodata database
+		Map<Coordinate, OsmNodeEntry> coordinates2Nodes = new HashMap<>();
+		
+		// Connect to the geodata database
 		Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
 		Connection connection = DriverManager.getConnection(DatabaseConstants.PSQL_URL + configuration.getLocalPort() + "/"
 				+ DatabaseConstants.GEODATA_DB, configuration.getDatabaseUsername(), configuration.getDatabasePassword());
@@ -661,6 +661,8 @@ public class DatabaseReader {
 					+ DatabaseConstants.ATT_WAY + "," + DatabaseConstants.functions.st_geomfromtext.name() + "('"
 					+ this.geoinformation.getCompleteGeometry().toString() + "',4326)) order by " + DatabaseConstants.ATT_OSM_ID + ";");
 			
+			int cnt = 0;
+			
 			while(result.next()){
 				
 				// Create a new way entry for each result and set its attributes according to the table entries
@@ -672,10 +674,40 @@ public class DatabaseReader {
 				entry.setLanesTag(result.getString(DatabaseConstants.TAG_LANES));
 				entry.setMaxspeedTag(result.getString(DatabaseConstants.TAG_MAXSPEED));
 				entry.setOnewayTag(result.getString(DatabaseConstants.ATT_ONEWAY));
-				entry.setGeometry(this.wktReader.read(result.getString(DatabaseConstants.functions.st_astext.name())));
-				wayEntries.add(entry);
+				
+				Geometry geom = this.wktReader.read(result.getString(DatabaseConstants.functions.st_astext.name()));
+				
+				if(geom.getCoordinates().length > 1){
+
+					for(Coordinate coordinate : geom.getCoordinates()){
+						
+						OsmNodeEntry nEntry = null;
+						
+						if(!coordinates2Nodes.containsKey(coordinate)){
+							
+							nEntry = new OsmNodeEntry(Integer.toString(coordinates2Nodes.size()), coordinate.x, coordinate.y);
+							coordinates2Nodes.put(coordinate, nEntry);
+							nodeEntries.put(nEntry.getId(), nEntry);
+							
+						} else {
+							cnt++;
+							nEntry = coordinates2Nodes.get(coordinate);
+							
+						}
+						
+						entry.getNodes().add(nEntry.getId());
+						
+					}
+					
+					entry.setGeometry(geom);
+					wayEntries.put(entry.getOsmId(), entry);
+					
+				}
 				
 			}
+			
+			System.out.println("reused nodes: " + cnt);
+			
 			
 			// After all road data is retrieved, close the statement and the connection.
 			result.close();
@@ -687,7 +719,7 @@ public class DatabaseReader {
 		
 		log.info("Done.");
 		
-		return wayEntries;
+//		return wayEntries;
 		
 	}
 	

@@ -1,5 +1,8 @@
 package innoz.scenarioGeneration.network;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
@@ -19,6 +22,8 @@ public class WayEntry{
 	private String maxspeedTag;
 	private String onewayTag;
 	Geometry geometry;
+	
+	private List<String> nodes = new ArrayList<>();
 
 	public WayEntry() {}
 
@@ -84,5 +89,9 @@ public class WayEntry{
 
 	public Geometry getGeometry() {
 		return geometry;
+	}
+	
+	public List<String> getNodes(){
+		return this.nodes;
 	}
 }
