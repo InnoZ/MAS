@@ -132,38 +132,42 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 	}
 	
 	void processBuildingDataset(OsmPolygonDataset dataset){
+	
+		synchronized (this.reader.getBuildingsQuadTree()) {
+			
+			if(dataset.getGeometry().isValid()){
 		
-		if(dataset.getGeometry().isValid()){
-
-			Building b = new Building(dataset.getGeometry());
-			String buildingType = getTypeOfBuilding(dataset.getBuildingKey());
-			
-			if(buildingType != null){
+				Building b = new Building(dataset.getGeometry());
+				String buildingType = getTypeOfBuilding(dataset.getBuildingKey());
 				
-				b.addActivityOption(buildingType);
+				if(buildingType != null){
+					
+					b.addActivityOption(buildingType);
+					
+				}
+				
+				if(dataset.getAmenityKey() != null){
+					
+					b.addActivityOption(getAmenityType(dataset.getAmenityKey()));
+					
+				}
+				
+				if(dataset.getLeisureKey()!= null){
+					b.addActivityOption(getAmenityType(dataset.getLeisureKey()));
+				}
+				
+				if(dataset.getShopKey()!= null){
+					
+					b.addActivityOption(getAmenityType(dataset.getShopKey()));
+					
+				}
+				
+				this.reader.getBuildingList().add(b);
+				this.reader.getBuildingsQuadTree().put(dataset.getGeometry().getCentroid().getX(),
+						dataset.getGeometry().getCentroid().getY(), b);
 				
 			}
-			
-			if(dataset.getAmenityKey() != null){
-				
-				b.addActivityOption(getAmenityType(dataset.getAmenityKey()));
-				
-			}
-			
-			if(dataset.getLeisureKey()!= null){
-				b.addActivityOption(getAmenityType(dataset.getLeisureKey()));
-			}
-			
-			if(dataset.getShopKey()!= null){
-				
-				b.addActivityOption(getAmenityType(dataset.getShopKey()));
-				
-			}
-			
-			this.reader.getBuildingList().add(b);
-			this.reader.getBuildingsQuadTree().put(dataset.getGeometry().getCentroid().getX(),
-					dataset.getGeometry().getCentroid().getY(), b);
-			
+		
 		}
 		
 	}
