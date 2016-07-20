@@ -107,7 +107,8 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 		Plan plan = population.getFactory().createPlan();
 		
 		Activity homeAct = population.getFactory().createActivityFromCoord(ActivityTypes.HOME, homeLocation);
-		homeAct.setEndTime(7 * 3600);
+		int start = 6 * 3600 + random.nextInt(10801);
+		homeAct.setEndTime(start);
 		plan.addActivity(homeAct);
 		
 		Leg firstLeg = population.getFactory().createLeg(TransportMode.car);
