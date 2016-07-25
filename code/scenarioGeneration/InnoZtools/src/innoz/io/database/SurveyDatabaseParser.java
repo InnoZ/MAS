@@ -429,7 +429,7 @@ public class SurveyDatabaseParser {
 				int p = Double.isNaN(purpose) ? 0 : (int)purpose;
 				String actType = handleActType(p, dp);
 				
-				if(actType != null){
+//				if(actType != null){
 
 					int id = plan.getPlanElements().size() + 1;
 					
@@ -489,7 +489,7 @@ public class SurveyDatabaseParser {
 							id += 2;
 						}
 						
-					}
+//					}
 					
 					counter++;
 						
@@ -631,7 +631,7 @@ public class SurveyDatabaseParser {
 
 			boolean licenseAndCarAvailabilitySet = false;
 			
-//			if(person.getPlans().size() < 1) return false;
+			if(person.getPlans().isEmpty()) return false;
 			
 			for(SurveyPlan plan : person.getPlans()){
 				
@@ -737,56 +737,6 @@ public class SurveyDatabaseParser {
 				
 				}
 				
-//				List<Subtour> subtours = createSubtours(plan);
-//				
-//				Set<Integer> breakpoints = new HashSet<>();
-//				
-//				for(Subtour subtour : subtours){
-//					
-//					breakpoints.add(subtour.startIndex);
-//					breakpoints.add(subtour.endIndex);
-//					
-//				}
-//				
-//				for(SurveyPlanElement pe : plan.getPlanElements()){
-//					if(pe instanceof SurveyPlanActivity){
-//						SurveyPlanActivity act = (SurveyPlanActivity)pe;
-//						if(act.getId() == plan.getMainActId()){
-//							breakpoints.add(plan.getPlanElements().indexOf(pe));
-//						}
-//					}
-//				}
-//				
-//				List<Integer> breakpointsList = new ArrayList<>();
-//				breakpointsList.addAll(breakpoints);
-//				Collections.sort(breakpointsList);
-//				
-//				for(int i = 0; i < breakpointsList.size() - 1; i++){
-//					
-//					SurveyPlanActivity act1 = (SurveyPlanActivity) plan.getPlanElements().get(breakpointsList.get(i));
-//					SurveyPlanActivity act2 = (SurveyPlanActivity) plan.getPlanElements().get(breakpointsList.get(i + 1));
-//
-//					Subtour subtour = new Subtour(breakpointsList.get(i), breakpointsList.get(i+1));
-//					
-//					if(act1.getActType().equals(act2.getActType())){
-//						
-//						subtour.type = subtourType.inter;
-//						plan.getSubtours().add(subtour);
-//						
-//					} else if(act2.getActType().equals(plan.getMainActType())){
-//						
-//						subtour.type = subtourType.forth;
-//						plan.getSubtours().add(subtour);
-//
-//					} else if(act1.getActType().equals(plan.getMainActType())){
-//
-//						subtour.type = subtourType.back;
-//						plan.getSubtours().add(subtour);
-//
-//					}
-//					
-//				}
-				
 			}
 			
 		}
@@ -807,78 +757,6 @@ public class SurveyDatabaseParser {
 		
 	}
 	
-//	private List<Subtour> createSubtours(SurveyPlan plan){
-//		
-//		List<Subtour> subtours = new ArrayList<>();
-//		
-//		if(plan.getPlanElements().size() > 1){
-//			
-//			List<Integer> originIds = new ArrayList<>();
-//			
-//			Integer destinationId = null;
-//			
-//			for(SurveyPlanElement pe : plan.getPlanElements()){
-//				
-//				if(pe instanceof SurveyPlanTrip){
-//					
-//					SurveyPlanActivity from = (SurveyPlanActivity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)-1);
-//					
-//					SurveyPlanActivity to = (SurveyPlanActivity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)+1);
-//					
-//					originIds.add(from.getId());
-//					originIds.add(null);
-//					
-//					destinationId = to.getId();
-//					
-//					if(originIds.contains(destinationId)){
-//						
-//						subtours.add(new Subtour(originIds.lastIndexOf(destinationId), originIds.size()));
-//						
-//						for(int i = originIds.lastIndexOf(destinationId); i < originIds.size(); i++){
-//							originIds.set(i, null);
-//						}
-//						
-//					} else if(plan.getPlanElements().indexOf(pe) >= plan.getPlanElements().size() - 2){
-//						
-//						subtours.add(new Subtour(0, originIds.size()));
-//						
-//					}
-//					
-//				}
-//				
-//			}
-//			
-//		}
-//		
-//		return subtours;
-//		
-//	}
-//	
-//	public static class Subtour{
-//		
-//		private subtourType type;
-//		private int startIndex;
-//		private int endIndex;
-//		
-//		enum subtourType{back,forth,inter};
-//		
-//		Subtour(int from, int to){this.startIndex=from;this.endIndex=to;}
-//		@Override
-//		public String toString(){
-//			return ("[" + startIndex + "," + endIndex + "], type: " + this.type.name());
-//		}
-//		public int getStartIndex(){
-//			return this.startIndex;
-//		}
-//		public int getEndIndex(){
-//			return this.endIndex;
-//		}
-//		public subtourType getType(){
-//			return type;
-//		}
-//		
-//	}
-	
 	private String handleActType(int idx, int idxD){
 		
 		if(this.constants.getNamespace().equalsIgnoreCase("mid")){
@@ -895,56 +773,89 @@ public class SurveyDatabaseParser {
 	
 	private String handleMiDActType(int idx, int idxD){
 	
-		switch(idx){
+		String actType = null;
 		
-			case 1: return ActivityTypes.WORK;
-			case 3: return ActivityTypes.EDUCATION;
-			case 4: return handleActTypeDetailed(idxD); //shopping
-			case 6:	
-			case 11: return null;
-			case 7: return handleActTypeDetailed(idxD); //leisure
-			case 8: return ActivityTypes.HOME;
-			case 9: return "return";
-			case 32: return ActivityTypes.KINDERGARTEN;
-			default: return handleActTypeDetailed(idxD); //other
-	
+		if(idx == 1){
+			
+			actType = ActivityTypes.WORK;
+			
+		} else if(idx == 3){
+			
+			actType = ActivityTypes.EDUCATION;
+			
+		} else if(idx == 4){
+			
+			actType = ActivityTypes.SHOPPING;
+			
+			if(idxD == 501){
+				
+				actType = ActivityTypes.SUPPLY;
+				
+			} else if(idxD == 504){
+				
+				actType = ActivityTypes.SERVICE;
+				
+			}
+			
+		} else if(idx == 5){
+			
+			actType = ActivityTypes.ERRAND;
+			
+		} else if(idx == 7){
+			
+			actType = ActivityTypes.LEISURE;
+			
+			if(idxD == 702){
+				
+				actType = ActivityTypes.CULTURE;
+				
+			} else if(idxD == 703){
+				
+				actType = ActivityTypes.EVENT;
+				
+			} else if(idxD == 704){
+				
+				actType = ActivityTypes.SPORTS;
+				
+			} else if(idxD == 705){
+				
+				actType = ActivityTypes.FURTHER;
+				
+			} else if(idxD == 706){
+				
+				actType = ActivityTypes.EATING;
+				
+			}
+			
+		} else if(idx == 8){
+			
+			actType = ActivityTypes.HOME;
+			
+		} else if(idx == 9){
+			
+			actType = "return";
+			
+		} else if(idx == 31){
+			
+			actType = ActivityTypes.EDUCATION;
+			
+		} else if(idx == 32){
+			
+			actType = ActivityTypes.KINDERGARTEN;
+			
+		} else {
+			
+			actType = ActivityTypes.OTHER;
+			
+			if(idxD == 601){
+				
+				actType = ActivityTypes.HEALTH;
+				
+			}
+			
 		}
 		
-	}
-	
-	private String handleActTypeDetailed(int idx){
-		
-		switch(idx){
-
-			case 501: return ActivityTypes.SUPPLY;
-			case 504: return ActivityTypes.SERVICE;
-			case 502:
-			case 503:
-			case 505: return ActivityTypes.SHOPPING;
-			case 601: return ActivityTypes.HEALTH;
-			case 602: 
-			case 603: return ActivityTypes.ERRAND;
-			case 702: return ActivityTypes.CULTURE;
-			case 703: return ActivityTypes.EVENT;
-			case 704: return ActivityTypes.SPORTS;
-			case 705: return ActivityTypes.FURTHER;
-			case 706: return ActivityTypes.EATING;
-			case 701:
-			case 707:
-			case 710:
-			case 712:
-			case 713:
-			case 714:
-			case 715:
-			case 716:
-			case 717:
-			case 718:
-			case 719:
-			case 720:
-			case 799: return ActivityTypes.LEISURE;
-			default: return ActivityTypes.OTHER;
-		
-		}
+		return actType;
 		
 	}
 	
