@@ -75,7 +75,7 @@ public class PopulationCreator {
 		
 		try {
 			
-			if(!configuration.getPopulationType().equals(PopulationType.none) &&
+			if(!configuration.getPopulationType().equals(PopulationType.none) ||
 					!configuration.getVicinityPopulationType().equals(PopulationType.none)){
 				
 				// Create the coordinate transformation for all of the geometries
