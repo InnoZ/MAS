@@ -428,72 +428,76 @@ public class SurveyDatabaseParser {
 				int dp = Double.isNaN(detailedPurpose) ? 0 : (int)detailedPurpose;
 				int p = Double.isNaN(purpose) ? 0 : (int)purpose;
 				String actType = handleActType(p, dp);
+				
+				if(actType != null){
 
-				int id = plan.getPlanElements().size() + 1;
-				
-				if(actType.equals(ActivityTypes.HOME)){
-					if(!plan.homeIndexIsSet()){
-						plan.setHomeIndex(id);
-					} else{
-						id = plan.getHomeIndex();
+					int id = plan.getPlanElements().size() + 1;
+					
+					if(actType.equals(ActivityTypes.HOME)){
+						if(!plan.homeIndexIsSet()){
+							plan.setHomeIndex(id);
+						} else{
+							id = plan.getHomeIndex();
+						}
 					}
-				}
 
-				//if it's a return leg, set the act type according to the act type
-				// before the last activity
-				if(actType.equals("return")){
-				
-					if(plan.getPlanElements().size() > 2){
-						
-						actType = ((SurveyPlanActivity)plan.getPlanElements().get(plan.getPlanElements()
-								.size() - 3)).getActType();
-						id -= 2;
-						
-					} else{
-						
-						actType = ActivityTypes.HOME;
-						plan.setHomeIndex(id);
-						
-					}
+					//if it's a return leg, set the act type according to the act type
+					// before the last activity
+					if(actType.equals("return")){
 					
-				}
-				
-				double endPoint = set.getDouble(this.constants.waySink());
-				
-				//if it's a round-based trip, the act types at origin and destination equal
-				if(endPoint == 5){
-					
-//					addRoundBasedWayAndActivity(plan, way, currentWayIdx, actType, id);
-					//ignore it for now since round-trips cause some problems...
-					
-				} else {
-					
-					if(endPoint == 1){
-						
-						actType = ActivityTypes.HOME;
-						plan.setHomeIndex(id);
+						if(plan.getPlanElements().size() > 2){
+							
+							actType = ((SurveyPlanActivity)plan.getPlanElements().get(plan.getPlanElements()
+									.size() - 3)).getActType();
+							id -= 2;
+							
+						} else{
+							
+							actType = ActivityTypes.HOME;
+							plan.setHomeIndex(id);
+							
+						}
 						
 					}
 					
-					if(!container.getActivityTypeHydrographs().containsKey(actType)){
-						container.getActivityTypeHydrographs().put(actType, new Hydrograph(actType));
-					}
-					if(!Double.isNaN(startHour)){
-						container.getActivityTypeHydrographs().get(actType).handleEntry(startHour, 1);
-					}
+					double endPoint = set.getDouble(this.constants.waySink());
 					
-					addWayAndActivity(plan, way, actType, id, container);
+					//if it's a round-based trip, the act types at origin and destination equal
 					if(endPoint == 5){
-						id += 2;
+						
+//						addRoundBasedWayAndActivity(plan, way, currentWayIdx, actType, id);
+						//ignore it for now since round-trips cause some problems...
+						
+					} else {
+						
+						if(endPoint == 1){
+							
+							actType = ActivityTypes.HOME;
+							plan.setHomeIndex(id);
+							
+						}
+						
+						if(!container.getActivityTypeHydrographs().containsKey(actType)){
+							container.getActivityTypeHydrographs().put(actType, new Hydrograph(actType));
+						}
+						if(!Double.isNaN(startHour)){
+							container.getActivityTypeHydrographs().get(actType).handleEntry(startHour, 1);
+						}
+						
+						addWayAndActivity(plan, way, actType, id, container);
+						if(endPoint == 5){
+							id += 2;
+						}
+						
 					}
 					
-				}
+					counter++;
+						
+					lastWayIdx = currentWayIdx;
+					lastPersonId = person.getId();
 				
-				counter++;
+				}
 					
-				lastWayIdx = currentWayIdx;
-				lastPersonId = person.getId();
-			
 			}
 			
 		}
@@ -896,6 +900,8 @@ public class SurveyDatabaseParser {
 			case 1: return ActivityTypes.WORK;
 			case 3: return ActivityTypes.EDUCATION;
 			case 4: return handleActTypeDetailed(idxD); //shopping
+			case 6:	
+			case 11: return null;
 			case 7: return handleActTypeDetailed(idxD); //leisure
 			case 8: return ActivityTypes.HOME;
 			case 9: return "return";
@@ -1005,8 +1011,8 @@ public class SurveyDatabaseParser {
 	//		case "4": return Modes.MOTORCYCLE;
 			case "3": return TransportMode.ride;
 			case "4": return TransportMode.car;
-			default: return TransportMode.pt;
-	//		default: return TransportMode.other;
+			case "5": return TransportMode.pt;
+			default: return TransportMode.other;
 	
 		}
 		
