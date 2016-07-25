@@ -399,8 +399,14 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 					
 					if(mpe instanceof SurveyPlanActivity){
 						
-						plan.addActivity(createActivity(population, personTemplate, planTemplate, mpe, cellIds.get(actIndex)));
-						
+						Activity act = createActivity(population, personTemplate, planTemplate, mpe, cellIds.get(actIndex));
+						if(act == null){
+//							plan.addActivity(act);
+							plan.getPlanElements().remove(plan.getPlanElements().size()-1);
+							break;
+						}
+							
+						plan.addActivity(act);
 						actIndex++;
 						
 					} else {
@@ -416,8 +422,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				// If there is only one plan element, create a 24hrs home activity
 				Activity home = population.getFactory().createActivityFromCoord(ActivityTypes.HOME, homeCoord);
 				home.setMaximumDuration(24 * 3600);
-//				home.setStartTime(0);
-//				home.setEndTime(24 * 3600);
+				home.setStartTime(0);
+				home.setEndTime(24 * 3600);
 				plan.addActivity(home);
 				
 			}
@@ -427,8 +433,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			// If there is no plan for the survey person, create a 24hrs home activity
 			Activity home = population.getFactory().createActivityFromCoord(ActivityTypes.HOME, homeCoord);
 			home.setMaximumDuration(24 * 3600);
-//			home.setStartTime(0);
-//			home.setEndTime(24 * 3600);
+			home.setStartTime(0);
+			home.setEndTime(24 * 3600);
 			plan.addActivity(home);
 			
 		}
@@ -650,26 +656,31 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		activity.setStartTime(start);
 		activity.setEndTime(end);
 		
+		if(end - start < 900){
+			
+			// Set the activity duration to at least 1/4 hour if it's been reported shorter to avoid
+			// extremely negative scores
+			activity.setMaximumDuration(900);
+			activity.setEndTime(start + 900);
+			
+		} else{
+				
+			// Set the maximum duration according to the survey data
+			activity.setMaximumDuration(end - start);
+			
+		}
+		
 		// If the end time is set to zero (probably last activity) or after midnight, set it to midnight
 		if(end == 0 || end > Time.MIDNIGHT){
-		
-			activity.setMaximumDuration(end - start + Time.MIDNIGHT);
+			
 			activity.setEndTime(Time.MIDNIGHT);
+			activity.setMaximumDuration(Time.MIDNIGHT - start);
+					
+		}
 		
-		} else{
+		if(start > Time.MIDNIGHT){
 			
-			if(end - start < 900){
-			
-				// Set the activity duration to at least 1/4 hour if it's been reported shorter to avoid
-				// extremely negative scores
-				activity.setMaximumDuration(900);
-			
-			} else{
-				
-				// Set the maximum duration according to the survey data
-				activity.setMaximumDuration(end - start);
-				
-			}
+			return null;
 			
 		}
 		
