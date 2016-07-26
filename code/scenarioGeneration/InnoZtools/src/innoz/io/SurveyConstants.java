@@ -29,10 +29,12 @@ public class SurveyConstants {
 		
 		WID("wid", "wnr"),
 		WWEIGHT("w_gew", "gewicht_w"),
+		WDEPD("st_dat", ""),
 		WDEP("st_time", "e_beginn"),
 		WDEPH("st_std", "v_beginn_stunde"),
 		WDEPM("st_min", "v_beginn_minute"),
 		WARR("en_time", "e_ankunft"),
+		WARRD("en_dat", ""),
 		WARRH("en_std", "v_ankunft_stunde"),
 		WARRM("en_min", "v_ankunft_minute"),
 		WTD("wegkm_k", "v_laenge"),
@@ -215,6 +217,12 @@ public class SurveyConstants {
 		
 	}
 	
+	public String wayDepartureDay() {
+		
+		return SurveyConstant.WDEPD.getName(this.namespace);
+		
+	}
+	
 	public String wayDepartureHour(){
 		
 		return SurveyConstant.WDEPH.getName(this.namespace);
@@ -230,6 +238,12 @@ public class SurveyConstants {
 	public String wayArrival(){
 		
 		return SurveyConstant.WARR.getName(this.namespace);
+		
+	}
+	
+	public String wayArrivalDay() {
+		
+		return SurveyConstant.WARRD.getName(this.namespace);
 		
 	}
 	

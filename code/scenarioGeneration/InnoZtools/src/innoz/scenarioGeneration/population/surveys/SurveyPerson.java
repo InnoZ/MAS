@@ -1,9 +1,12 @@
 package innoz.scenarioGeneration.population.surveys;
 
-import innoz.io.SurveyConstants;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import innoz.io.SurveyConstants;
+import innoz.io.database.handler.Logbook;
 
 /**
  * 
@@ -33,7 +36,14 @@ public class SurveyPerson implements SurveyObject {
 	private boolean carsharingUser;
 	
 	private List<SurveyPlan> plans;
+	
+	private Map<Integer, Logbook> day2logbook;
 	/////////////////////////////////////////////////////////////////////////////////////////
+	
+	public SurveyPerson(){
+		this.day2logbook = new HashMap<Integer, Logbook>();
+		this.plans = new ArrayList<>();
+	};
 	
 	/**
 	 * 
@@ -77,6 +87,12 @@ public class SurveyPerson implements SurveyObject {
 		
 	}
 	
+	public void setId(String id){
+		
+		this.id = id;
+		
+	}
+	
 	/**
 	 * 
 	 * Getter for the person's identifier.
@@ -87,6 +103,10 @@ public class SurveyPerson implements SurveyObject {
 		return id;
 	}
 
+	public void setSex(String sex){
+		this.sex = sex;
+	}
+	
 	/**
 	 * 
 	 * Getter for the person's sex.
@@ -97,6 +117,10 @@ public class SurveyPerson implements SurveyObject {
 		return sex;
 	}
 
+	public void setAge(int age){
+		this.age = age;
+	}
+	
 	/**
 	 * 
 	 * Getter for the person's age.
@@ -157,6 +181,12 @@ public class SurveyPerson implements SurveyObject {
 	 */
 	public boolean isEmployed() {
 		return isEmployed;
+	}
+	
+	public void setEmployed(boolean b){
+		
+		this.isEmployed = b;
+		
 	}
 	
 	public boolean isCarsharingUser(){
@@ -252,6 +282,10 @@ public class SurveyPerson implements SurveyObject {
 	 */
 	public void incrementPlansWeight(double v){
 		this.weightOfAllPlans += v;
+	}
+	
+	public Map<Integer,Logbook> getLogbook(){
+		return this.day2logbook;
 	}
 	
 }

@@ -13,9 +13,8 @@ public class SurveyHousehold implements SurveyObject {
 	private final List<String> memberIds;
 	private final List<String> vehicleIds;
 	
-	public SurveyHousehold(String id){
+	public SurveyHousehold(){
 		
-		this.id = id;
 		this.memberIds = new ArrayList<String>();
 		this.vehicleIds = new ArrayList<String>();
 
@@ -24,6 +23,12 @@ public class SurveyHousehold implements SurveyObject {
 	public String getId(){
 		
 		return this.id;
+		
+	}
+	
+	public void setId(String id){
+		
+		this.id = id;
 		
 	}
 	

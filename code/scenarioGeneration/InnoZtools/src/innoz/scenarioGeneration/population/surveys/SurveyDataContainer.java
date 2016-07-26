@@ -1,11 +1,13 @@
 package innoz.scenarioGeneration.population.surveys;
 
 import innoz.config.Configuration;
+import innoz.scenarioGeneration.population.utils.HashGenerator;
 import innoz.scenarioGeneration.utils.Hydrograph;
 import innoz.utils.matsim.RecursiveStatsContainer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -52,6 +54,36 @@ public class SurveyDataContainer {
 		
 		this.regionType2Households = new HashMap<Integer, Set<String>>();
 		this.stateAndRegionType2HouseholdWeights = new HashMap<Integer, Double>();
+		
+	}
+	
+	public void addHousehold(SurveyHousehold household, int rtyp){
+		
+		this.households.put(household.getId(), household);
+		this.sumOfHouseholdWeights += household.getWeight();
+		
+		if(!this.regionType2Households.containsKey(rtyp)){
+			this.regionType2Households.put(rtyp, new HashSet<String>());
+		}
+		
+		this.regionType2Households.get(rtyp).add(household.getId());
+		
+	}
+	
+	public void addPerson(SurveyPerson person){
+		
+		this.persons.put(person.getId(), person);
+		this.sumOfPersonWeights += person.getWeight();
+		
+		String hash = HashGenerator.generateAgeGroupHash(person);
+		
+		if(!this.classifiedPersons.containsKey(hash)){
+			
+			this.classifiedPersons.put(hash, new ArrayList<>());
+			
+		}
+		
+		this.classifiedPersons.get(hash).add(person);
 		
 	}
 	
@@ -149,6 +181,24 @@ public class SurveyDataContainer {
 		
 		return this.stateAndRegionType2HouseholdWeights.get(rtyp);
 		
+	}
+	
+	public void removePerson(String id){
+		SurveyPerson p = this.persons.get(id);
+		if(p != null){
+			this.sumOfPersonWeights -= p.getWeight();
+		}
+		
+		this.persons.remove(id);
+	}
+	
+	public void removeHousehold(String id){
+		SurveyHousehold hh = this.households.get(id);
+		if(hh != null){
+			this.sumOfHouseholdWeights -= hh.getWeight();
+		}
+		
+		this.households.remove(id);
 	}
 	
 }

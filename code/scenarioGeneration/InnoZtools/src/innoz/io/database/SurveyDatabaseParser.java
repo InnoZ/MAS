@@ -166,24 +166,26 @@ public class SurveyDatabaseParser {
 		while(set.next()){
 			
 			String hhId = set.getString(this.constants.householdId());
-			SurveyHousehold hh = new SurveyHousehold(hhId);
+			SurveyHousehold hh = new SurveyHousehold();
+			hh.setId(hhId);
 			
 			hh.setWeight(set.getDouble(this.constants.householdWeight()));
 			
 			double income = set.getDouble(this.constants.householdIncomePerMonth());
 			hh.setIncome(handleHouseholdIncome(income));
-			
-			container.getHouseholds().put(hhId, hh);
-			container.incrementSumOfHouseholdWeigtsBy(hh.getWeight());
-			
-//			int bland = set.getInt(this.constants.bundesland());
+
 			int rtyp = this.constants.getNamespace().equals("mid") ? set.getInt(this.constants.regionType()) : 3;
 			
-			if(container.getHouseholdsForRegionType(rtyp) == null){
-				container.getStateId2Households().put(rtyp, new HashSet<String>());
-			}
+			container.addHousehold(hh, rtyp);//getHouseholds().put(hhId, hh);
+//			container.incrementSumOfHouseholdWeigtsBy(hh.getWeight());
 			
-			container.getStateId2Households().get(rtyp).add(hhId);
+//			int bland = set.getInt(this.constants.bundesland());
+			
+//			if(container.getHouseholdsForRegionType(rtyp) == null){
+//				container.getStateId2Households().put(rtyp, new HashSet<String>());
+//			}
+//			
+//			container.getStateId2Households().get(rtyp).add(hhId);
 
 		}
 		
@@ -325,7 +327,7 @@ public class SurveyDatabaseParser {
 			query+=" where " + this.constants.dayOfTheWeek() + " < 6";
 		}
 		
-		query+=" and " + this.constants.wayTravelDistance() + " <> 'NaN' and " + this.constants.wayTravelTime() + " <> 'NaN' and "
+		query+= " and " + this.constants.wayTravelDistance() + " <> 'NaN' and " + this.constants.wayTravelTime() + " <> 'NaN' and "
 				+ this.constants.wayDeparture() + " <> 'NaN' and " + this.constants.wayArrival() + " <>'NaN' order by "
 				+ this.constants.householdId() + "," + this.constants.personId() + "," + this.constants.wayId() + ";";
 		
@@ -674,6 +676,8 @@ public class SurveyDatabaseParser {
 					} else {
 						
 						SurveyPlanTrip way = (SurveyPlanTrip)pe;
+						
+						if(way.getStartTime() > way.getEndTime()) return false;
 						
 						if(way.getTravelDistance() > plan.getLongestLeg()){
 							plan.setLongestLeg(way.getTravelDistance());
