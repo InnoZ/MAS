@@ -9,6 +9,7 @@ code/scenarioGeneration/InnoZtools/.gitignore
 code/scenarioGeneration/InnoZtools/.settings
 #ingore build files from jar generation
 libraries/build/*
+libraries/*.zip
 # ignore temp files:
 *~
 # ignore local documentation
