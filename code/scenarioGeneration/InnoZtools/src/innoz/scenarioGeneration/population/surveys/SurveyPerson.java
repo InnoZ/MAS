@@ -14,7 +14,7 @@ import java.util.List;
  * @author dhosse
  *
  */
-public class SurveyPerson {
+public class SurveyPerson implements SurveyObject {
 
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	private String id;
