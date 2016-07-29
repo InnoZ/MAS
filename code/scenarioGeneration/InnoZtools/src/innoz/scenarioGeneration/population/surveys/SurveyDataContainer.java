@@ -201,4 +201,16 @@ public class SurveyDataContainer {
 		this.households.remove(id);
 	}
 	
+	public void handleNewModeEntry(String mode, double distance){
+	
+		if(!this.modeStatsContainer.containsKey(mode)){
+			
+			this.modeStatsContainer.put(mode, new RecursiveStatsContainer());
+			
+		}
+		
+		this.modeStatsContainer.get(mode).handleNewEntry(distance);
+		
+	}
+	
 }

@@ -68,7 +68,9 @@ public class SurveyDatabaseParserV2 {
 					log.info("Creating survey households...");
 					
 					new ReadHouseholdDatabaseTask(constants, geoinformation).parse(connection, configuration.isUsingHouseholds(),
-						configuration.isOnlyUsingWorkingDays(), container);;
+						configuration.isOnlyUsingWorkingDays(), container);
+						
+					log.info("Read " + container.getHouseholds().size() + " households...");
 					
 				}
 				
@@ -316,6 +318,11 @@ public class SurveyDatabaseParserV2 {
 					trip.setStartTime(Double.parseDouble(stage.getStartTime()));
 					trip.setEndTime(Double.parseDouble(stage.getEndTime()));
 					plan.getPlanElements().add(trip);
+					
+					Double distance = trip.getTravelDistance();
+					if(distance != null){
+						container.handleNewModeEntry(trip.getMainMode(), distance);
+					}
 					
 					String actType = stage.getPurpose();
 					SurveyPlanActivity act = new SurveyPlanActivity(actType);
