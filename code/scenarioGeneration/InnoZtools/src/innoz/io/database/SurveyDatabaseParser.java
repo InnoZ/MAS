@@ -6,8 +6,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -17,6 +20,10 @@ import org.matsim.core.utils.misc.Time;
 
 import innoz.config.Configuration;
 import innoz.io.SurveyConstants;
+import innoz.io.database.handler.DefaultHandler;
+import innoz.io.database.handler.HouseholdIdHandler;
+import innoz.io.database.handler.HouseholdIncomeHandler;
+import innoz.io.database.handler.HouseholdWeightHandler;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
 import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
@@ -163,30 +170,29 @@ public class SurveyDatabaseParser {
 		
 		ResultSet set = statement.executeQuery(q);
 		
+		List<DefaultHandler> householdHandlers = new ArrayList<>();
+		householdHandlers.add(new HouseholdIdHandler());
+		householdHandlers.add(new HouseholdIncomeHandler());
+		householdHandlers.add(new HouseholdWeightHandler());
+		
 		while(set.next()){
 			
-			String hhId = set.getString(this.constants.householdId());
+			Map<String, String> attributes = new HashMap<>();
+			attributes.put(this.constants.householdId(), set.getString(this.constants.householdId()));
+			attributes.put(this.constants.householdIncomePerMonth(), Double.toString(set.getDouble(this.constants
+					.householdIncomePerMonth())));
+			
 			SurveyHousehold hh = new SurveyHousehold();
-			hh.setId(hhId);
 			
-			hh.setWeight(set.getDouble(this.constants.householdWeight()));
+			for(DefaultHandler handler : householdHandlers){
+				
+				handler.handle(hh, attributes);
+				
+			}
 			
-			double income = set.getDouble(this.constants.householdIncomePerMonth());
-			hh.setIncome(handleHouseholdIncome(income));
-
 			int rtyp = this.constants.getNamespace().equals("mid") ? set.getInt(this.constants.regionType()) : 3;
+			container.addHousehold(hh, rtyp);
 			
-			container.addHousehold(hh, rtyp);//getHouseholds().put(hhId, hh);
-//			container.incrementSumOfHouseholdWeigtsBy(hh.getWeight());
-			
-//			int bland = set.getInt(this.constants.bundesland());
-			
-//			if(container.getHouseholdsForRegionType(rtyp) == null){
-//				container.getStateId2Households().put(rtyp, new HashSet<String>());
-//			}
-//			
-//			container.getStateId2Households().get(rtyp).add(hhId);
-
 		}
 		
 		set.close();
@@ -485,8 +491,8 @@ public class SurveyDatabaseParser {
 						if(!Double.isNaN(startHour)){
 							container.getActivityTypeHydrographs().get(actType).handleEntry(startHour, 1);
 						}
-						
-						addWayAndActivity(plan, way, actType, id, container);
+						boolean inHomeCell = endPoint > 2;
+						addWayAndActivity(plan, way, actType, id, container, inHomeCell);
 						if(endPoint == 5){
 							id += 2;
 						}
@@ -495,10 +501,10 @@ public class SurveyDatabaseParser {
 					
 					counter++;
 						
+				}
+					
 					lastWayIdx = currentWayIdx;
 					lastPersonId = person.getId();
-				
-				}
 					
 			}
 			
@@ -551,7 +557,8 @@ public class SurveyDatabaseParser {
 		
 	}
 	
-	private void addWayAndActivity(SurveyPlan plan, SurveyPlanTrip way, String actType, int id, SurveyDataContainer container) throws SQLException{
+	private void addWayAndActivity(SurveyPlan plan, SurveyPlanTrip way, String actType, int id, SurveyDataContainer container,
+			boolean inHomeCell) throws SQLException{
 		
 		SurveyPlanActivity activity = new SurveyPlanActivity(actType);
 		
@@ -571,6 +578,7 @@ public class SurveyDatabaseParser {
 		activity.setStartTime(way.getEndTime());
 		activity.setPriority(this.setActPriority(actType));
 		activity.setId(id);
+		activity.setInHomeCell(inHomeCell);
 		
 		//add current way and activity
 		plan.getPlanElements().add(way);
