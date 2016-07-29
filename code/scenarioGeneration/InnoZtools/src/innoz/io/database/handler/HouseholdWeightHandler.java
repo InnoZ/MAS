@@ -12,9 +12,13 @@ public class HouseholdWeightHandler implements DefaultHandler {
 
 		SurveyHousehold hh = (SurveyHousehold)obj;
 		
-		double w = Double.parseDouble(attributes.get("hh_gew"));
+		String w = attributes.get("hh_gew");
 		
-		hh.setWeight(w);
+		if(w != null){
+			
+			hh.setWeight(Double.parseDouble(w));
+			
+		}
 		
 	}
 
