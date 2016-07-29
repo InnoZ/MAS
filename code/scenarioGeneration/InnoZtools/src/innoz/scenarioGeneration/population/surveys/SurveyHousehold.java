@@ -8,7 +8,7 @@ public class SurveyHousehold implements SurveyObject {
 	private String id;
 	
 	private double hhIncome;
-	private double weight;
+	private Double weight;
 	
 	private final List<String> memberIds;
 	private final List<String> vehicleIds;
@@ -66,11 +66,11 @@ public class SurveyHousehold implements SurveyObject {
 		return this.vehicleIds;
 	}
 
-	public double getWeight() {
+	public Double getWeight() {
 		return weight;
 	}
 
-	public void setWeight(double weight) {
+	public void setWeight(Double weight) {
 		this.weight = weight;
 	}
 	

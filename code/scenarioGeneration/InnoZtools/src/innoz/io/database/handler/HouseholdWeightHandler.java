@@ -18,6 +18,10 @@ public class HouseholdWeightHandler implements DefaultHandler {
 			
 			hh.setWeight(Double.parseDouble(w));
 			
+		} else {
+			
+			hh.setWeight(null);
+			
 		}
 		
 	}

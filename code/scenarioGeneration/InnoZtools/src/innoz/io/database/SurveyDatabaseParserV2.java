@@ -213,14 +213,21 @@ public class SurveyDatabaseParserV2 {
 				continue;
 			}
 			int size = hh.getMemberIds().size();
+			Set<String> idsToRemove = new HashSet<>();
 			for(String id : hh.getMemberIds()){
 				if(container.getPersons().get(id) == null){
+					idsToRemove.add(id);
 					size--;
 				}
 			}
+			hh.getMemberIds().removeAll(idsToRemove);
 			if(size <= 0){
 				hhToRemove.add(hh.getId());
 			}
+			
+			if(hh.getWeight() == null)
+				hhToRemove.add(hh.getId());
+			
 		}
 		for(String id : hhToRemove){
 			container.removeHousehold(id);

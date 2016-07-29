@@ -81,6 +81,7 @@ public class ReadHouseholdDatabaseTask extends DatabaseTask {
 			Map<String, String> attributes = new HashMap<>();
 			attributes.put(this.constants.householdId(), resultSet.getString(this.constants.householdId()));
 			attributes.put(this.constants.householdIncomePerMonth(), resultSet.getString(this.constants.householdIncomePerMonth()));
+			attributes.put(this.constants.householdWeight(), Double.toString(resultSet.getDouble(this.constants.householdWeight())));
 			int rtyp = resultSet.getInt(this.constants.regionType());
 			
 			SurveyHousehold hh = new SurveyHousehold();
