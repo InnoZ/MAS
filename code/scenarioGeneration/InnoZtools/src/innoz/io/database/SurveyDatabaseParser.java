@@ -24,6 +24,15 @@ import innoz.io.database.handler.DefaultHandler;
 import innoz.io.database.handler.HouseholdIdHandler;
 import innoz.io.database.handler.HouseholdIncomeHandler;
 import innoz.io.database.handler.HouseholdWeightHandler;
+import innoz.io.database.handler.PersonAgeHandler;
+import innoz.io.database.handler.PersonCarAvailabilityHandler;
+import innoz.io.database.handler.PersonEmploymentHandler;
+import innoz.io.database.handler.PersonGroupHandler;
+import innoz.io.database.handler.PersonIdHandler;
+import innoz.io.database.handler.PersonLicenseHandler;
+import innoz.io.database.handler.PersonLifephaseHandler;
+import innoz.io.database.handler.PersonSexHandler;
+import innoz.io.database.handler.PersonWeightHandler;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
 import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
@@ -33,7 +42,6 @@ import innoz.scenarioGeneration.population.surveys.SurveyPlanActivity;
 import innoz.scenarioGeneration.population.surveys.SurveyPlanElement;
 import innoz.scenarioGeneration.population.surveys.SurveyPlanTrip;
 import innoz.scenarioGeneration.population.surveys.SurveyVehicle;
-import innoz.scenarioGeneration.population.utils.HashGenerator;
 import innoz.scenarioGeneration.utils.ActivityTypes;
 import innoz.scenarioGeneration.utils.Hydrograph;
 import innoz.utils.matsim.RecursiveStatsContainer;
@@ -244,29 +252,44 @@ public class SurveyDatabaseParser {
 			
 		}
 		
+		List<DefaultHandler> personHandlers = new ArrayList<>();
+		personHandlers.add(new PersonIdHandler());
+		personHandlers.add(new PersonWeightHandler());
+		personHandlers.add(new PersonCarAvailabilityHandler());
+		personHandlers.add(new PersonLicenseHandler());
+		personHandlers.add(new PersonSexHandler());
+		personHandlers.add(new PersonAgeHandler());
+		personHandlers.add(new PersonEmploymentHandler());
+		personHandlers.add(new PersonGroupHandler());
+		personHandlers.add(new PersonLifephaseHandler());
+		
 		while(set.next()){
 			
 			String hhId = set.getString(this.constants.householdId());
-			String personId = set.getString(this.constants.personId());
-			double personWeight = set.getDouble(this.constants.personWeight());
-			String carAvail = set.getString(this.constants.personCarAvailability());
-			String license = set.getString(this.constants.personDrivingLicense());
-			String sex = set.getString(this.constants.personSex());
-			String age = set.getString(this.constants.personAge());
-			String employed = set.getString(this.constants.personEmployment());
 			
-			String carshare = "2";
-			if(this.constants.getNamespace().equalsIgnoreCase("srv")){
-				carshare = set.getString(this.constants.personIsCarsharingUser());
+			Map<String, String> attributes = new HashMap<>();
+			attributes.put(this.constants.personId(), hhId + set.getString(this.constants.personId()));
+			attributes.put(this.constants.personWeight(), Double.toString(set.getDouble(this.constants.personWeight())));
+			attributes.put(this.constants.personCarAvailability(), set.getString(this.constants.personCarAvailability()));
+			attributes.put(this.constants.personDrivingLicense(), set.getString(this.constants.personDrivingLicense()));
+			attributes.put(this.constants.personSex(), set.getString(this.constants.personSex()));
+			attributes.put(this.constants.personAge(), set.getString(this.constants.personAge()));
+			attributes.put(this.constants.personEmployment(), set.getString(this.constants.personEmployment()));
+			attributes.put(this.constants.personGroup(), Integer.toString(set.getInt(this.constants.personGroup())));
+			attributes.put(this.constants.personLifephase(), Integer.toString(set.getInt(this.constants.personLifephase())));
+			
+//			String carshare = "2";
+//			if(this.constants.getNamespace().equalsIgnoreCase("srv")){
+//				carshare = set.getString(this.constants.personIsCarsharingUser());
+//			}
+			
+			SurveyPerson person = new SurveyPerson();
+			
+			for(DefaultHandler handler : personHandlers){
+				
+				handler.handle(person, attributes);
+				
 			}
-			
-			int personGroup = this.constants.getNamespace().equalsIgnoreCase("mid") ? set.getInt(this.constants.personGroup()) : 0; //TODO
-			int phase = this.constants.getNamespace().equalsIgnoreCase("mid") ? set.getInt(this.constants.personLifephase()) : 0; //TODO
-			
-			SurveyPerson person = new SurveyPerson(hhId + personId, sex, age, carAvail, license, employed, this.constants, carshare);
-			person.setWeight(personWeight);
-			person.setPersonGroup(personGroup);
-			person.setLifePhase(phase);
 			
 			if(isUsingHouseholds){
 				
@@ -282,24 +305,7 @@ public class SurveyDatabaseParser {
 				
 			}
 			
-			if(!container.getPersons().containsKey(person.getId())){
-			
-				container.getPersons().put(person.getId(), person);
-				
-			}
-			
-			//generate person hash in order to classify the current person
-			String hash = HashGenerator.generateAgeGroupHash(person);
-			
-			if(!container.getPersonsByGroup().containsKey(hash)){
-				
-				container.getPersonsByGroup().put(hash, new ArrayList<SurveyPerson>());
-				
-			}
-			
-			container.getPersonsByGroup().get(hash).add(person);
-			
-			container.incrementSumOfPersonWeightsBy(personWeight);
+			container.addPerson(person);
 			
 		}
 		
@@ -962,31 +968,6 @@ public class SurveyDatabaseParser {
 			case "15": return TransportMode.pt;
 			case "16": //return Modes.TAXI;
 			default: return TransportMode.other;
-		
-		}
-		
-	}
-	
-	private double handleHouseholdIncome(double incomeIdx){
-		
-		switch((int)incomeIdx){
-		
-		case 1: return 250;
-		case 2: return 750;
-		case 3: return 1200;
-		case 4: return 1750;
-		case 5: return 2300;
-		case 6: return 2800;
-		case 7: return 3300;
-		case 8: return 3800;
-		case 9: return 4300;
-		case 10: return 4800;
-		case 11: return 5300;
-		case 12: return 5800;
-		case 13: return 6300;
-		case 14: return 6800;
-		case 15: return 7300;
-		default: return 0;
 		
 		}
 		
