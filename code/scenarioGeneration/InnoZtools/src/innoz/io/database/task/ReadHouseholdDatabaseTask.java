@@ -14,6 +14,7 @@ import innoz.io.SurveyConstants;
 import innoz.io.database.handler.DefaultHandler;
 import innoz.io.database.handler.HouseholdIdHandler;
 import innoz.io.database.handler.HouseholdIncomeHandler;
+import innoz.io.database.handler.HouseholdWeightHandler;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
 import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
@@ -30,6 +31,7 @@ public class ReadHouseholdDatabaseTask extends DatabaseTask {
 		this.handlers = new HashSet<>();
 		this.handlers.add(new HouseholdIdHandler());
 		this.handlers.add(new HouseholdIncomeHandler());
+		this.handlers.add(new HouseholdWeightHandler());
 		
 	}
 	

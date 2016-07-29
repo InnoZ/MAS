@@ -30,7 +30,7 @@ import org.matsim.vehicles.VehicleType;
 import com.vividsolutions.jts.geom.Geometry;
 
 import innoz.config.Configuration;
-import innoz.io.database.SurveyDatabaseParser;
+import innoz.io.database.SurveyDatabaseParserV2;
 import innoz.scenarioGeneration.geoinformation.AdministrativeUnit;
 import innoz.scenarioGeneration.geoinformation.Distribution;
 import innoz.scenarioGeneration.geoinformation.District;
@@ -75,7 +75,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	private void createCompletePopulation(Configuration configuration, String ids){
 		
 		// Run the survey data parser that stores all of the travel information
-		SurveyDatabaseParser parser = new SurveyDatabaseParser();
+		SurveyDatabaseParserV2 parser = new SurveyDatabaseParserV2();
 		SurveyDataContainer container = new SurveyDataContainer(configuration);
 		parser.run(configuration, container, this.geoinformation);
 		
