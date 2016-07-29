@@ -504,7 +504,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
 				SurveyPlanActivity act = (SurveyPlanActivity)pe;
 				
-				if(act.getActType().equals(ActivityTypes.HOME)){
+				if(act.getActType().equals(ActivityTypes.HOME)){// || act.isInHomeCell()){
 					
 					next = this.currentHomeCell;
 					
@@ -515,8 +515,10 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				} else {
 					
 					if(lastWay != null){
+						
 						next = locateActivityInCell(lastTo.getId(), act.getActType(),
 								lastWay.getMainMode(), person);
+						
 					}
 					
 				}
@@ -585,6 +587,9 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		// Initialize the activity type and the start and end time
 		SurveyPlanActivity act = (SurveyPlanActivity)mpe;
 		String type = act.getActType();
+		if(type.equals(ActivityTypes.EDUCATION) && personTemplate.getAge() > 18){
+			type = ActivityTypes.UNIVERSITY;
+		}
 		double start = act.getStartTime();
 		double end = act.getEndTime();
 		

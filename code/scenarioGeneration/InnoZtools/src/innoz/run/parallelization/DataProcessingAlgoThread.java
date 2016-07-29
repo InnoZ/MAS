@@ -176,6 +176,9 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 		
 		if(OsmKey2ActivityType.education.contains(tag)){
 			
+			if("university".equals(tag) || "college".equals(tag))
+				return ActivityTypes.UNIVERSITY;
+			
 			return ActivityTypes.EDUCATION;
 			
 		} else if(OsmKey2ActivityType.groceryShops.contains(tag) || OsmKey2ActivityType.miscShops.contains(tag) ||

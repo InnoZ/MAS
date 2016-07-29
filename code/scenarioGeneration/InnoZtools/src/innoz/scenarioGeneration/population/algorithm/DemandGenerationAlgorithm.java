@@ -214,6 +214,7 @@ public abstract class DemandGenerationAlgorithm {
 			
 			adminUnits = new HashSet<AdministrativeUnit>();
 			adminUnits.addAll(this.geoinformation.getSubUnits().values());
+//			adminUnits.remove(this.currentHomeCell);
 			
 		}
 		
