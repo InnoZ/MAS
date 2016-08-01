@@ -4,6 +4,6 @@ import innoz.io.database.handler.Logbook;
 
 public interface Validator {
 	
-	void validate(Logbook logbook);
+	boolean validate(Logbook logbook);
 
 }

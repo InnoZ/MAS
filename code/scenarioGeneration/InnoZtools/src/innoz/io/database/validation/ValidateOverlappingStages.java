@@ -5,7 +5,7 @@ import innoz.io.database.handler.Logbook;
 public class ValidateOverlappingStages implements Validator {
 
 	@Override
-	public void validate(Logbook logbook){
+	public boolean validate(Logbook logbook){
 		
 		for(int i = 1; i < logbook.getStages().size(); i++){
 
@@ -20,13 +20,15 @@ public class ValidateOverlappingStages implements Validator {
 				if(startTime < endTime){
 					
 					logbook.setDelete(true);
-					return;
+					return false;
 					
 				}
 				
 			}
 			
 		}
+		
+		return true;
 		
 	}
 	

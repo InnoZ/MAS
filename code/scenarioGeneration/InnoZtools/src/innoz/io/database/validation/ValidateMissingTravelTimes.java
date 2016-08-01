@@ -6,7 +6,7 @@ import innoz.io.database.handler.SurveyStage;
 public class ValidateMissingTravelTimes implements Validator {
 
 	@Override
-	public void validate(Logbook logbook) {
+	public boolean validate(Logbook logbook) {
 
 		for(SurveyStage stage : logbook.getStages()){
 
@@ -15,10 +15,12 @@ public class ValidateMissingTravelTimes implements Validator {
 			
 			if(start == null || end == null){
 				logbook.setDelete(true);
-				return;
+				return false;
 			}
 			
 		}
+		
+		return true;
 		
 	}
 

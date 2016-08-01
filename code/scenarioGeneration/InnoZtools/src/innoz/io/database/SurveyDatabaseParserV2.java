@@ -17,6 +17,7 @@ import innoz.io.database.task.ReadPersonDatabaseTask;
 import innoz.io.database.task.ReadWayDatabaseTask;
 import innoz.io.database.task.ResolveRoundTripsTask;
 import innoz.io.database.task.SortStagesTask;
+import innoz.io.database.task.TaskRunner;
 import innoz.io.database.validation.ValidateMissingTravelTimes;
 import innoz.io.database.validation.ValidateNegativeTravelTimes;
 import innoz.io.database.validation.ValidateOverlappingStages;
@@ -115,8 +116,6 @@ public class SurveyDatabaseParserV2 {
 	
 	private void process(SurveyDataContainer container){
 		
-		Set<Logbook> toRemove;
-		
 		SortStagesTask task1 = new SortStagesTask();
 		
 		for(SurveyPerson person : container.getPersons().values()){
@@ -129,62 +128,9 @@ public class SurveyDatabaseParserV2 {
 			
 		}
 		
-		ValidateMissingTravelTimes vmtt = new ValidateMissingTravelTimes();
-		
-		for(SurveyPerson person : container.getPersons().values()){
-		
-			toRemove = new HashSet<>();
-			
-			for(Logbook logbook : person.getLogbook().values()){
-			
-				vmtt.validate(logbook);
-				if(logbook.isDelete()) toRemove.add(logbook);
-			
-			}
-			
-			for(Logbook log : toRemove){
-				person.getLogbook().remove(log);
-			}
-		
-		}
-		
-		ValidateNegativeTravelTimes vntt = new ValidateNegativeTravelTimes();
-		
-		for(SurveyPerson person : container.getPersons().values()){
-		
-			toRemove = new HashSet<>();
-			
-			for(Logbook logbook : person.getLogbook().values()){
-			
-				vntt.validate(logbook);
-				if(logbook.isDelete()) toRemove.add(logbook);
-			
-			}
-			
-			for(Logbook log : toRemove){
-				person.getLogbook().remove(log);
-			}
-		
-		}
-		
-		ValidateOverlappingStages vos = new ValidateOverlappingStages();
-		
-		for(SurveyPerson person : container.getPersons().values()){
-		
-			toRemove = new HashSet<>();
-			
-			for(Logbook logbook : person.getLogbook().values()){
-			
-				vos.validate(logbook);
-				if(logbook.isDelete()) toRemove.add(logbook);
-		
-			}
-			
-			for(Logbook log : toRemove){
-				person.getLogbook().remove(log);
-			}
-			
-		}
+		TaskRunner.exec(new ValidateMissingTravelTimes(), container.getPersons().values());
+		TaskRunner.exec(new ValidateNegativeTravelTimes(), container.getPersons().values());
+		TaskRunner.exec(new ValidateOverlappingStages(), container.getPersons().values());
 		
 		Set<String> personsToRemove = new HashSet<>();
 		for(SurveyPerson person : container.getPersons().values()){
@@ -206,16 +152,14 @@ public class SurveyDatabaseParserV2 {
 				hhToRemove.add(hh.getId());
 				continue;
 			}
-			int size = hh.getMemberIds().size();
 			Set<String> idsToRemove = new HashSet<>();
 			for(String id : hh.getMemberIds()){
 				if(container.getPersons().get(id) == null){
 					idsToRemove.add(id);
-					size--;
 				}
 			}
 			hh.getMemberIds().removeAll(idsToRemove);
-			if(size <= 0){
+			if(hh.getMemberIds().size() <= 0){
 				hhToRemove.add(hh.getId());
 			}
 			
