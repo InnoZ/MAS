@@ -4,19 +4,18 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.TransportMode;
 
 import innoz.config.Configuration;
 import innoz.io.SurveyConstants;
 import innoz.io.database.handler.Logbook;
-import innoz.io.database.handler.SurveyStage;
+import innoz.io.database.task.ConvertToPlansTask;
 import innoz.io.database.task.ReadHouseholdDatabaseTask;
 import innoz.io.database.task.ReadPersonDatabaseTask;
 import innoz.io.database.task.ReadWayDatabaseTask;
+import innoz.io.database.task.ResolveRoundTripsTask;
 import innoz.io.database.task.SortStagesTask;
 import innoz.io.database.validation.ValidateMissingTravelTimes;
 import innoz.io.database.validation.ValidateNegativeTravelTimes;
@@ -25,11 +24,6 @@ import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
 import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
 import innoz.scenarioGeneration.population.surveys.SurveyPerson;
-import innoz.scenarioGeneration.population.surveys.SurveyPlan;
-import innoz.scenarioGeneration.population.surveys.SurveyPlanActivity;
-import innoz.scenarioGeneration.population.surveys.SurveyPlanElement;
-import innoz.scenarioGeneration.population.surveys.SurveyPlanTrip;
-import innoz.scenarioGeneration.utils.ActivityTypes;
 
 public class SurveyDatabaseParserV2 {
 
@@ -233,241 +227,9 @@ public class SurveyDatabaseParserV2 {
 			container.removeHousehold(id);
 		}
 		
-		resolveRoundTrips(container);
+		new ResolveRoundTripsTask().run(container);
 		
-		convertToPlans(container);
-		
-	}
-	
-	void resolveRoundTrips(SurveyDataContainer container){
-		
-		for(SurveyPerson person : container.getPersons().values()){
-			
-			for(Logbook logbook : person.getLogbook().values()){
-				
-				for(SurveyStage stage : logbook.getStages()){
-					
-					if(stage.getDestination() != null){
-
-						if(stage.getDestination().equals("5")){
-							
-							int start = Integer.parseInt(stage.getStartTime());
-							int end = Integer.parseInt(stage.getEndTime());
-							int duration = end - start;
-							double distance = Double.parseDouble(stage.getDistance());
-							
-							SurveyStage st2 = new SurveyStage();
-							st2.setDestination("HOME");
-							st2.setPurpose(ActivityTypes.HOME);
-							st2.setDistance(Double.toString(distance / 2));
-							st2.setEndTime(Integer.toString(end));
-							st2.setMode(stage.getMode());
-							st2.setStartTime(Integer.toString(start + duration / 2));
-							
-							logbook.getStages().add(logbook.getStages().indexOf(stage)+1, st2);
-							
-							stage.setDistance(Double.toString(distance / 2));
-							stage.setEndTime(Integer.toString(start + duration / 2 - 1));
-							stage.setPurpose(ActivityTypes.OTHER);
-							
-						}
-						
-					}
-					
-				}
-				
-			}
-			
-		}
-		
-	}
-	
-	void convertToPlans(SurveyDataContainer container){
-		
-		for(SurveyPerson person : container.getPersons().values()){
-			
-			for(Logbook logbook : person.getLogbook().values()){
-				
-				SurveyPlan plan = new SurveyPlan();
-				
-				for(SurveyStage stage : logbook.getStages()){
-			
-					if(logbook.getStages().indexOf(stage)==0){
-						
-						String actType = "";
-						
-						if(stage.getOrigin() != null){
-							if(stage.getOrigin().equals("HOME")){
-								actType = ActivityTypes.HOME;
-							} else if(stage.getOrigin().equals("WORK")){
-								actType = ActivityTypes.WORK;
-							} else {
-								actType = ActivityTypes.OTHER;
-							}
-						} else{
-							actType = ActivityTypes.OTHER;
-						}
-						
-						SurveyPlanActivity act = new SurveyPlanActivity(actType);
-						act.setEndTime(Double.parseDouble(stage.getStartTime()));
-						act.setPriority(setActPriority(actType));
-						plan.getPlanElements().add(act);
-						
-					} else {
-						
-						SurveyPlanActivity act = (SurveyPlanActivity)plan.getPlanElements().get(plan.getPlanElements().size()-1);
-						act.setEndTime(Double.parseDouble(stage.getStartTime()));
-						
-					}
-					
-					SurveyPlanTrip trip = new SurveyPlanTrip(Integer.parseInt(stage.getIndex()));
-					trip.setMainMode(stage.getMode());
-					trip.setStartTime(Double.parseDouble(stage.getStartTime()));
-					trip.setEndTime(Double.parseDouble(stage.getEndTime()));
-					plan.getPlanElements().add(trip);
-					
-					Double distance = trip.getTravelDistance();
-					if(distance != null){
-						container.handleNewModeEntry(trip.getMainMode(), distance);
-					}
-					
-					String actType = stage.getPurpose();
-					SurveyPlanActivity act = new SurveyPlanActivity(actType);
-					act.setStartTime(Double.parseDouble(stage.getEndTime()));
-					act.setPriority(setActPriority(actType));
-					plan.getPlanElements().add(act);
-					
-				}
-				
-				person.getPlans().add(plan);
-			
-			}
-			
-		}
-		
-		for(SurveyPerson person : container.getPersons().values()){
-			
-			boolean licenseAndCarAvailabilitySet = false;
-			
-			for(SurveyPlan plan : person.getPlans()){
-				
-				SurveyPlanActivity mainAct = null;
-				
-				for(SurveyPlanElement pe : plan.getPlanElements()){
-					
-					if(pe instanceof SurveyPlanActivity){
-						
-						SurveyPlanActivity activity = (SurveyPlanActivity)pe;
-						
-						if(mainAct != null){
-							
-							mainAct = evaluateActTypes(activity, mainAct);
-							
-						} else {
-							
-							mainAct = activity;
-							
-						}
-						
-					} else {
-						
-						SurveyPlanTrip way = (SurveyPlanTrip)pe;
-						
-						if(way.getTravelDistance() > plan.getLongestLeg()){
-							plan.setLongestLeg(way.getTravelDistance());
-						}
-						
-						if(way.getMainMode().equals(TransportMode.car) && !person.hasCarAvailable()){
-							if(!licenseAndCarAvailabilitySet){
-								log.warn("Person " + person.getId() + " reported that no car was available, but it is driving anyway!");
-								log.info("Setting car availability and license ownership to ’true’.");
-								person.setCarAvailable(true);
-								person.setHasLicense(true);
-								licenseAndCarAvailabilitySet = true;
-								
-							}
-
-						}
-						
-					}
-					
-				}
-
-				plan.setMainActType(mainAct.getActType());
-				plan.setMainActId(mainAct.getId());
-				plan.setMainActIndex(plan.getPlanElements().indexOf(mainAct));
-				
-				if(plan.getMainActType().equals(ActivityTypes.HOME) && plan.getPlanElements().size() > 1){
-					
-					boolean first = true;
-					
-					for(Iterator<SurveyPlanElement> it = plan.getPlanElements().iterator(); it.hasNext();){
-						
-						it.next();
-						
-						if(!first){
-							it.remove();
-						}
-						
-						first = false;
-						
-					}
-					
-				}
-				
-				for(SurveyPlanElement pe : plan.getPlanElements()){
-					
-					if(pe instanceof SurveyPlanActivity){
-						
-						SurveyPlanActivity act = (SurveyPlanActivity)pe;
-						
-						if(act.getActType().equals(plan.getMainActType()) && act.getId() != plan.getMainActId()){
-							
-							if(plan.getPlanElements().indexOf(act) > plan.getMainActIndex() + 2){
-								
-								act.setId(plan.getMainActId());
-								
-							}
-							
-						}
-					
-					}
-				
-				}
-				
-			}
-			
-		}
-		
-	}
-	
-	private int setActPriority(String type){
-		
-		if(type.equals(ActivityTypes.WORK) || type.equals(ActivityTypes.EDUCATION) || type.equals(ActivityTypes.KINDERGARTEN) || type.equals(ActivityTypes.PRIMARY_SCHOOL)
-				|| type.equals(ActivityTypes.PROFESSIONAL_SCHOOL) || type.equals(ActivityTypes.SECONDARY_SCHOOL) || type.equals(ActivityTypes.UNIVERSITY)){
-			return 1;
-		} else if(type.equals(ActivityTypes.LEISURE) || type.equals(ActivityTypes.EATING) || type.equals(ActivityTypes.CULTURE) || type.equals(ActivityTypes.SPORTS) || type.equals(ActivityTypes.FURTHER)
-				|| type.equals(ActivityTypes.EVENT)){
-			return 2;
-		} else if(type.equals(ActivityTypes.SHOPPING) || type.equals(ActivityTypes.SUPPLY) || type.equals(ActivityTypes.SERVICE)){
-			return 3;
-		} else  if(type.equals(ActivityTypes.OTHER) || type.equals(ActivityTypes.HEALTH) || type.equals(ActivityTypes.ERRAND)){
-			return 4;
-		} else{
-			return 5;
-		}
-		
-	}
-	
-	private SurveyPlanActivity evaluateActTypes(SurveyPlanActivity activity, SurveyPlanActivity currentMainAct){
-		
-		if(activity.getPriority() < currentMainAct.getPriority()){
-			
-			return activity;
-			
-		}
-		
-		return currentMainAct;
+		new ConvertToPlansTask().run(container);
 		
 	}
 	
