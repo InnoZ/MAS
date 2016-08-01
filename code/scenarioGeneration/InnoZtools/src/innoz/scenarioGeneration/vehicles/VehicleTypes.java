@@ -11,6 +11,14 @@ import org.matsim.vehicles.VehicleUtils;
 
 public final class VehicleTypes {
 
+	/**
+	 * 
+	 * Returns a vehicle type that represents a KBA vehicle class. See {@link http://www.kba.de} for more information.
+	 * 
+	 * @param k The key of the vehicle type that was reported.
+	 * @param type The type of fuel.
+	 * @return Vehicle type according to KBA vehicle class.
+	 */
 	public static VehicleType getVehicleTypeForKey(int k, FuelType type){
 		
 		switch(k){
