@@ -6,6 +6,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.MatsimNetworkReader;
+import org.matsim.core.network.NetworkWriter;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.transitSchedule.api.TransitScheduleWriter;
 
@@ -40,6 +41,7 @@ public class GTFSToMatsimConverter {
 				"EPSG:32632");
 		
 		new TransitScheduleWriter(g2m.getTransitSchedule()).writeFile("/home/dhosse/schedule.xml.gz");
+		new NetworkWriter(g2m.getNetwork()).write("/home/dhosse/networkMod.xml.gz");
 		
 	}
 	
