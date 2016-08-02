@@ -7,7 +7,7 @@ import java.util.TreeMap;
 import innoz.io.database.handler.Logbook;
 import innoz.io.database.handler.SurveyStage;
 
-public class SortStagesTask extends LogbookTask {
+public class SortStagesTask implements LogbookTask {
 
 	private Comparator<String> intComparator = new Comparator<String>() {
 

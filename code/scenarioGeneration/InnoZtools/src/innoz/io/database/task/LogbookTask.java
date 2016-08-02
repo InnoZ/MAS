@@ -2,8 +2,8 @@ package innoz.io.database.task;
 
 import innoz.io.database.handler.Logbook;
 
-public abstract class LogbookTask {
+public interface LogbookTask extends Task {
 
-	public abstract void apply(Logbook logbook);
+	public void apply(Logbook logbook);
 	
 }

@@ -8,7 +8,7 @@ import innoz.io.SurveyConstants;
 import innoz.io.database.handler.DefaultHandler;
 import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
 
-public abstract class DatabaseTask {
+public abstract class DatabaseTask implements Task {
 
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	SurveyConstants constants;

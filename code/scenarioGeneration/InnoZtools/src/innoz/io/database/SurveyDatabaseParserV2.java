@@ -3,15 +3,14 @@ package innoz.io.database;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import innoz.config.Configuration;
 import innoz.io.SurveyConstants;
-import innoz.io.database.handler.Logbook;
 import innoz.io.database.task.ConvertToPlansTask;
+import innoz.io.database.task.HouseholdRemovalTask;
+import innoz.io.database.task.PersonRemovalTask;
 import innoz.io.database.task.ReadHouseholdDatabaseTask;
 import innoz.io.database.task.ReadPersonDatabaseTask;
 import innoz.io.database.task.ReadWayDatabaseTask;
@@ -23,8 +22,6 @@ import innoz.io.database.validation.ValidateNegativeTravelTimes;
 import innoz.io.database.validation.ValidateOverlappingStages;
 import innoz.scenarioGeneration.geoinformation.Geoinformation;
 import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
-import innoz.scenarioGeneration.population.surveys.SurveyHousehold;
-import innoz.scenarioGeneration.population.surveys.SurveyPerson;
 
 public class SurveyDatabaseParserV2 {
 
@@ -116,63 +113,13 @@ public class SurveyDatabaseParserV2 {
 	
 	private void process(SurveyDataContainer container){
 		
-		SortStagesTask task1 = new SortStagesTask();
-		
-		for(SurveyPerson person : container.getPersons().values()){
-			
-			for(Logbook logbook : person.getLogbook().values()){
-			
-				task1.apply(logbook);
-			
-			}
-			
-		}
-		
+		TaskRunner.exec(new SortStagesTask(), container);
 		TaskRunner.exec(new ValidateMissingTravelTimes(), container.getPersons().values());
 		TaskRunner.exec(new ValidateNegativeTravelTimes(), container.getPersons().values());
 		TaskRunner.exec(new ValidateOverlappingStages(), container.getPersons().values());
-		
-		Set<String> personsToRemove = new HashSet<>();
-		for(SurveyPerson person : container.getPersons().values()){
-			if(person.getLogbook().size() < 1){
-				personsToRemove.add(person.getId());
-			}
-			if(person.getId() == null){
-				personsToRemove.add(person.getId());
-			}
-		}
-		
-		for(String id : personsToRemove){
-			container.removePerson(id);
-		}
-		
-		Set<String> hhToRemove = new HashSet<>();
-		for(SurveyHousehold hh : container.getHouseholds().values()){
-			if(hh.getMemberIds().isEmpty()){
-				hhToRemove.add(hh.getId());
-				continue;
-			}
-			Set<String> idsToRemove = new HashSet<>();
-			for(String id : hh.getMemberIds()){
-				if(container.getPersons().get(id) == null){
-					idsToRemove.add(id);
-				}
-			}
-			hh.getMemberIds().removeAll(idsToRemove);
-			if(hh.getMemberIds().size() <= 0){
-				hhToRemove.add(hh.getId());
-			}
-			
-			if(hh.getWeight() == null)
-				hhToRemove.add(hh.getId());
-			
-		}
-		for(String id : hhToRemove){
-			container.removeHousehold(id);
-		}
-		
+		TaskRunner.exec(new PersonRemovalTask(), container);
+		TaskRunner.exec(new HouseholdRemovalTask(), container);
 		new ResolveRoundTripsTask().run(container);
-		
 		new ConvertToPlansTask().run(container);
 		
 	}
