@@ -6,8 +6,10 @@ import java.util.TreeMap;
 
 import innoz.io.database.handler.Logbook;
 import innoz.io.database.handler.SurveyStage;
+import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
+import innoz.scenarioGeneration.population.surveys.SurveyPerson;
 
-public class SortStagesTask implements LogbookTask {
+public class SortStagesTask implements DataContainerTask {
 
 	private Comparator<String> intComparator = new Comparator<String>() {
 
@@ -23,20 +25,28 @@ public class SortStagesTask implements LogbookTask {
 	};
 	
 	@Override
-	public void apply(Logbook logbook) {
+	public void apply(SurveyDataContainer container) {
 
-		SortedMap<String, SurveyStage> stages = new TreeMap<>(intComparator);
-		
-		for(SurveyStage stage : logbook.getStages()){
-			stages.put(stage.getIndex(), stage);
-		}
-		
-		for(SurveyStage stage : stages.values()){
-			logbook.getStages().remove(stage);
-		}
-		
-		for(SurveyStage stage : stages.values()){
-			logbook.getStages().add(stage);
+		for(SurveyPerson person : container.getPersons().values()){
+			
+			for(Logbook logbook : person.getLogbook().values()){
+				
+				SortedMap<String, SurveyStage> stages = new TreeMap<>(intComparator);
+				
+				for(SurveyStage stage : logbook.getStages()){
+					stages.put(stage.getIndex(), stage);
+				}
+				
+				for(SurveyStage stage : stages.values()){
+					logbook.getStages().remove(stage);
+				}
+				
+				for(SurveyStage stage : stages.values()){
+					logbook.getStages().add(stage);
+				}
+				
+			}
+			
 		}
 		
 	}

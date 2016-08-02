@@ -6,8 +6,9 @@ import java.util.Set;
 import innoz.scenarioGeneration.population.surveys.SurveyDataContainer;
 import innoz.scenarioGeneration.population.surveys.SurveyPerson;
 
-public class PersonRemovalTask implements Task {
+public class PersonRemovalTask implements DataContainerTask {
 
+	@Override
 	public void apply(SurveyDataContainer container){
 		
 		Set<String> toRemove = new HashSet<>();

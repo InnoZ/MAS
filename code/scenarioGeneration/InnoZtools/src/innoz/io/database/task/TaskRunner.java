@@ -13,31 +13,9 @@ public class TaskRunner {
 
 	public static void exec(Task task, SurveyDataContainer container){
 
-		if(task instanceof LogbookTask){
+		if(task instanceof DataContainerTask){
 			
-			exec((LogbookTask)task, container.getPersons().values());
-			
-		} else if(task instanceof PersonRemovalTask){
-			
-			((PersonRemovalTask)task).apply(container);
-			
-		} else if(task instanceof HouseholdRemovalTask){
-			
-			((HouseholdRemovalTask)task).apply(container);
-			
-		}
-		
-	}
-	
-	private static void exec(LogbookTask task, Collection<? extends SurveyPerson> collection){
-		
-		for(SurveyPerson person : collection){
-			
-			for(Logbook logbook : person.getLogbook().values()){
-				
-				task.apply(logbook);
-				
-			}
+			((DataContainerTask)task).apply(container);
 			
 		}
 		
