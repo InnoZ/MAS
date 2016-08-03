@@ -1,6 +1,7 @@
 # ignore all files and folders inside input and output:
 input/**/* 
 output/**/*
+.project
 #ignore auto-generated binaries
 code/scenarioGeneration/InnoZtools/bin/innoz/
 #ignore user-specific classpaths

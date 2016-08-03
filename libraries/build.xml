@@ -10,6 +10,7 @@
 			<include name="poi-3.14-20160307.jar" />
 			<include name="poi-ooxml-3.14-20160307.jar" />
 			<include name="matsim-0.8.0.jar"/>
+			<include name="gtfs2matsimtransitschedule-0.8.0.jar" />
 		</fileset>
 	</path>
 
