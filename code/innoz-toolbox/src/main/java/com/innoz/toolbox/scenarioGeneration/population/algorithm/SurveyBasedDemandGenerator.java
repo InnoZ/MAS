@@ -589,9 +589,9 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		// Initialize the activity type and the start and end time
 		SurveyPlanActivity act = (SurveyPlanActivity)mpe;
 		String type = act.getActType();
-		if(type.equals(ActivityTypes.EDUCATION) && personTemplate.getAge() > 18){
-			type = ActivityTypes.UNIVERSITY;
-		}
+//		if(type.equals(ActivityTypes.EDUCATION) && personTemplate.getAge() > 18){
+//			type = ActivityTypes.UNIVERSITY;
+//		}
 		double start = act.getStartTime();
 		double end = act.getEndTime();
 		
@@ -714,23 +714,15 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	private Coord shootLocationForActType(AdministrativeUnit au, String actType, double distance,
 			SurveyPlan templatePlan, String mode, SurveyPerson personTemplate) {
 
-//		if(mode != null){
-//			
-//			// Bound the maximum walk distance to avoid "endless" walk legs
-//			if(mode.equals(TransportMode.walk) && distance > 2000){
-//				
-//				distance = 500 + random.nextInt(1001);
-//				
-//			}
-//
-//		}
-		
 		// Divide the distance by the beeline distance factor and set boundaries for maximum and minimum distance traveled
 		double d = distance / 1.3;
 		double minFactor = 0.75;
 		double maxFactor = 1.5;
 		
 		// Get all landuse geometries of the current activity type within the given administrative unit
+		if(this.geoinformation.getQuadTreeForActType(actType)==null){
+			System.out.println(actType);
+		}
 		List<Geometry> closest = (List<Geometry>) this.geoinformation.getQuadTreeForActType(actType).getRing
 				(this.lastActCoord.getX(), this.lastActCoord.getY(), d * minFactor, d * maxFactor);
 		

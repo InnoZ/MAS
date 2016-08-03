@@ -18,6 +18,12 @@ public class ValidateMissingTravelTimes implements Validator {
 				return false;
 			}
 			
+			//TODO this seems a little messy. Better create a separate validator for distances.
+			String distance = stage.getDistance();
+			if(distance == null){
+				return false;
+			}
+			
 		}
 		
 		return true;

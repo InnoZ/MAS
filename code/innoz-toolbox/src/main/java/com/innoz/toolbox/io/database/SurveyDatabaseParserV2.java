@@ -119,8 +119,8 @@ public class SurveyDatabaseParserV2 {
 		TaskRunner.exec(new ValidateOverlappingStages(), container.getPersons().values());
 		TaskRunner.exec(new PersonRemovalTask(), container);
 		TaskRunner.exec(new HouseholdRemovalTask(), container);
-		new ResolveRoundTripsTask().run(container);
 		new ConvertToPlansTask().run(container);
+		new ResolveRoundTripsTask().run(container);
 		
 	}
 	

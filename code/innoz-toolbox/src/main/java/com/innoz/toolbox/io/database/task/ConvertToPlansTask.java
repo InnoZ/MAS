@@ -26,6 +26,8 @@ public class ConvertToPlansTask implements SurveyDataTask {
 			
 			for(Logbook logbook : person.getLogbook().values()){
 				
+				int actCounter = 0;
+				
 				SurveyPlan plan = new SurveyPlan();
 				
 				for(SurveyStage stage : logbook.getStages()){
@@ -47,6 +49,8 @@ public class ConvertToPlansTask implements SurveyDataTask {
 						}
 						
 						SurveyPlanActivity act = new SurveyPlanActivity(actType);
+						act.setId(actCounter);
+						actCounter++;
 						act.setEndTime(Double.parseDouble(stage.getStartTime()));
 						act.setPriority(setActPriority(actType));
 						plan.getPlanElements().add(act);
@@ -62,18 +66,39 @@ public class ConvertToPlansTask implements SurveyDataTask {
 					trip.setMainMode(stage.getMode());
 					trip.setStartTime(Double.parseDouble(stage.getStartTime()));
 					trip.setEndTime(Double.parseDouble(stage.getEndTime()));
+					if(stage.getDistance() != null){
+						trip.setTravelDistance(Double.parseDouble(stage.getDistance()));
+					}
 					plan.getPlanElements().add(trip);
 					
 					Double distance = trip.getTravelDistance();
-					if(distance != null){
-						container.handleNewModeEntry(trip.getMainMode(), distance);
-					}
+					container.handleNewModeEntry(trip.getMainMode(), distance);
 					
 					String actType = stage.getPurpose();
+					
+					if(actType.equalsIgnoreCase("return")){
+						
+						int index = logbook.getStages().indexOf(stage);
+						
+						if(index >= 1){
+							
+							actType = ((SurveyPlanActivity)plan.getPlanElements().get(plan.getPlanElements().size()-4)).getActType();
+							
+						} else {
+							
+							actType = ActivityTypes.HOME;
+							
+						}
+						
+					}
+					
 					SurveyPlanActivity act = new SurveyPlanActivity(actType);
 					act.setStartTime(Double.parseDouble(stage.getEndTime()));
 					act.setPriority(setActPriority(actType));
 					plan.getPlanElements().add(act);
+					
+					act.setId(actCounter);
+					actCounter++;
 					
 				}
 				
@@ -161,10 +186,14 @@ public class ConvertToPlansTask implements SurveyDataTask {
 						
 						if(act.getActType().equals(plan.getMainActType()) && act.getId() != plan.getMainActId()){
 							
-							if(plan.getPlanElements().indexOf(act) > plan.getMainActIndex() + 2){
-								
-								act.setId(plan.getMainActId());
-								
+							if(plan.getMainActType().equals(ActivityTypes.WORK) || plan.getMainActType().equals(ActivityTypes.EDUCATION)){
+								if(plan.getPlanElements().indexOf(act) > plan.getMainActIndex() + 2){
+									act.setId(plan.getMainActId());
+								}
+							} else {
+								if(plan.getPlanElements().indexOf(act) > plan.getMainActIndex() + 4){
+									act.setId(plan.getMainActId());
+								}
 							}
 							
 						}
