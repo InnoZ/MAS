@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+
+JAVA=`which java`
+if [ ! -z $JAVA_HOME ]; then
+        JAVA=$JAVA_HOME/bin/java
+fi
+echo "using java: $JAVA"
+
+JOPTS="-Xmx1500m -DsuppressSwingDropSupport=true"
+
+SCRIPT=`readlink -f "${BASH_SOURCE[0]}"`
+if [ "$SCRIPT" = "" ]; then
+  # seems to be running on BSD or Darwin, where readlink -f is not supported
+        SCRIPT=$0
+fi
+BASEDIR=`dirname "$SCRIPT"`
+cd "$BASEDIR"
+$JAVA $JOPTS -cp InnoZscenarioGeneration.jar innoz.run.Gui $*
