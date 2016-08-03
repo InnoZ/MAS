@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -16,6 +17,7 @@ import org.matsim.utils.objectattributes.ObjectAttributes;
 
 public class MobilityAttitudeCreationTest {
 
+	@Ignore
 	@Test
 	public void testPersonCreation(){
 		
