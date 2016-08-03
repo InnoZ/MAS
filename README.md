@@ -50,14 +50,18 @@ You can access the playground via SecureShell (ssh). If your computer has a Linu
 
 ## First steps - Setting up your workspace
 
-### MATSim
+### User version
+If you just want to execute the code, there are two ways of doing this. In either way, you will first need to get the latest released jar file ([here](https://github.com/00Bock/MAS/releases)). You can use this file as a command line tool by typing:
 
-To set up MATSim in your Eclipse workspace, you need to visit www.matsim.org and download the latest stable release. After the download has finished, unpack the zip file to a location in your workspace. Eventually, you should see a folder named e.g. matism-0.8.0.
+`java -cp innoz-toolbox-[release].jar com.innoz.toolbox.run.Runner`
 
-In Eclipse, start the new Java project wizard. Uncheck the default location checkbox and choose the matsim folder you just unpacked. Then, press "Finish".
+or import it as a library into your eclipse workspace.
 
-Now, we need to set up the MATSim libraries in the correct way. For that, right-click on your matsim project and select "Properties". In the properties dialog, choose the "Java build path" tab and then the "Libraries" tab. You should see two libraries. We expand the "Referenced libraries" by clicking on the arrow on the left side and search for the files "matsim.[VERSION].jar" and "matsim.[VERSION]-source.jar". Delete the source file and expand the regular matsim jar.
-Edit the source attachment and choose the previously deleted matsim sources jar. Also, set the native library location to "matsim-[VERSION]/libs". After that, MATSim should be set up correctly.
+### Developer version
+If you want to modify or extend the existing code, you will first need to clone this repo to your local machine.
 
-### Additional libraries
-In order to run the scenario generation code, you need additional java libraries we provide in the [libraries folder](https://github.com/00Bock/MAS/tree/master/libraries). Just add them to your project's Java build path.
+In Eclipse, you need to add this repo to the "Git Repositories" view. Then, right click on the repo and select "Import Projects...". In the next view, select the radio button called "Import as general project". After clicking "Finish" you should see a new MAS project.
+
+When this is done, right click on the project and click on "Import" again. This time, you need to select "Maven/Existing Maven Projects" and click "Next". Eclipse should recognize the pom of the project. So, you just have to click "Finish" and it's done.
+
+The external references are all imported by Maven, so you don't have to add anything else. The project also comes with full MATSim core functionality. If you want to use code from contribs or something else, you will have to add these references yourself.
