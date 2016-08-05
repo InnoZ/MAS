@@ -31,7 +31,7 @@ public final class Configuration {
 	public static final String VICINITY_IDS = "vicinityIds";
 	public static final String CRS = "coordinateSystem";
 	public static final String OUTPUT_DIR = "outputDirectory";
-	public static final String POPULATION_SOURCE = "populationSourcee";
+	public static final String POPULATION_SOURCE = "populationSource";
 	public static final String POPULATION_SOURCE_V = "populationSourceVicinity";
 	public static final String SCALE_FACTOR = "scaleFactor";
 	public static final String ACTIVITY_LOCATIONS_TYPE = "activityLocationsType";
