@@ -1,7 +1,7 @@
 package com.innoz.toolbox.scenarioGeneration.config;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.Configuration.PopulationType;
+import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.config.Configuration.Subpopulations;
 import com.innoz.toolbox.scenarioGeneration.population.mobilityAttitude.MobilityAttitudeGroups;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
@@ -26,7 +26,7 @@ public class InitialConfigCreator {
 		// Plans config group
 		config.plans().setInputFile(configuration.getOutputDirectory() + "plans.xml.gz");
 		
-		if(configuration.getPopulationType().equals(PopulationType.survey)){
+		if(configuration.getPopulationSource().equals(PopulationSource.survey)){
 			
 			config.plans().setInputPersonAttributeFile(configuration.getOutputDirectory() + "personAttributes.xml.gz");
 		

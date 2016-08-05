@@ -25,7 +25,7 @@ import org.opengis.referencing.FactoryException;
 import com.vividsolutions.jts.io.ParseException;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.Configuration.PopulationType;
+import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.io.BbsrDataReader;
 import com.innoz.toolbox.io.database.DatabaseReader;
 import com.innoz.toolbox.io.database.DatabaseUpdater;
@@ -91,8 +91,8 @@ public class ScenarioGenerationController implements DefaultController {
 			new NetworkWriter(scenario.getNetwork()).write(configuration
 					.getOutputDirectory() + "network.xml.gz");
 	
-			if(!configuration.getPopulationType().equals(PopulationType.none) ||
-					!configuration.getVicinityPopulationType().equals(PopulationType.none)){
+			if(!configuration.getPopulationSource().equals(PopulationSource.none) ||
+					!configuration.getVicinityPopulationSource().equals(PopulationSource.none)){
 	
 				new PopulationWriter(scenario.getPopulation()).write(configuration
 						.getOutputDirectory() + "plans.xml.gz");

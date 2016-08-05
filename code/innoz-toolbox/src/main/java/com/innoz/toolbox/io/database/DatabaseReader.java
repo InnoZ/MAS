@@ -39,7 +39,7 @@ import com.vividsolutions.jts.io.WKTReader;
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.ActivityLocations;
 import com.innoz.toolbox.config.Configuration.AdminUnitEntry;
-import com.innoz.toolbox.config.Configuration.PopulationType;
+import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.io.database.datasets.OsmPointDataset;
 import com.innoz.toolbox.io.database.datasets.OsmPolygonDataset;
 import com.innoz.toolbox.run.parallelization.BuildingThread;
@@ -175,8 +175,8 @@ public class DatabaseReader {
 					
 				}
 				
-				if(!configuration.getPopulationType().equals(PopulationType.none)
-						|| !configuration.getVicinityPopulationType().equals(PopulationType.none)){
+				if(!configuration.getPopulationSource().equals(PopulationSource.none)
+						|| !configuration.getVicinityPopulationSource().equals(PopulationSource.none)){
 
 					// Otherwise, read in the OSM data
 					this.readOsmData(connection, configuration);

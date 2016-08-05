@@ -12,7 +12,7 @@ import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.Configuration.PopulationType;
+import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.CommuterDemandGenerator;
@@ -75,8 +75,8 @@ public class PopulationCreator {
 		
 		try {
 			
-			if(!configuration.getPopulationType().equals(PopulationType.none) ||
-					!configuration.getVicinityPopulationType().equals(PopulationType.none)){
+			if(!configuration.getPopulationSource().equals(PopulationSource.none) ||
+					!configuration.getVicinityPopulationSource().equals(PopulationSource.none)){
 				
 				// Create the coordinate transformation for all of the geometries
 				// This could also be done by just passing the auth id strings, but doing it this way suppresses
@@ -91,8 +91,8 @@ public class PopulationCreator {
 				
 				log.info("Creating population for MATSim scenario...");
 			
-				runI(configuration, scenario, configuration.getPopulationType(), configuration.getSurveyAreaIds());
-				runI(configuration, scenario, configuration.getVicinityPopulationType(), configuration.getVicinityIds());
+				runI(configuration, scenario, configuration.getPopulationSource(), configuration.getSurveyAreaIds());
+				runI(configuration, scenario, configuration.getVicinityPopulationSource(), configuration.getVicinityIds());
 			
 			}
 		
@@ -108,7 +108,7 @@ public class PopulationCreator {
 		
 	}
 	
-	private void runI(Configuration configuration, Scenario scenario, PopulationType populationType, String ids)
+	private void runI(Configuration configuration, Scenario scenario, PopulationSource populationType, String ids)
 			throws NoSuchAuthorityCodeException, FactoryException, InstantiationException, IllegalAccessException,
 			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException,
 			ClassNotFoundException{

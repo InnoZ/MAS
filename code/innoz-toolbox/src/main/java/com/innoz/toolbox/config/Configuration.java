@@ -31,8 +31,8 @@ public final class Configuration {
 	public static final String VICINITY_IDS = "vicinityIds";
 	public static final String CRS = "coordinateSystem";
 	public static final String OUTPUT_DIR = "outputDirectory";
-	public static final String POPULATION_TYPE = "populationType";
-	public static final String POPULATION_TYPE_V = "populationTypeVicinity";
+	public static final String POPULATION_SOURCE = "populationSourcee";
+	public static final String POPULATION_SOURCE_V = "populationSourceVicinity";
 	public static final String SCALE_FACTOR = "scaleFactor";
 	public static final String ACTIVITY_LOCATIONS_TYPE = "activityLocationsType";
 	public static final String CREATE_TRANSIT = "createTransit";
@@ -65,8 +65,8 @@ public final class Configuration {
 	String crs = "EPSG:32632";
 	String outputDirectory = ".";
 	
-	PopulationType popType = PopulationType.survey;
-	PopulationType popTypeV = PopulationType.none;
+	PopulationSource popSource = PopulationSource.survey;
+	PopulationSource popSourceV = PopulationSource.none;
 	
 	Subpopulations subpopulation = Subpopulations.none;
 	
@@ -102,8 +102,9 @@ public final class Configuration {
 	String databaseUser = "postgres";
 	String userPassword = "postgres";
 	
-	public enum PopulationType{dummy,commuter,survey,none};
+	public enum PopulationSource{dummy,commuter,survey,none};
 	public enum Subpopulations{none,mobility_attitude};
+	public enum VehicleSource{matsim, survey};
 	public enum ActivityLocations{landuse, buildings};
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
@@ -156,7 +157,7 @@ public final class Configuration {
 		this.vicinityIds = null;
 		this.crs = "EPSG:32632";
 		this.outputDirectory = null;
-		this.popType = PopulationType.survey;
+		this.popSource = PopulationSource.survey;
 		this.useHouseholds = true;
 		this.useVehicles = false;
 		this.onlyWorkingDays = true;
@@ -340,8 +341,8 @@ public final class Configuration {
 	 * 
 	 * @return The chosen type of population to generate.
 	 */
-	public PopulationType getPopulationType() {
-		return this.popType;
+	public PopulationSource getPopulationSource() {
+		return this.popSource;
 	}
 	
 	/**
@@ -631,8 +632,8 @@ public final class Configuration {
 		
 	}
 	
-	public PopulationType getVicinityPopulationType(){
-		return this.popTypeV;
+	public PopulationSource getVicinityPopulationSource(){
+		return this.popSourceV;
 	}
 	
 	public Map<String, String> getParams(){
@@ -641,8 +642,8 @@ public final class Configuration {
 		
 		map.put(CRS, this.crs);
 		map.put(CREATE_TRANSIT, Boolean.toString(this.useTransit));
-		map.put(POPULATION_TYPE, this.popType.name());
-		map.put(POPULATION_TYPE_V, this.popTypeV.name());
+		map.put(POPULATION_SOURCE, this.popSource.name());
+		map.put(POPULATION_SOURCE_V, this.popSourceV.name());
 		map.put(SCALE_FACTOR, Double.toString(this.scaleFactor));
 		map.put(OUTPUT_DIR, this.outputDirectory);
 		map.put(OVERWRITE_FILES, Boolean.toString(this.overwriteExistingFiles));
@@ -668,8 +669,8 @@ public final class Configuration {
 		
 		map.put(CRS, "The coordinate reference system that applies to the study area.");
 		map.put(CREATE_TRANSIT, "NOT IMPLEMENTED YET! Defines if MATSim transit should be modeled or not. Default: false.");
-		map.put(POPULATION_TYPE, "The type of population that is created as initial demand. Possible values are: none, dummy, commuter, survey.");
-		map.put(POPULATION_TYPE_V, "The type of population that is created as initial demand for the vicinity. Possible values are: none, dummy, commuter, survey.");
+		map.put(POPULATION_SOURCE, "The source of the population that is created as initial demand in the survey area. Possible values are: none, dummy, commuter, survey.");
+		map.put(POPULATION_SOURCE_V, "The source of the population that is created as initial demand for the vicinity. Possible values are: none, dummy, commuter, survey.");
 		map.put(SCALE_FACTOR, "The scale factor for the amount of households / persons to be created and for the supply side to reduce capacities. Any numeric value between 0 and 1.");
 		map.put(OUTPUT_DIR, "The directory containing all output files of the scenario generation process.");
 		map.put(OVERWRITE_FILES, "Switch to 'yes' to overwrite existing files in the output directory. Default: false.");

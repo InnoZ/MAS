@@ -20,8 +20,8 @@
 		</areaSet>	
 		<coordinateSystem v="EPSG:32632" />
 		<createTransit v="false" />
-		<populationType v="survey" />
-		<populationTypeVicinity v="none" />
+		<populationSource v="survey" />
+		<populationSourceVicinity v="none" />
 		<scaleFactor v="1.0" />
 		<outputDirectory v="/home/dhosse/scenarios/eGAP/" />
 		<overwriteExistingFiles v="true"/>

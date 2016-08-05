@@ -2,7 +2,7 @@ package com.innoz.toolbox.config;
 
 import com.innoz.toolbox.config.Configuration.ActivityLocations;
 import com.innoz.toolbox.config.Configuration.AdminUnitEntry;
-import com.innoz.toolbox.config.Configuration.PopulationType;
+import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.config.Configuration.Subpopulations;
 
 import java.io.File;
@@ -72,13 +72,13 @@ public class ConfigurationReaderXml extends DefaultHandler {
 			
 		} else if(qName.equalsIgnoreCase("useTransit")){
 			
-		} else if(qName.equalsIgnoreCase(Configuration.POPULATION_TYPE)){
+		} else if(qName.equalsIgnoreCase(Configuration.POPULATION_SOURCE)){
 			
-			this.configuration.popType = PopulationType.valueOf(attributes.getValue("v"));
+			this.configuration.popSource = PopulationSource.valueOf(attributes.getValue("v"));
 			
-		} else if(qName.equalsIgnoreCase(Configuration.POPULATION_TYPE_V)){
+		} else if(qName.equalsIgnoreCase(Configuration.POPULATION_SOURCE_V)){
 			
-			this.configuration.popTypeV = PopulationType.valueOf(attributes.getValue("v"));
+			this.configuration.popSourceV = PopulationSource.valueOf(attributes.getValue("v"));
 			
 		} else if(qName.equalsIgnoreCase(Configuration.SCALE_FACTOR)){
 			
