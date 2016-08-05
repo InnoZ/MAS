@@ -40,7 +40,7 @@ public final class Configuration {
 	public static final String POPULATION_SOURCE_V = "populationSourceVicinity";
 	public static final String VEHICLES_SOURCE = "vehiclesSource";
 	
-	public static final String DAY_TYPES = "onlyWorkingDays";
+	public static final String DAY_TYPES = "dayTypes";
 	public static final String POPULATION_TYPE = "populationType";
 	
 	public static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
