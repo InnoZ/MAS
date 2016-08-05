@@ -43,6 +43,12 @@ If you want to write java scripts or your own java classes to extend or modify M
 Windows: Download the zip-File and unzip it to wherever you want to place it.
 To install Eclipse in Linux follow the instructions here: http://www.krizna.com/ubuntu/install-eclipse-in-ubuntu-12-04/ or use the software center.
 
+### import git reprository to eclipse
+Window > Show view > other... > git repositories
+Add an existing local Git repository > got to local repo path > select > finish
+
+
+
 ### Access to Mobility DataHub
 To access the Mobility DataHub, you need a user account on the playground. Just contact either Benno Bock, Daniel Hosse or Benjamin Stolte to create an account for you.
 
