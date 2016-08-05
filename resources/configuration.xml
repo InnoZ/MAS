@@ -22,14 +22,13 @@
 		<outputDirectory v="/home/dhosse/scenarios/burg/" />
 		<overwriteExistingFiles v="true"/>
 		<demandSource v="mid" />
-		<!-- Set to 'true' if you want to use InnoZ' mobility attitudegroups (Mobilitätstypen) -->
-		<useMobilityAttitudeGroups v="false" />
+		<subpopulationsType v="none"/>
 	</scenario>
 
 	<numberOfThreads v="2" />
 
 	<surveyData>
-		<useBuildings v="true" />
+		<activityLocationsType v="buildings" />
 		<useHouseholds v="true" />
 		<onlyWorkingDays v="true"/>
 		<useVehicles v="false" />

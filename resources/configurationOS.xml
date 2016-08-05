@@ -36,12 +36,12 @@
 		<outputDirectory v="/home/dhosse/scenarios/3connect/" />
 		<overwriteExistingFiles v="true"/>
 		<demandSource v="mid" />
-		<useMobilityAttitudeGroups v="true" />
+		<subpopulationsType v="mobility_attitude" />
 		<numberOfThreads v="2" />
 	</scenario>
 
 	<surveyData>
-		<useBuildings v="true" />
+		<activityLocationsType v="buildings" />
 		<useHouseholds v="true" />
 		<onlyWorkingDays v="true"/>
 		<useVehicles v="false" />

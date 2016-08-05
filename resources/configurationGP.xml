@@ -30,7 +30,7 @@
 	<numberOfThreads v="2" />
 
 	<surveyData>
-		<useBuildings v="true" />
+		<activityLocationsType v="buildings" />
 		<useHouseholds v="true" />
 		<onlyWorkingDays v="true"/>
 		<useVehicles v="false" />
