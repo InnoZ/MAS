@@ -4,7 +4,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -17,8 +16,8 @@ import org.matsim.utils.objectattributes.ObjectAttributes;
 
 public class MobilityAttitudeCreationTest {
 
-	@Ignore
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testPersonCreation(){
 		
 		Scenario scenario = ScenarioUtils.createScenario(
@@ -50,16 +49,16 @@ public class MobilityAttitudeCreationTest {
 			
 		}
 		
-		assertTrue(results[0] == null);
-		assertTrue(results[1].equals("flexCar"));
-		assertTrue(results[2].equals("convBike"));
-		assertTrue(results[3].equals("flexCar"));
-		assertTrue(results[4].equals("envtPtBike"));
-		assertTrue(results[5].equals("multiOpt"));
+		assertTrue(results[0].equals("none"));
+		assertTrue(results[1].equals("envtPtBike"));
+		assertTrue(results[2].equals("flexCar"));
+		assertTrue(results[3].equals("multiOpt"));
+		assertTrue(results[4].equals("convBike"));
+		assertTrue(results[5].equals("tradCar"));
 		assertTrue(results[6].equals("flexCar"));
-		assertTrue(results[7].equals("flexCar"));
-		assertTrue(results[8].equals("flexCar"));
-		assertTrue(results[9].equals("convBike"));
+		assertTrue(results[7].equals("envtPtBike"));
+		assertTrue(results[8].equals("tradCar"));
+		assertTrue(results[9].equals("envtPtBike"));
 		
 	}
 	
