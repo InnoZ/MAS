@@ -60,6 +60,6 @@ or import it as a library into your eclipse workspace.
 ### Developer version
 If you want to modify or extend the existing code, you will first need to clone this repo to your local machine.
 
-In Eclipse, you need to add this repo to the "Git Repositories" view. Then, right click on the repo and select "Import Projects...". In the next view, select the radio button called "Import existing Eclipse projects". After clicking "Next" you should select only the innoz-toolbox project and click "Finish". And that's it.
+In Eclipse, you need to add this repo to the "Git Repositories" view. Then, right click on the repo and select "Import Projects...". In the next view, select the radio button called "Import existing Eclipse projects". After clicking "Next" you should select only the innoz-toolbox project and click "Finish". And that's it. In case errors are displayed, update the project to fix them.
 
 The external references are all imported by Maven, so you don't have to add anything else. The project also comes with full MATSim core functionality. If you want to use code from contribs or something else, you will have to add these references yourself.
