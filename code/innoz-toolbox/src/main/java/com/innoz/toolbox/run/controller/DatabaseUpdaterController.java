@@ -12,15 +12,15 @@ import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.io.database.DatabaseUpdater;
 import com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils;
 
-public class DatabaseUpdaterControler implements DefaultController {
+public class DatabaseUpdaterController extends DefaultController {
 
-	private final Configuration configuration;
 	private final Scenario scenario;
 	private final String vehiclesFile;
 	
-	public DatabaseUpdaterControler(final Configuration configuration, String plansFile, String networkFile, String vehiclesFile, String attributesFile){
+	public DatabaseUpdaterController(final Configuration configuration, String plansFile, String networkFile,
+			String vehiclesFile, String attributesFile){
 		
-		this.configuration = configuration;
+		super(configuration);
 		this.scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		
 		if(plansFile != null){

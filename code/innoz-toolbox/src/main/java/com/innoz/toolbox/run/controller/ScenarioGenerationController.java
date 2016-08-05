@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 
-import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.core.config.Config;
@@ -22,8 +21,6 @@ import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.matsim.vehicles.VehicleWriterV1;
 import org.opengis.referencing.FactoryException;
 
-import com.vividsolutions.jts.io.ParseException;
-
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.config.Configuration.PopulationType;
@@ -35,15 +32,14 @@ import com.innoz.toolbox.scenarioGeneration.config.InitialConfigCreator;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.network.NetworkCreatorFromPsql;
 import com.innoz.toolbox.scenarioGeneration.population.PopulationCreator;
+import com.vividsolutions.jts.io.ParseException;
 
-public class ScenarioGenerationController implements DefaultController {
+public class ScenarioGenerationController extends DefaultController {
 
-	private static final Logger log = Logger.getLogger(ScenarioGenerationController.class);
-	
-	private final Configuration configuration;
-	
 	public ScenarioGenerationController(final Configuration configuration){
-		this.configuration = configuration;
+		
+		super(configuration);
+		
 	}
 	
 	@Override
@@ -52,7 +48,7 @@ public class ScenarioGenerationController implements DefaultController {
 		try {
 			
 			double t0 = System.currentTimeMillis();
-		
+			
 			// Dump scenario generation settings on the console and create the output directory
 			configuration.dumpSettings();
 			new File(configuration.getOutputDirectory()).mkdirs();

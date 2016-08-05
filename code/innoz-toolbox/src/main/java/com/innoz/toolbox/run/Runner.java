@@ -3,7 +3,7 @@ package com.innoz.toolbox.run;
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.ConfigurationUtils;
 import com.innoz.toolbox.config.SshConnector;
-import com.innoz.toolbox.run.controller.DatabaseUpdaterControler;
+import com.innoz.toolbox.run.controller.DatabaseUpdaterController;
 import com.innoz.toolbox.run.controller.ScenarioGenerationController;
 
 import java.io.IOException;
@@ -157,7 +157,7 @@ public class Runner {
 							
 						}
 						
-						new DatabaseUpdaterControler(c, inputPlansFile, networkFile, vehiclesFile, attributesFile).run();
+						new DatabaseUpdaterController(c, inputPlansFile, networkFile, vehiclesFile, attributesFile).run();
 							
 						c.reset();
 						

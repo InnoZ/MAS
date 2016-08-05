@@ -26,18 +26,6 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class CountsFromNetworkShapefile {
 
-	enum TrafficGraph{
-		
-		equil(new double[]{1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24,1/24});
-		
-		double[] p;
-		
-		TrafficGraph(double[] hourlyPercentage){
-			this.p = hourlyPercentage;
-		}
-		
-	}
-	
 	public static void main(String args[]){
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
@@ -48,7 +36,7 @@ public class CountsFromNetworkShapefile {
 	
 	public void run(final Scenario scenario, String inputShapefile, String outputCountsFile){
 		
-		this.run(scenario, inputShapefile, outputCountsFile, "equil");
+		this.run(scenario, inputShapefile, outputCountsFile, "uniform");
 		
 	}
 	
@@ -79,7 +67,8 @@ public class CountsFromNetworkShapefile {
 		
 		for(CountsLink cl : countsLinks){
 			
-			Link l = ((NetworkImpl)scenario.getNetwork()).getNearestLinkExactly(transformation.transform(MGC.point2Coord(cl.geometry.getCentroid())));
+			Link l = ((NetworkImpl)scenario.getNetwork()).getNearestLinkExactly(transformation.transform(MGC.point2Coord(
+					cl.geometry.getCentroid())));
 			
 			if(!visitedLinkIds.contains(l.getId())){
 
@@ -110,7 +99,7 @@ public class CountsFromNetworkShapefile {
 		
 		for(int i = 0; i < hourlyVolumes.length; i++){
 			
-			hourlyVolumes[i] = dtv * graph.p[i];
+			hourlyVolumes[i] = dtv * graph.perc[i];
 			
 		}
 		
@@ -130,6 +119,150 @@ public class CountsFromNetworkShapefile {
 			this.dtv = dtv;
 			this.geometry = geometry;
 			
+		}
+		
+	}
+	
+	enum TrafficGraph{
+		
+		// types
+		uniform(new double[]{
+			1/24,1/24,1/24,1/24,1/24,1/24,
+			1/24,1/24,1/24,1/24,1/24,1/24,
+			1/24,1/24,1/24,1/24,1/24,1/24,
+			1/24,1/24,1/24,1/24,1/24,1/24
+		}),
+		
+		a(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		b(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		c(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		d(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		e(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		f(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		g(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		h(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		i(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		j(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		k(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		l(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		m(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		n(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		o(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		p(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		q(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		}),
+		
+		r(new double[]{
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0,
+			0,0,0,0,0,0
+		});
+		
+		double[] perc;
+		
+		TrafficGraph(double[] hourlyPercentage){
+			this.perc = hourlyPercentage;
 		}
 		
 	}
