@@ -39,7 +39,7 @@ public final class Configuration {
 	
 	public static final String ONLY_WORKING_DAYS = "onlyWorkingDays";
 	public static final String POPULATION_TYPE = "populationType";
-	public static final String USE_VEHICLES = "useVehicles";
+	public static final String VEHICLES_SOURCE = "vehiclesSourec";
 	public static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
 	public static final String LOD_NETWORK = "networkDetail";
 	public static final String DEMAND_DATA_SOURCE = "demandSource";
@@ -74,7 +74,9 @@ public final class Configuration {
 	
 	ActivityLocations actLocs = ActivityLocations.buildings;
 	
-	boolean useVehicles = false;
+	VehicleSource vehSource = VehicleSource.matsim;
+	
+//	boolean useVehicles = false;
 	boolean onlyWorkingDays = true;
 	boolean useTransit = false;
 	
@@ -162,7 +164,7 @@ public final class Configuration {
 		this.popSource = PopulationSource.survey;
 		this.popSourceV = PopulationSource.none;
 		this.popType = PopulationType.households;
-		this.useVehicles = false;
+		this.vehSource = VehicleSource.matsim;
 		this.onlyWorkingDays = true;
 		this.actLocs = ActivityLocations.buildings;
 		this.adminUnits = new HashMap<String, Configuration.AdminUnitEntry>();
@@ -236,7 +238,7 @@ public final class Configuration {
 		}
 		
 		// Non-generic cars can only be used along w/ households.
-		if(!this.popType.equals(PopulationType.households) && this.useVehicles){
+		if(!this.popType.equals(PopulationType.households) && this.vehSource.equals(VehicleSource.survey)){
 			
 			validationError = true;
 			log.error("You disabled the use of households data but enabled cars. This won't work!");
@@ -418,8 +420,8 @@ public final class Configuration {
 	 * 
 	 * @return {@code True} if vehicles from mobility surveys should be used, {@code false} otherwise (= generic vehicles}.
 	 */
-	public boolean isUsingVehicles(){
-		return this.useVehicles;
+	public VehicleSource getVehicleSource(){
+		return this.vehSource;
 	}
 	
 	/**
@@ -655,7 +657,7 @@ public final class Configuration {
 		map.put(ACTIVITY_LOCATIONS_TYPE, ActivityLocations.buildings.name());
 		map.put(POPULATION_TYPE, this.popType.name());
 		map.put(ONLY_WORKING_DAYS, Boolean.toString(this.onlyWorkingDays));
-		map.put(USE_VEHICLES, Boolean.toString(this.useVehicles));
+		map.put(VEHICLES_SOURCE, this.vehSource.name());
 		map.put(LOCAL_PORT, Integer.toString(this.localPort));
 		map.put(WRITE_DB_OUTPUT, Boolean.toString(this.writeDatabaseTables));
 		map.put(N_THREADS, Integer.toString(numberOfThreads));
@@ -682,7 +684,7 @@ public final class Configuration {
 		map.put(ACTIVITY_LOCATIONS_TYPE, "'Yes' means: Demand is spatially distributed on the level of individual buildings. If switched to 'no', activities will be randomly distributed in landuse areas. Default: yes.");
 		map.put(POPULATION_TYPE, "Defines the type of population created. Possible values are 'persons' and 'households' (default).");
 		map.put(ONLY_WORKING_DAYS, "Defines if all days or only working days (Mo-Fr) should be used for generating plans. Default: yes.");
-		map.put(USE_VEHICLES, "Defines if household vehicles should be created or not. This only works, if the population type is 'households'. Default: no.");
+		map.put(VEHICLES_SOURCE, "Defines if household vehicles should be created from survey or not. This only works, if the population type is 'households'. Default: 'matsim' (i.e. use MATSim default vehicles).");
 		map.put(LOCAL_PORT, "The local network port for the ssh connection.");
 		map.put(WRITE_DB_OUTPUT, "Defines if the data created according to this configuration should be written into database tables or not. Default: no.");
 		map.put(N_THREADS, "Number of threads that are executed at the same time. Deault value is '1'.");

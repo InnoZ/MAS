@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.PopulationType;
+import com.innoz.toolbox.config.Configuration.VehicleSource;
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.task.ConvertToPlansTask;
 import com.innoz.toolbox.io.database.task.HouseholdRemovalTask;
@@ -80,7 +81,7 @@ public class SurveyDatabaseParserV2 {
 				new ReadWayDatabaseTask(constants).parse(connection, configuration.isOnlyUsingWorkingDays(),
 						container);
 				
-				if(configuration.isUsingVehicles() && configuration.getDatasource().equals("mid")){
+				if(configuration.getVehicleSource().equals(VehicleSource.survey) && configuration.getDatasource().equals("mid")){
 				
 					log.info("Creating survey cars...");
 					
@@ -91,10 +92,19 @@ public class SurveyDatabaseParserV2 {
 				process(container);
 				
 				log.info("Conversion statistics:");
-				log.info("#Households in survey: " + container.getHouseholds().size());
+				
+				if(container.getHouseholds() != null){
+					
+					log.info("#Households in survey: " + container.getHouseholds().size());
+					
+				}
+				
 				log.info("#Persons in survey   : " + container.getPersons().size());
-				if(configuration.isUsingVehicles()){
+				
+				if(container.getVehicles() != null){
+				
 					log.info("#Vehicles in survey  : " + container.getVehicles().size());
+					
 				}
 				
 				connection.close();

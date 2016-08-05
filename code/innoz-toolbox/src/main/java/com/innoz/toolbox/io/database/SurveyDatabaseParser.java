@@ -20,6 +20,7 @@ import org.matsim.core.utils.misc.Time;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.PopulationType;
+import com.innoz.toolbox.config.Configuration.VehicleSource;
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.handler.DefaultHandler;
 import com.innoz.toolbox.io.database.handler.HouseholdIdHandler;
@@ -108,7 +109,7 @@ public class SurveyDatabaseParser {
 				
 				parseWaysDatabase(connection, configuration.isOnlyUsingWorkingDays(), container);
 				
-				if(configuration.isUsingVehicles() && configuration.getDatasource().equals("mid")){
+				if(configuration.getVehicleSource().equals(VehicleSource.survey) && configuration.getDatasource().equals("mid")){
 				
 					log.info("Creating survey cars...");
 					
@@ -117,9 +118,11 @@ public class SurveyDatabaseParser {
 				}
 				
 				log.info("Conversion statistics:");
-				log.info("#Households in survey: " + container.getHouseholds().size());
+				if(container.getHouseholds() != null){
+					log.info("#Households in survey: " + container.getHouseholds().size());
+				}
 				log.info("#Persons in survey   : " + container.getPersons().size());
-				if(configuration.isUsingVehicles()){
+				if(container.getVehicles() != null){
 					log.info("#Vehicles in survey  : " + container.getVehicles().size());
 				}
 				

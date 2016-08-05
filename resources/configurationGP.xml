@@ -32,8 +32,8 @@
 	<surveyData>
 		<activityLocationsType v="buildings" />
 		<populationType v="households" />
+		<vehiclesSource v="matsim" />
 		<onlyWorkingDays v="true"/>
-		<useVehicles v="false" />
 	</surveyData>
 
 	<database>

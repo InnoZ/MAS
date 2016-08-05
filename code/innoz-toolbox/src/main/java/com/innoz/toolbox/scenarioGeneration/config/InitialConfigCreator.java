@@ -4,6 +4,7 @@ import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.config.Configuration.Subpopulations;
+import com.innoz.toolbox.config.Configuration.VehicleSource;
 import com.innoz.toolbox.scenarioGeneration.population.mobilityAttitude.MobilityAttitudeGroups;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 
@@ -59,7 +60,7 @@ public class InitialConfigCreator {
 		config.qsim().setStorageCapFactor(configuration.getScaleFactor());
 
 		// If non-generic vehicles are used, adapt the parameters that define the usage in MATSim
-		if(configuration.isUsingVehicles()){
+		if(configuration.getVehicleSource().equals(VehicleSource.survey)){
 			
 			config.qsim().setVehiclesSource(VehiclesSource.fromVehiclesData);
 			config.vehicles().setVehiclesFile(configuration.getOutputDirectory() + "vehicles.xml.gz");

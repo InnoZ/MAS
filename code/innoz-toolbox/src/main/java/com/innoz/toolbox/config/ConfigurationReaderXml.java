@@ -16,6 +16,7 @@ import com.innoz.toolbox.config.Configuration.AdminUnitEntry;
 import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.config.Configuration.Subpopulations;
+import com.innoz.toolbox.config.Configuration.VehicleSource;
 
 public class ConfigurationReaderXml extends DefaultHandler {
 	
@@ -101,9 +102,9 @@ public class ConfigurationReaderXml extends DefaultHandler {
 			
 			this.configuration.onlyWorkingDays = Boolean.parseBoolean(attributes.getValue("v"));
 			
-		} else if(qName.equalsIgnoreCase(Configuration.USE_VEHICLES)){
+		} else if(qName.equalsIgnoreCase(Configuration.VEHICLES_SOURCE)){
 			
-			this.configuration.useVehicles = Boolean.parseBoolean(attributes.getValue("v"));
+			this.configuration.vehSource = VehicleSource.valueOf(attributes.getValue("v"));
 			
 		} else if(qName.equalsIgnoreCase(Configuration.LOCAL_PORT)){
 			

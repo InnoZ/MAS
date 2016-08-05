@@ -32,6 +32,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.config.Configuration.Subpopulations;
+import com.innoz.toolbox.config.Configuration.VehicleSource;
 import com.innoz.toolbox.io.database.SurveyDatabaseParserV2;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
@@ -195,7 +196,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				}
 				
 				// If we model non-generic cars, create all cars that were reported in the survey and add them to the household
-				if(configuration.isUsingVehicles()){
+				if(configuration.getVehicleSource().equals(VehicleSource.survey)){
 					
 					createSurveyVehicles(container, template,
 							household);

@@ -2,6 +2,7 @@ package com.innoz.toolbox.scenarioGeneration.population.surveys;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.PopulationType;
+import com.innoz.toolbox.config.Configuration.VehicleSource;
 import com.innoz.toolbox.scenarioGeneration.population.utils.HashGenerator;
 import com.innoz.toolbox.scenarioGeneration.utils.Hydrograph;
 import com.innoz.toolbox.utils.matsim.RecursiveStatsContainer;
@@ -42,7 +43,7 @@ public class SurveyDataContainer {
 			this.households = new HashMap<String, SurveyHousehold>();
 		}
 		
-		if(configuration.isUsingVehicles()){
+		if(configuration.getVehicleSource().equals(VehicleSource.survey)){
 			this.vehicles = new HashMap<String, SurveyVehicle>();
 		}
 		

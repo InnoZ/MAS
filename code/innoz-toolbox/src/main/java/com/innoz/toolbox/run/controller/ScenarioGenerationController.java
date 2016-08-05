@@ -27,6 +27,7 @@ import com.vividsolutions.jts.io.ParseException;
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.config.Configuration.PopulationType;
+import com.innoz.toolbox.config.Configuration.VehicleSource;
 import com.innoz.toolbox.io.BbsrDataReader;
 import com.innoz.toolbox.io.database.DatabaseReader;
 import com.innoz.toolbox.io.database.DatabaseUpdater;
@@ -109,7 +110,7 @@ public class ScenarioGenerationController implements DefaultController {
 					
 				}
 				
-				if(configuration.isUsingVehicles()){
+				if(configuration.getVehicleSource().equals(VehicleSource.survey)){
 	
 					new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration
 							.getOutputDirectory() + "vehicles.xml.gz");
