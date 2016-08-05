@@ -26,6 +26,7 @@ import com.vividsolutions.jts.io.ParseException;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.PopulationSource;
+import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.io.BbsrDataReader;
 import com.innoz.toolbox.io.database.DatabaseReader;
 import com.innoz.toolbox.io.database.DatabaseUpdater;
@@ -101,7 +102,7 @@ public class ScenarioGenerationController implements DefaultController {
 						getPersonAttributes()).writeFile(configuration.getOutputDirectory()
 								+ "personAttributes.xml.gz");
 					
-				if(configuration.isUsingHouseholds()){
+				if(configuration.getPopulationType().equals(PopulationType.households)){
 					
 					new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration
 							.getOutputDirectory() + "households.xml.gz");

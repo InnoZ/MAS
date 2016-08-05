@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import org.apache.log4j.Logger;
 
 import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.task.ConvertToPlansTask;
 import com.innoz.toolbox.io.database.task.HouseholdRemovalTask;
@@ -55,12 +56,14 @@ public class SurveyDatabaseParserV2 {
 		
 			if(connection != null){
 				
-				if(configuration.isUsingHouseholds()){
+				boolean isUsingHouseholds = configuration.getPopulationType().equals(PopulationType.households);
+				
+				if(isUsingHouseholds){
 					
 					log.info("Creating survey households...");
 					
-					new ReadHouseholdDatabaseTask(constants, geoinformation).parse(connection, configuration.isUsingHouseholds(),
-						configuration.isOnlyUsingWorkingDays(), container);
+					new ReadHouseholdDatabaseTask(constants, geoinformation).parse(connection, 
+							configuration.isOnlyUsingWorkingDays(), container);
 						
 					log.info("Read " + container.getHouseholds().size() + " households...");
 					
@@ -68,15 +71,14 @@ public class SurveyDatabaseParserV2 {
 				
 				log.info("Creating survey persons...");
 				
-				new ReadPersonDatabaseTask(constants).parse(connection, configuration.isUsingHouseholds(),
-						configuration.isOnlyUsingWorkingDays(), container);
+				new ReadPersonDatabaseTask(constants).parse(connection, configuration.isOnlyUsingWorkingDays(), container);
 				
 				log.info("Read " + container.getPersons().size() + " persons...");
 				
 				log.info("Creating survey ways...");
 
-				new ReadWayDatabaseTask(constants).parse(connection, configuration.isUsingHouseholds(),
-						configuration.isOnlyUsingWorkingDays(), container);
+				new ReadWayDatabaseTask(constants).parse(connection, configuration.isOnlyUsingWorkingDays(),
+						container);
 				
 				if(configuration.isUsingVehicles() && configuration.getDatasource().equals("mid")){
 				

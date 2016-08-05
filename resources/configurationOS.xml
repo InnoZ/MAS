@@ -42,7 +42,7 @@
 
 	<surveyData>
 		<activityLocationsType v="buildings" />
-		<useHouseholds v="true" />
+		<populationType v="households" />
 		<onlyWorkingDays v="true"/>
 		<useVehicles v="false" />
 	</surveyData>

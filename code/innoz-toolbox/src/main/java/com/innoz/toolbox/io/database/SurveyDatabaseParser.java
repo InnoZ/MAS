@@ -19,6 +19,7 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.utils.misc.Time;
 
 import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.handler.DefaultHandler;
 import com.innoz.toolbox.io.database.handler.HouseholdIdHandler;
@@ -90,7 +91,7 @@ public class SurveyDatabaseParser {
 		
 			if(connection != null){
 				
-				if(configuration.isUsingHouseholds()){
+				if(configuration.getPopulationType().equals(PopulationType.households)){
 					
 					log.info("Creating survey households...");
 					
@@ -100,7 +101,7 @@ public class SurveyDatabaseParser {
 				
 				log.info("Creating survey persons...");
 				
-				parsePersonsDatabase(connection, configuration.isUsingHouseholds(),
+				parsePersonsDatabase(connection, configuration.getPopulationType().equals(PopulationType.households),
 						configuration.isOnlyUsingWorkingDays(), container);
 				
 				log.info("Creating survey ways...");

@@ -2,6 +2,7 @@ package com.innoz.toolbox.scenarioGeneration.config;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.PopulationSource;
+import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.config.Configuration.Subpopulations;
 import com.innoz.toolbox.scenarioGeneration.population.mobilityAttitude.MobilityAttitudeGroups;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
@@ -33,7 +34,7 @@ public class InitialConfigCreator {
 		}
 	
 		// If households are used, adapt the parameters that define the usage in MATSim
-		if(configuration.isUsingHouseholds()){
+		if(configuration.getPopulationType().equals(PopulationType.households)){
 			
 			config.households().setInputFile(configuration.getOutputDirectory() + "households.xml.gz");
 			

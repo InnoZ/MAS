@@ -36,8 +36,7 @@ public class ReadHouseholdDatabaseTask extends DatabaseTask {
 	}
 	
 	@Override
-	public void parse(Connection connection, boolean isUsingHouseholds, boolean onlyWorkingDays,
-			SurveyDataContainer container) throws SQLException{
+	public void parse(Connection connection, boolean onlyWorkingDays, SurveyDataContainer container) throws SQLException{
 		
 		Statement statement = connection.createStatement();
 		statement.setFetchSize(2000);

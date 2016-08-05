@@ -38,7 +38,7 @@ public final class Configuration {
 	public static final String CREATE_TRANSIT = "createTransit";
 	
 	public static final String ONLY_WORKING_DAYS = "onlyWorkingDays";
-	public static final String USE_HOUSEHOLDS = "useHouseholds";
+	public static final String POPULATION_TYPE = "populationType";
 	public static final String USE_VEHICLES = "useVehicles";
 	public static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
 	public static final String LOD_NETWORK = "networkDetail";
@@ -65,6 +65,8 @@ public final class Configuration {
 	String crs = "EPSG:32632";
 	String outputDirectory = ".";
 	
+	PopulationType popType = PopulationType.households;
+	
 	PopulationSource popSource = PopulationSource.survey;
 	PopulationSource popSourceV = PopulationSource.none;
 	
@@ -72,7 +74,6 @@ public final class Configuration {
 	
 	ActivityLocations actLocs = ActivityLocations.buildings;
 	
-	boolean useHouseholds = true;
 	boolean useVehicles = false;
 	boolean onlyWorkingDays = true;
 	boolean useTransit = false;
@@ -102,6 +103,7 @@ public final class Configuration {
 	String databaseUser = "postgres";
 	String userPassword = "postgres";
 	
+	public enum PopulationType{persons,households};
 	public enum PopulationSource{dummy,commuter,survey,none};
 	public enum Subpopulations{none,mobility_attitude};
 	public enum VehicleSource{matsim, survey};
@@ -158,7 +160,8 @@ public final class Configuration {
 		this.crs = "EPSG:32632";
 		this.outputDirectory = null;
 		this.popSource = PopulationSource.survey;
-		this.useHouseholds = true;
+		this.popSourceV = PopulationSource.none;
+		this.popType = PopulationType.households;
 		this.useVehicles = false;
 		this.onlyWorkingDays = true;
 		this.actLocs = ActivityLocations.buildings;
@@ -195,7 +198,7 @@ public final class Configuration {
 			case OVERWRITE_FILES: this.overwriteExistingFiles = (Boolean) value;
 				break;
 				
-			case USE_HOUSEHOLDS: this.useHouseholds = (Boolean) value;
+			case POPULATION_TYPE: this.popType = PopulationType.valueOf((String) value);
 				break;
 				
 			case DB_SCHEMA_NAME: this.dbNameSpace = (String) value;
@@ -233,7 +236,7 @@ public final class Configuration {
 		}
 		
 		// Non-generic cars can only be used along w/ households.
-		if(!this.useHouseholds && this.useVehicles){
+		if(!this.popType.equals(PopulationType.households) && this.useVehicles){
 			
 			validationError = true;
 			log.error("You disabled the use of households data but enabled cars. This won't work!");
@@ -351,8 +354,8 @@ public final class Configuration {
 	 * 
 	 * @return {@code True} if households are used in demand generation, {@code false} otherwise.
 	 */
-	public boolean isUsingHouseholds(){
-		return this.useHouseholds;
+	public PopulationType getPopulationType(){
+		return this.popType;
 	}
 	
 	/**
@@ -650,7 +653,7 @@ public final class Configuration {
 		map.put(DEMAND_DATA_SOURCE, this.demandSource);
 		map.put(SUBPOPULATIONS_TYPE, this.subpopulation.name());
 		map.put(ACTIVITY_LOCATIONS_TYPE, ActivityLocations.buildings.name());
-		map.put(USE_HOUSEHOLDS, Boolean.toString(this.useHouseholds));
+		map.put(POPULATION_TYPE, this.popType.name());
 		map.put(ONLY_WORKING_DAYS, Boolean.toString(this.onlyWorkingDays));
 		map.put(USE_VEHICLES, Boolean.toString(this.useVehicles));
 		map.put(LOCAL_PORT, Integer.toString(this.localPort));
@@ -677,9 +680,9 @@ public final class Configuration {
 		map.put(DEMAND_DATA_SOURCE, "The data source for demand generation. Only applies to population type 'survey' at the moment. Default is 'mid', for Osnabrück, also 'srv' is possible.");
 		map.put(SUBPOPULATIONS_TYPE, "Defines the type of subpopulation that is used to classify persons. Possible values are 'none' and 'mobility_attitude' (only valid for Osnabrück).");
 		map.put(ACTIVITY_LOCATIONS_TYPE, "'Yes' means: Demand is spatially distributed on the level of individual buildings. If switched to 'no', activities will be randomly distributed in landuse areas. Default: yes.");
-		map.put(USE_HOUSEHOLDS, "Defines if househols should be created or not. Default: yes.");
+		map.put(POPULATION_TYPE, "Defines the type of population created. Possible values are 'persons' and 'households' (default).");
 		map.put(ONLY_WORKING_DAYS, "Defines if all days or only working days (Mo-Fr) should be used for generating plans. Default: yes.");
-		map.put(USE_VEHICLES, "Defines if household vehicles should be created or not. This only works, if 'useHouseholds' is set to 'true'. Default: no.");
+		map.put(USE_VEHICLES, "Defines if household vehicles should be created or not. This only works, if the population type is 'households'. Default: no.");
 		map.put(LOCAL_PORT, "The local network port for the ssh connection.");
 		map.put(WRITE_DB_OUTPUT, "Defines if the data created according to this configuration should be written into database tables or not. Default: no.");
 		map.put(N_THREADS, "Number of threads that are executed at the same time. Deault value is '1'.");

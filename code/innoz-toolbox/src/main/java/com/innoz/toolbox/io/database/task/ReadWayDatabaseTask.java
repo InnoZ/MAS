@@ -10,10 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 import com.innoz.toolbox.io.SurveyConstants;
-import com.innoz.toolbox.io.database.SurveyDatabaseParser;
 import com.innoz.toolbox.io.database.handler.DefaultHandler;
 import com.innoz.toolbox.io.database.handler.LegDestinationHandler;
 import com.innoz.toolbox.io.database.handler.LegDistanceHandler;
@@ -29,10 +26,6 @@ import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 
 public class ReadWayDatabaseTask extends DatabaseTask {
 
-	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
-	private static final Logger log = Logger.getLogger(SurveyDatabaseParser.class);
-	/////////////////////////////////////////////////////////////////////////////////////////
-	
 	public ReadWayDatabaseTask(SurveyConstants constants){
 		
 		super(constants);
@@ -49,8 +42,7 @@ public class ReadWayDatabaseTask extends DatabaseTask {
 	}
 	
 	@Override
-	public void parse(Connection connection, boolean isUsingHouseholds, boolean onlyWorkingDays,
-			SurveyDataContainer container) throws SQLException{
+	public void parse(Connection connection, boolean onlyWorkingDays, SurveyDataContainer container) throws SQLException{
 		
 		Map<String, List<SurveyStage>> personId2Stages = new HashMap<>();
 		
@@ -62,14 +54,12 @@ public class ReadWayDatabaseTask extends DatabaseTask {
 		
 		String table = this.constants.getNamespace().equals("mid") ? "mid2008.ways_raw" : "srv2013.ways";
 		
-		if(isUsingHouseholds){
-			
-			q = "select * from " + table;
-			if(onlyWorkingDays){
-				q += " where " + this.constants.dayOfTheWeek() + " < 6";
-			}
-			
-			
+		q = "select * from " + table;
+		
+		if(onlyWorkingDays){
+		
+			q += " where " + this.constants.dayOfTheWeek() + " < 6";
+
 		}
 		
 		resultSet = statement.executeQuery(q);

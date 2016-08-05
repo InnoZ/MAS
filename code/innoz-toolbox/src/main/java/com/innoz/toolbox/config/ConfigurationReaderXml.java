@@ -1,10 +1,5 @@
 package com.innoz.toolbox.config;
 
-import com.innoz.toolbox.config.Configuration.ActivityLocations;
-import com.innoz.toolbox.config.Configuration.AdminUnitEntry;
-import com.innoz.toolbox.config.Configuration.PopulationSource;
-import com.innoz.toolbox.config.Configuration.Subpopulations;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -15,6 +10,12 @@ import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+
+import com.innoz.toolbox.config.Configuration.ActivityLocations;
+import com.innoz.toolbox.config.Configuration.AdminUnitEntry;
+import com.innoz.toolbox.config.Configuration.PopulationSource;
+import com.innoz.toolbox.config.Configuration.PopulationType;
+import com.innoz.toolbox.config.Configuration.Subpopulations;
 
 public class ConfigurationReaderXml extends DefaultHandler {
 	
@@ -92,9 +93,9 @@ public class ConfigurationReaderXml extends DefaultHandler {
 			
 			this.configuration.actLocs = ActivityLocations.valueOf(attributes.getValue("v"));
 			
-		} else if(qName.equalsIgnoreCase(Configuration.USE_HOUSEHOLDS)){
+		} else if(qName.equalsIgnoreCase(Configuration.POPULATION_TYPE)){
 			
-			this.configuration.useHouseholds = Boolean.parseBoolean(attributes.getValue("v"));
+			this.configuration.popType = PopulationType.valueOf(attributes.getValue("v"));
 			
 		} else if(qName.equalsIgnoreCase(Configuration.ONLY_WORKING_DAYS)){
 			

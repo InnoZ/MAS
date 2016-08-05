@@ -30,6 +30,7 @@ import org.matsim.vehicles.VehicleType;
 import com.vividsolutions.jts.geom.Geometry;
 
 import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.config.Configuration.Subpopulations;
 import com.innoz.toolbox.io.database.SurveyDatabaseParserV2;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
@@ -81,7 +82,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		parser.run(configuration, container, this.geoinformation);
 		
 		// Choose the method for demand generation that has been specified in the configuration
-		if(configuration.isUsingHouseholds()){
+		if(configuration.getPopulationType().equals(PopulationType.households)){
 		
 			createHouseholds(configuration, container, ids);
 			

@@ -23,7 +23,9 @@ import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 public class ReadPersonDatabaseTask extends DatabaseTask {
 
 	public ReadPersonDatabaseTask(SurveyConstants constants) {
+		
 		super(constants);
+		
 		this.handlers = new HashSet<>();
 		this.handlers.add(new PersonAgeHandler());
 		this.handlers.add(new PersonCarAvailabilityHandler());
@@ -32,10 +34,11 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 		this.handlers.add(new PersonLicenseHandler());
 		this.handlers.add(new PersonSexHandler());
 		this.handlers.add(new PersonWeightHandler());
+	
 	}
 
 	@Override
-	public void parse(Connection connection, boolean isUsingHouseholds, boolean onlyWorkingDays, SurveyDataContainer container)
+	public void parse(Connection connection, boolean onlyWorkingDays, SurveyDataContainer container)
 			throws SQLException {
 		
 		Statement statement = connection.createStatement();
@@ -80,7 +83,12 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 				}
 				
 				container.addPerson(person);
-				container.getHouseholds().get(hhId).getMemberIds().add(person.getId());
+				
+				if(container.getHouseholds() != null){
+					
+					container.getHouseholds().get(hhId).getMemberIds().add(person.getId());
+					
+				}
 				
 			}
 			
