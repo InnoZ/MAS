@@ -2,6 +2,7 @@ package com.innoz.toolbox.scenarioGeneration.config;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.PopulationType;
+import com.innoz.toolbox.config.Configuration.Subpopulations;
 import com.innoz.toolbox.scenarioGeneration.population.mobilityAttitude.MobilityAttitudeGroups;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 
@@ -38,7 +39,7 @@ public class InitialConfigCreator {
 			
 		}
 
-		if(configuration.isUsingMobilityAttitudeGroups()){
+		if(configuration.getSubpopulationsType().equals(Subpopulations.mobility_attitude)){
 			
 			MobilityAttitudeGroups.addScoringParameterSets(config);
 			

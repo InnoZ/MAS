@@ -34,7 +34,7 @@ public final class Configuration {
 	public static final String POPULATION_TYPE = "populationType";
 	public static final String POPULATION_TYPE_V = "populationTypeVicinity";
 	public static final String SCALE_FACTOR = "scaleFactor";
-	public static final String USE_BUILDINGS = "useBuildings";
+	public static final String ACTIVITY_LOCATIONS_TYPE = "activityLocationsType";
 	public static final String CREATE_TRANSIT = "createTransit";
 	
 	public static final String ONLY_WORKING_DAYS = "onlyWorkingDays";
@@ -44,7 +44,7 @@ public final class Configuration {
 	public static final String LOD_NETWORK = "networkDetail";
 	public static final String DEMAND_DATA_SOURCE = "demandSource";
 	
-	public static final String USE_MAG = "useMobilityAttitudeGroups";
+	public static final String SUBPOPULATIONS_TYPE = "subpopulationsType";
 	
 	public static final String LOCAL_PORT = "localPort";
 	public static final String DB_SCHEMA_NAME = "databaseSchemaName";
@@ -64,19 +64,20 @@ public final class Configuration {
 	String vicinityIds;
 	String crs = "EPSG:32632";
 	String outputDirectory = ".";
+	
 	PopulationType popType = PopulationType.survey;
 	PopulationType popTypeV = PopulationType.none;
+	
+	Subpopulations subpopulation = Subpopulations.none;
+	
+	ActivityLocations actLocs = ActivityLocations.buildings;
 	
 	boolean useHouseholds = true;
 	boolean useVehicles = false;
 	boolean onlyWorkingDays = true;
-	boolean useBuildings = true;
-	boolean useMobilityAttitudeGroups = false;
 	boolean useTransit = false;
 	
 	String demandSource = "mid";
-	
-	int numberOfHouseholds = 0;
 	
 	Map<String,AdminUnitEntry> adminUnits;
 	
@@ -102,6 +103,8 @@ public final class Configuration {
 	String userPassword = "postgres";
 	
 	public enum PopulationType{dummy,commuter,survey,none};
+	public enum Subpopulations{none,mobility_attitude};
+	public enum ActivityLocations{landuse, buildings};
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
 	/**
@@ -157,8 +160,7 @@ public final class Configuration {
 		this.useHouseholds = true;
 		this.useVehicles = false;
 		this.onlyWorkingDays = true;
-		this.useBuildings = true;
-		this.numberOfHouseholds = 0;
+		this.actLocs = ActivityLocations.buildings;
 		this.adminUnits = new HashMap<String, Configuration.AdminUnitEntry>();
 		this.randomSeed = 4711L;
 		this.scaleFactor = 1.0d;
@@ -237,7 +239,7 @@ public final class Configuration {
 			
 		}
 		
-		if((this.useMobilityAttitudeGroups || this.demandSource.equals("srv")) && !this.surveyAreaIds.contains("03404")){
+		if((this.subpopulation.equals(Subpopulations.mobility_attitude) || this.demandSource.equals("srv")) && !this.surveyAreaIds.contains("03404")){
 			
 			validationError = true;
 			log.error("SrV data as well as data for mobility attitude groups (Mobilitätstypen) are only valid for Osnabrück!");
@@ -418,12 +420,14 @@ public final class Configuration {
 	
 	/**
 	 * 
-	 * Getter for the {@code isUsingBuildings} parameter.
+	 * Getter for the {@code activity locations type} parameter.
 	 * 
-	 * @return {@code True} if buildings should be used to locate activities, {@code false} otherwise (= only landuse data).
+	 * @return {@code ActivityLocations} type that is used to locate activity coordinates Default is 'buildings'.
 	 */
-	public boolean isUsingBuildings(){
-		return this.useBuildings;
+	public ActivityLocations getActivityLocationsType(){
+		
+		return this.actLocs;
+		
 	}
 	
 	/**
@@ -446,16 +450,6 @@ public final class Configuration {
 		return this.remotePort;
 	}
 	
-	/**
-	 * 
-	 * Getter for the number of households in the survey area.
-	 * 
-	 * @return The number of households.
-	 */
-	public int getNumberOfHouseholds(){
-		return this.numberOfHouseholds;
-	}
-
 	/**
 	 * 
 	 * Getter for the random seed used for the random number generator.
@@ -541,15 +535,6 @@ public final class Configuration {
 			log.info(entry.getKey() + "\t" + entry.getValue());
 			
 		}
-//		log.info("surveyAreaId(s):           " + this.surveyAreaIds);
-//		log.info("vicinityId(s):             " + this.vicinityIds);
-//		log.info("coordinateReferenceSystem: " + this.crs);
-//		log.info("outputDirectory:           " + this.outputDirectory);
-//		log.info("populationType:            " + this.popType.name());
-//		log.info("onlyWorkingDays:           " + this.onlyWorkingDays);
-//		log.info("useBuildings:              " + this.useBuildings);
-//		log.info("useMiDHouseholds:          " + this.useHouseholds);
-//		log.info("useMiDVehicles:            " + this.useVehicles);
 		
 	}
 	
@@ -628,9 +613,9 @@ public final class Configuration {
 		return this.demandSource;
 	}
 	
-	public boolean isUsingMobilityAttitudeGroups(){
+	public Subpopulations getSubpopulationsType(){
 		
-		return this.useMobilityAttitudeGroups;
+		return this.subpopulation;
 		
 	}
 	
@@ -662,8 +647,8 @@ public final class Configuration {
 		map.put(OUTPUT_DIR, this.outputDirectory);
 		map.put(OVERWRITE_FILES, Boolean.toString(this.overwriteExistingFiles));
 		map.put(DEMAND_DATA_SOURCE, this.demandSource);
-		map.put(USE_MAG, Boolean.toString(this.useMobilityAttitudeGroups));
-		map.put(USE_BUILDINGS, Boolean.toString(this.useBuildings));
+		map.put(SUBPOPULATIONS_TYPE, this.subpopulation.name());
+		map.put(ACTIVITY_LOCATIONS_TYPE, ActivityLocations.buildings.name());
 		map.put(USE_HOUSEHOLDS, Boolean.toString(this.useHouseholds));
 		map.put(ONLY_WORKING_DAYS, Boolean.toString(this.onlyWorkingDays));
 		map.put(USE_VEHICLES, Boolean.toString(this.useVehicles));
@@ -689,8 +674,8 @@ public final class Configuration {
 		map.put(OUTPUT_DIR, "The directory containing all output files of the scenario generation process.");
 		map.put(OVERWRITE_FILES, "Switch to 'yes' to overwrite existing files in the output directory. Default: false.");
 		map.put(DEMAND_DATA_SOURCE, "The data source for demand generation. Only applies to population type 'survey' at the moment. Default is 'mid', for Osnabrück, also 'srv' is possible.");
-		map.put(USE_MAG, "Defines if mobility attitude groups (Mobilitätstypen) should be created as persons' subpopulation attributes. At the moment, this is only possible for Osnabrück!");
-		map.put(USE_BUILDINGS, "'Yes' means: Demand is spatially distributed on the level of individual buildings. If switched to 'no', activities will be randomly distributed in landuse areas. Default: yes.");
+		map.put(SUBPOPULATIONS_TYPE, "Defines the type of subpopulation that is used to classify persons. Possible values are 'none' and 'mobility_attitude' (only valid for Osnabrück).");
+		map.put(ACTIVITY_LOCATIONS_TYPE, "'Yes' means: Demand is spatially distributed on the level of individual buildings. If switched to 'no', activities will be randomly distributed in landuse areas. Default: yes.");
 		map.put(USE_HOUSEHOLDS, "Defines if househols should be created or not. Default: yes.");
 		map.put(ONLY_WORKING_DAYS, "Defines if all days or only working days (Mo-Fr) should be used for generating plans. Default: yes.");
 		map.put(USE_VEHICLES, "Defines if household vehicles should be created or not. This only works, if 'useHouseholds' is set to 'true'. Default: no.");

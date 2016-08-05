@@ -1,7 +1,9 @@
 package com.innoz.toolbox.config;
 
+import com.innoz.toolbox.config.Configuration.ActivityLocations;
 import com.innoz.toolbox.config.Configuration.AdminUnitEntry;
 import com.innoz.toolbox.config.Configuration.PopulationType;
+import com.innoz.toolbox.config.Configuration.Subpopulations;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,9 +88,9 @@ public class ConfigurationReaderXml extends DefaultHandler {
 			
 			this.configuration.outputDirectory = attributes.getValue("v");
 			
-		} else if(qName.equalsIgnoreCase(Configuration.USE_BUILDINGS)){
+		} else if(qName.equalsIgnoreCase(Configuration.ACTIVITY_LOCATIONS_TYPE)){
 			
-			this.configuration.useBuildings = Boolean.parseBoolean(attributes.getValue("v"));
+			this.configuration.actLocs = ActivityLocations.valueOf(attributes.getValue("v"));
 			
 		} else if(qName.equalsIgnoreCase(Configuration.USE_HOUSEHOLDS)){
 			
@@ -126,9 +128,9 @@ public class ConfigurationReaderXml extends DefaultHandler {
 			
 			this.configuration.demandSource = attributes.getValue("v");
 			
-		} else if(qName.equalsIgnoreCase(Configuration.USE_MAG)){
+		} else if(qName.equalsIgnoreCase(Configuration.SUBPOPULATIONS_TYPE)){
 
-			this.configuration.useMobilityAttitudeGroups = Boolean.parseBoolean(attributes.getValue("v"));
+			this.configuration.subpopulation = Subpopulations.valueOf(attributes.getValue("v"));
 			
 		} else if(qName.equalsIgnoreCase(Configuration.N_THREADS)){
 			

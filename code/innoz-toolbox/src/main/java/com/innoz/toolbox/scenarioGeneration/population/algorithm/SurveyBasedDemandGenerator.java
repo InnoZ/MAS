@@ -30,6 +30,7 @@ import org.matsim.vehicles.VehicleType;
 import com.vividsolutions.jts.geom.Geometry;
 
 import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.config.Configuration.Subpopulations;
 import com.innoz.toolbox.io.database.SurveyDatabaseParserV2;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
@@ -340,7 +341,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			personAttributes.putAttribute(person.getId().toString(), "FF_CARD", "true");
 		}
 		
-		if(configuration.isUsingMobilityAttitudeGroups()){
+		if(configuration.getSubpopulationsType().equals(Subpopulations.mobility_attitude)){
 			String mag = MobilityAttitudeGroups.assignPersonToGroup(person, random,
 					hhIncome, personAttributes);
 			if(mag != null){

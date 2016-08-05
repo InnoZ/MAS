@@ -3,6 +3,7 @@ package com.innoz.toolbox.run.parallelization;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.innoz.toolbox.config.Configuration.ActivityLocations;
 import com.innoz.toolbox.io.database.DatabaseReader;
 import com.innoz.toolbox.io.database.datasets.OsmDataset;
 import com.innoz.toolbox.io.database.datasets.OsmPointDataset;
@@ -89,7 +90,7 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 			
 			// Add the landuse geometry to the geoinformation if we have a valid activity option for it
 			
-			if(reader.getConfiguration().isUsingBuildings()){
+			if(reader.getConfiguration().getActivityLocationsType().equals(ActivityLocations.buildings)){
 				
 //				if(!this.reader.getGeoinformation().getSurveyAreaBoundingBox().contains(dataset.getGeometry()) ||
 //						!this.reader.getGeoinformation().getSurveyAreaBoundingBox().touches(dataset.getGeometry()) ||

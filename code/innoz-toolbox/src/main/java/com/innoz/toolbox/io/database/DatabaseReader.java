@@ -37,6 +37,7 @@ import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
 import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.config.Configuration.ActivityLocations;
 import com.innoz.toolbox.config.Configuration.AdminUnitEntry;
 import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.io.database.datasets.OsmPointDataset;
@@ -382,7 +383,7 @@ public class DatabaseReader {
 			// Read point geometries
 			readPointData(connection);
 			
-			if(configuration.isUsingBuildings()){
+			if(configuration.getActivityLocationsType().equals(ActivityLocations.buildings)){
 				
 				for(AdministrativeUnit au : this.geoinformation.getSubUnits().values()){
 					
