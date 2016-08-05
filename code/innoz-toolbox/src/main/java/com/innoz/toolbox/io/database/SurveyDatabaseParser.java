@@ -19,6 +19,7 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.utils.misc.Time;
 
 import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.config.Configuration.DayType;
 import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.config.Configuration.VehicleSource;
 import com.innoz.toolbox.io.SurveyConstants;
@@ -91,6 +92,8 @@ public class SurveyDatabaseParser {
 					configuration.getDatabaseUsername(), configuration.getDatabasePassword());
 		
 			if(connection != null){
+
+				boolean onlyWorkingDays = configuration.getUsedDayTypes().equals(DayType.weekday) ? true : false;
 				
 				if(configuration.getPopulationType().equals(PopulationType.households)){
 					
@@ -103,11 +106,11 @@ public class SurveyDatabaseParser {
 				log.info("Creating survey persons...");
 				
 				parsePersonsDatabase(connection, configuration.getPopulationType().equals(PopulationType.households),
-						configuration.isOnlyUsingWorkingDays(), container);
+						onlyWorkingDays, container);
 				
 				log.info("Creating survey ways...");
 				
-				parseWaysDatabase(connection, configuration.isOnlyUsingWorkingDays(), container);
+				parseWaysDatabase(connection, onlyWorkingDays, container);
 				
 				if(configuration.getVehicleSource().equals(VehicleSource.survey) && configuration.getDatasource().equals("mid")){
 				

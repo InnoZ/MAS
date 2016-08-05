@@ -21,6 +21,6 @@ public abstract class DatabaseTask implements Task {
 		
 	}
 	
-	abstract void parse(Connection connection, boolean onlyWorkingDays, SurveyDataContainer container) throws SQLException;
+	abstract void parse(Connection connection, SurveyDataContainer container) throws SQLException;
 	
 }

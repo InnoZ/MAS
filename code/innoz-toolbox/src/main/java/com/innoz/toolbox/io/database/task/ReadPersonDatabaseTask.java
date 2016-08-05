@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import com.innoz.toolbox.config.Configuration.DayType;
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.handler.DefaultHandler;
 import com.innoz.toolbox.io.database.handler.PersonAgeHandler;
@@ -21,10 +22,13 @@ import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContain
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 
 public class ReadPersonDatabaseTask extends DatabaseTask {
+	
+	private final DayType dayType;
 
-	public ReadPersonDatabaseTask(SurveyConstants constants) {
+	public ReadPersonDatabaseTask(SurveyConstants constants, DayType dayType) {
 		
 		super(constants);
+		this.dayType = dayType;
 		
 		this.handlers = new HashSet<>();
 		this.handlers.add(new PersonAgeHandler());
@@ -38,8 +42,7 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 	}
 
 	@Override
-	public void parse(Connection connection, boolean onlyWorkingDays, SurveyDataContainer container)
-			throws SQLException {
+	public void parse(Connection connection, SurveyDataContainer container) throws SQLException {
 		
 		Statement statement = connection.createStatement();
 		statement.setFetchSize(2000);
@@ -51,8 +54,10 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 		
 		q = "select * from " + table;
 		
-		if(onlyWorkingDays){
+		if(dayType.equals(DayType.weekday)){
 			q += " where " + this.constants.dayOfTheWeek() + " < 6";
+		} else if(dayType.equals(DayType.weekend)){
+			q += " where " + this.constants.dayOfTheWeek() + " > 5";
 		}
 		
 		q += ";";

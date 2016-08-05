@@ -63,8 +63,7 @@ public class SurveyDatabaseParserV2 {
 					
 					log.info("Creating survey households...");
 					
-					new ReadHouseholdDatabaseTask(constants, geoinformation).parse(connection, 
-							configuration.isOnlyUsingWorkingDays(), container);
+					new ReadHouseholdDatabaseTask(constants, geoinformation).parse(connection, container);
 						
 					log.info("Read " + container.getHouseholds().size() + " households...");
 					
@@ -72,14 +71,13 @@ public class SurveyDatabaseParserV2 {
 				
 				log.info("Creating survey persons...");
 				
-				new ReadPersonDatabaseTask(constants).parse(connection, configuration.isOnlyUsingWorkingDays(), container);
+				new ReadPersonDatabaseTask(constants, configuration.getUsedDayTypes()).parse(connection, container);
 				
 				log.info("Read " + container.getPersons().size() + " persons...");
 				
 				log.info("Creating survey ways...");
 
-				new ReadWayDatabaseTask(constants).parse(connection, configuration.isOnlyUsingWorkingDays(),
-						container);
+				new ReadWayDatabaseTask(constants, configuration.getUsedDayTypes()).parse(connection, container);
 				
 				if(configuration.getVehicleSource().equals(VehicleSource.survey) && configuration.getDatasource().equals("mid")){
 				

@@ -13,6 +13,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.innoz.toolbox.config.Configuration.ActivityLocations;
 import com.innoz.toolbox.config.Configuration.AdminUnitEntry;
+import com.innoz.toolbox.config.Configuration.DayType;
 import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.config.Configuration.Subpopulations;
@@ -98,9 +99,9 @@ public class ConfigurationReaderXml extends DefaultHandler {
 			
 			this.configuration.popType = PopulationType.valueOf(attributes.getValue("v"));
 			
-		} else if(qName.equalsIgnoreCase(Configuration.ONLY_WORKING_DAYS)){
+		} else if(qName.equalsIgnoreCase(Configuration.DAY_TYPES)){
 			
-			this.configuration.onlyWorkingDays = Boolean.parseBoolean(attributes.getValue("v"));
+			this.configuration.dayType = DayType.valueOf(attributes.getValue("v"));
 			
 		} else if(qName.equalsIgnoreCase(Configuration.VEHICLES_SOURCE)){
 			

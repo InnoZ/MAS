@@ -40,7 +40,7 @@ public final class Configuration {
 	public static final String POPULATION_SOURCE_V = "populationSourceVicinity";
 	public static final String VEHICLES_SOURCE = "vehiclesSource";
 	
-	public static final String ONLY_WORKING_DAYS = "onlyWorkingDays";
+	public static final String DAY_TYPES = "onlyWorkingDays";
 	public static final String POPULATION_TYPE = "populationType";
 	
 	public static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
@@ -78,8 +78,8 @@ public final class Configuration {
 	
 	VehicleSource vehSource = VehicleSource.matsim;
 	
-//	boolean useVehicles = false;
-	boolean onlyWorkingDays = true;
+	DayType dayType = DayType.weekday;
+	
 	boolean useTransit = false;
 	
 	String demandSource = "mid";
@@ -112,6 +112,7 @@ public final class Configuration {
 	public enum Subpopulations{none,mobility_attitude};
 	public enum VehicleSource{matsim, survey};
 	public enum ActivityLocations{landuse, buildings};
+	public enum DayType{weekday, weekend, all};
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
 	/**
@@ -167,7 +168,7 @@ public final class Configuration {
 		this.popSourceV = PopulationSource.none;
 		this.popType = PopulationType.households;
 		this.vehSource = VehicleSource.matsim;
-		this.onlyWorkingDays = true;
+		this.dayType = DayType.weekday;
 		this.actLocs = ActivityLocations.buildings;
 		this.adminUnits = new HashMap<String, Configuration.AdminUnitEntry>();
 		this.randomSeed = 4711L;
@@ -412,8 +413,8 @@ public final class Configuration {
 	 * 
 	 * @return {@code True} if only working days should be considered in demand generation, {@code false} otherwise.
 	 */
-	public boolean isOnlyUsingWorkingDays(){
-		return this.onlyWorkingDays;
+	public DayType getUsedDayTypes(){
+		return this.dayType;
 	}
 	
 	/**
@@ -658,7 +659,7 @@ public final class Configuration {
 		map.put(SUBPOPULATIONS_TYPE, this.subpopulation.name());
 		map.put(ACTIVITY_LOCATIONS_TYPE, ActivityLocations.buildings.name());
 		map.put(POPULATION_TYPE, this.popType.name());
-		map.put(ONLY_WORKING_DAYS, Boolean.toString(this.onlyWorkingDays));
+		map.put(DAY_TYPES, this.dayType.name());
 		map.put(VEHICLES_SOURCE, this.vehSource.name());
 		map.put(LOCAL_PORT, Integer.toString(this.localPort));
 		map.put(WRITE_DB_OUTPUT, Boolean.toString(this.writeDatabaseTables));
@@ -685,7 +686,7 @@ public final class Configuration {
 		map.put(SUBPOPULATIONS_TYPE, "Defines the type of subpopulation that is used to classify persons. Possible values are 'none' and 'mobility_attitude' (only valid for Osnabrück).");
 		map.put(ACTIVITY_LOCATIONS_TYPE, "'Yes' means: Demand is spatially distributed on the level of individual buildings. If switched to 'no', activities will be randomly distributed in landuse areas. Default: yes.");
 		map.put(POPULATION_TYPE, "Defines the type of population created. Possible values are 'persons' and 'households' (default).");
-		map.put(ONLY_WORKING_DAYS, "Defines if all days or only working days (Mo-Fr) should be used for generating plans. Default: yes.");
+		map.put(DAY_TYPES, "Defines if all days or only working days (Mo-Fr) should be used for generating plans. Default: 'weekday'.");
 		map.put(VEHICLES_SOURCE, "Defines if household vehicles should be created from survey or not. This only works, if the population type is 'households'. Default: 'matsim' (i.e. use MATSim default vehicles).");
 		map.put(LOCAL_PORT, "The local network port for the ssh connection.");
 		map.put(WRITE_DB_OUTPUT, "Defines if the data created according to this configuration should be written into database tables or not. Default: no.");

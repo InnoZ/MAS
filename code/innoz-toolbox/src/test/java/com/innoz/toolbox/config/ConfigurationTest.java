@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import com.innoz.toolbox.config.Configuration.ActivityLocations;
+import com.innoz.toolbox.config.Configuration.DayType;
 import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.config.Configuration.VehicleSource;
@@ -36,9 +37,9 @@ public class ConfigurationTest {
 		assertEquals(ActivityLocations.buildings, configuration.actLocs);
 		assertEquals(4711L, configuration.randomSeed);
 		assertEquals(1.0d, configuration.scaleFactor, 0.0d);
+		assertEquals(DayType.weekday, configuration.getUsedDayTypes());
 		
 		assertTrue(configuration.adminUnits.isEmpty());
-		assertTrue(configuration.onlyWorkingDays);
 		assertFalse(configuration.writeDatabaseTables);
 		assertFalse(configuration.writeIntoDatahub);
 		assertFalse(configuration.overwriteExistingFiles);
