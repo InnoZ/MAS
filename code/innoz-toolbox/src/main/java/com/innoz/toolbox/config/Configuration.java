@@ -31,18 +31,20 @@ public final class Configuration {
 	public static final String VICINITY_IDS = "vicinityIds";
 	public static final String CRS = "coordinateSystem";
 	public static final String OUTPUT_DIR = "outputDirectory";
-	public static final String POPULATION_SOURCE = "populationSource";
-	public static final String POPULATION_SOURCE_V = "populationSourceVicinity";
 	public static final String SCALE_FACTOR = "scaleFactor";
 	public static final String ACTIVITY_LOCATIONS_TYPE = "activityLocationsType";
 	public static final String CREATE_TRANSIT = "createTransit";
+
+	public static final String DEMAND_DATA_SOURCE = "demandSource";
+	public static final String POPULATION_SOURCE = "populationSource";
+	public static final String POPULATION_SOURCE_V = "populationSourceVicinity";
+	public static final String VEHICLES_SOURCE = "vehiclesSource";
 	
 	public static final String ONLY_WORKING_DAYS = "onlyWorkingDays";
 	public static final String POPULATION_TYPE = "populationType";
-	public static final String VEHICLES_SOURCE = "vehiclesSourec";
+	
 	public static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
 	public static final String LOD_NETWORK = "networkDetail";
-	public static final String DEMAND_DATA_SOURCE = "demandSource";
 	
 	public static final String SUBPOPULATIONS_TYPE = "subpopulationsType";
 	
