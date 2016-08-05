@@ -162,7 +162,7 @@ public final class Configuration {
 		this.surveyAreaIds = null;
 		this.vicinityIds = null;
 		this.crs = "EPSG:32632";
-		this.outputDirectory = null;
+		this.outputDirectory = ".";
 		this.popSource = PopulationSource.survey;
 		this.popSourceV = PopulationSource.none;
 		this.popType = PopulationType.households;
