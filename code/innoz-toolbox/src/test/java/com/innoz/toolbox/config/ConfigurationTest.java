@@ -4,7 +4,9 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import com.innoz.toolbox.config.Configuration.ActivityLocations;
 import com.innoz.toolbox.config.Configuration.PopulationSource;
+import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.config.Configuration.VehicleSource;
 
 public class ConfigurationTest {
@@ -16,18 +18,30 @@ public class ConfigurationTest {
 	 * 
 	 */
 	@Test
-	public void testDefaultConfiguration(){
+	public void testDefaultConfigurationParams(){
 	
 		Configuration configuration = ConfigurationUtils.createConfiguration();
 		
 		assertTrue(configuration != null);
 		
-		assertTrue(configuration.surveyAreaIds == null);
-		assertTrue(configuration.vicinityIds == null);
-		assertTrue(configuration.outputDirectory.equals("."));
-		assertTrue(configuration.popSource.equals(PopulationSource.survey));
-		assertTrue(configuration.popSourceV.equals(PopulationSource.none));
-		assertTrue(configuration.vehSource.equals(VehicleSource.matsim));
+		assertNull("Survey area id(s) are not null!", configuration.surveyAreaIds);
+		assertNull("Vicinity id(s) are not null!", configuration.vicinityIds);
+		assertNull(configuration.dbNameSpace);
+		
+		assertEquals(".", configuration.outputDirectory);
+		assertEquals(PopulationType.households, configuration.popType);
+		assertEquals(PopulationSource.survey, configuration.popSource);
+		assertEquals(PopulationSource.none, configuration.popSourceV);
+		assertEquals(VehicleSource.matsim, configuration.vehSource);
+		assertEquals(ActivityLocations.buildings, configuration.actLocs);
+		assertEquals(4711L, configuration.randomSeed);
+		assertEquals(1.0d, configuration.scaleFactor, 0.0d);
+		
+		assertTrue(configuration.adminUnits.isEmpty());
+		assertTrue(configuration.onlyWorkingDays);
+		assertFalse(configuration.writeDatabaseTables);
+		assertFalse(configuration.writeIntoDatahub);
+		assertFalse(configuration.overwriteExistingFiles);
 		
 	}
 	
