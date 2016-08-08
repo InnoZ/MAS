@@ -73,8 +73,9 @@ public class GTFSToMatsimConverter {
 		
 		TransitSchedule schedule = scenario.getTransitSchedule();
 		
-		GtfsConverter converter = new GtfsConverter(GTFSFeed.fromFile(
-				"/home/dhosse/02_Data/GTFS/VBN/VBN.zip"), scenario, transformation);
+		com.innoz.toolbox.scenarioGeneration.transit.GtfsConverter converter =
+				new com.innoz.toolbox.scenarioGeneration.transit.GtfsConverter(GTFSFeed.fromFile(
+				"/home/dhosse/02_Data/GTFS/VBN.zip"), scenario, transformation);
 		converter.setDate(LocalDate.of(2016, 6, 1));
 		converter.convert();
 		
