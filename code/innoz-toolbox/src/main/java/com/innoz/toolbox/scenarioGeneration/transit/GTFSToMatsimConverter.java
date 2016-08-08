@@ -27,7 +27,8 @@ public class GTFSToMatsimConverter {
 	
 	public static void main(String args[]){
 
-		new GTFSToMatsimConverter().runV1();
+//		new GTFSToMatsimConverter().runV1();
+		new GTFSToMatsimConverter().runV2();
 		
 	}
 	
@@ -35,7 +36,8 @@ public class GTFSToMatsimConverter {
 		
 		Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
 		Network network = scenario.getNetwork();
-		new MatsimNetworkReader(network).readFile("/home/dhosse/scenarios/3connect/network.xml.gz");
+		new MatsimNetworkReader(network).readFile(
+				"/home/dhosse/scenarios/3connect/network.xml.gz");
 		CoordinateTransformation transformation = TransformationFactory.
 				getCoordinateTransformation("EPSG:32632", TransformationFactory.WGS84);
 		for(Node node : network.getNodes().values()){
@@ -52,8 +54,14 @@ public class GTFSToMatsimConverter {
 				new String[]{"weekday"},
 				"EPSG:32632");
 		
-		new TransitScheduleWriter(g2m.getTransitSchedule()).writeFile("/home/dhosse/schedule.xml.gz");
-		new NetworkWriter(g2m.getNetwork()).write("/home/dhosse/networkMod.xml.gz");
+		TransitSchedule schedule = g2m.getTransitSchedule();
+		
+		Network transitNet = NetworkUtils.createNetwork();
+		CreatePseudoNetwork creator = new CreatePseudoNetwork(schedule, network, "pt_");
+		creator.createNetwork();
+		
+		new TransitScheduleWriter(schedule).writeFile("/home/dhosse/schedule.xml.gz");
+		new NetworkWriter(transitNet).write("/home/dhosse/networkMod.xml.gz");
 		
 	}
 	
@@ -63,26 +71,28 @@ public class GTFSToMatsimConverter {
 		CoordinateTransformation transformation = TransformationFactory.
 				getCoordinateTransformation(TransformationFactory.WGS84, "EPSG:32632");
 		
-		Network network = scenario.getNetwork();
 		TransitSchedule schedule = scenario.getTransitSchedule();
 		
 		GtfsConverter converter = new GtfsConverter(GTFSFeed.fromFile(
-				"/home/dhosse/02_Data/GTFS/VBN.zip"), scenario, transformation);
-		converter.setDate(LocalDate.of(2016, 8, 1));
+				"/home/dhosse/02_Data/GTFS/VBN/VBN.zip"), scenario, transformation);
+		converter.setDate(LocalDate.of(2016, 6, 1));
 		converter.convert();
 		
 		File output = new File("/home/dhosse/osGtfs/");
 		if(!output.exists()) output.mkdirs();
 		
 		Network transitNet = NetworkUtils.createNetwork();
-		CreatePseudoNetwork creator = new CreatePseudoNetwork(schedule, network, "pt_");
+		CreatePseudoNetwork creator = new CreatePseudoNetwork(schedule, transitNet, "pt_");
 		creator.createNetwork();
 		
-		new NetworkWriter(transitNet).write(output.getAbsolutePath() + "/transitNetwork.xml.gz");
-		new TransitScheduleWriter(schedule).writeFile(output.getAbsolutePath() + "/schedule.xml.gz");
+		new NetworkWriter(transitNet).write(output.getAbsolutePath() +
+				"/transitNetwork.xml.gz");
+		new TransitScheduleWriter(schedule).writeFile(output.getAbsolutePath() +
+				"/schedule.xml.gz");
 		
 		Vehicles tv = scenario.getTransitVehicles();
-		new VehicleWriterV1(tv).writeFile(output.getAbsolutePath() + "/transitVehicles.xml.gz");
+		new VehicleWriterV1(tv).writeFile(output.getAbsolutePath() +
+				"/transitVehicles.xml.gz");
 		
 	}
 	
