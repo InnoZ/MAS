@@ -17,6 +17,11 @@
 			<name>MATSim release repository</name>
 			<url>http://dl.bintray.com/matsim/matsim</url>
 		</repository>
+		<repository>
+			<id>conveyal</id>
+			<name>Conveyal Maven Repository</name>
+			<url>http://maven.conveyal.com/</url>
+		</repository>
 	</repositories>
 	<build>
 		<resources>
@@ -110,6 +115,11 @@
 			<artifactId>gtfs2matsimtransitschedule</artifactId>
 			<version>0.8.0</version>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>matsim-gtfs</artifactId>
+			<version>0.8.0</version>
 		</dependency>
 	</dependencies>
 </project>

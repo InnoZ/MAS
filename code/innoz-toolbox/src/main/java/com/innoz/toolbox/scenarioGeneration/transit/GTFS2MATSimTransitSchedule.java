@@ -154,6 +154,22 @@ public class GTFS2MATSimTransitSchedule {
 		this.coordinateTransformation = TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, outCoordinateSystem);
 		updateNetwork();
 	}
+	
+	/**
+	 * @param root
+	 * @param network
+	 */
+	public GTFS2MATSimTransitSchedule(File[] roots, String[] modes, Network network,
+			String[] serviceIds, String outCoordinateSystem, String[] agencyIds) {
+		super();
+		this.roots = roots;
+		this.modes = modes;
+		this.network = network;
+		this.serviceIds = serviceIds;
+		this.coordinateTransformation = TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, outCoordinateSystem);
+		updateNetwork();
+	}
+	
 	/**
 	 * @return the network
 	 */
@@ -213,7 +229,7 @@ public class GTFS2MATSimTransitSchedule {
 		try {
 			timeFormat = new SimpleDateFormat("HH:mm:ss");
 			BufferedReader reader = null;
-			String line = null;
+//			String line = null;
 			//Files load
 			int size = roots.length;
 			stops = new Map[size];
@@ -229,17 +245,14 @@ public class GTFS2MATSimTransitSchedule {
 				for(GTFSDefinitions gtfs:GTFSDefinitions.values()) {
 					File file = new File(root.getPath()+"/"+gtfs.fileName);
 					if(file.exists()) {
+						log.info("Reading " + gtfs.getFunction());
 						reader = new BufferedReader(new FileReader(file));
 						int[] indices = gtfs.getIndices(reader.readLine());
 						line = reader.readLine();
 						Method processMethod = GTFS2MATSimTransitSchedule.class.getMethod(gtfs.getFunction(), new Class[] {String[].class, int[].class, int.class});
 						while(line!=null) {
 							String[] parts = getParts(line);
-							try{
-								processMethod.invoke(this, new Object[]{parts, indices, publicSystemNumber});
-							} catch(InvocationTargetException e){
-//								e.printStackTrace();
-							}
+							processMethod.invoke(this, new Object[]{parts, indices, publicSystemNumber});
 							line = reader.readLine();
 						}
 						reader.close();
@@ -257,11 +270,14 @@ public class GTFS2MATSimTransitSchedule {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
-//		} catch (InvocationTargetException e) {
-//			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+			System.out.println();
 		}
 	}
 
+	String line;
+	
 	private String[] getParts(String line) {
 		List<String> partsList = new ArrayList<String>();
 		boolean inQ = false;
@@ -318,10 +334,15 @@ public class GTFS2MATSimTransitSchedule {
 	}
 	public void processCalendarDate(String[] parts, int[] indices, int publicSystemNumber) {
 		Service actual = services[publicSystemNumber].get(parts[indices[0]]);
-		if(parts[indices[2]].equals("2"))
-			actual.addException(parts[indices[1]]);
-		else
-			actual.addAddition(parts[indices[1]]);
+		if(actual != null){
+
+			if(parts[indices[2]].equals("2"))
+				actual.addException(parts[indices[1]]);
+			else
+				actual.addAddition(parts[indices[1]]);
+			
+		}
+		
 	}
 	public void processShape(String[] parts, int[] indices, int publicSystemNumber) {
 		Shape actual = shapes[publicSystemNumber].get(parts[indices[0]]);
@@ -332,14 +353,18 @@ public class GTFS2MATSimTransitSchedule {
 		actual.addPoint(new Coord(Double.parseDouble(parts[indices[1]]), Double.parseDouble(parts[indices[2]])),Integer.parseInt(parts[indices[3]]));
 	}
 	public void processRoute(String[] parts, int[] indices, int publicSystemNumber) {
-		routes[publicSystemNumber].put(parts[indices[0]], new Route(parts[indices[1]], RouteTypes.values()[Integer.parseInt(parts[indices[2]])]));
+		if("XOS___".equals(parts[1])){
+			routes[publicSystemNumber].put(parts[indices[0]], new Route(parts[indices[1]], RouteTypes.values()[Integer.parseInt(parts[indices[2]])]));
+		}
 	}
 	public void processTrip(String[] parts, int[] indices, int publicSystemNumber) {
 		Route route = routes[publicSystemNumber].get(parts[indices[0]]);
-		if(parts.length==5)
-			route.putTrip(parts[indices[1]], new Trip(services[publicSystemNumber].get(parts[indices[2]]), shapes[publicSystemNumber].get(parts[indices[3]]),parts[indices[1]]));
-		else
-			route.putTrip(parts[indices[1]], new Trip(services[publicSystemNumber].get(parts[indices[2]]), null, parts[indices[1]]));
+		if(route != null){
+			if(parts.length==5)
+				route.putTrip(parts[indices[1]], new Trip(services[publicSystemNumber].get(parts[indices[2]]), shapes[publicSystemNumber].get(parts[indices[3]]),parts[indices[1]]));
+			else
+				route.putTrip(parts[indices[1]], new Trip(services[publicSystemNumber].get(parts[indices[2]]), null, parts[indices[1]]));
+		}
 	}
 	public void processStopTime(String[] parts, int[] indices, int publicSystemNumber) {
 		for(Route actualRoute:routes[publicSystemNumber].values()) {
