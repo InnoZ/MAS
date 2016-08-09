@@ -72,7 +72,7 @@ public class NetworkCreatorFromPsql {
 	
 	private boolean scaleMaxSpeed = false;
 	private boolean cleanNetwork = false;
-	private boolean simplifyNetworK = false;
+	private boolean simplifyNetwork = false;
 
 	private GeometryFactory gf;
 	
@@ -122,7 +122,7 @@ public class NetworkCreatorFromPsql {
 	 * @param b true / false
 	 */
 	public void setSimplifyNetwork(boolean b){
-		this.simplifyNetworK = b;
+		this.simplifyNetwork = b;
 	}
 	
 	/**
@@ -170,13 +170,6 @@ public class NetworkCreatorFromPsql {
 		dbReader.readOsmRoads(this.configuration, ways, nodes);
 		this.bufferedArea = dbReader.getBufferedArea();
 		processEntries();
-		
-		// Simplify the network if needed
-//		if(this.simplifyNetworK) {
-//			
-//			new NetworkSimplifier().run(network);
-//			
-//		}
 		
 		// Clean the network to avoid dead ends during simulation (clustered network)
 		if(this.cleanNetwork){
@@ -255,6 +248,10 @@ public class NetworkCreatorFromPsql {
 		
 	}
 	
+	/**
+	 * Default setter for the highway defaults. If no defaults were specified, this
+	 * method is called and sets the defaults according to the level of detail specified.
+	 */
 	private void setHighwayDefaultsAccordingToLevelOfDetail(){
 
 		this.setHighwayDefaults(1, MOTORWAY, 2.0, 100/3.6, 1.2, 2000.0, true, "car");
@@ -346,7 +343,7 @@ public class NetworkCreatorFromPsql {
 			
 		}
 		
-		if(this.simplifyNetworK){
+		if(this.simplifyNetwork){
 
 			for(OsmNodeEntry entry : this.nodes.values()){
 				
@@ -461,7 +458,8 @@ public class NetworkCreatorFromPsql {
 
 	}
 		
-	public void createLink(WayEntry entry, double length, OsmNodeEntry fromNode, OsmNodeEntry toNode){
+	public void createLink(WayEntry entry, double length, OsmNodeEntry fromNode,
+			OsmNodeEntry toNode){
 		
 		HighwayDefaults defaults = this.highwayDefaults.get(entry.getHighwayTag());
 		
@@ -590,52 +588,52 @@ public class NetworkCreatorFromPsql {
 				if(this.network.getNodes().get(from) != null && this.network.getNodes().get(to) != null){
 
 				// Create a link in one direction
-				if(!onewayReverse){
-					
-					Link link = network.getFactory().createLink(Id.createLinkId(linkCounter.get()), this.network.getNodes().get(from), this.network.getNodes().get(to));
-					link.setCapacity(capacity);
-					link.setFreespeed(freespeed);
-					link.setLength(length);
-					link.setNumberOfLanes(lanesPerDirection);
-					link.setAllowedModes(modes);
-					
-					if(link instanceof LinkImpl){
+					if(!onewayReverse){
 						
-						((LinkImpl)link).setOrigId(origId);
-						((LinkImpl)link).setType(entry.getHighwayTag());
+						Link link = network.getFactory().createLink(Id.createLinkId(linkCounter.get()), this.network.getNodes().get(from), this.network.getNodes().get(to));
+						link.setCapacity(capacity);
+						link.setFreespeed(freespeed);
+						link.setLength(length);
+						link.setNumberOfLanes(lanesPerDirection);
+						link.setAllowedModes(modes);
 						
-					}
-					
-					network.addLink(link);
-					linkCounter.incrementAndGet();
-					
-				}
-				
-				// If it's not a oneway link, create another link in the opposite direction
-				if(!oneway){
-					
-					Link link = network.getFactory().createLink(Id.createLinkId(linkCounter.get()), this.network.getNodes().get(to), this.network.getNodes().get(from));
-					link.setCapacity(capacity);
-					link.setFreespeed(freespeed);
-					link.setLength(length);
-					link.setNumberOfLanes(lanesPerDirection);
-					link.setAllowedModes(modes);
-					
-					if(link instanceof LinkImpl){
+						if(link instanceof LinkImpl){
+							
+							((LinkImpl)link).setOrigId(origId);
+							((LinkImpl)link).setType(entry.getHighwayTag());
+							
+						}
 						
-						((LinkImpl)link).setOrigId(origId);
-						((LinkImpl)link).setType(entry.getHighwayTag());
+						network.addLink(link);
+						linkCounter.incrementAndGet();
 						
 					}
 					
-					network.addLink(link);
-					linkCounter.incrementAndGet();
+					// If it's not a oneway link, create another link in the opposite direction
+					if(!oneway){
+						
+						Link link = network.getFactory().createLink(Id.createLinkId(linkCounter.get()), this.network.getNodes().get(to), this.network.getNodes().get(from));
+						link.setCapacity(capacity);
+						link.setFreespeed(freespeed);
+						link.setLength(length);
+						link.setNumberOfLanes(lanesPerDirection);
+						link.setAllowedModes(modes);
+						
+						if(link instanceof LinkImpl){
+							
+							((LinkImpl)link).setOrigId(origId);
+							((LinkImpl)link).setType(entry.getHighwayTag());
+							
+						}
+						
+						network.addLink(link);
+						linkCounter.incrementAndGet();
+						
+					}
 					
 				}
-				
+					
 			}
-				
-		}
 
 		}
 			
