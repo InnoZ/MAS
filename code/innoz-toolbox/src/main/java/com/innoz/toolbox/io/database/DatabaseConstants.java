@@ -25,7 +25,8 @@ public final class DatabaseConstants {
 	
 	//DATABASE-SPECIFIC CONSTANTS////////////////////////////////////////////////////////////
 	public enum schemata { gadm, osm };
-	public enum tables { districts, osm_line, osm_nodes, osm_point, osm_polygon, osm_rels, osm_ways };
+	public enum tables { districts, osm_germany_line, osm_germany_nodes, osm_germany_point, osm_germany_polygon,
+		osm_germany_rels, osm_germany_ways };
 
 	public enum functions { st_astext, st_geomfromtext, st_within };
 	
