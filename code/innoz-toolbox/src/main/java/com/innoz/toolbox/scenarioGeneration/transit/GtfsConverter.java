@@ -2,8 +2,10 @@ package com.innoz.toolbox.scenarioGeneration.transit;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.matsim.api.core.v01.Coord;
@@ -11,6 +13,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.gtfs.RouteType;
 import org.matsim.core.scenario.MutableScenario;
+import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.pt.transitSchedule.api.Departure;
@@ -36,6 +39,7 @@ import com.conveyal.gtfs.model.Trip;
 
 public class GtfsConverter {
 
+	private Set<String> agencyIdFilter;
 	private GTFSFeed feed;
 	private CoordinateTransformation transform;
 	private MutableScenario scenario;
@@ -46,6 +50,14 @@ public class GtfsConverter {
 		this.feed = feed;
 		this.transform = transform;
 		this.scenario = (MutableScenario) scenario;
+		this.agencyIdFilter = new HashSet<>();
+	}
+	
+	public GtfsConverter(GTFSFeed feed, Scenario scenario, CoordinateTransformation transform, String agencyIds) {
+		this.feed = feed;
+		this.transform = transform;
+		this.scenario = (MutableScenario) scenario;
+		this.agencyIdFilter = CollectionUtils.stringToSet(agencyIds);
 	}
 
 	public void setDate(LocalDate date) {
@@ -148,7 +160,7 @@ public class GtfsConverter {
 		VehicleType bus = createDefaultBusVehicleType();
 		scenario.getTransitVehicles().addVehicleType(bus);
 		for (Trip trip : trips) {
-			if(trip.route.agency.agency_id.equals("XOS___")){
+			if(this.agencyIdFilter != null && agencyIdFilter.contains(trip.route.agency.agency_id)){
 			if (trip.frequencies == null) {
 				StopTime firstStopTime = feed.getOrderedStopTimesForTrip(trip.trip_id).iterator().next();
 				Double departureTime = Time.parseTime(String.valueOf(firstStopTime.departure_time));
