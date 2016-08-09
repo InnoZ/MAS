@@ -19,8 +19,12 @@ import org.matsim.pt.transitSchedule.api.TransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitRouteStop;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
+import org.matsim.vehicles.EngineInformation;
+import org.matsim.vehicles.EngineInformation.FuelType;
 import org.matsim.vehicles.Vehicle;
-import org.matsim.vehicles.VehicleUtils;
+import org.matsim.vehicles.VehicleCapacity;
+import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.VehicleType.DoorOperationMode;
 
 import com.conveyal.gtfs.GTFSFeed;
 import com.conveyal.gtfs.model.Frequency;
@@ -141,7 +145,8 @@ public class GtfsConverter {
 		int scheduleDepartures = 0;
 		int frequencyDepartures = 0;
 		int vehCounter = 0;
-		scenario.getTransitVehicles().addVehicleType(VehicleUtils.getDefaultVehicleType());
+		VehicleType bus = createDefaultBusVehicleType();
+		scenario.getTransitVehicles().addVehicleType(bus);
 		for (Trip trip : trips) {
 			if(trip.route.agency.agency_id.equals("XOS___")){
 			if (trip.frequencies == null) {
@@ -157,7 +162,7 @@ public class GtfsConverter {
 				TransitLine tl = ts.getTransitLines().get(Id.create(trip.route.route_id, TransitLine.class));
 				TransitRoute tr = findOrAddTransitRoute(tl, trip.route, stops);
 				Departure departure = ts.getFactory().createDeparture(Id.create(trip.trip_id, Departure.class), departureTime);
-				Vehicle vehicle = scenario.getTransitVehicles().getFactory().createVehicle(Id.createVehicleId(vehCounter), VehicleUtils.getDefaultVehicleType());
+				Vehicle vehicle = scenario.getTransitVehicles().getFactory().createVehicle(Id.createVehicleId(vehCounter), bus);
 				scenario.getTransitVehicles().addVehicle(vehicle);
 				departure.setVehicleId(vehicle.getId());
 				vehCounter++;
@@ -176,7 +181,7 @@ public class GtfsConverter {
 						TransitLine tl = ts.getTransitLines().get(Id.create(trip.route.route_id, TransitLine.class));
 						TransitRoute tr = findOrAddTransitRoute(tl, trip.route, stops);
 						Departure d = ts.getFactory().createDeparture(Id.create(trip.trip_id + "." + time, Departure.class), time);
-						Vehicle vehicle = scenario.getTransitVehicles().getFactory().createVehicle(Id.createVehicleId(vehCounter), VehicleUtils.getDefaultVehicleType());
+						Vehicle vehicle = scenario.getTransitVehicles().getFactory().createVehicle(Id.createVehicleId(vehCounter), bus);
 						scenario.getTransitVehicles().addVehicle(vehicle);
 						d.setVehicleId(vehicle.getId());
 						vehCounter++;
@@ -203,6 +208,31 @@ public class GtfsConverter {
 		TransitRoute tr = ts.getFactory().createTransitRoute(routeId, /*networkRoute*/ null, stops, RouteType.values()[route.route_type].toString());
 		tl.addRoute(tr);
 		return tr;
+	}
+	
+	private VehicleType createDefaultBusVehicleType(){
+		
+		VehicleType vehType = scenario.getTransitVehicles().getFactory().createVehicleType(Id.create("default bus", VehicleType.class));
+		vehType.setAccessTime(1);
+		
+		VehicleCapacity capacity = scenario.getTransitVehicles().getFactory().createVehicleCapacity();
+		capacity.setSeats(45);
+		capacity.setStandingRoom(30);
+		vehType.setCapacity(capacity);
+		
+		vehType.setDoorOperationMode(DoorOperationMode.parallel);
+		vehType.setEgressTime(1);
+		
+		EngineInformation currentEngineInfo = scenario.getTransitVehicles().getFactory().createEngineInformation(FuelType.diesel, 10);
+		vehType.setEngineInformation(currentEngineInfo);
+		
+		vehType.setLength(20);
+		vehType.setMaximumVelocity(120);
+		vehType.setPcuEquivalents(2);
+		vehType.setWidth(2.8);
+		
+		return vehType;
+		
 	}
 	
 }
