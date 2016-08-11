@@ -81,7 +81,7 @@ public class ReadWayDatabaseTask extends DatabaseTask {
 
 				Map<String, String> attributes = new HashMap<>();
 				
-				attributes.put(this.constants.wayId(), resultSet.getString(this.constants.wayId()));
+				attributes.put(this.constants.sortedWayId(), resultSet.getString(this.constants.sortedWayId()));
 				attributes.put(this.constants.waySource(), resultSet.getString(this.constants.waySource()));
 				attributes.put(this.constants.waySink(), resultSet.getString(this.constants.waySink()));
 				attributes.put(this.constants.wayPurpose(), resultSet.getString(this.constants.wayPurpose()));

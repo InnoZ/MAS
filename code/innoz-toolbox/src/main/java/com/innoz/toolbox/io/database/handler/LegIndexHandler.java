@@ -11,7 +11,7 @@ public class LegIndexHandler implements DefaultHandler {
 
 		SurveyStage stage = (SurveyStage)obj;
 		
-		String index = attributes.get("wid");
+		String index = attributes.get("wsid");
 		stage.setIndex(index);
 
 	}

@@ -28,6 +28,7 @@ public class SurveyConstants {
 		PLPHASE("lebensph", null),
 		
 		WID("wid", "wnr"),
+		WSID("wsid", "wnr"),
 		WWEIGHT("w_gew", "gewicht_w"),
 		WDEPD("st_dat", ""),
 		WDEP("st_time", "e_beginn"),
@@ -196,6 +197,12 @@ public class SurveyConstants {
 	public String personIsCarsharingUser(){
 		
 		return SurveyConstant.PCSUSER.getName(this.namespace);
+		
+	}
+
+	public String sortedWayId(){
+		
+		return SurveyConstant.WSID.getName(this.namespace);
 		
 	}
 	
