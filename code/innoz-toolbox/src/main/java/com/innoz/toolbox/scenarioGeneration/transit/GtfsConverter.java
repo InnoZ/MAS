@@ -160,7 +160,7 @@ public class GtfsConverter {
 		VehicleType bus = createDefaultBusVehicleType();
 		scenario.getTransitVehicles().addVehicleType(bus);
 		for (Trip trip : trips) {
-			if(this.agencyIdFilter != null && agencyIdFilter.contains(trip.route.agency.agency_id)){
+			if(agencyIdFilter.contains(trip.route.agency.agency_id) || agencyIdFilter.isEmpty()){
 			if (trip.frequencies == null) {
 				StopTime firstStopTime = feed.getOrderedStopTimesForTrip(trip.trip_id).iterator().next();
 				Double departureTime = Time.parseTime(String.valueOf(firstStopTime.departure_time));

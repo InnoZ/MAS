@@ -79,7 +79,8 @@ public class GTFSToMatsimConverter {
 		
 		TransitSchedule schedule = scenario.getTransitSchedule();
 		
-		String agencies = "VBN,XOS___,NWBus_";//,01____,02____,03____,04____,05____,06____,07____
+		String agencies = "VBN,XOS___,NWBus_,01____,02____,03____,04____,05____,06____,07____";
+		//,01____,02____,03____,04____,05____,06____,07____
 		
 		com.innoz.toolbox.scenarioGeneration.transit.GtfsConverter converter =
 				new com.innoz.toolbox.scenarioGeneration.transit.GtfsConverter(GTFSFeed.fromFile(
