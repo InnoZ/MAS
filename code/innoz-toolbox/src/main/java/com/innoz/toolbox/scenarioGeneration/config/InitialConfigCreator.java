@@ -41,16 +41,16 @@ public class InitialConfigCreator {
 			
 		}
 
-		if(configuration.getSubpopulationsType().equals(Subpopulations.mobility_attitude)){
-			
-			MobilityAttitudeGroups.addScoringParameterSets(config);
-			
-		} else {
+//		if(configuration.getSubpopulationsType().equals(Subpopulations.mobility_attitude)){
+//			
+//			MobilityAttitudeGroups.addScoringParameterSets(config);
+//			
+//		} else {
 			
 			// Add activity types to the scoring parameters
 			addBasicActivityParams(config);
 			
-		}
+//		}
 		
 		// Add mode parameters
 		addBasicModeParams(config);

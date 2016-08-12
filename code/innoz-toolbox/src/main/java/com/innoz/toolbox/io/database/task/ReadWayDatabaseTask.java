@@ -46,7 +46,7 @@ public class ReadWayDatabaseTask extends DatabaseTask {
 	}
 	
 	@Override
-	public void parse(Connection connection, SurveyDataContainer container) throws SQLException{
+	public void parse(Connection connection, SurveyDataContainer container, String surveyType) throws SQLException{
 		
 		Map<String, List<SurveyStage>> personId2Stages = new HashMap<>();
 		
@@ -56,17 +56,17 @@ public class ReadWayDatabaseTask extends DatabaseTask {
 		ResultSet resultSet = null;
 		String q = null;
 		
-		String table = this.constants.getNamespace().equals("mid") ? "mid2008.ways_raw" : "srv2013.ways";
+		String table = surveyType.equals("mid") ? "mid2008.ways_raw" : "srv2013.ways";
 		
 		q = "select * from " + table;
 		
 		if(dayType.equals(DayType.weekday)){
 		
-			q += " where " + this.constants.dayOfTheWeek() + " < 6";
+			q += " where " + SurveyConstants.dayOfTheWeek(surveyType) + " < 6";
 
 		} else if(dayType.equals(DayType.weekend)){
 			
-			q += " where " + this.constants.dayOfTheWeek() + " > 5";
+			q += " where " + SurveyConstants.dayOfTheWeek(surveyType) + " > 5";
 			
 		}
 		
@@ -74,35 +74,35 @@ public class ReadWayDatabaseTask extends DatabaseTask {
 		
 		while(resultSet.next()){
 			
-			String householdId = resultSet.getString(this.constants.householdId());
-			String personId = resultSet.getString(this.constants.personId());
+			String householdId = resultSet.getString(SurveyConstants.householdId(surveyType));
+			String personId = resultSet.getString(SurveyConstants.personId(surveyType));
 			
 			if(container.getHouseholds().containsKey(householdId) && container.getPersons().containsKey(householdId + personId)){
 
 				Map<String, String> attributes = new HashMap<>();
 				
-				attributes.put(this.constants.sortedWayId(), resultSet.getString(this.constants.sortedWayId()));
-				attributes.put(this.constants.waySource(), resultSet.getString(this.constants.waySource()));
-				attributes.put(this.constants.waySink(), resultSet.getString(this.constants.waySink()));
-				attributes.put(this.constants.wayPurpose(), resultSet.getString(this.constants.wayPurpose()));
-				attributes.put(this.constants.wayDetailedPurpose(), resultSet.getString(this.constants.wayDetailedPurpose()));
-				attributes.put(this.constants.wayTravelDistance(), Double.toString(resultSet.getDouble(this.constants.wayTravelDistance())));
-				attributes.put(this.constants.wayMode(), resultSet.getString(this.constants.wayMode()));
-				attributes.put(this.constants.wayTravelTime(), Double.toString(resultSet.getDouble(this.constants.wayTravelTime())));
-				attributes.put(this.constants.wayDepartureHour(), Double.toString(resultSet.getDouble(this.constants.wayDepartureHour())));
-				attributes.put(this.constants.wayDepartureMinute(), Double.toString(resultSet.getDouble(this.constants.wayDepartureMinute())));
-				attributes.put(this.constants.wayDepartureDay(), Double.toString(resultSet.getDouble(this.constants.wayDepartureDay())));
-				attributes.put(this.constants.wayArrivalHour(), Double.toString(resultSet.getDouble(this.constants.wayArrivalHour())));
-				attributes.put(this.constants.wayArrivalMinute(), Double.toString(resultSet.getDouble(this.constants.wayArrivalMinute())));
-				attributes.put(this.constants.wayArrivalDay(), Double.toString(resultSet.getDouble(this.constants.wayArrivalDay())));
+				attributes.put(SurveyConstants.sortedWayId(surveyType), resultSet.getString(SurveyConstants.sortedWayId(surveyType)));
+				attributes.put(SurveyConstants.waySource(surveyType), resultSet.getString(SurveyConstants.waySource(surveyType)));
+				attributes.put(SurveyConstants.waySink(surveyType), resultSet.getString(SurveyConstants.waySink(surveyType)));
+				attributes.put(SurveyConstants.wayPurpose(surveyType), resultSet.getString(SurveyConstants.wayPurpose(surveyType)));
+				attributes.put(SurveyConstants.wayDetailedPurpose(surveyType), resultSet.getString(SurveyConstants.wayDetailedPurpose(surveyType)));
+				attributes.put(SurveyConstants.wayTravelDistance(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.wayTravelDistance(surveyType))));
+				attributes.put(SurveyConstants.wayMode(surveyType), resultSet.getString(SurveyConstants.wayMode(surveyType)));
+				attributes.put(SurveyConstants.wayTravelTime(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.wayTravelTime(surveyType))));
+				attributes.put(SurveyConstants.wayDepartureHour(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.wayDepartureHour(surveyType))));
+				attributes.put(SurveyConstants.wayDepartureMinute(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.wayDepartureMinute(surveyType))));
+				attributes.put(SurveyConstants.wayDepartureDay(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.wayDepartureDay(surveyType))));
+				attributes.put(SurveyConstants.wayArrivalHour(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.wayArrivalHour(surveyType))));
+				attributes.put(SurveyConstants.wayArrivalMinute(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.wayArrivalMinute(surveyType))));
+				attributes.put(SurveyConstants.wayArrivalDay(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.wayArrivalDay(surveyType))));
 				
-				int stichtag = resultSet.getInt(this.constants.dayOfTheWeek());
+				int stichtag = resultSet.getInt(SurveyConstants.dayOfTheWeek(surveyType));
 				
 				SurveyStage stage = new SurveyStage();
 				
 				for(DefaultHandler handler : this.handlers){
 					
-					handler.handle(stage, attributes);
+					handler.handle(stage, attributes, surveyType);
 					
 				}
 				

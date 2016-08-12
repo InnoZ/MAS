@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.core.utils.misc.Time;
 
 import com.innoz.toolbox.io.database.handler.Logbook;
 import com.innoz.toolbox.io.database.handler.SurveyStage;
@@ -31,7 +32,11 @@ public class ConvertToPlansTask implements SurveyDataTask {
 				SurveyPlan plan = new SurveyPlan();
 				
 				for(SurveyStage stage : logbook.getStages()){
-			
+
+					if(Double.parseDouble(stage.getStartTime()) > Time.MIDNIGHT){
+						continue;
+					}
+					
 					if(logbook.getStages().indexOf(stage)==0){
 						
 						String actType = "";

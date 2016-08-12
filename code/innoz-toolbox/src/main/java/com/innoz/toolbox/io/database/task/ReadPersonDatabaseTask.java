@@ -42,7 +42,7 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 	}
 
 	@Override
-	public void parse(Connection connection, SurveyDataContainer container) throws SQLException {
+	public void parse(Connection connection, SurveyDataContainer container, String surveyType) throws SQLException {
 		
 		Statement statement = connection.createStatement();
 		statement.setFetchSize(2000);
@@ -50,14 +50,14 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 		ResultSet resultSet = null;
 		String q = null;
 		
-		String table = this.constants.getNamespace().equals("mid") ? "mid2008.persons_raw" : "srv2013.persons";
+		String table = surveyType.equals("mid") ? "mid2008.persons_raw" : "srv2013.persons";
 		
 		q = "select * from " + table;
 		
 		if(dayType.equals(DayType.weekday)){
-			q += " where " + this.constants.dayOfTheWeek() + " < 6";
+			q += " where " + SurveyConstants.dayOfTheWeek(surveyType) + " < 6";
 		} else if(dayType.equals(DayType.weekend)){
-			q += " where " + this.constants.dayOfTheWeek() + " > 5";
+			q += " where " + SurveyConstants.dayOfTheWeek(surveyType) + " > 5";
 		}
 		
 		q += ";";
@@ -66,24 +66,24 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 		
 		while(resultSet.next()){
 			
-			String hhId = resultSet.getString(this.constants.householdId());
+			String hhId = resultSet.getString(SurveyConstants.householdId(surveyType));
 			
 			if(container.getHouseholds().containsKey(hhId)){
 
 				Map<String, String> attributes = new HashMap<>();
-				attributes.put(this.constants.personId(), hhId + resultSet.getString(this.constants.personId()));
-				attributes.put(this.constants.personWeight(), Double.toString(resultSet.getDouble(this.constants.personWeight())));
-				attributes.put(this.constants.personCarAvailability(), resultSet.getString(this.constants.personCarAvailability()));
-				attributes.put(this.constants.personDrivingLicense(), resultSet.getString(this.constants.personDrivingLicense()));
-				attributes.put(this.constants.personSex(), resultSet.getString(this.constants.personSex()));
-				attributes.put(this.constants.personAge(), resultSet.getString(this.constants.personAge()));
-				attributes.put(this.constants.personEmployment(), resultSet.getString(this.constants.personEmployment()));
+				attributes.put(SurveyConstants.personId(surveyType), hhId + resultSet.getString(SurveyConstants.personId(surveyType)));
+				attributes.put(SurveyConstants.personWeight(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.personWeight(surveyType))));
+				attributes.put(SurveyConstants.personCarAvailability(surveyType), resultSet.getString(SurveyConstants.personCarAvailability(surveyType)));
+				attributes.put(SurveyConstants.personDrivingLicense(surveyType), resultSet.getString(SurveyConstants.personDrivingLicense(surveyType)));
+				attributes.put(SurveyConstants.personSex(surveyType), resultSet.getString(SurveyConstants.personSex(surveyType)));
+				attributes.put(SurveyConstants.personAge(surveyType), resultSet.getString(SurveyConstants.personAge(surveyType)));
+				attributes.put(SurveyConstants.personEmployment(surveyType), resultSet.getString(SurveyConstants.personEmployment(surveyType)));
 				
 				SurveyPerson person = new SurveyPerson();
 				
 				for(DefaultHandler handler : this.handlers){
 					
-					handler.handle(person, attributes);
+					handler.handle(person, attributes, surveyType);
 					
 				}
 				

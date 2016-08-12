@@ -17,6 +17,7 @@ import com.innoz.toolbox.config.Configuration.DayType;
 import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.config.Configuration.Subpopulations;
+import com.innoz.toolbox.config.Configuration.SurveyType;
 import com.innoz.toolbox.config.Configuration.VehicleSource;
 
 public class ConfigurationReaderXml extends DefaultHandler {
@@ -129,7 +130,7 @@ public class ConfigurationReaderXml extends DefaultHandler {
 			
 		} else if(qName.equalsIgnoreCase(Configuration.DEMAND_DATA_SOURCE)){
 			
-			this.configuration.demandSource = attributes.getValue("v");
+			this.configuration.surveyType = SurveyType.valueOf(attributes.getValue("v"));
 			
 		} else if(qName.equalsIgnoreCase(Configuration.SUBPOPULATIONS_TYPE)){
 

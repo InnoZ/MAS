@@ -2,19 +2,20 @@ package com.innoz.toolbox.io.database.handler;
 
 import java.util.Map;
 
+import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 
 public class LegPurposeHandler implements DefaultHandler {
 
 	@Override
-	public void handle(SurveyObject obj, Map<String, String> attributes) {
+	public void handle(SurveyObject obj, Map<String, String> attributes, String surveyType) {
 		
 		SurveyStage stage = (SurveyStage)obj;
 		
 		String actType = null;
-		String purpose = attributes.get("w04");
-		String subtype = attributes.get("w04_dzw");
+		String purpose = attributes.get(SurveyConstants.wayPurpose(surveyType));
+		String subtype = attributes.get(SurveyConstants.wayDetailedPurpose(surveyType));
 		
 		if(purpose.equals("1")){
 			

@@ -36,16 +36,16 @@ public class ReadHouseholdDatabaseTask extends DatabaseTask {
 	}
 	
 	@Override
-	public void parse(Connection connection, SurveyDataContainer container) throws SQLException{
+	public void parse(Connection connection, SurveyDataContainer container, String surveyType) throws SQLException{
 		
 		Statement statement = connection.createStatement();
 		statement.setFetchSize(2000);
 	
-		String table = this.constants.getNamespace().equals("mid") ? "mid2008.households_raw" : "srv2013.households";
+		String table = surveyType.equals("mid") ? "mid2008.households_raw" : "srv2013.households";
 		
 		String q = "select * from " + table;
 		
-		if(this.constants.getNamespace().equals("mid")){
+		if(surveyType.equals("mid")){
 			
 			q +=  " where ";
 			
@@ -55,7 +55,7 @@ public class ReadHouseholdDatabaseTask extends DatabaseTask {
 
 				cntOut++;
 				
-				q += this.constants.regionType() + " = " + entry.getKey();
+				q += SurveyConstants.regionType(surveyType) + " = " + entry.getKey();
 
 				if(cntOut < geoinformation.getRegionTypes().size()){
 
@@ -78,16 +78,18 @@ public class ReadHouseholdDatabaseTask extends DatabaseTask {
 		while(resultSet.next()){
 			
 			Map<String, String> attributes = new HashMap<>();
-			attributes.put(this.constants.householdId(), resultSet.getString(this.constants.householdId()));
-			attributes.put(this.constants.householdIncomePerMonth(), resultSet.getString(this.constants.householdIncomePerMonth()));
-			attributes.put(this.constants.householdWeight(), Double.toString(resultSet.getDouble(this.constants.householdWeight())));
-			int rtyp = resultSet.getInt(this.constants.regionType());
+			attributes.put(SurveyConstants.householdId(surveyType), resultSet.getString(SurveyConstants.householdId(surveyType)));
+			attributes.put(SurveyConstants.householdIncomePerMonth(surveyType),
+					resultSet.getString(SurveyConstants.householdIncomePerMonth(surveyType)));
+			attributes.put(SurveyConstants.householdWeight(surveyType),
+					Double.toString(resultSet.getDouble(SurveyConstants.householdWeight(surveyType))));
+			int rtyp = resultSet.getInt(SurveyConstants.regionType(surveyType));
 			
 			SurveyHousehold hh = new SurveyHousehold();
 			
 			for(DefaultHandler handler : this.handlers){
 				
-				handler.handle(hh, attributes);
+				handler.handle(hh, attributes, surveyType);
 				
 			}
 			

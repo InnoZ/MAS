@@ -42,7 +42,7 @@ public class SurveyDatabaseParserV2 {
 	public void run(Configuration configuration, SurveyDataContainer container, Geoinformation geoinformation){
 		
 		// Initialize the survey constants according to what datasource was specified.
-		this.constants = new SurveyConstants(configuration.getDatasource());
+		this.constants = new SurveyConstants();
 		
 		try {
 			
@@ -62,7 +62,7 @@ public class SurveyDatabaseParserV2 {
 					
 					log.info("Creating survey households...");
 					
-					new ReadHouseholdDatabaseTask(constants, geoinformation).parse(connection, container);
+					new ReadHouseholdDatabaseTask(constants, geoinformation).parse(connection, container, configuration.getSurveyType().name());
 						
 					log.info("Read " + container.getHouseholds().size() + " households...");
 					
@@ -70,15 +70,15 @@ public class SurveyDatabaseParserV2 {
 				
 				log.info("Creating survey persons...");
 				
-				new ReadPersonDatabaseTask(constants, configuration.getUsedDayTypes()).parse(connection, container);
+				new ReadPersonDatabaseTask(constants, configuration.getUsedDayTypes()).parse(connection, container, configuration.getSurveyType().name());
 				
 				log.info("Read " + container.getPersons().size() + " persons...");
 				
 				log.info("Creating survey ways...");
 
-				new ReadWayDatabaseTask(constants, configuration.getUsedDayTypes()).parse(connection, container);
+				new ReadWayDatabaseTask(constants, configuration.getUsedDayTypes()).parse(connection, container, configuration.getSurveyType().name());
 				
-				if(configuration.getVehicleSource().equals(VehicleSource.survey) && configuration.getDatasource().equals("mid")){
+				if(configuration.getVehicleSource().equals(VehicleSource.survey) && configuration.getSurveyType().equals("mid")){
 				
 					log.info("Creating survey cars...");
 					

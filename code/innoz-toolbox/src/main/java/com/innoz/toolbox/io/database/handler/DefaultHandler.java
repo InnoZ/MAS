@@ -6,6 +6,6 @@ import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
 
 public interface DefaultHandler {
 
-	void handle(SurveyObject obj, Map<String, String> attributes);
+	void handle(SurveyObject obj, Map<String, String> attributes, String surveyType);
 	
 }

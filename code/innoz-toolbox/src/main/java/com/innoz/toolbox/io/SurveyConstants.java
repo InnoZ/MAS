@@ -1,6 +1,6 @@
 package com.innoz.toolbox.io;
 
-public class SurveyConstants {
+public final class SurveyConstants {
 
 	private enum SurveyConstant{
 		
@@ -76,271 +76,257 @@ public class SurveyConstants {
 		
 	}
 
-	private final String PSEX_MALE = "1";
-
-	final String namespace;
+	private final static String PSEX_MALE = "1";
 	
-	public SurveyConstants(String namespace) {
+	public static String dayOfTheWeek(String namespace){
 		
-		this.namespace = namespace;
+		return SurveyConstant.WTAG.getName(namespace);
 		
 	}
 	
-	public String getNamespace(){
+	public static String startDate(String namespace){
 		
-		return this.namespace;
-		
-	}
-	
-	public String dayOfTheWeek(){
-		
-		return SurveyConstant.WTAG.getName(this.namespace);
+		return SurveyConstant.DATEST.getName(namespace);
 		
 	}
 	
-	public String startDate(){
+	public static String endDate(String namespace){
 		
-		return SurveyConstant.DATEST.getName(this.namespace);
-		
-	}
-	
-	public String endDate(){
-		
-		return SurveyConstant.DATEEN.getName(this.namespace);
+		return SurveyConstant.DATEEN.getName(namespace);
 		
 	}
 	
-	public String bundesland(){
+	public static String bundesland(String namespace){
 		
-		return SurveyConstant.BLAND.getName(this.namespace);
-		
-	}
-	
-	public String regionType(){
-		
-		return SurveyConstant.RTYP.getName(this.namespace);
+		return SurveyConstant.BLAND.getName(namespace);
 		
 	}
 	
-	public String householdId(){
+	public static String regionType(String namespace){
 		
-		return SurveyConstant.HHID.getName(this.namespace);
-		
-	}
-	
-	public String householdWeight(){
-		
-		return SurveyConstant.HHWEIGHT.getName(this.namespace);
+		return SurveyConstant.RTYP.getName(namespace);
 		
 	}
 	
-	public String householdSize(){
+	public static String householdId(String namespace){
 		
-		return SurveyConstant.HHSIZE.getName(this.namespace);
-		
-	}
-	
-	public String numberOfHouseholdVehicles(){
-		
-		return SurveyConstant.HHVEHICLES.getName(this.namespace);
+		return SurveyConstant.HHID.getName(namespace);
 		
 	}
 	
-	public String householdIncomePerMonth(){
+	public static String householdWeight(String namespace){
 		
-		return SurveyConstant.HHINCOME.getName(this.namespace);
-		
-	}
-	
-	public String personId(){
-		
-		return SurveyConstant.PID.getName(this.namespace);
+		return SurveyConstant.HHWEIGHT.getName(namespace);
 		
 	}
 	
-	public String personWeight(){
+	public static String householdSize(String namespace){
 		
-		return SurveyConstant.PWEIGHT.getName(this.namespace);
-		
-	}
-	
-	public String personSex(){
-		
-		return SurveyConstant.PSEX.getName(this.namespace);
+		return SurveyConstant.HHSIZE.getName(namespace);
 		
 	}
 	
-	public String personAge(){
+	public static String numberOfHouseholdVehicles(String namespace){
 		
-		return SurveyConstant.PAGE.getName(this.namespace);
-		
-	}
-	
-	public String personCarAvailability(){
-		
-		return SurveyConstant.PCARAVAIL.getName(this.namespace);
+		return SurveyConstant.HHVEHICLES.getName(namespace);
 		
 	}
 	
-	public String personDrivingLicense(){
+	public static String householdIncomePerMonth(String namespace){
 		
-		return SurveyConstant.PLICENSE.getName(this.namespace);
-		
-	}
-	
-	public String personEmployment(){
-		
-		return SurveyConstant.PEMPLOYED.getName(this.namespace);
+		return SurveyConstant.HHINCOME.getName(namespace);
 		
 	}
 	
-	public String personIsCarsharingUser(){
+	public static String personId(String namespace){
 		
-		return SurveyConstant.PCSUSER.getName(this.namespace);
+		return SurveyConstant.PID.getName(namespace);
+		
+	}
+	
+	public static String personWeight(String namespace){
+		
+		return SurveyConstant.PWEIGHT.getName(namespace);
+		
+	}
+	
+	public static String personSex(String namespace){
+		
+		return SurveyConstant.PSEX.getName(namespace);
+		
+	}
+	
+	public static String personAge(String namespace){
+		
+		return SurveyConstant.PAGE.getName(namespace);
+		
+	}
+	
+	public static String personCarAvailability(String namespace){
+		
+		return SurveyConstant.PCARAVAIL.getName(namespace);
+		
+	}
+	
+	public static String personDrivingLicense(String namespace){
+		
+		return SurveyConstant.PLICENSE.getName(namespace);
+		
+	}
+	
+	public static String personEmployment(String namespace){
+		
+		return SurveyConstant.PEMPLOYED.getName(namespace);
+		
+	}
+	
+	public static String personIsCarsharingUser(String namespace){
+		
+		return SurveyConstant.PCSUSER.getName(namespace);
 		
 	}
 
-	public String sortedWayId(){
+	public static String sortedWayId(String namespace){
 		
-		return SurveyConstant.WSID.getName(this.namespace);
-		
-	}
-	
-	public String wayId(){
-		
-		return SurveyConstant.WID.getName(this.namespace);
+		return SurveyConstant.WSID.getName(namespace);
 		
 	}
 	
-	public String wayWeight(){
+	public static String wayId(String namespace){
 		
-		return SurveyConstant.WWEIGHT.getName(this.namespace);
-		
-	}
-	
-	public String wayDeparture(){
-		
-		return SurveyConstant.WDEP.getName(this.namespace);
+		return SurveyConstant.WID.getName(namespace);
 		
 	}
 	
-	public String wayDepartureDay() {
+	public static String wayWeight(String namespace){
 		
-		return SurveyConstant.WDEPD.getName(this.namespace);
-		
-	}
-	
-	public String wayDepartureHour(){
-		
-		return SurveyConstant.WDEPH.getName(this.namespace);
+		return SurveyConstant.WWEIGHT.getName(namespace);
 		
 	}
 	
-	public String wayDepartureMinute(){
+	public static String wayDeparture(String namespace){
 		
-		return SurveyConstant.WDEPM.getName(this.namespace);
-		
-	}
-	
-	public String wayArrival(){
-		
-		return SurveyConstant.WARR.getName(this.namespace);
+		return SurveyConstant.WDEP.getName(namespace);
 		
 	}
 	
-	public String wayArrivalDay() {
+	public static String wayDepartureDay(String namespace) {
 		
-		return SurveyConstant.WARRD.getName(this.namespace);
-		
-	}
-	
-	public String wayArrivalHour(){
-		
-		return SurveyConstant.WARRH.getName(this.namespace);
+		return SurveyConstant.WDEPD.getName(namespace);
 		
 	}
 	
-	public String wayArrivalMinute(){
+	public static String wayDepartureHour(String namespace){
 		
-		return SurveyConstant.WARRM.getName(this.namespace);
-		
-	}
-	
-	public String wayTravelDistance(){
-		
-		return SurveyConstant.WTD.getName(this.namespace);
+		return SurveyConstant.WDEPH.getName(namespace);
 		
 	}
 	
-	public String wayTravelTime(){
+	public static String wayDepartureMinute(String namespace){
 		
-		return SurveyConstant.WTT.getName(this.namespace);
-		
-	}
-	
-	public String wayMode(){
-	
-		return SurveyConstant.WMODE.getName(this.namespace);
+		return SurveyConstant.WDEPM.getName(namespace);
 		
 	}
 	
-	public String wayPurpose(){
+	public static String wayArrival(String namespace){
 		
-		return SurveyConstant.WPUR.getName(this.namespace);
-		
-	}
-	
-	public String waySource(){
-		
-		return SurveyConstant.WSOURCE.getName(this.namespace);
+		return SurveyConstant.WARR.getName(namespace);
 		
 	}
 	
-	public String waySink(){
+	public static String wayArrivalDay(String namespace) {
 		
-		return SurveyConstant.WSINK.getName(this.namespace);
+		return SurveyConstant.WARRD.getName(namespace);
 		
 	}
 	
-	public String personGroup(){
+	public static String wayArrivalHour(String namespace){
 		
-		return SurveyConstant.PG12.getName(this.namespace);
+		return SurveyConstant.WARRH.getName(namespace);
+		
+	}
+	
+	public static String wayArrivalMinute(String namespace){
+		
+		return SurveyConstant.WARRM.getName(namespace);
+		
+	}
+	
+	public static String wayTravelDistance(String namespace){
+		
+		return SurveyConstant.WTD.getName(namespace);
+		
+	}
+	
+	public static String wayTravelTime(String namespace){
+		
+		return SurveyConstant.WTT.getName(namespace);
+		
+	}
+	
+	public static String wayMode(String namespace){
+	
+		return SurveyConstant.WMODE.getName(namespace);
+		
+	}
+	
+	public static String wayPurpose(String namespace){
+		
+		return SurveyConstant.WPUR.getName(namespace);
+		
+	}
+	
+	public static String waySource(String namespace){
+		
+		return SurveyConstant.WSOURCE.getName(namespace);
+		
+	}
+	
+	public static String waySink(String namespace){
+		
+		return SurveyConstant.WSINK.getName(namespace);
+		
+	}
+	
+	public static String personGroup(String namespace){
+		
+		return SurveyConstant.PG12.getName(namespace);
 		
 	}
 
-	public String personLifephase(){
+	public static String personLifephase(String namespace){
 		
-		return SurveyConstant.PLPHASE.getName(this.namespace);
-		
-	}
-	
-	public String wayDetailedPurpose(){
-		
-		return SurveyConstant.WPURD.getName(this.namespace);
+		return SurveyConstant.PLPHASE.getName(namespace);
 		
 	}
 	
-	public String vehicleId(){
+	public static String wayDetailedPurpose(String namespace){
 		
-		return SurveyConstant.VID.getName(this.namespace);
-		
-	}
-	
-	public String vehicleFuelType(){
-		
-		return SurveyConstant.VFUEL.getName(this.namespace);
+		return SurveyConstant.WPURD.getName(namespace);
 		
 	}
 	
-	public String vehicleSegmentKBA(){
+	public static String vehicleId(String namespace){
 		
-		return SurveyConstant.VSEG.getName(this.namespace);
+		return SurveyConstant.VID.getName(namespace);
 		
 	}
 	
-	public String getSexMale(){
+	public static String vehicleFuelType(String namespace){
 		
-		return this.PSEX_MALE;
+		return SurveyConstant.VFUEL.getName(namespace);
+		
+	}
+	
+	public static String vehicleSegmentKBA(String namespace){
+		
+		return SurveyConstant.VSEG.getName(namespace);
+		
+	}
+	
+	public static String getSexMale(){
+		
+		return PSEX_MALE;
 		
 	}
 	

@@ -4,16 +4,17 @@ import java.util.Map;
 
 import org.matsim.api.core.v01.TransportMode;
 
+import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
 
 public class LegModeHandler implements DefaultHandler {
 
 	@Override
-	public void handle(SurveyObject obj, Map<String, String> attributes) {
+	public void handle(SurveyObject obj, Map<String, String> attributes, String surveyType) {
 
 		SurveyStage stage = (SurveyStage)obj;
 		
-		String mode = attributes.get("hvm");
+		String mode = attributes.get(SurveyConstants.wayMode(surveyType));
 		if(mode.equals("1")){
 			stage.setMode(TransportMode.walk);
 		} else if(mode.equals("2")){

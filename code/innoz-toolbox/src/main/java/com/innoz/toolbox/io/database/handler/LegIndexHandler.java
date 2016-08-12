@@ -2,16 +2,17 @@ package com.innoz.toolbox.io.database.handler;
 
 import java.util.Map;
 
+import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
 
 public class LegIndexHandler implements DefaultHandler {
 
 	@Override
-	public void handle(SurveyObject obj, Map<String, String> attributes) {
+	public void handle(SurveyObject obj, Map<String, String> attributes, String surveyType) {
 
 		SurveyStage stage = (SurveyStage)obj;
 		
-		String index = attributes.get("wsid");
+		String index = attributes.get(SurveyConstants.sortedWayId(surveyType));
 		stage.setIndex(index);
 
 	}

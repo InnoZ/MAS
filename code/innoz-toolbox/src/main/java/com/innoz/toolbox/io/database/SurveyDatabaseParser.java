@@ -63,10 +63,6 @@ public class SurveyDatabaseParser {
 	private static final Logger log = Logger.getLogger(SurveyDatabaseParser.class);
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
-	//MEMBERS////////////////////////////////////////////////////////////////////////////////
-	private SurveyConstants constants;
-	/////////////////////////////////////////////////////////////////////////////////////////
-	
 	/**
 	 * 
 	 * Executes the data retrieval process. Depending on the specifications in the configuration household, person,
@@ -77,9 +73,6 @@ public class SurveyDatabaseParser {
 	 * @param geoinformation
 	 */
 	public void run(Configuration configuration, SurveyDataContainer container, Geoinformation geoinformation){
-		
-		// Initialize the survey constants according to what datasource was specified.
-		this.constants = new SurveyConstants(configuration.getDatasource());
 		
 		try {
 			
@@ -99,24 +92,24 @@ public class SurveyDatabaseParser {
 					
 					log.info("Creating survey households...");
 					
-					parseHouseholdsDatabase(connection, geoinformation, container);
+					parseHouseholdsDatabase(connection, geoinformation, container, configuration);
 					
 				}
 				
 				log.info("Creating survey persons...");
 				
 				parsePersonsDatabase(connection, configuration.getPopulationType().equals(PopulationType.households),
-						onlyWorkingDays, container);
+						onlyWorkingDays, container, configuration);
 				
 				log.info("Creating survey ways...");
 				
-				parseWaysDatabase(connection, onlyWorkingDays, container);
+				parseWaysDatabase(connection, onlyWorkingDays, container, configuration);
 				
-				if(configuration.getVehicleSource().equals(VehicleSource.survey) && configuration.getDatasource().equals("mid")){
+				if(configuration.getVehicleSource().equals(VehicleSource.survey) && configuration.getSurveyType().equals("mid")){
 				
 					log.info("Creating survey cars...");
 					
-					parseVehiclesDatabase(connection, container);
+					parseVehiclesDatabase(connection, container, configuration);
 					
 				}
 				
@@ -146,16 +139,18 @@ public class SurveyDatabaseParser {
 	}
 	
 	private void parseHouseholdsDatabase(Connection connection, Geoinformation geoinformation,
-			SurveyDataContainer container) throws RuntimeException, SQLException{
+			SurveyDataContainer container, Configuration configuration) throws RuntimeException, SQLException{
 		
 		Statement statement = connection.createStatement();
 		statement.setFetchSize(2000);
-	
-		String table = this.constants.getNamespace().equals("mid") ? "mid2008.households_raw" : "srv2013.households";
+
+		String surveyType = configuration.getSurveyType().name();
+		
+		String table = surveyType.equals("mid") ? "mid2008.households_raw" : "srv2013.households";
 		
 		String q = "select * from " + table;
 		
-		if(this.constants.getNamespace().equals("mid")){
+		if(surveyType.equals("mid")){
 			
 			q +=  " where ";
 			
@@ -165,7 +160,7 @@ public class SurveyDatabaseParser {
 
 				cntOut++;
 				
-				q += this.constants.regionType() + " = " + entry.getKey();
+				q += SurveyConstants.regionType(surveyType) + " = " + entry.getKey();
 
 				if(cntOut < geoinformation.getRegionTypes().size()){
 
@@ -193,19 +188,19 @@ public class SurveyDatabaseParser {
 		while(set.next()){
 			
 			Map<String, String> attributes = new HashMap<>();
-			attributes.put(this.constants.householdId(), set.getString(this.constants.householdId()));
-			attributes.put(this.constants.householdIncomePerMonth(), Double.toString(set.getDouble(this.constants
-					.householdIncomePerMonth())));
+			attributes.put(SurveyConstants.householdId(surveyType), set.getString(SurveyConstants.householdId(surveyType)));
+			attributes.put(SurveyConstants.householdIncomePerMonth(surveyType), Double.toString(set.getDouble(SurveyConstants
+					.householdIncomePerMonth(surveyType))));
 			
 			SurveyHousehold hh = new SurveyHousehold();
 			
 			for(DefaultHandler handler : householdHandlers){
 				
-				handler.handle(hh, attributes);
+				handler.handle(hh, attributes, surveyType);
 				
 			}
 			
-			int rtyp = this.constants.getNamespace().equals("mid") ? set.getInt(this.constants.regionType()) : 3;
+			int rtyp = surveyType.equals("mid") ? set.getInt(SurveyConstants.regionType(surveyType)) : 3;
 			container.addHousehold(hh, rtyp);
 			
 		}
@@ -239,7 +234,9 @@ public class SurveyDatabaseParser {
 	 * 
 	 */
 	private void parsePersonsDatabase(Connection connection, boolean isUsingHouseholds, boolean onlyWorkingDays,
-			SurveyDataContainer container) throws SQLException{
+			SurveyDataContainer container, Configuration configuration) throws SQLException{
+		
+		String surveyType = configuration.getSurveyType().name();
 		
 		Statement statement = connection.createStatement();
 		statement.setFetchSize(2000);
@@ -247,13 +244,13 @@ public class SurveyDatabaseParser {
 		ResultSet set = null;
 		String q = null;
 		
-		String table = this.constants.getNamespace().equals("mid") ? "mid2008.persons_raw" : "srv2013.persons";
+		String table = surveyType.equals("mid") ? "mid2008.persons_raw" : "srv2013.persons";
 		
 		if(isUsingHouseholds){
 			
 			q = "select * from " + table;
 			if(onlyWorkingDays){
-				q += " where " + this.constants.dayOfTheWeek() + " < 6";
+				q += " where " + SurveyConstants.dayOfTheWeek(surveyType) + " < 6";
 			}
 			set = statement.executeQuery(q);
 			
@@ -272,29 +269,29 @@ public class SurveyDatabaseParser {
 		
 		while(set.next()){
 			
-			String hhId = set.getString(this.constants.householdId());
+			String hhId = set.getString(SurveyConstants.householdId(surveyType));
 			
 			Map<String, String> attributes = new HashMap<>();
-			attributes.put(this.constants.personId(), hhId + set.getString(this.constants.personId()));
-			attributes.put(this.constants.personWeight(), Double.toString(set.getDouble(this.constants.personWeight())));
-			attributes.put(this.constants.personCarAvailability(), set.getString(this.constants.personCarAvailability()));
-			attributes.put(this.constants.personDrivingLicense(), set.getString(this.constants.personDrivingLicense()));
-			attributes.put(this.constants.personSex(), set.getString(this.constants.personSex()));
-			attributes.put(this.constants.personAge(), set.getString(this.constants.personAge()));
-			attributes.put(this.constants.personEmployment(), set.getString(this.constants.personEmployment()));
-			attributes.put(this.constants.personGroup(), Integer.toString(set.getInt(this.constants.personGroup())));
-			attributes.put(this.constants.personLifephase(), Integer.toString(set.getInt(this.constants.personLifephase())));
+			attributes.put(SurveyConstants.personId(surveyType), hhId + set.getString(SurveyConstants.personId(surveyType)));
+			attributes.put(SurveyConstants.personWeight(surveyType), Double.toString(set.getDouble(SurveyConstants.personWeight(surveyType))));
+			attributes.put(SurveyConstants.personCarAvailability(surveyType), set.getString(SurveyConstants.personCarAvailability(surveyType)));
+			attributes.put(SurveyConstants.personDrivingLicense(surveyType), set.getString(SurveyConstants.personDrivingLicense(surveyType)));
+			attributes.put(SurveyConstants.personSex(surveyType), set.getString(SurveyConstants.personSex(surveyType)));
+			attributes.put(SurveyConstants.personAge(surveyType), set.getString(SurveyConstants.personAge(surveyType)));
+			attributes.put(SurveyConstants.personEmployment(surveyType), set.getString(SurveyConstants.personEmployment(surveyType)));
+			attributes.put(SurveyConstants.personGroup(surveyType), Integer.toString(set.getInt(SurveyConstants.personGroup(surveyType))));
+			attributes.put(SurveyConstants.personLifephase(surveyType), Integer.toString(set.getInt(SurveyConstants.personLifephase(surveyType))));
 			
 //			String carshare = "2";
-//			if(this.constants.getNamespace().equalsIgnoreCase("srv")){
-//				carshare = set.getString(this.constants.personIsCarsharingUser());
+//			if(SurveyConstants.getNamespace().equalsIgnoreCase("srv")){
+//				carshare = set.getString(SurveyConstants.personIsCarsharingUser());
 //			}
 			
 			SurveyPerson person = new SurveyPerson();
 			
 			for(DefaultHandler handler : personHandlers){
 				
-				handler.handle(person, attributes);
+				handler.handle(person, attributes, surveyType);
 				
 			}
 			
@@ -333,22 +330,24 @@ public class SurveyDatabaseParser {
 		
 	}
 	
-	private void parseWaysDatabase(Connection connection, boolean onlyWorkingDays, SurveyDataContainer container) throws SQLException {
+	private void parseWaysDatabase(Connection connection, boolean onlyWorkingDays, SurveyDataContainer container, Configuration configuration) throws SQLException {
+		
+		String surveyType = configuration.getSurveyType().name();
 		
 		Statement statement = connection.createStatement();
 		statement.setFetchSize(2000);
 		
-		String table = this.constants.getNamespace().equals("mid") ? "mid2008.ways_raw" : "srv2013.ways";
+		String table = surveyType.equals("mid") ? "mid2008.ways_raw" : "srv2013.ways";
 
 		String query = "select * from " + table;
 		
 		if(onlyWorkingDays){
-			query+=" where " + this.constants.dayOfTheWeek() + " < 6";
+			query+=" where " + SurveyConstants.dayOfTheWeek(surveyType) + " < 6";
 		}
 		
-		query+= " and " + this.constants.wayTravelDistance() + " <> 'NaN' and " + this.constants.wayTravelTime() + " <> 'NaN' and "
-				+ this.constants.wayDeparture() + " <> 'NaN' and " + this.constants.wayArrival() + " <>'NaN' order by "
-				+ this.constants.householdId() + "," + this.constants.personId() + "," + this.constants.wayId() + ";";
+		query+= " and " + SurveyConstants.wayTravelDistance(surveyType) + " <> 'NaN' and " + SurveyConstants.wayTravelTime(surveyType) + " <> 'NaN' and "
+				+ SurveyConstants.wayDeparture(surveyType) + " <> 'NaN' and " + SurveyConstants.wayArrival(surveyType) + " <>'NaN' order by "
+				+ SurveyConstants.householdId(surveyType) + "," + SurveyConstants.personId(surveyType) + "," + SurveyConstants.wayId(surveyType) + ";";
 		
 		ResultSet set = statement.executeQuery(query);
 		
@@ -358,15 +357,15 @@ public class SurveyDatabaseParser {
 		
 		while(set.next()){
 			
-			String hhId = set.getString(this.constants.householdId());
-			String personId = set.getString(this.constants.personId());
+			String hhId = set.getString(SurveyConstants.householdId(surveyType));
+			String personId = set.getString(SurveyConstants.personId(surveyType));
 			SurveyPerson person = container.getPersons().get(hhId + personId);
 		
 			if(person != null){
 				
 				SurveyPlan plan = null;
 				
-				int currentWayIdx = set.getInt(this.constants.wayId());
+				int currentWayIdx = set.getInt(SurveyConstants.wayId(surveyType));
 				
 				//if the index of the current way is lower than the previous index
 				//or the currently processed way is a rbw
@@ -384,23 +383,23 @@ public class SurveyDatabaseParser {
 				}
 				
 				//the act type index at the destination
-				double purpose = set.getDouble(this.constants.wayPurpose());
-				double detailedPurpose = this.constants.getNamespace().equalsIgnoreCase("mid") ? set.getDouble(this.constants.wayDetailedPurpose()) : 0d;
+				double purpose = set.getDouble(SurveyConstants.wayPurpose(surveyType));
+				double detailedPurpose = surveyType.equalsIgnoreCase("mid") ? set.getDouble(SurveyConstants.wayDetailedPurpose(surveyType)) : 0d;
 				
 				//the main mode of the leg and the mode combination
-				String mainMode = handleMainMode(set.getString(this.constants.wayMode()));
+				String mainMode = handleMainMode(set.getString(SurveyConstants.wayMode(surveyType)), surveyType);
 //				Set<String> modes = CollectionUtils.stringToSet(set.getString(MiDConstants
 //						.MODE_COMBINATION));
 				
-				double startHour = set.getDouble(this.constants.wayDepartureHour());
-				double startTime = this.constants.getNamespace().equals("mid") ? set.getDouble(this.constants.wayDeparture())
-						: set.getDouble(this.constants.wayDeparture()) * 60;
-				double endTime = this.constants.getNamespace().equals("mid") ? set.getDouble(this.constants.wayArrival())
-						: set.getDouble(this.constants.wayArrival()) * 60;
+				double startHour = set.getDouble(SurveyConstants.wayDepartureHour(surveyType));
+				double startTime = surveyType.equals("mid") ? set.getDouble(SurveyConstants.wayDeparture(surveyType))
+						: set.getDouble(SurveyConstants.wayDeparture(surveyType)) * 60;
+				double endTime = surveyType.equals("mid") ? set.getDouble(SurveyConstants.wayArrival(surveyType))
+						: set.getDouble(SurveyConstants.wayArrival(surveyType)) * 60;
 				
-				int startDate = this.constants.getNamespace().equalsIgnoreCase("mid") ? set.getInt(this.constants.startDate()) : 0;
-				int endDate = this.constants.getNamespace().equalsIgnoreCase("mid") ? set.getInt(this.constants.endDate()) : 0;
-				double travelDistance = 1000 * set.getDouble(this.constants.wayTravelDistance());
+				int startDate = surveyType.equalsIgnoreCase("mid") ? set.getInt(SurveyConstants.startDate(surveyType)) : 0;
+				int endDate = surveyType.equalsIgnoreCase("mid") ? set.getInt(SurveyConstants.endDate(surveyType)) : 0;
+				double travelDistance = 1000 * set.getDouble(SurveyConstants.wayTravelDistance(surveyType));
 				
 				if(!container.getModeStatsContainer().containsKey(mainMode)){
 					container.getModeStatsContainer().put(mainMode, new RecursiveStatsContainer());
@@ -416,7 +415,7 @@ public class SurveyDatabaseParser {
 					endTime += Time.MIDNIGHT;
 				}
 				
-				double weight = set.getDouble(this.constants.wayWeight());
+				double weight = set.getDouble(SurveyConstants.wayWeight(surveyType));
 
 				//create a new way and set the main mode, mode combination
 				//and departure / arrival time
@@ -433,7 +432,7 @@ public class SurveyDatabaseParser {
 				if(plan.getPlanElements().size() < 1){
 					
 					//add the source activity
-					double firstActType = set.getDouble(this.constants.waySource());
+					double firstActType = set.getDouble(SurveyConstants.waySource(surveyType));
 					SurveyPlanActivity firstAct = new SurveyPlanActivity(handleActTypeAtStart(firstActType));
 					if(firstAct.getActType().equals(ActivityTypes.HOME)){
 						plan.setHomeIndex(0);
@@ -448,7 +447,7 @@ public class SurveyDatabaseParser {
 				
 				int dp = Double.isNaN(detailedPurpose) ? 0 : (int)detailedPurpose;
 				int p = Double.isNaN(purpose) ? 0 : (int)purpose;
-				String actType = handleActType(p, dp);
+				String actType = handleActType(p, dp, surveyType);
 				
 //				if(actType != null){
 
@@ -481,7 +480,7 @@ public class SurveyDatabaseParser {
 						
 					}
 					
-					double endPoint = set.getDouble(this.constants.waySink());
+					double endPoint = set.getDouble(SurveyConstants.waySink(surveyType));
 					
 					//if it's a round-based trip, the act types at origin and destination equal
 					if(endPoint == 5){
@@ -532,7 +531,9 @@ public class SurveyDatabaseParser {
 		
 	}
 	
-	private void parseVehiclesDatabase(Connection connection, SurveyDataContainer container) throws SQLException{
+	private void parseVehiclesDatabase(Connection connection, SurveyDataContainer container, Configuration configuration) throws SQLException{
+		
+		String surveyType = configuration.getSurveyType().name();
 		
 		Statement statement = connection.createStatement();
 		
@@ -542,10 +543,10 @@ public class SurveyDatabaseParser {
 		
 		while(results.next()){
 			
-			String hhid = results.getString(this.constants.householdId());
-			String vid = results.getString(this.constants.vehicleId());
-			int fuelType = results.getInt(this.constants.vehicleFuelType());
-			int kbaClass = results.getInt(this.constants.vehicleSegmentKBA());
+			String hhid = results.getString(SurveyConstants.householdId(surveyType));
+			String vid = results.getString(SurveyConstants.vehicleId(surveyType));
+			int fuelType = results.getInt(SurveyConstants.vehicleFuelType(surveyType));
+			int kbaClass = results.getInt(SurveyConstants.vehicleSegmentKBA(surveyType));
 			
 			SurveyHousehold household = container.getHouseholds().get(hhid);
 			
@@ -782,9 +783,9 @@ public class SurveyDatabaseParser {
 		
 	}
 	
-	private String handleActType(int idx, int idxD){
+	private String handleActType(int idx, int idxD, String surveyType){
 		
-		if(this.constants.getNamespace().equalsIgnoreCase("mid")){
+		if(surveyType.equalsIgnoreCase("mid")){
 			
 			return handleMiDActType(idx, idxD);
 			
@@ -923,9 +924,9 @@ public class SurveyDatabaseParser {
 		
 	}
 	
-	private String handleMainMode(String modeIdx){
+	private String handleMainMode(String modeIdx, String surveyType){
 		
-		if(this.constants.getNamespace().equalsIgnoreCase("mid")){
+		if(surveyType.equalsIgnoreCase("mid")){
 			
 			return handleMainModeMiD(modeIdx);
 			

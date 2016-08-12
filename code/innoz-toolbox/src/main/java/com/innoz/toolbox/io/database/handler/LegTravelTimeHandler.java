@@ -2,33 +2,34 @@ package com.innoz.toolbox.io.database.handler;
 
 import java.util.Map;
 
+import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
 
 public class LegTravelTimeHandler implements DefaultHandler {
 
 	@Override
-	public void handle(SurveyObject obj, Map<String, String> attributes) {
+	public void handle(SurveyObject obj, Map<String, String> attributes, String surveyType) {
 		
 		SurveyStage stage = (SurveyStage)obj;
 		
-		int time = calcSeconds(attributes, true);
+		int time = calcSeconds(attributes, true, surveyType);
 		stage.setStartTime(Integer.toString(time));
 		
-		time = calcSeconds(attributes, false);
+		time = calcSeconds(attributes, false, surveyType);
 		stage.setEndTime(Integer.toString(time));
 
 	}
 	
-	private int calcSeconds(Map<String, String> attributes, boolean mode) {
+	private int calcSeconds(Map<String, String> attributes, boolean mode, String surveyType) {
 		
-		String hKey = "en_std";
-		String mKey = "en_min";
-		String dKey = "en_dat";
+		String hKey = SurveyConstants.wayArrivalHour(surveyType);
+		String mKey = SurveyConstants.wayArrivalMinute(surveyType);
+		String dKey = SurveyConstants.wayArrivalDay(surveyType);
 
 		if(mode) {
-			hKey = "st_std";
-			mKey = "st_min";
-			dKey = "st_dat";
+			hKey = SurveyConstants.wayDepartureHour(surveyType);
+			mKey = SurveyConstants.wayDepartureMinute(surveyType);
+			dKey = SurveyConstants.wayDepartureDay(surveyType);
 		}
 
 		String hour = attributes.get(hKey);

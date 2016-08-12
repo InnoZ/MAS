@@ -82,7 +82,7 @@ public final class Configuration {
 	
 	boolean useTransit = false;
 	
-	String demandSource = "mid";
+	SurveyType surveyType = SurveyType.mid;
 	
 	Map<String,AdminUnitEntry> adminUnits;
 	
@@ -113,6 +113,7 @@ public final class Configuration {
 	public enum VehicleSource{matsim, survey};
 	public enum ActivityLocations{landuse, buildings};
 	public enum DayType{weekday, weekend, all};
+	public enum SurveyType{mid,srv};
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
 	/**
@@ -248,7 +249,7 @@ public final class Configuration {
 			
 		}
 		
-		if((this.subpopulation.equals(Subpopulations.mobility_attitude) || this.demandSource.equals("srv")) && !this.surveyAreaIds.contains("03404")){
+		if((this.subpopulation.equals(Subpopulations.mobility_attitude) || this.surveyType.equals("srv")) && !this.surveyAreaIds.contains("03404")){
 			
 			validationError = true;
 			log.error("SrV data as well as data for mobility attitude groups (Mobilitätstypen) are only valid for Osnabrück!");
@@ -618,8 +619,8 @@ public final class Configuration {
 		return this.adminUnits;
 	}
 	
-	public String getDatasource(){
-		return this.demandSource;
+	public SurveyType getSurveyType(){
+		return this.surveyType;
 	}
 	
 	public Subpopulations getSubpopulationsType(){
@@ -655,7 +656,7 @@ public final class Configuration {
 		map.put(SCALE_FACTOR, Double.toString(this.scaleFactor));
 		map.put(OUTPUT_DIR, this.outputDirectory);
 		map.put(OVERWRITE_FILES, Boolean.toString(this.overwriteExistingFiles));
-		map.put(DEMAND_DATA_SOURCE, this.demandSource);
+		map.put(DEMAND_DATA_SOURCE, this.surveyType.name());
 		map.put(SUBPOPULATIONS_TYPE, this.subpopulation.name());
 		map.put(ACTIVITY_LOCATIONS_TYPE, ActivityLocations.buildings.name());
 		map.put(POPULATION_TYPE, this.popType.name());
