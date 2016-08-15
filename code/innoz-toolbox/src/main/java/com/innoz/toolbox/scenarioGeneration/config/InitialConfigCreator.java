@@ -33,6 +33,8 @@ public class InitialConfigCreator {
 			config.plans().setInputPersonAttributeFile(configuration.getOutputDirectory() + "personAttributes.xml.gz");
 		
 		}
+		
+		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
 	
 		// If households are used, adapt the parameters that define the usage in MATSim
 		if(configuration.getPopulationType().equals(PopulationType.households)){
