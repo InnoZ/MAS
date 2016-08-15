@@ -5,8 +5,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.utils.collections.QuadTree;
@@ -41,6 +43,8 @@ public class ProcessBundeswehrSites {
 		String flinkster = "flinkster.csv";
 		String miscCS = "cs_stations.csv";
 		
+		Set<Coord> visitedCoords = new HashSet<>();
+		
 		AbstractCsvReader reader1 = new AbstractCsvReader() {
 			
 			@Override
@@ -48,10 +52,6 @@ public class ProcessBundeswehrSites {
 				
 				double x = Double.parseDouble(line[0]);
 				double y = Double.parseDouble(line[1]);
-				
-//				Coord c = transformation.transform(new Coord(x, y));
-//				x = c.getX();
-//				y = c.getY();
 				
 				if(Double.isFinite(x) && Double.isFinite(y)){
 					
@@ -73,9 +73,13 @@ public class ProcessBundeswehrSites {
 					String street = line[6];
 					String postalCode = line[7];
 					String city = line[8];
+		
+					Coord c = new Coord(x, y);
 					
-					ProcessBundeswehrSites.this.bwSites.put(id, new BwSite(id, name, street, postalCode, city,new Coord(x,y)));
-//					ProcessBundeswehrSites.this.bwSites.put(id, new BwSite(id, name, street, postalCode, city, c));
+					if(!visitedCoords.contains(c)){
+						ProcessBundeswehrSites.this.bwSites.put(id, new BwSite(id, name, street, postalCode, city, c));
+						visitedCoords.add(c);
+					}
 					
 				}
 				
@@ -86,25 +90,22 @@ public class ProcessBundeswehrSites {
 		reader1.read(filebase + bwSites);
 		Coord topLeft = transformation2.transform(new Coord(0, 84));
 		Coord bottomRight = transformation2.transform(new Coord(18,0));
-//		minX = -250000;
-//		minY = 5261371;
-//		maxX = 500311;
-//		maxY = 7089373;
 		qT = new QuadTree<>(-3000000, -1000, bottomRight.getX(), topLeft.getY());
-//		qT = new QuadTree<>(minX,minY,maxX,maxY);
 		
-		AbstractCsvReader reader2 = new AbstractCsvReader() {
+		AbstractCsvReader reader2 = new AbstractCsvReader(";",true) {
 			
 			@Override
 			public void handleRow(String[] line) {
 				
-				double x = Double.parseDouble(line[0]);
-				double y = Double.parseDouble(line[1]);
-				
-				Coord result = transformation2.transform(new Coord(x, y));
-				
-				if(x >= 0 && x <= 18)
-					qT.put(result.getX(), result.getY(), new CsStation("bw"));
+				if(!line[7].equals("")&&!line[7].equals(" ")){
+					double x = Double.parseDouble(line[0].replace(",", "."));
+					double y = Double.parseDouble(line[1].replace(",", "."));
+					
+					Coord result = transformation2.transform(new Coord(x, y));
+					
+					if(x >= 0 && x <= 18)
+						qT.put(result.getX(), result.getY(), new CsStation("bw"));
+				}
 				
 			}
 		};
@@ -153,7 +154,7 @@ public class ProcessBundeswehrSites {
 			double x = bwSite.coord.getX();
 			double y = bwSite.coord.getY();
 			List<CsStation> closest = (List<CsStation>) this.qT.getDisk(x, y, 10000);
-			
+
 			if(closest != null){
 				
 				if(!closest.isEmpty()){
