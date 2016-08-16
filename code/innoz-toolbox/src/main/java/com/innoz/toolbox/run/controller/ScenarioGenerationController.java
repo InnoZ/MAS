@@ -16,6 +16,7 @@ import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.PopulationWriter;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.Time;
+import org.matsim.facilities.FacilitiesWriter;
 import org.matsim.households.HouseholdsWriterV10;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.matsim.vehicles.VehicleWriterV1;
@@ -115,13 +116,13 @@ public class ScenarioGenerationController extends DefaultController {
 				
 			}
 			
+			new FacilitiesWriter(scenario.getActivityFacilities()).write(configuration.getOutputDirectory() + "facilities.xml.gz");
+			
 			if(configuration.isWritingDatabaseOutput()){
 				
 				new DatabaseUpdater().update(configuration, scenario, null);
 				
 			}
-			
-			OutputDirectoryLogging.closeOutputDirLogging();
 			
 			double t1 = System.currentTimeMillis();
 			
@@ -135,6 +136,9 @@ public class ScenarioGenerationController extends DefaultController {
 
 		log.info("> Scenario generation complete. All files have been written to "
 				+ configuration.getOutputDirectory());
+		
+		OutputDirectoryLogging.closeOutputDirLogging();
+		
 		return;
 		
 	}

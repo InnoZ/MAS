@@ -22,19 +22,15 @@ import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.facilities.ActivityFacility;
+import org.matsim.facilities.ActivityFacilityImpl;
+import org.matsim.facilities.ActivityOption;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.PrecisionModel;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.ActivityLocations;
@@ -45,6 +41,7 @@ import com.innoz.toolbox.io.database.datasets.OsmPolygonDataset;
 import com.innoz.toolbox.run.parallelization.BuildingThread;
 import com.innoz.toolbox.run.parallelization.DataProcessingAlgoThread;
 import com.innoz.toolbox.run.parallelization.MultithreadedModule;
+import com.innoz.toolbox.scenarioGeneration.facilities.FacilitiesCreator;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Building;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.District;
@@ -52,6 +49,12 @@ import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.network.OsmNodeEntry;
 import com.innoz.toolbox.scenarioGeneration.network.WayEntry;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 
 /**
  * 
@@ -178,7 +181,7 @@ public class DatabaseReader {
 						|| !configuration.getVicinityPopulationSource().equals(PopulationSource.none)){
 
 					// Otherwise, read in the OSM data
-					this.readOsmData(connection, configuration);
+					this.readOsmData(connection, configuration, scenario);
 					
 				}
 				
@@ -354,7 +357,7 @@ public class DatabaseReader {
 	 * @throws FactoryException 
 	 * @throws NoSuchAuthorityCodeException 
 	 */
-	private void readOsmData(Connection connection, Configuration configuration)
+	private void readOsmData(Connection connection, Configuration configuration, Scenario scenario)
 			throws NoSuchAuthorityCodeException, FactoryException{
 
 		final CoordinateReferenceSystem fromCRS = CRS.decode(Geoinformation.AUTH_KEY_WGS84, true);
@@ -382,7 +385,7 @@ public class DatabaseReader {
 			// Read point geometries
 			readPointData(connection);
 			
-			if(configuration.getActivityLocationsType().equals(ActivityLocations.buildings)){
+			if(!configuration.getActivityLocationsType().equals(ActivityLocations.landuse)){
 				
 				for(AdministrativeUnit au : this.geoinformation.getSubUnits().values()){
 					
@@ -390,12 +393,26 @@ public class DatabaseReader {
 					
 				}
 				
-				MultithreadedModule module = new MultithreadedModule(configuration.getNumberOfThreads());
-				module.initThreads(BuildingThread.class.getName(), this);
-				for(Building b : this.buildingList){
-					module.handle(b);
+				if(configuration.getActivityLocationsType().equals(ActivityLocations.facilities)){
+					
+					new FacilitiesCreator().create(scenario, geoinformation, buildingList);
+					for(ActivityFacility f : scenario.getActivityFacilities().getFacilities().values()){
+						for(ActivityOption option : f.getActivityOptions().values()){
+							this.addGeometry(option.getType(), gFactory.createPoint(MGC.coord2Coordinate(f.getCoord())));
+						}
+						((ActivityFacilityImpl)f).setCoord(ct.transform(f.getCoord()));
+					}
+					
+				} else {
+					
+					MultithreadedModule module = new MultithreadedModule(configuration.getNumberOfThreads());
+					module.initThreads(BuildingThread.class.getName(), this);
+					for(Building b : this.buildingList){
+						module.handle(b);
+					}
+					module.execute();
+					
 				}
-				module.execute();
 				
 			}
 			

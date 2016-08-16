@@ -90,7 +90,7 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 			
 			// Add the landuse geometry to the geoinformation if we have a valid activity option for it
 			
-			if(reader.getConfiguration().getActivityLocationsType().equals(ActivityLocations.buildings)){
+			if(!reader.getConfiguration().getActivityLocationsType().equals(ActivityLocations.landuse)){
 				
 //				if(!this.reader.getGeoinformation().getSurveyAreaBoundingBox().contains(dataset.getGeometry()) ||
 //						!this.reader.getGeoinformation().getSurveyAreaBoundingBox().touches(dataset.getGeometry()) ||

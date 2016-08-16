@@ -11,6 +11,7 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.core.population.PersonUtils;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 
@@ -83,7 +84,8 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 		}
 		
 	}
-	
+
+	@SuppressWarnings("deprecation")
 	private void createOneCommuter(CommuterDataElement el, Population population, int n){
 
 		String homeId = el.getFromId();
@@ -129,6 +131,9 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 		person.setSelectedPlan(plan);
 		
 		population.addPerson(person);
+		PersonUtils.setCarAvail(person, "always");
+		scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(),
+				com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.ATT_CAR_AVAIL, "always");
 		
 	}
 

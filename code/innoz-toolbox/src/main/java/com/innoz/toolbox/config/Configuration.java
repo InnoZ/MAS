@@ -111,7 +111,7 @@ public final class Configuration {
 	public enum PopulationSource{dummy,commuter,survey,none};
 	public enum Subpopulations{none,mobility_attitude};
 	public enum VehicleSource{matsim, survey};
-	public enum ActivityLocations{landuse, buildings};
+	public enum ActivityLocations{landuse, buildings, facilities};
 	public enum DayType{weekday, weekend, all};
 	public enum SurveyType{mid,srv};
 	/////////////////////////////////////////////////////////////////////////////////////////	
