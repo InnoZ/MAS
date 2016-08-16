@@ -3,6 +3,7 @@ package com.innoz.toolbox.io.database;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -39,7 +40,7 @@ public class SurveyDatabaseParserV2 {
 	 * @param container The class containing all survey information needed for demand generation.
 	 * @param geoinformation
 	 */
-	public void run(Configuration configuration, SurveyDataContainer container, Geoinformation geoinformation){
+	public void run(Configuration configuration, SurveyDataContainer container, Geoinformation geoinformation, Set<String> ids){
 		
 		// Initialize the survey constants according to what datasource was specified.
 		this.constants = new SurveyConstants();
@@ -62,7 +63,7 @@ public class SurveyDatabaseParserV2 {
 					
 					log.info("Creating survey households...");
 					
-					new ReadHouseholdDatabaseTask(constants, geoinformation).parse(connection, container, configuration.getSurveyType().name());
+					new ReadHouseholdDatabaseTask(constants, geoinformation, ids).parse(connection, container, configuration.getSurveyType().name());
 						
 					log.info("Read " + container.getHouseholds().size() + " households...");
 					

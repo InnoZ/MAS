@@ -50,10 +50,10 @@ public class ScenarioGenerationController extends DefaultController {
 			double t0 = System.currentTimeMillis();
 			
 			// Dump scenario generation settings on the console and create the output directory
-			configuration.dumpSettings();
 			new File(configuration.getOutputDirectory()).mkdirs();
 			
 			OutputDirectoryLogging.initLoggingWithOutputDirectory(configuration.getOutputDirectory());
+			configuration.dumpSettings();
 			
 			// Reset the random seed
 			MatsimRandom.reset(configuration.getRandomSeed());

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
+import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.handler.DefaultHandler;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;

@@ -15,6 +15,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.population.PersonUtils;
+import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -80,7 +81,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		// Run the survey data parser that stores all of the travel information
 		SurveyDatabaseParserV2 parser = new SurveyDatabaseParserV2();
 		SurveyDataContainer container = new SurveyDataContainer(configuration);
-		parser.run(configuration, container, this.geoinformation);
+		parser.run(configuration, container, this.geoinformation, CollectionUtils.stringToSet(ids));
 		
 		// Choose the method for demand generation that has been specified in the configuration
 		if(configuration.getPopulationType().equals(PopulationType.households)){

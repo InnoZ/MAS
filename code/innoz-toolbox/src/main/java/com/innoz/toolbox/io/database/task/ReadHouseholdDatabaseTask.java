@@ -7,7 +7,6 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.innoz.toolbox.io.SurveyConstants;
@@ -15,6 +14,7 @@ import com.innoz.toolbox.io.database.handler.DefaultHandler;
 import com.innoz.toolbox.io.database.handler.HouseholdIdHandler;
 import com.innoz.toolbox.io.database.handler.HouseholdIncomeHandler;
 import com.innoz.toolbox.io.database.handler.HouseholdWeightHandler;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyHousehold;
@@ -22,11 +22,13 @@ import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyHousehold;
 public class ReadHouseholdDatabaseTask extends DatabaseTask {
 	
 	private Geoinformation geoinformation;
+	private Set<String> ids;
 
-	public ReadHouseholdDatabaseTask(SurveyConstants constants, Geoinformation geoinformation) {
+	public ReadHouseholdDatabaseTask(SurveyConstants constants, Geoinformation geoinformation, Set<String> ids) {
 
 		super(constants);
 		this.geoinformation = geoinformation;
+		this.ids = ids;
 		
 		this.handlers = new HashSet<>();
 		this.handlers.add(new HouseholdIdHandler());
@@ -50,20 +52,40 @@ public class ReadHouseholdDatabaseTask extends DatabaseTask {
 			q +=  " where ";
 			
 			int cntOut = 0;
-			
-			for(Entry<Integer, Set<Integer>> entry : geoinformation.getRegionTypes().entrySet()){
+			Set<Integer> knownRegionTypes = new HashSet<>();
 
-				cntOut++;
+			for(AdministrativeUnit entry : geoinformation.getSubUnits().values()){
 				
-				q += SurveyConstants.regionType(surveyType) + " = " + entry.getKey();
+				if(ids.contains(entry.getId().substring(0, 5))&&!knownRegionTypes.contains(entry.getRegionType())){
+				
+					cntOut++;
+					
+					q += SurveyConstants.regionType(surveyType) + " = " + entry.getRegionType();
+					knownRegionTypes.add(entry.getRegionType());
 
-				if(cntOut < geoinformation.getRegionTypes().size()){
+					if(cntOut < ids.size()){
 
-					q += " or ";
+						q += " or ";
+						
+					}
 					
 				}
 				
 			}
+			
+//			for(Entry<Integer, Set<Integer>> entry : geoinformation.getRegionTypes().entrySet()){
+//
+//				cntOut++;
+//				
+//				q += SurveyConstants.regionType(surveyType) + " = " + entry.getKey();
+//
+//				if(cntOut < geoinformation.getRegionTypes().size()){
+//
+//					q += " or ";
+//					
+//				}
+//				
+//			}
 			
 		} else {
 			
