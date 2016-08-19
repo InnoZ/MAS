@@ -128,10 +128,13 @@ public class GtfsConverter {
 	
 	
 	private void convertStops(){
+		double[] bb = new double[]{7.2729,51.6623,8.8824,52.7396};
 		for(Stop stop: feed.stops.values()){
-			TransitStopFacility t = this.ts.getFactory().createTransitStopFacility(Id.create(stop.stop_id, TransitStopFacility.class), transform.transform(new Coord(stop.stop_lon, stop.stop_lat)), false);
-			t.setName(stop.stop_name);
-			ts.addStopFacility(t);
+			if(stop.stop_lon >= bb[0] && stop.stop_lon <= bb[2] && stop.stop_lat >= bb[1] && stop.stop_lat <= bb[3]){
+				TransitStopFacility t = this.ts.getFactory().createTransitStopFacility(Id.create(stop.stop_id, TransitStopFacility.class), transform.transform(new Coord(stop.stop_lon, stop.stop_lat)), false);
+				t.setName(stop.stop_name);
+				ts.addStopFacility(t);
+			}
 		}		
 	}
 
@@ -168,8 +171,10 @@ public class GtfsConverter {
 				for(StopTime stopTime : feed.getOrderedStopTimesForTrip(trip.trip_id)) {
 					Id<TransitStopFacility> stopId = Id.create(stopTime.stop_id, TransitStopFacility.class);
 					TransitStopFacility stop = ts.getFacilities().get(stopId);
-					TransitRouteStop routeStop = ts.getFactory().createTransitRouteStop(stop, Time.parseTime(String.valueOf(stopTime.arrival_time))-departureTime, Time.parseTime(String.valueOf(stopTime.departure_time))-departureTime);
-					stops.add(routeStop);
+					if(stop != null){
+						TransitRouteStop routeStop = ts.getFactory().createTransitRouteStop(stop, Time.parseTime(String.valueOf(stopTime.arrival_time))-departureTime, Time.parseTime(String.valueOf(stopTime.departure_time))-departureTime);
+						stops.add(routeStop);
+					}
 				}
 				TransitLine tl = ts.getTransitLines().get(Id.create(trip.route.route_id, TransitLine.class));
 				TransitRoute tr = findOrAddTransitRoute(tl, trip.route, stops);
@@ -185,8 +190,10 @@ public class GtfsConverter {
 				for(StopTime stopTime : feed.getOrderedStopTimesForTrip(trip.trip_id)) {
 					Id<TransitStopFacility> stopId = Id.create(stopTime.stop_id, TransitStopFacility.class);
 					TransitStopFacility stop = ts.getFacilities().get(stopId);
-					TransitRouteStop routeStop = ts.getFactory().createTransitRouteStop(stop, Time.parseTime(String.valueOf(stopTime.arrival_time)), Time.parseTime(String.valueOf(stopTime.departure_time)));
-					stops.add(routeStop);
+					if(stop != null){
+						TransitRouteStop routeStop = ts.getFactory().createTransitRouteStop(stop, Time.parseTime(String.valueOf(stopTime.arrival_time)), Time.parseTime(String.valueOf(stopTime.departure_time)));
+						stops.add(routeStop);
+					}
 				}
 				for (Frequency frequency : trip.frequencies) {
 					for (int time = frequency.start_time; time < frequency.end_time; time += frequency.headway_secs) {
