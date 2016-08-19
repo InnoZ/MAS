@@ -161,7 +161,9 @@ public class GtfsConverter {
 		int frequencyDepartures = 0;
 		int vehCounter = 0;
 		VehicleType bus = createDefaultBusVehicleType();
+		VehicleType train = createDefaultTrainVehicleType();
 		scenario.getTransitVehicles().addVehicleType(bus);
+		scenario.getTransitVehicles().addVehicleType(train);
 		for (Trip trip : trips) {
 			if(agencyIdFilter.contains(trip.route.agency.agency_id) || agencyIdFilter.isEmpty()){
 			if (trip.frequencies == null) {
@@ -179,7 +181,12 @@ public class GtfsConverter {
 				TransitLine tl = ts.getTransitLines().get(Id.create(trip.route.route_id, TransitLine.class));
 				TransitRoute tr = findOrAddTransitRoute(tl, trip.route, stops);
 				Departure departure = ts.getFactory().createDeparture(Id.create(trip.trip_id, Departure.class), departureTime);
-				Vehicle vehicle = scenario.getTransitVehicles().getFactory().createVehicle(Id.createVehicleId(vehCounter), bus);
+				Vehicle vehicle = null;
+				if(trip.route.route_type == Route.BUS){
+					vehicle = scenario.getTransitVehicles().getFactory().createVehicle(Id.createVehicleId("bus_"+vehCounter), bus);
+				} else {vehicle = scenario.getTransitVehicles().getFactory().createVehicle(Id.createVehicleId("train_"+vehCounter), train);
+					
+				}
 				scenario.getTransitVehicles().addVehicle(vehicle);
 				departure.setVehicleId(vehicle.getId());
 				vehCounter++;
@@ -247,6 +254,31 @@ public class GtfsConverter {
 		
 		vehType.setLength(20);
 		vehType.setMaximumVelocity(120);
+		vehType.setPcuEquivalents(2);
+		vehType.setWidth(2.8);
+		
+		return vehType;
+		
+	}
+	
+	private VehicleType createDefaultTrainVehicleType(){
+		
+		VehicleType vehType = scenario.getTransitVehicles().getFactory().createVehicleType(Id.create("default train", VehicleType.class));
+		vehType.setAccessTime(1);
+		
+		VehicleCapacity capacity = scenario.getTransitVehicles().getFactory().createVehicleCapacity();
+		capacity.setSeats(300);
+		capacity.setStandingRoom(150);
+		vehType.setCapacity(capacity);
+		
+		vehType.setDoorOperationMode(DoorOperationMode.parallel);
+		vehType.setEgressTime(1);
+		
+		EngineInformation currentEngineInfo = scenario.getTransitVehicles().getFactory().createEngineInformation(FuelType.diesel, 10);
+		vehType.setEngineInformation(currentEngineInfo);
+		
+		vehType.setLength(40);
+		vehType.setMaximumVelocity(200);
 		vehType.setPcuEquivalents(2);
 		vehType.setWidth(2.8);
 		
