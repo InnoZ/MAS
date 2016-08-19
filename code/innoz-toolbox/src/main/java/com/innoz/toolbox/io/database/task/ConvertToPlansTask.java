@@ -20,6 +20,8 @@ public class ConvertToPlansTask implements SurveyDataTask {
 
 	private static final Logger log = Logger.getLogger(ConvertToPlansTask.class);
 	
+	private int warnCounterLicense = 0;
+	
 	@Override
 	public void run(SurveyDataContainer container) {
 
@@ -147,8 +149,13 @@ public class ConvertToPlansTask implements SurveyDataTask {
 						
 						if(way.getMainMode().equals(TransportMode.car) && !person.hasCarAvailable()){
 							if(!licenseAndCarAvailabilitySet){
-								log.warn("Person " + person.getId() + " reported that no car was available, but it is driving anyway!");
-								log.info("Setting car availability and license ownership to ’true’.");
+								if(warnCounterLicense < 5){
+									log.warn("Person " + person.getId() + " reported that no car was available, but it is driving anyway!");
+									log.info("Setting car availability and license ownership to ’true’.");
+									warnCounterLicense++;
+								} else if(warnCounterLicense == 5){
+									log.info("Further occurences of this message are suppressed.");
+								}
 								person.setCarAvailable(true);
 								person.setHasLicense(true);
 								licenseAndCarAvailabilitySet = true;
