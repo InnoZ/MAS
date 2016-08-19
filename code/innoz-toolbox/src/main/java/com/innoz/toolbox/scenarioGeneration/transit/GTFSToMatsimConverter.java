@@ -2,10 +2,10 @@ package com.innoz.toolbox.scenarioGeneration.transit;
 
 import java.io.File;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
@@ -14,13 +14,16 @@ import org.matsim.core.network.MatsimNetworkReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.NetworkWriter;
 import org.matsim.core.network.NodeImpl;
+import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.pt.transitSchedule.api.Departure;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitRouteStop;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
+import org.matsim.pt.transitSchedule.api.TransitScheduleFactory;
 import org.matsim.pt.transitSchedule.api.TransitScheduleWriter;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.matsim.pt.utils.CreatePseudoNetwork;
@@ -90,15 +93,16 @@ public class GTFSToMatsimConverter {
 		File output = new File("/home/dhosse/osGtfs/");
 		if(!output.exists()) output.mkdirs();
 		
-		cleanTransitSchedule(schedule);
+		TransitSchedule cleaned = cleanTransitSchedule(schedule);
+		((MutableScenario)scenario).setTransitSchedule(cleaned);
 		
 		Network transitNet = NetworkUtils.createNetwork();
-		CreatePseudoNetwork creator = new CreatePseudoNetwork(schedule, transitNet, "pt_");
+		InnoZCreatePseudoNetwork creator = new InnoZCreatePseudoNetwork(cleaned, transitNet, "pt_");
 		creator.createNetwork();
 		
 		new NetworkWriter(transitNet).write(output.getAbsolutePath() +
 				"/transitNetwork.xml.gz");
-		new TransitScheduleWriter(schedule).writeFile(output.getAbsolutePath() +
+		new TransitScheduleWriter(cleaned).writeFile(output.getAbsolutePath() +
 				"/schedule.xml.gz");
 		
 		TransitScheduleSimplifier.simplifyTransitSchedule(scenario, "/home/dhosse/osGtfs/scheduleSimplified.xml.gz");
@@ -109,49 +113,87 @@ public class GTFSToMatsimConverter {
 		
 	}
 	
-	private void cleanTransitSchedule(TransitSchedule schedule){
+	private TransitSchedule cleanTransitSchedule(TransitSchedule schedule){
 		
-		Set<Id<TransitLine>> linesToRemove = new HashSet<>();
-		Set<Id<TransitStopFacility>> usedFacilities = new HashSet<>();
+		TransitSchedule schedule2 = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getTransitSchedule();
+		TransitScheduleFactory factory = schedule2.getFactory();
+		
+		double[] bb = new double[]{7.2729,51.6623,8.8824,52.7396};
+		
+		CoordinateTransformation transformation = TransformationFactory.
+				getCoordinateTransformation("EPSG:32632", TransformationFactory.WGS84);
+		
+		for(TransitStopFacility f : schedule.getFacilities().values()){
+			
+			Coord c = transformation.transform(f.getCoord());
+			
+			if(c.getX() >= bb[0] && c.getX() <= bb[2] && c.getY() >= bb[1] && c.getY() <= bb[3]){
+				schedule2.addStopFacility(f);
+			}
+			
+		}
 		
 		for(TransitLine line : schedule.getTransitLines().values()){
 			
-			if(line.getRoutes().isEmpty()){
-				
-				linesToRemove.add(line.getId());
-				
-			} else {
+			if(!line.getRoutes().isEmpty()){
+			
+				TransitLine l2 = factory.createTransitLine(line.getId());
+				l2.setName(line.getName());
 				
 				for(TransitRoute route : line.getRoutes().values()){
 					
-					for(TransitRouteStop stop : route.getStops()){
+					if(route.getDepartures().size() > 0 && route.getStops().size() > 2){
 						
-						usedFacilities.add(stop.getStopFacility().getId());
+						List<TransitRouteStop> stops = new ArrayList<>();
+
+						boolean first = true;
+						double arrivalOffset = 0d;
+						double departureOffset = 0d;
+						
+						for(TransitRouteStop stop : route.getStops()){
+							
+							if(schedule2.getFacilities().get(stop.getStopFacility().getId()) != null){
+								
+								if(first){
+									arrivalOffset = stop.getArrivalOffset();
+									departureOffset = stop.getDepartureOffset();
+									first = false;
+								}
+								
+								TransitRouteStop s = factory.createTransitRouteStop(stop.getStopFacility(),
+										stop.getArrivalOffset() - arrivalOffset, stop.getDepartureOffset() - departureOffset);
+								
+								stops.add(s);
+								
+							}
+							
+						}
+						
+						TransitRoute r = factory.createTransitRoute(route.getId(), route.getRoute(), stops,
+								route.getTransportMode());
+						
+						for(Departure d : route.getDepartures().values()){
+							
+							Departure departure = factory.createDeparture(d.getId(), d.getDepartureTime() + arrivalOffset);
+							
+							r.addDeparture(departure);
+						}
+
+						l2.addRoute(r);
 						
 					}
 					
+				}
+				
+				if(!l2.getRoutes().isEmpty()){
+					schedule2.addTransitLine(l2);
 				}
 				
 			}
 			
 		}
 		
-		for(Id<TransitLine> lineId : linesToRemove){
-			schedule.removeTransitLine(schedule.getTransitLines().get(lineId));
-		}
-		
-		Set<TransitStopFacility> toRemove = new HashSet<>();
-		for(TransitStopFacility fac : schedule.getFacilities().values()){
-			
-			if(!usedFacilities.contains(fac.getId())){
-				toRemove.add(fac);
-			}
-			
-		}
-		
-		for(TransitStopFacility fac : toRemove){
-			schedule.removeStopFacility(fac);
-		}
+		return schedule2;
 		
 	}
 	

@@ -128,14 +128,14 @@ public class GtfsConverter {
 	
 	
 	private void convertStops(){
-		double[] bb = new double[]{7.2729,51.6623,8.8824,52.7396};
+//		double[] bb = new double[]{7.2729,51.6623,8.8824,52.7396};
 		for(Stop stop: feed.stops.values()){
-			if(stop.stop_lon >= bb[0] && stop.stop_lon <= bb[2] && stop.stop_lat >= bb[1] && stop.stop_lat <= bb[3]){
+//			if(stop.stop_lon >= bb[0] && stop.stop_lon <= bb[2] && stop.stop_lat >= bb[1] && stop.stop_lat <= bb[3]){
 				TransitStopFacility t = this.ts.getFactory().createTransitStopFacility(Id.create(stop.stop_id, TransitStopFacility.class), transform.transform(new Coord(stop.stop_lon, stop.stop_lat)), false);
 				t.setName(stop.stop_name);
 				ts.addStopFacility(t);
 			}
-		}		
+//		}		
 	}
 
 
