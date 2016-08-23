@@ -169,17 +169,22 @@ public class GTFSToMatsimConverter {
 							
 						}
 						
-						TransitRoute r = factory.createTransitRoute(route.getId(), route.getRoute(), stops,
-								route.getTransportMode());
-						
-						for(Departure d : route.getDepartures().values()){
-							
-							Departure departure = factory.createDeparture(d.getId(), d.getDepartureTime() + arrivalOffset);
-							
-							r.addDeparture(departure);
-						}
+						if(stops.size() > 1){
 
-						l2.addRoute(r);
+							TransitRoute r = factory.createTransitRoute(route.getId(), route.getRoute(), stops,
+									route.getTransportMode());
+							
+							for(Departure d : route.getDepartures().values()){
+								
+								Departure departure = factory.createDeparture(d.getId(), d.getDepartureTime() + arrivalOffset);
+								departure.setVehicleId(d.getVehicleId());
+								r.addDeparture(departure);
+								
+							}
+
+							l2.addRoute(r);
+							
+						}
 						
 					}
 					
