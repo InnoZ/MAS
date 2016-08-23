@@ -27,6 +27,7 @@ import com.innoz.toolbox.scenarioGeneration.population.PopulationCreator;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyHousehold;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPlanTrip;
+import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.utils.GeometryUtils;
 
 public abstract class DemandGenerationAlgorithm {
@@ -158,6 +159,10 @@ public abstract class DemandGenerationAlgorithm {
 		
 		if(fromId == null){
 			fromId = this.currentHomeCell.getId();
+		}
+		
+		if(activityType.split("_")[0].equals(ActivityTypes.EDUCATION) && this.currentHomeCell.getWeightForKey(ActivityTypes.EDUCATION) > 0){
+			return this.currentHomeCell;
 		}
 		
 		if(mode != null){

@@ -24,7 +24,7 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.facilities.ActivityFacility;
 import org.matsim.facilities.ActivityFacilityImpl;
-import org.matsim.facilities.ActivityOption;
+import org.matsim.facilities.FacilitiesWriter;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
@@ -395,13 +395,29 @@ public class DatabaseReader {
 				
 				if(configuration.getActivityLocationsType().equals(ActivityLocations.facilities)){
 					
-					new FacilitiesCreator().create(scenario, geoinformation, buildingList);
-					for(ActivityFacility f : scenario.getActivityFacilities().getFacilities().values()){
-						for(ActivityOption option : f.getActivityOptions().values()){
-							this.addGeometry(option.getType(), gFactory.createPoint(MGC.coord2Coordinate(f.getCoord())));
-						}
-						((ActivityFacilityImpl)f).setCoord(ct.transform(f.getCoord()));
+					minX = Double.MAX_VALUE;
+					minY = Double.MAX_VALUE;
+					maxX = Double.MIN_VALUE;
+					maxY = Double.MIN_VALUE;
+					
+					for(Coordinate coord : this.boundingBox.getCoordinates()){
+						if(coord.x < minX) minX = coord.x;
+						if(coord.x > maxX) maxX = coord.x;
+						if(coord.y < minY) minY = coord.y;
+						if(coord.y > maxY) maxY = coord.y;
 					}
+					
+					new FacilitiesCreator().create(scenario, geoinformation, buildingList, minX, minY, maxX, maxY);
+
+					this.buildingList = null;
+					
+					for(ActivityFacility f : scenario.getActivityFacilities().getFacilities().values()){
+						
+						((ActivityFacilityImpl)f).setCoord(ct.transform(f.getCoord()));
+						
+					}
+					
+					new FacilitiesWriter(scenario.getActivityFacilities()).write("/home/dhosse/facilities.xml.gz");
 					
 				} else {
 					

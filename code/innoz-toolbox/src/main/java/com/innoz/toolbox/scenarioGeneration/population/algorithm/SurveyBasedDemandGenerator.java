@@ -20,6 +20,7 @@ import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.misc.Time;
+import org.matsim.facilities.ActivityFacility;
 import org.matsim.households.Household;
 import org.matsim.households.HouseholdImpl;
 import org.matsim.households.Income.IncomePeriod;
@@ -27,8 +28,6 @@ import org.matsim.households.IncomeImpl;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.PopulationType;
@@ -51,6 +50,7 @@ import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyVehicle;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.scenarioGeneration.vehicles.VehicleTypes;
 import com.innoz.toolbox.utils.GeometryUtils;
+import com.vividsolutions.jts.geom.Geometry;
 
 public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
@@ -723,12 +723,24 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		double minFactor = 0.75;
 		double maxFactor = 1.5;
 		
-		// Get all landuse geometries of the current activity type within the given administrative unit
-		if(this.geoinformation.getQuadTreeForActType(actType)==null){
-			System.out.println(actType);
+		if(this.scenario.getActivityFacilities().getFacilities().isEmpty()){
+			
+			return shootGeometry(au, actType, d, minFactor, maxFactor, templatePlan, mode, personTemplate);
+			
+		} else {
+			
+			return shootFacility(au, actType, d, minFactor, maxFactor, templatePlan, mode, personTemplate);
+			
 		}
+		
+	}
+	
+	private Coord shootGeometry(AdministrativeUnit au, String actType, double d, double minFactor, double maxFactor,
+			SurveyPlan templatePlan, String mode, SurveyPerson personTemplate){
+		
+		// Get all landuse geometries of the current activity type within the given administrative unit
 		List<Geometry> closest = (List<Geometry>) this.geoinformation.getQuadTreeForActType(actType).getRing
-				(this.lastActCoord.getX(), this.lastActCoord.getY(), d * minFactor, d * maxFactor);
+					(this.lastActCoord.getX(), this.lastActCoord.getY(), d * minFactor, d * maxFactor);
 		
 		// If there were any landuse geometries found, randomly choose one of the geometries.
 		// Else pick the landuse geometry closest to the last activity coordinate.
@@ -799,6 +811,79 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			}
 			
 		}
+		
+	}
+	
+	private Coord shootFacility(AdministrativeUnit au, String actType, double d, double minFactor, double maxFactor,
+			SurveyPlan templatePlan, String mode, SurveyPerson personTemplate){
+		
+		List<ActivityFacility> closest = (List<ActivityFacility>) this.geoinformation.getQuadTreeForFacilityActType(actType).getRing
+				(this.lastActCoord.getX(), this.lastActCoord.getY(), d * minFactor, d * maxFactor);
+		
+		if(closest != null){
+			
+			if(!closest.isEmpty()){
+				
+				double shootingRandom = this.random.nextInt(closest.size());
+				double accumulatedWeight = 0.0d;
+				ActivityFacility area = null;
+				
+				for(ActivityFacility g : closest){
+					
+					accumulatedWeight++;
+					if(shootingRandom <= accumulatedWeight){
+						area = g;
+						break;
+					}
+					
+				}
+				
+				
+				return (area.getCoord());
+				
+			} else {
+				
+				ActivityFacility area = this.geoinformation.getQuadTreeForFacilityActType(actType)
+						.getClosest(this.lastActCoord.getX(), this.lastActCoord.getY());
+				
+				return (area.getCoord());
+				
+			}
+		
+		} else {
+			
+//			closest = au.getLanduseGeometries().get(actType);
+//			
+//			if(!closest.isEmpty()){
+//				
+//				double shootingRandom = this.random.nextDouble() * au.getWeightForKey(actType);
+//				double accumulatedWeight = 0.0d;
+//				Geometry area = null;
+//				
+//				for(Geometry g : closest){
+//					
+//					accumulatedWeight += g.getArea();
+//					if(shootingRandom <= accumulatedWeight){
+//						area = g;
+//						break;
+//					}
+//					
+//				}
+//				
+//				return this.transformation.transform(GeometryUtils.shoot(area, this.random));
+//				
+//			} else {
+//				
+//				Geometry area = this.geoinformation.getQuadTreeForActType(actType).getClosest(
+//						this.lastActCoord.getX(), this.lastActCoord.getY());
+//				
+//				return this.transformation.transform(GeometryUtils.shoot(area, this.random));
+//				
+//			}
+			
+		}
+		
+		return null;
 		
 	}
 

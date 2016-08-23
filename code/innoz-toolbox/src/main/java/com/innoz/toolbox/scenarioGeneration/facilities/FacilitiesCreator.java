@@ -2,18 +2,30 @@ package com.innoz.toolbox.scenarioGeneration.facilities;
 
 import java.util.List;
 
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.core.utils.misc.Time;
 import org.matsim.facilities.ActivityFacilitiesFactory;
 import org.matsim.facilities.ActivityFacility;
+import org.matsim.facilities.ActivityOption;
+import org.matsim.facilities.ActivityOptionImpl;
+import org.matsim.facilities.OpeningTimeImpl;
 
+import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Building;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
+import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 
 public class FacilitiesCreator {
 
-	public void create(final Scenario scenario, final Geoinformation geoinformation, List<Building> buildingList){
+	public void create(final Scenario scenario, final Geoinformation geoinformation, List<Building> buildingList,
+			double minX, double minY, double maxX, double maxY){
+		
+		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation("EPSG:4326", "EPSG:32632");
 		
 		ActivityFacilitiesFactory factory = scenario.getActivityFacilities().getFactory();
 		
@@ -21,13 +33,55 @@ public class FacilitiesCreator {
 		
 		for(Building building : buildingList){
 			
+			if(building.getGeometry() != null){
+				
 			ActivityFacility facility = factory.createActivityFacility(Id.create(cnt, ActivityFacility.class), MGC.point2Coord(building.getGeometry().getCentroid()));
 			
 			for(String act : building.getActivityOptions()){
 
 				if(act != null){
-					facility.addActivityOption(factory.createActivityOption(act));
+					
+					String actType = act.split("_")[0];
+					
+					if(!facility.getActivityOptions().containsKey(actType)){
+
+						// If the activity is of any of the sub types, take only the main activity type
+						ActivityOption option = factory.createActivityOption(actType);
+						((ActivityOptionImpl)option).addOpeningTime(getOpeningTimeForActivityOption(option.getType()));
+						facility.addActivityOption(option);
+						
+						if(geoinformation.getQuadTreeForFacilityActType(act) == null){
+							
+							geoinformation.createQuadTreeForFacilityActType(act, new double[]{minX,minY,maxX,maxY});
+							
+						}
+						
+						Coord c = transformation.transform(MGC.point2Coord(building.getGeometry().getCentroid()));
+						geoinformation.getQuadTreeForFacilityActType(act).put(c.getX(), c.getY(), facility);
+						
+						for(AdministrativeUnit unit : geoinformation.getSubUnits().values()){
+							
+							if(unit.getGeometry().contains(building.getGeometry())){
+								
+								unit.addLanduseGeometry(actType, building.getGeometry());
+								
+							}
+							
+						}
+						
+					}
+					
 				}
+				
+			}
+			
+			if(!facility.getActivityOptions().containsKey(ActivityTypes.LEISURE) &&
+					!facility.getActivityOptions().containsKey(ActivityTypes.HOME) &&
+					!facility.getActivityOptions().containsKey(ActivityTypes.WORK)){
+				
+				ActivityOption option = factory.createActivityOption(ActivityTypes.WORK);
+				((ActivityOptionImpl)option).addOpeningTime(getOpeningTimeForActivityOption(option.getType()));
+				facility.addActivityOption(option);
 				
 			}
 			
@@ -35,8 +89,36 @@ public class FacilitiesCreator {
 			
 			cnt++;
 			
+			}
+			
 		}
 	
+	}
+	
+	private OpeningTimeImpl getOpeningTimeForActivityOption(String type){
+		
+		if(type.equals(ActivityTypes.EDUCATION)) {
+			
+			return new OpeningTimeImpl(7 * 3600, 20 * 3600);
+			
+		} else if(type.equals(ActivityTypes.KINDERGARTEN)){
+			
+			return new OpeningTimeImpl(7 * 3600, 16 * 3600);
+			
+		} else if(type.equals(ActivityTypes.OTHER)){
+			
+			return new OpeningTimeImpl(8 * 3600, 18 * 3600);
+			
+		} else if(type.equals(ActivityTypes.SHOPPING)){
+			
+			return new OpeningTimeImpl(9 * 3600, 20 * 3600);
+			
+		} else {
+			
+			return new OpeningTimeImpl(0, Time.MIDNIGHT);
+			
+		}
+		
 	}
 	
 }

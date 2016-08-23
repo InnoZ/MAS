@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.gis.ShapeFileReader;
+import org.matsim.facilities.ActivityFacility;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -49,6 +50,7 @@ public class Geoinformation {
 	private Geometry vicinityBoundingBox;
 	private Geometry completeGeometry;
 	protected Map<String,QuadTree<Geometry>> actType2QT;
+	protected Map<String, QuadTree<ActivityFacility>> facilityQuadTree;
 	protected Geometry catchmentAreaPt;
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
@@ -59,6 +61,7 @@ public class Geoinformation {
 		this.adminUnits = new HashMap<String, District>();
 		this.subUnits = new HashMap<String, AdministrativeUnit>();
 		this.actType2QT = new HashMap<String, QuadTree<Geometry>>();
+		this.facilityQuadTree = new HashMap<>();
 		
 		this.states = new HashSet<Integer>();
 		this.regionTypesToDistricts = new HashMap<Integer, Set<Integer>>();
@@ -212,6 +215,18 @@ public class Geoinformation {
 	public void createQuadTreeForActType(String actType, double[] bounds){
 		
 		actType2QT.put(actType, new QuadTree<Geometry>(bounds[0], bounds[1], bounds[2], bounds[3]));
+		
+	}
+	
+	public QuadTree<ActivityFacility> getQuadTreeForFacilityActType(String actType){
+		
+		return facilityQuadTree.get(actType);
+		
+	}
+	
+	public void createQuadTreeForFacilityActType(String actType, double[] bounds){
+		
+		facilityQuadTree.put(actType, new QuadTree<ActivityFacility>(bounds[0], bounds[1], bounds[2], bounds[3]));
 		
 	}
 	
