@@ -55,7 +55,7 @@ public class PlansToJson {
 	
 	public static void run(String plansFile, String networkFile) throws IOException{
 		
-		double d = 0.25d;
+		double d = 0.025d;
 		
 		Random random = MatsimRandom.getLocalInstance();
 		
@@ -69,8 +69,11 @@ public class PlansToJson {
 		List<SimpleFeature> features = new ArrayList<>();
 		
 		PolylineFeatureFactory pfactory = new PolylineFeatureFactory.Builder()
+				.setCrs(MGC.getCRS("EPSG:4326"))
 				.addAttribute("departure", Double.class)
 				.addAttribute("arrival", Double.class)
+				.addAttribute("mode", String.class)
+				.addAttribute("kmh", Integer.class)
 				.create();
 		
 		for(Person person : scenario.getPopulation().getPersons().values()){
@@ -103,13 +106,11 @@ public class PlansToJson {
 							for(Id<Link> id : route.getLinkIds()){
 								
 								current = scenario.getNetwork().getLinks().get(id);
-								coordinates.add(MGC.coord2Coordinate(ct.transform(current.getFromNode().getCoord())));
 								coordinates.add(MGC.coord2Coordinate(ct.transform(current.getToNode().getCoord())));
 								
 							}
 							
 							current = scenario.getNetwork().getLinks().get(route.getEndLinkId());
-							coordinates.add(MGC.coord2Coordinate(ct.transform(current.getFromNode().getCoord())));
 							coordinates.add(MGC.coord2Coordinate(ct.transform(current.getToNode().getCoord())));
 						
 							Coordinate[] coords = new Coordinate[coordinates.size()];
@@ -120,6 +121,8 @@ public class PlansToJson {
 							SimpleFeature feature = pfactory.createPolyline(coords);
 							feature.setAttribute("departure", departure);
 							feature.setAttribute("arrival", arrival);
+							feature.setAttribute("mode", "car");
+							feature.setAttribute("kmh", (int)(3.6 * route.getDistance() / (arrival-departure)));
 							features.add(feature);
 							
 						}
