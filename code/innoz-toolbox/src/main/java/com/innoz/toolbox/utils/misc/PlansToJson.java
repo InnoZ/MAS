@@ -26,6 +26,7 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.PolylineFeatureFactory;
 import org.opengis.feature.simple.SimpleFeature;
 
+import com.innoz.toolbox.utils.GlobalNames;
 import com.vividsolutions.jts.geom.Coordinate;
 
 /**
@@ -39,8 +40,8 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class PlansToJson {
 	
-	static final String PAR_DEPARTURE = "departure";
-	static final String PAR_ARRIVAL = "arrival";
+	static final String PAR_DEPARTURE = "started_at";
+	static final String PAR_ARRIVAL = "finished_at";
 	static final String PAR_MODE = "mode";
 	static final String PAR_SPEED = "kmh";
 	
@@ -71,12 +72,12 @@ public class PlansToJson {
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
 		new MatsimPopulationReader(scenario).readFile(plansFile);
 
-		CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation("EPSG:32632", "EPSG:4326");
+		CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(GlobalNames.UTM32N, GlobalNames.WGS84);
 		
 		List<SimpleFeature> features = new ArrayList<>();
 		
 		PolylineFeatureFactory pfactory = new PolylineFeatureFactory.Builder()
-				.setCrs(MGC.getCRS("EPSG:4326"))
+				.setCrs(MGC.getCRS(GlobalNames.WGS84))
 				.addAttribute(PAR_DEPARTURE, Double.class)
 				.addAttribute(PAR_ARRIVAL, Double.class)
 				.addAttribute(PAR_MODE, String.class)
