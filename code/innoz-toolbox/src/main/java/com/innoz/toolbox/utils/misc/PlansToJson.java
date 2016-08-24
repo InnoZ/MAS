@@ -39,6 +39,13 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class PlansToJson {
 	
+	static final String PAR_DEPARTURE = "departure";
+	static final String PAR_ARRIVAL = "arrival";
+	static final String PAR_MODE = "mode";
+	static final String PAR_SPEED = "kmh";
+	
+	enum Modes{car};
+	
 	/*
 	 * EXAMPLE USAGE
 	 */
@@ -70,10 +77,10 @@ public class PlansToJson {
 		
 		PolylineFeatureFactory pfactory = new PolylineFeatureFactory.Builder()
 				.setCrs(MGC.getCRS("EPSG:4326"))
-				.addAttribute("departure", Double.class)
-				.addAttribute("arrival", Double.class)
-				.addAttribute("mode", String.class)
-				.addAttribute("kmh", Integer.class)
+				.addAttribute(PAR_DEPARTURE, Double.class)
+				.addAttribute(PAR_ARRIVAL, Double.class)
+				.addAttribute(PAR_MODE, String.class)
+				.addAttribute(PAR_SPEED, Integer.class)
 				.create();
 		
 		for(Person person : scenario.getPopulation().getPersons().values()){
@@ -119,10 +126,10 @@ public class PlansToJson {
 							}
 							
 							SimpleFeature feature = pfactory.createPolyline(coords);
-							feature.setAttribute("departure", departure);
-							feature.setAttribute("arrival", arrival);
-							feature.setAttribute("mode", "car");
-							feature.setAttribute("kmh", (int)(3.6 * route.getDistance() / (arrival-departure)));
+							feature.setAttribute(PAR_DEPARTURE, departure);
+							feature.setAttribute(PAR_ARRIVAL, arrival);
+							feature.setAttribute(PAR_MODE, Modes.car.name());
+							feature.setAttribute(PAR_SPEED, (int)(3.6 * route.getDistance() / (arrival-departure)));
 							features.add(feature);
 							
 						}
