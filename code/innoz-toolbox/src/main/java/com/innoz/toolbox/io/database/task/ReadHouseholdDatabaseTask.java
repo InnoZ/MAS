@@ -18,6 +18,7 @@ import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyHousehold;
+import com.innoz.toolbox.utils.data.Tree.Node;
 
 public class ReadHouseholdDatabaseTask extends DatabaseTask {
 	
@@ -54,7 +55,9 @@ public class ReadHouseholdDatabaseTask extends DatabaseTask {
 			int cntOut = 0;
 			Set<Integer> knownRegionTypes = new HashSet<>();
 
-			for(AdministrativeUnit entry : geoinformation.getSubUnits().values()){
+			for(Node<AdministrativeUnit> node: geoinformation.getAdminUnits()){
+				
+				AdministrativeUnit entry = node.getData();
 				
 				if(ids.contains(entry.getId().substring(0, 5))&&!knownRegionTypes.contains(entry.getRegionType())){
 				

@@ -36,7 +36,6 @@ import com.innoz.toolbox.config.Configuration.VehicleSource;
 import com.innoz.toolbox.io.database.SurveyDatabaseParserV2;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.District;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.mobilityAttitude.MobilityAttitudeGroups;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
@@ -50,6 +49,7 @@ import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyVehicle;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.scenarioGeneration.vehicles.VehicleTypes;
 import com.innoz.toolbox.utils.GeometryUtils;
+import com.innoz.toolbox.utils.data.Tree.Node;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
@@ -123,11 +123,11 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		// pick the current admin unit.
 		for(String s : ids.split(",")){
 
-			District d = this.geoinformation.getAdminUnits().get(s);
+			AdministrativeUnit d = this.geoinformation.getAdminUnit(s).getData();
 			
-			for(int i = 0; i < d.getnHouseholds() * configuration.getScaleFactor(); i++){
+			for(int i = 0; i < d.getNumberOfHouseholds() * configuration.getScaleFactor(); i++){
 				
-				this.currentHomeCell = chooseAdminUnitInsideDistrict(d, ActivityTypes.HOME);
+				this.currentHomeCell = chooseAdminUnit(d, ActivityTypes.HOME);
 				
 				int rtyp = this.currentHomeCell.getRegionType();
 				
@@ -264,9 +264,11 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				personAttributes);
 		
 		// TODO this is not final and most likely won't work like that /dhosse, 05/16
-		for(District d : this.geoinformation.getAdminUnits().values()){
+		for(Node<AdministrativeUnit> d : this.geoinformation.getAdminUnits()){
 
-			for(AdministrativeUnit au : d.getAdminUnits().values()){
+			for(Node<AdministrativeUnit> node : d.getChildren()){
+				
+				AdministrativeUnit au = node.getData();
 				
 				double personalRandom = this.random.nextDouble();
 				
@@ -476,9 +478,11 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 		// Also, add all cells of which the sum of the distances between their centroid and the centroids of
 		// the home and the main act cell is less than twice the distance between the home and the main activity location
-		for(District d : this.geoinformation.getAdminUnits().values()){
+		for(Node<AdministrativeUnit> d : this.geoinformation.getAdminUnits()){
 
-			for(AdministrativeUnit au : d.getAdminUnits().values()){
+			for(Node<AdministrativeUnit> node : d.getChildren()){
+				
+				AdministrativeUnit au = node.getData();
 				
 				double a = CoordUtils.calcEuclideanDistance(this.transformation.transform(
 						MGC.point2Coord(this.currentHomeCell.getGeometry().getCentroid())),
@@ -588,7 +592,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	private Activity createActivity(Population population, SurveyPerson personTemplate, SurveyPlan templatePlan,
 			SurveyPlanElement mpe, String cellId) {
 
-		AdministrativeUnit au = this.geoinformation.getAdminUnitById(cellId);
+		AdministrativeUnit au = this.geoinformation.getAdminUnit(cellId).getData();
 		
 		// Initialize the activity type and the start and end time
 		SurveyPlanActivity act = (SurveyPlanActivity)mpe;

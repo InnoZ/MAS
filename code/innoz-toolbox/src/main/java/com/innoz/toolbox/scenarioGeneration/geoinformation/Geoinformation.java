@@ -1,16 +1,16 @@
 package com.innoz.toolbox.scenarioGeneration.geoinformation;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.matsim.core.utils.collections.QuadTree;
-import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.facilities.ActivityFacility;
-import org.opengis.feature.simple.SimpleFeature;
 
+import com.innoz.toolbox.utils.data.Tree;
+import com.innoz.toolbox.utils.data.Tree.Node;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
@@ -26,24 +26,16 @@ import com.vividsolutions.jts.geom.Geometry;
  * </ul>
  * </ul>
  * 
- * There are standard procedures for reading shapefiles or geometry tables of the MobilityDatahub.
+ * There are standard procedures for reading geometry tables of the MobilityDatahub.
  * 
  * @author dhosse
  *
  */
 public class Geoinformation {
 	
-	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
-	public static final String AUTH_KEY_WGS84 = "EPSG:4326";
-	/////////////////////////////////////////////////////////////////////////////////////////
-	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
-	private Map<String, District> adminUnits;
-	private Map<String, AdministrativeUnit> subUnits;
-//	private List<District> vicinity;
-//	private Map<String, AdministrativeUnit> adminUnits;
+	private Tree<AdministrativeUnit> adminUnitTree;
 	
-	private Set<Integer> states;
 	private Map<Integer, Set<Integer>> regionTypesToDistricts;
 	
 	private Geometry surveyAreaBoundingBox;
@@ -56,82 +48,52 @@ public class Geoinformation {
 	
 	public Geoinformation(){
 		
-//		this.surveyArea = new ArrayList<District>();
-//		this.vicinity = new ArrayList<District>();
-		this.adminUnits = new HashMap<String, District>();
-		this.subUnits = new HashMap<String, AdministrativeUnit>();
+		// Initialize the tree with the highest level admin unit (Germany)
+		this.adminUnitTree = new Tree<AdministrativeUnit>(new AdministrativeUnit("0"));
+		
 		this.actType2QT = new HashMap<String, QuadTree<Geometry>>();
 		this.facilityQuadTree = new HashMap<>();
 		
-		this.states = new HashSet<Integer>();
 		this.regionTypesToDistricts = new HashMap<Integer, Set<Integer>>();
 		
 	}
 	
-	/**
-	 * Reads the geometries of the specified id(s) from an ESRI shapefile into the
-	 * administrative unit collection.
-	 * 
-	 * @param filename Input shapefile path.
-	 * @param ids The id's of the geometries we want to read in.
-	 */
-	public void readGeodataFromShapefile(String filename, Set<String> ids){
+	public void addAdministrativeUnit(AdministrativeUnit unit){
 		
-		// Read in the shapefile
-		Collection<SimpleFeature> features = new ShapeFileReader().readFileAndInitialize(filename);
-		
-		// Go through all features. If the GKZ (Gemeindekennzahl) is one of the specified ids,
-		// add a new administrative unit with the feature's geometry.
-		for(SimpleFeature feature : features){
-			
-			String kennzahl = Long.toString((Long)feature.getAttribute("GEM_KENNZ"));
-			
-			if(ids.contains(kennzahl)){
-				
-				AdministrativeUnit au = new AdministrativeUnit(kennzahl);
-				au.setGeometry((Geometry)feature.getDefaultGeometry());
-//				surveyArea.put(kennzahl, au);
-				
-			}
-			
-		}
+		this.adminUnitTree.add(unit);
 		
 	}
 	
-	/**
-	 * 
-	 * Same functionality as {@link #readGeodataFromShapefile(String, Set)}. The difference is that
-	 * the ids of the shapefile features are tested wheter they start with any of the id strings inside
-	 * the filter ids set. By that, it's possible to read in e.g. all municipalities of a district or region.
-	 * 
-	 * @param filename Input shapefile path.
-	 * @param filterIds
-	 */
-	public void readGeodataFromShapefileWithFilter(String filename, Set<String> filterIds){
+	public Node<AdministrativeUnit> getAdminUnit(String id){
 		
-		// Read in the shapefile
-		Collection<SimpleFeature> features = new ShapeFileReader().readFileAndInitialize(filename);
+		return this.adminUnitTree.get(id);
 		
-		// Go through all features. If the GKZ (Gemeindekennzahl) starts with one of the specified ids,
-		// add a new administrative unit with the feature's geometry.
-		for(SimpleFeature feature : features){
-			
-			String kennzahl = Long.toString((Long)feature.getAttribute("GEM_KENNZ"));
-			
-			for(String id : filterIds){
-				
-				if(kennzahl.startsWith(id)){
+	}
 	
-					AdministrativeUnit au = new AdministrativeUnit(kennzahl);
-					au.setGeometry((Geometry)feature.getDefaultGeometry());
-//					surveyArea.put(kennzahl, au);
-					break;
-					
-				}
-				
+	public List<Node<AdministrativeUnit>> getAdminUnits(){
+		
+		return this.adminUnitTree.getAll();
+		
+	}
+	
+	public List<AdministrativeUnit> getAdminUnitsList(){
+		
+		List<AdministrativeUnit> units = new ArrayList<>();
+		
+		List<Node<AdministrativeUnit>> nodes = this.getAdminUnits();
+		for(Node<AdministrativeUnit> node : nodes){
+			if(node.getData().getGeometry() != null){
+				units.add(node.getData());
 			}
-			
 		}
+		
+		return units;
+		
+	}
+	
+	public int getNumberOfAdminUnits(){
+		
+		return this.adminUnitTree.getSize();
 		
 	}
 	
@@ -146,33 +108,17 @@ public class Geoinformation {
 		
 		double weight = 0.;
 		
-		for(AdministrativeUnit au : adminUnits.get(districtId).getAdminUnits().values()){
+		Node<AdministrativeUnit> node = this.adminUnitTree.get(districtId);
+		
+		for(Node<AdministrativeUnit> childNode : node.getChildren()){
 			
-			weight += au.getWeightForKey(key);
+			weight += childNode.getData().getWeightForKey(key);
 			
 		}
 		
 		return weight;
 		
 	}
-	
-	public Map<String, District> getAdminUnits(){
-		
-		return this.adminUnits;
-		
-	}
-	
-//	public List<District> getSurveyArea(){
-//		
-//		return surveyArea;
-//		
-//	}
-	
-//	public List<District> getVicinity(){
-//		
-//		return vicinity;
-//		
-//	}
 	
 	public void setSurveyAreaBoundingBox(Geometry g){
 		this.surveyAreaBoundingBox = g;
@@ -242,24 +188,8 @@ public class Geoinformation {
 		
 	}
 	
-	public Set<Integer> getStatesSet(){
-		return this.states;
-	}
-	
 	public Map<Integer, Set<Integer>> getRegionTypes(){
 		return this.regionTypesToDistricts;
-	}
-	
-	public AdministrativeUnit getAdminUnitById(String id){
-		return this.subUnits.get(id);
-	}
-	
-	public Map<String, AdministrativeUnit> getSubUnits(){
-		return this.subUnits;
-	}
-	
-	public void addSubUnit(AdministrativeUnit au){
-		this.subUnits.put(au.getId(), au);
 	}
 	
 }

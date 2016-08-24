@@ -42,7 +42,7 @@ public class SurveyDatabaseParserV2 {
 	 */
 	public void run(Configuration configuration, SurveyDataContainer container, Geoinformation geoinformation, Set<String> ids){
 		
-		// Initialize the survey constants according to what datasource was specified.
+		// Initialize the survey constants
 		this.constants = new SurveyConstants();
 		
 		try {

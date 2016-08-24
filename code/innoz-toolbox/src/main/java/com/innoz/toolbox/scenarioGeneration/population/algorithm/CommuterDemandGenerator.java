@@ -19,7 +19,6 @@ import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.io.database.CommuterDatabaseParser;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.District;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.commuters.CommuterDataElement;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
@@ -91,18 +90,18 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 		String homeId = el.getFromId();
 		String workId = el.getToId();
 
-		if(!this.geoinformation.getAdminUnits().containsKey(homeId) || !this.geoinformation.getAdminUnits().containsKey(workId)){
+		if(this.geoinformation.getAdminUnit(homeId) == null || this.geoinformation.getAdminUnit(workId) == null){
 			
 			return;
 			
 		}
 		
-		District homeDistrict = this.geoinformation.getAdminUnits().get(homeId);
-		AdministrativeUnit home = this.chooseAdminUnitInsideDistrict(homeDistrict, ActivityTypes.HOME);
+		AdministrativeUnit homeDistrict = this.geoinformation.getAdminUnit(homeId).getData();
+		AdministrativeUnit home = this.chooseAdminUnit(homeDistrict, ActivityTypes.HOME);
 		Coord homeLocation = this.chooseActivityCoordInAdminUnit(home, ActivityTypes.HOME);
 		
-		District workDistrict = this.geoinformation.getAdminUnits().get(workId);
-		AdministrativeUnit work = chooseAdminUnitInsideDistrict(workDistrict, ActivityTypes.WORK);
+		AdministrativeUnit workDistrict = this.geoinformation.getAdminUnit(workId).getData();
+		AdministrativeUnit work = chooseAdminUnit(workDistrict, ActivityTypes.WORK);
 		Coord workLocation = chooseActivityCoordInAdminUnit(work, ActivityTypes.WORK);
 		
 		Person person = population.getFactory().createPerson(Id.createPersonId(homeId + "-" + workId + "_" + n));

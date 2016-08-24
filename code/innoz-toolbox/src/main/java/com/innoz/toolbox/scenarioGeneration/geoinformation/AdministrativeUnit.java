@@ -113,5 +113,10 @@ public class AdministrativeUnit {
 			this.networkDetail = lod;
 		}
 	}
+	
+	@Override
+	public String toString(){
+		return this.id;
+	}
 
 }

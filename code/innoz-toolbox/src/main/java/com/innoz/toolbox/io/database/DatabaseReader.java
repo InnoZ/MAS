@@ -44,11 +44,12 @@ import com.innoz.toolbox.run.parallelization.MultithreadedModule;
 import com.innoz.toolbox.scenarioGeneration.facilities.FacilitiesCreator;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Building;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.District;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.network.OsmNodeEntry;
 import com.innoz.toolbox.scenarioGeneration.network.WayEntry;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
+import com.innoz.toolbox.utils.GlobalNames;
+import com.innoz.toolbox.utils.data.Tree.Node;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -145,7 +146,8 @@ public class DatabaseReader {
 				
 				// If no administrative units were created, we are unable to proceed
 				// The process would probably finish, but no network or population would be created
-				if(this.geoinformation.getAdminUnits().size() < 1){
+				// Size = 1 means, only the root element (basically the top level container) has been initialized
+				if(this.geoinformation.getNumberOfAdminUnits()/*getAdminUnits().size()*/ < 2){
 				
 					Log.error("No administrative boundaries were created!");
 					Log.error("Maybe the ids you specified don't exist in the database.");
@@ -157,17 +159,19 @@ public class DatabaseReader {
 
 					String id = entry.getId().startsWith("0") ? entry.getId().substring(1) : entry.getId();
 					
-					District d = this.geoinformation.getAdminUnits().get(id);
+					Node<AdministrativeUnit> d = this.geoinformation.getAdminUnit(id);
 					
 					if(d != null){
 						
-						d.setnHouseholds(entry.getNumberOfHouseholds());
+						AdministrativeUnit unit = d.getData();
 						
-						for(AdministrativeUnit au : this.geoinformation.getAdminUnits().get(id).getAdminUnits().values()){
+						unit.setNumberOfHouseholds(entry.getNumberOfHouseholds());
+						
+						for(Node<AdministrativeUnit> au : d.getChildren()){
 							
-							if(au.getId().startsWith(id)){
+							if(au.getData().getId().startsWith(id)){
 								
-								au.setNumberOfHouseholds(entry.getNumberOfHouseholds());
+								au.getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
 								
 							}
 							
@@ -224,7 +228,7 @@ public class DatabaseReader {
 		log.info("Reading administrative borders from database...");
 
 		// This is needed to transform the WGS84 geometries into the specified CRS
-		MathTransform t = CRS.findMathTransform(CRS.decode(Geoinformation.AUTH_KEY_WGS84, true),
+		MathTransform t = CRS.findMathTransform(CRS.decode(GlobalNames.WGS84, true),
 				CRS.decode(configuration.getCrs(), true));
 		
 		// A collection to temporarily store all geometries
@@ -240,9 +244,14 @@ public class DatabaseReader {
 					.convexHull());
 		}
 		
-		for(District d : this.geoinformation.getAdminUnits().values()){
-			d.setnHouseholds(configuration.getAdminUnitEntries().get(d.getId()).getNumberOfHouseholds());
+		for(AdminUnitEntry entry : configuration.getAdminUnitEntries().values()){
+			
+			this.geoinformation.getAdminUnit(entry.getId()).getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
+			
 		}
+//		for(District d : this.geoinformation.getAdminUnits().values()){
+//			d.setnHouseholds(configuration.getAdminUnitEntries().get(d.getId()).getNumberOfHouseholds());
+//		}
 		
 		// Get the survey area by building the bounding box of all geometries 
 		this.geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection)
@@ -320,16 +329,20 @@ public class DatabaseReader {
 						
 						au.setNetworkDetail(configuration.getAdminUnitEntries().get(district).getNetworkDetail());
 
-						if(!this.geoinformation.getAdminUnits().containsKey(district)){
-							this.geoinformation.getAdminUnits().put(district,
-									new District(district));
-						}
-						this.geoinformation.getAdminUnits().get(district).getAdminUnits()
-							.put(key, au);
+						this.geoinformation.addAdministrativeUnit(new AdministrativeUnit(district));
+						
+//						if(!this.geoinformation.getAdminUnits().containsKey(district)){
+//							this.geoinformation.getAdminUnits().put(district,
+//									new District(district));
+//						}
+//						this.geoinformation.getAdminUnits().get(district).getAdminUnits()
+//							.put(key, au);
 						
 					}
 					
-					this.geoinformation.addSubUnit(au);
+					this.geoinformation.addAdministrativeUnit(au);
+					
+//					this.geoinformation.addSubUnit(au);
 					
 					// Store all geometries inside a collection to get the survey area geometry in
 					// the end
@@ -360,7 +373,7 @@ public class DatabaseReader {
 	private void readOsmData(Connection connection, Configuration configuration, Scenario scenario)
 			throws NoSuchAuthorityCodeException, FactoryException{
 
-		final CoordinateReferenceSystem fromCRS = CRS.decode(Geoinformation.AUTH_KEY_WGS84, true);
+		final CoordinateReferenceSystem fromCRS = CRS.decode(GlobalNames.WGS84, true);
 		final CoordinateReferenceSystem toCRS = CRS.decode(configuration.getCrs(), true);
 		
 		this.ct = TransformationFactory.getCoordinateTransformation(fromCRS.toString(),
@@ -387,9 +400,9 @@ public class DatabaseReader {
 			
 			if(!configuration.getActivityLocationsType().equals(ActivityLocations.landuse)){
 				
-				for(AdministrativeUnit au : this.geoinformation.getSubUnits().values()){
+				for(Node<AdministrativeUnit> au : this.geoinformation.getAdminUnits()){
 					
-					au.getLanduseGeometries().clear();
+					au.getData().getLanduseGeometries().clear();
 					
 				}
 				
@@ -593,34 +606,40 @@ public class DatabaseReader {
 			// Check if the geometry is valid (e.g. not intersecting itself)
 			if(g.isValid()){
 
-				for(AdministrativeUnit au : this.geoinformation.getSubUnits().values()){
+				for(Node<AdministrativeUnit> adminUnitNode : this.geoinformation.getAdminUnits()){
 
-					// Add the landuse geometry to the administrative unit containing it or skip it if it's outside of the survey area
-					if(au.getGeometry().contains(g) || au.getGeometry().touches(g) || au.getGeometry().intersects(g)){
-						
-						au.addLanduseGeometry(landuse, g);
-						if(!landuse.equals(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
-							au.addLanduseGeometry(ActivityTypes.WORK, g);
-						}
-						
-						// If we don't have a quad tree for this activity type already, create a new one
-						if(this.geoinformation.getQuadTreeForActType(landuse) == null){
+					AdministrativeUnit au = adminUnitNode.getData();
+					
+					if(au.getGeometry() != null){
+
+						// Add the landuse geometry to the administrative unit containing it or skip it if it's outside of the survey area
+						if(au.getGeometry().contains(g) || au.getGeometry().touches(g) || au.getGeometry().intersects(g)){
 							
-							this.geoinformation.createQuadTreeForActType(landuse, new double[]{minX,minY,maxX,maxY});
-							
-						}
-						if(this.geoinformation.getQuadTreeForActType(ActivityTypes.WORK) == null){
-							this.geoinformation.createQuadTreeForActType(ActivityTypes.WORK, new double[]{minX,minY,maxX,maxY});
-						}
-						
-						// Add the landuse geometry's centroid as new quad tree entry
-						Coord c = ct.transform(MGC.point2Coord(g.getCentroid()));
-						
-						if(this.boundingBox.contains(MGC.coord2Point(c))){
-							
-							this.geoinformation.getQuadTreeForActType(landuse).put(c.getX(), c.getY(), g);
+							au.addLanduseGeometry(landuse, g);
 							if(!landuse.equals(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
-								this.geoinformation.getQuadTreeForActType(ActivityTypes.WORK).put(c.getX(), c.getY(), g);
+								au.addLanduseGeometry(ActivityTypes.WORK, g);
+							}
+							
+							// If we don't have a quad tree for this activity type already, create a new one
+							if(this.geoinformation.getQuadTreeForActType(landuse) == null){
+								
+								this.geoinformation.createQuadTreeForActType(landuse, new double[]{minX,minY,maxX,maxY});
+								
+							}
+							if(this.geoinformation.getQuadTreeForActType(ActivityTypes.WORK) == null){
+								this.geoinformation.createQuadTreeForActType(ActivityTypes.WORK, new double[]{minX,minY,maxX,maxY});
+							}
+							
+							// Add the landuse geometry's centroid as new quad tree entry
+							Coord c = ct.transform(MGC.point2Coord(g.getCentroid()));
+							
+							if(this.boundingBox.contains(MGC.coord2Point(c))){
+								
+								this.geoinformation.getQuadTreeForActType(landuse).put(c.getX(), c.getY(), g);
+								if(!landuse.equals(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
+									this.geoinformation.getQuadTreeForActType(ActivityTypes.WORK).put(c.getX(), c.getY(), g);
+								}
+								
 							}
 							
 						}

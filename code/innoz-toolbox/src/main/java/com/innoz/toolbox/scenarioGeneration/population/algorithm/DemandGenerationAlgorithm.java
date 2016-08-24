@@ -16,12 +16,9 @@ import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 
-import com.vividsolutions.jts.geom.Geometry;
-
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.District;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.PopulationCreator;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyHousehold;
@@ -29,6 +26,8 @@ import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPlanTrip;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.utils.GeometryUtils;
+import com.innoz.toolbox.utils.data.Tree.Node;
+import com.vividsolutions.jts.geom.Geometry;
 
 public abstract class DemandGenerationAlgorithm {
 
@@ -82,12 +81,14 @@ public abstract class DemandGenerationAlgorithm {
 	
 	public abstract void run(final Configuration configuration, String ids);
 
-	AdministrativeUnit chooseAdminUnitInsideDistrict(District district, String activityType){
+	AdministrativeUnit chooseAdminUnit(AdministrativeUnit district, String activityType){
 		
 		double r = random.nextDouble() * this.geoinformation.getTotalWeightForLanduseKey(district.getId(), activityType);
 		double r2 = 0.;
 		
-		for(AdministrativeUnit admin : district.getAdminUnits().values()){
+		for(Node<AdministrativeUnit> node : geoinformation.getAdminUnit(district.getId()).getChildren()){
+			
+			AdministrativeUnit admin = node.getData();
 			
 			r2 += admin.getWeightForKey(activityType);
 			
@@ -170,7 +171,7 @@ public abstract class DemandGenerationAlgorithm {
 			// If the person walked, it most likely didn't leave the last cell (to avoid very long walk legs)
 			if(mode.equals(TransportMode.walk) && fromId != null){
 				
-				return this.geoinformation.getAdminUnitById(fromId);
+				return this.geoinformation.getAdminUnit(fromId).getData();
 				
 			}
 			
@@ -218,7 +219,7 @@ public abstract class DemandGenerationAlgorithm {
 		if(adminUnits == null){
 			
 			adminUnits = new HashSet<AdministrativeUnit>();
-			adminUnits.addAll(this.geoinformation.getSubUnits().values());
+			adminUnits.addAll(this.geoinformation.getAdminUnitsList());
 //			adminUnits.remove(this.currentHomeCell);
 			
 		}
@@ -262,9 +263,9 @@ public abstract class DemandGenerationAlgorithm {
 			
 			accumulatedWeight += entry.getValue();
 			if(r <= accumulatedWeight){
-				result = this.geoinformation.getSubUnits().get(entry.getKey());
+				result = this.geoinformation.getAdminUnit(entry.getKey()).getData();
 				if(result == null){
-					result = this.geoinformation.getSubUnits().get(entry.getKey());
+					result = this.geoinformation.getAdminUnit(entry.getKey()).getData();
 				}
 				break;
 			}

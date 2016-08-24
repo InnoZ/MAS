@@ -19,13 +19,16 @@ import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Building;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
+import com.innoz.toolbox.utils.GlobalNames;
+import com.innoz.toolbox.utils.data.Tree.Node;
 
 public class FacilitiesCreator {
 
 	public void create(final Scenario scenario, final Geoinformation geoinformation, List<Building> buildingList,
 			double minX, double minY, double maxX, double maxY){
 		
-		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation("EPSG:4326", "EPSG:32632");
+		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(GlobalNames.WGS84
+				, GlobalNames.UTM32N);
 		
 		ActivityFacilitiesFactory factory = scenario.getActivityFacilities().getFactory();
 		
@@ -41,7 +44,7 @@ public class FacilitiesCreator {
 
 				if(act != null){
 					
-					String actType = act.split("_")[0];
+					String actType = act.split(GlobalNames.UNDERLINE)[0];
 					
 					if(!facility.getActivityOptions().containsKey(actType)){
 
@@ -59,9 +62,11 @@ public class FacilitiesCreator {
 						Coord c = transformation.transform(MGC.point2Coord(building.getGeometry().getCentroid()));
 						geoinformation.getQuadTreeForFacilityActType(act).put(c.getX(), c.getY(), facility);
 						
-						for(AdministrativeUnit unit : geoinformation.getSubUnits().values()){
+						for(Node<AdministrativeUnit> node : geoinformation.getAdminUnits()){
 							
-							if(unit.getGeometry().contains(building.getGeometry())){
+							AdministrativeUnit unit = node.getData();
+							
+							if(unit.getGeometry() != null && unit.getGeometry().contains(building.getGeometry())){
 								
 								unit.addLanduseGeometry(actType, building.getGeometry());
 								
