@@ -45,30 +45,6 @@ public class BbsrDataReader {
 
 		process(geoinformation);
 		
-//		for(District d : geoinformation.getAdminUnits().values()){
-//
-//			for(String key : d.getAdminUnits().keySet()){
-//
-//				String subKey = key.substring(0, 5);
-//				if(subKey.startsWith("0")) subKey = subKey.substring(1);
-//				AdministrativeUnit unit = d.getAdminUnits().get(key);
-//				
-//				int regionType = this.key2Type.get(subKey);
-//				
-//				unit.setRegionType(regionType);
-//				
-//				if(!geoinformation.getRegionTypes().containsKey(unit.getRegionType())){
-//					
-//					geoinformation.getRegionTypes().put(unit.getRegionType(), new HashSet<Integer>());
-//					
-//				}
-//				
-//				geoinformation.getRegionTypes().get(unit.getRegionType()).add(this.key2Type.get(subKey));
-//				
-//			}
-//			
-//		}
-		
 	}
 	
 	public void read(final Geoinformation geoinformation, String file){
