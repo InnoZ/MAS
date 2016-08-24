@@ -76,7 +76,7 @@ public class Geoinformation {
 		
 	}
 	
-	public List<AdministrativeUnit> getAdminUnitsList(){
+	public List<AdministrativeUnit> getAdminUnitsWithGeometry(){
 		
 		List<AdministrativeUnit> units = new ArrayList<>();
 		

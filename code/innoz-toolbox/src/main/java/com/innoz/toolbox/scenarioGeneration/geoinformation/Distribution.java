@@ -62,7 +62,7 @@ public class Distribution {
 		Map<String, Double> rowMinima = new HashMap<>();
 		
 		List<AdministrativeUnit> adminUnits = new ArrayList<>();
-		adminUnits.addAll(geoinformation.getAdminUnitsList());
+		adminUnits.addAll(geoinformation.getAdminUnitsWithGeometry());
 		
 		for(AdministrativeUnit u1 : adminUnits){
 			
