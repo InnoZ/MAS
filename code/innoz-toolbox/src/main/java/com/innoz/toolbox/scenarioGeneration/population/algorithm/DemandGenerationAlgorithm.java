@@ -15,11 +15,14 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.facilities.ActivityFacility;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.ProxyFacility;
 import com.innoz.toolbox.scenarioGeneration.population.PopulationCreator;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyHousehold;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
@@ -27,7 +30,6 @@ import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPlanTrip;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.utils.GeometryUtils;
 import com.innoz.toolbox.utils.data.Tree.Node;
-import com.vividsolutions.jts.geom.Geometry;
 
 public abstract class DemandGenerationAlgorithm {
 
@@ -57,6 +59,8 @@ public abstract class DemandGenerationAlgorithm {
 	
 	Coord currentHomeLocation = null;
 	Coord currentMainActLocation = null;
+	ActivityFacility currentHomeFacility = null;
+	ActivityFacility currentMainActFacility = null;
 	SurveyPlanTrip lastLeg = null;
 	Coord lastActCoord = null;
 	double c = 0d;
@@ -74,7 +78,7 @@ public abstract class DemandGenerationAlgorithm {
 		this.scenario = scenario;
 		
 		// Initialize the disutilities for traveling from each cell to each other cell
-				// to eventually get a gravitation model.
+		// to eventually get a gravitation model.
 		this.distribution = distribution;
 		
 	}
@@ -109,14 +113,36 @@ public abstract class DemandGenerationAlgorithm {
 		double p = random.nextDouble() * admin.getWeightForKey(activityType);
 		double accumulatedWeight = 0.;
 		
-		for(Geometry g : admin.getLanduseGeometries().get(activityType)){
+		for(Landuse g : admin.getLanduseGeometries().get(activityType)){
 			
-			accumulatedWeight += g.getArea();
+			accumulatedWeight += g.getGeometry().getArea();
 			
 			if(p <= accumulatedWeight){
 
 				// Shoot the location
-				return transformation.transform(GeometryUtils.shoot(g, random));
+				return transformation.transform(GeometryUtils.shoot(g.getGeometry(), random));
+
+			}
+			
+		}
+		
+		return null;
+		
+	}
+	
+	ActivityFacility chooseActivityFacilityInAdminUnit(AdministrativeUnit admin, String activityType){
+		
+		double p = random.nextDouble() * admin.getWeightForKey(activityType);
+		double accumulatedWeight = 0;
+		
+		for(Landuse g : admin.getLanduseGeometries().get(activityType)){
+			
+			accumulatedWeight += g.getGeometry().getArea();
+			
+			if(p <= accumulatedWeight){
+
+				// Shoot the location
+				return ((ProxyFacility)g).get();
 
 			}
 			

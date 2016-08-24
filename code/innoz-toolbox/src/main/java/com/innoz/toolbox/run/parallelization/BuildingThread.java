@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.innoz.toolbox.io.database.DatabaseReader;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Building;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Building;
 
 /**
  * 
@@ -27,7 +27,7 @@ public final class BuildingThread extends AlgoThread {
 				
 				if(actType != null){
 			
-					this.reader.addGeometry(actType, b.getGeometry());
+					this.reader.addGeometry(actType, b);
 				
 				}
 			

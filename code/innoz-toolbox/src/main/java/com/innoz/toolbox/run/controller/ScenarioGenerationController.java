@@ -63,7 +63,7 @@ public class ScenarioGenerationController extends DefaultController {
 			Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 			
 			// Container for geoinformation (admin borders, landuse)
-			Geoinformation geoinformation = new Geoinformation();
+			Geoinformation geoinformation = new Geoinformation(configuration.getActivityLocationsType());
 	
 			// A class that reads data from database tables into local containers
 			DatabaseReader dbReader = new DatabaseReader(configuration, geoinformation);

@@ -7,8 +7,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.matsim.core.utils.collections.QuadTree;
-import org.matsim.facilities.ActivityFacility;
 
+import com.innoz.toolbox.config.Configuration.ActivityLocations;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
 import com.innoz.toolbox.utils.data.Tree;
 import com.innoz.toolbox.utils.data.Tree.Node;
 import com.vividsolutions.jts.geom.Geometry;
@@ -41,20 +42,25 @@ public class Geoinformation {
 	private Geometry surveyAreaBoundingBox;
 	private Geometry vicinityBoundingBox;
 	private Geometry completeGeometry;
-	protected Map<String,QuadTree<Geometry>> actType2QT;
-	protected Map<String, QuadTree<ActivityFacility>> facilityQuadTree;
+	
+	private LanduseDataContainer landuseData;
+	
 	protected Geometry catchmentAreaPt;
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
-	public Geoinformation(){
+	public Geoinformation(ActivityLocations type){
 		
 		// Initialize the tree with the highest level admin unit (Germany)
 		this.adminUnitTree = new Tree<AdministrativeUnit>(new AdministrativeUnit("0"));
-		
-		this.actType2QT = new HashMap<String, QuadTree<Geometry>>();
-		this.facilityQuadTree = new HashMap<>();
+		this.landuseData = new LanduseDataContainer(type);
 		
 		this.regionTypesToDistricts = new HashMap<Integer, Set<Integer>>();
+		
+	}
+	
+	public ActivityLocations getLanduseType(){
+		
+		return this.landuseData.getType();
 		
 	}
 	
@@ -152,27 +158,15 @@ public class Geoinformation {
 		
 	}
 	
-	public QuadTree<Geometry> getQuadTreeForActType(String actType){
+	public QuadTree<Landuse> getLanduseOfType(String key){
 		
-		return actType2QT.get(actType);
+		return this.landuseData.getLanduseOfType(key);
 		
 	}
 	
 	public void createQuadTreeForActType(String actType, double[] bounds){
 		
-		actType2QT.put(actType, new QuadTree<Geometry>(bounds[0], bounds[1], bounds[2], bounds[3]));
-		
-	}
-	
-	public QuadTree<ActivityFacility> getQuadTreeForFacilityActType(String actType){
-		
-		return facilityQuadTree.get(actType);
-		
-	}
-	
-	public void createQuadTreeForFacilityActType(String actType, double[] bounds){
-		
-		facilityQuadTree.put(actType, new QuadTree<ActivityFacility>(bounds[0], bounds[1], bounds[2], bounds[3]));
+		this.landuseData.create(actType, bounds);
 		
 	}
 	

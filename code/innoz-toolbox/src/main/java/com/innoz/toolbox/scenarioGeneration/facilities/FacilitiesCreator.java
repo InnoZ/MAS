@@ -16,8 +16,9 @@ import org.matsim.facilities.ActivityOptionImpl;
 import org.matsim.facilities.OpeningTimeImpl;
 
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Building;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Building;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.ProxyFacility;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.utils.GlobalNames;
 import com.innoz.toolbox.utils.data.Tree.Node;
@@ -47,20 +48,23 @@ public class FacilitiesCreator {
 					String actType = act.split(GlobalNames.UNDERLINE)[0];
 					
 					if(!facility.getActivityOptions().containsKey(actType)){
+						
+						ProxyFacility proxy = new ProxyFacility(facility);
 
 						// If the activity is of any of the sub types, take only the main activity type
 						ActivityOption option = factory.createActivityOption(actType);
 						((ActivityOptionImpl)option).addOpeningTime(getOpeningTimeForActivityOption(option.getType()));
 						facility.addActivityOption(option);
+						option.setCapacity(building.getGeometry().getArea());
 						
-						if(geoinformation.getQuadTreeForFacilityActType(act) == null){
+						if(geoinformation.getLanduseOfType(act) == null){
 							
-							geoinformation.createQuadTreeForFacilityActType(act, new double[]{minX,minY,maxX,maxY});
+							geoinformation.createQuadTreeForActType(act, new double[]{minX,minY,maxX,maxY});
 							
 						}
 						
 						Coord c = transformation.transform(MGC.point2Coord(building.getGeometry().getCentroid()));
-						geoinformation.getQuadTreeForFacilityActType(act).put(c.getX(), c.getY(), facility);
+						geoinformation.getLanduseOfType(act).put(c.getX(), c.getY(), proxy);
 						
 						for(Node<AdministrativeUnit> node : geoinformation.getAdminUnits()){
 							
@@ -68,7 +72,7 @@ public class FacilitiesCreator {
 							
 							if(unit.getGeometry() != null && unit.getGeometry().contains(building.getGeometry())){
 								
-								unit.addLanduseGeometry(actType, building.getGeometry());
+								unit.addLanduse(actType, proxy);
 								
 							}
 							

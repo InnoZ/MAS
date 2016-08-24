@@ -30,6 +30,7 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 
 import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.config.Configuration.ActivityLocations;
 import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.config.Configuration.Subpopulations;
 import com.innoz.toolbox.config.Configuration.VehicleSource;
@@ -37,6 +38,7 @@ import com.innoz.toolbox.io.database.SurveyDatabaseParserV2;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
 import com.innoz.toolbox.scenarioGeneration.population.mobilityAttitude.MobilityAttitudeGroups;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyHousehold;
@@ -163,11 +165,20 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	
 				// Set global home location for the entire household
 				Coord homeLocation = null;
+				ActivityFacility homeFacility = null;
 	
 				// Go through all residential areas of the home cell and randomly choose one of them
 				if(this.currentHomeCell.getLanduseGeometries().containsKey(ActivityTypes.HOME)){
 					
-					homeLocation = chooseActivityCoordInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
+					if(this.geoinformation.getLanduseType().equals(ActivityLocations.facilities)){
+						
+						homeFacility = chooseActivityFacilityInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
+						
+					} else {
+						
+						homeLocation = chooseActivityCoordInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
+						
+					}
 					
 				} else {
 				
@@ -184,7 +195,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 					SurveyPerson templatePerson = container.getPersons().get(personId);
 					
 					Person person = createPerson(configuration, templatePerson, population, personAttributes, this.random.nextDouble(),
-							population.getPersons().size(), homeLocation, container, household.getIncome().getIncome());
+							population.getPersons().size(), homeLocation, homeFacility, container, household.getIncome().getIncome());
 					
 					// If the resulting MATSim person is not null, add it
 					if(person != null){
@@ -283,7 +294,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				for(int i = 0; i < 10000 * configuration.getScaleFactor(); i++){
 					
 					Coord homeCoord = chooseActivityCoordInAdminUnit(au, ActivityTypes.HOME);
-					population.addPerson(createPerson(configuration, personTemplate, population, personAttributes, personalRandom, i, homeCoord, container, 0d));
+					population.addPerson(createPerson(configuration, personTemplate, population, personAttributes, personalRandom, i, homeCoord, null, container, 0d));
 					
 				}
 				
@@ -308,7 +319,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	 */
 	@SuppressWarnings("deprecation")
 	private Person createPerson(Configuration configuration, SurveyPerson personTemplate, Population population,
-			ObjectAttributes personAttributes, double personalRandom, int i, Coord homeCoord, SurveyDataContainer container, double hhIncome) {
+			ObjectAttributes personAttributes, double personalRandom, int i, Coord homeCoord, ActivityFacility homeFacility, SurveyDataContainer container, double hhIncome) {
 
 		// Initialize main act location, last leg, last act cell and the coordinate of the last activity as null to avoid errors...
 		this.currentMainActLocation = null;
@@ -409,7 +420,6 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 						
 						Activity act = createActivity(population, personTemplate, planTemplate, mpe, cellIds.get(actIndex));
 						if(act == null){
-//							plan.addActivity(act);
 							plan.getPlanElements().remove(plan.getPlanElements().size()-1);
 							break;
 						}
@@ -429,6 +439,13 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				
 				// If there is only one plan element, create a 24hrs home activity
 				Activity home = population.getFactory().createActivityFromCoord(ActivityTypes.HOME, homeCoord);
+				
+				if(this.geoinformation.getLanduseType().equals(ActivityLocations.facilities)){
+
+					home.setFacilityId(homeFacility.getId());
+					
+				}
+				
 				home.setMaximumDuration(24 * 3600);
 				home.setStartTime(0);
 				home.setEndTime(24 * 3600);
@@ -438,8 +455,15 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			
 		} else {
 			
-			// If there is no plan for the survey person, create a 24hrs home activity
+			// If there is only one plan element, create a 24hrs home activity
 			Activity home = population.getFactory().createActivityFromCoord(ActivityTypes.HOME, homeCoord);
+			
+			if(this.geoinformation.getLanduseType().equals(ActivityLocations.facilities)){
+
+				home.setFacilityId(homeFacility.getId());
+				
+			}
+			
 			home.setMaximumDuration(24 * 3600);
 			home.setStartTime(0);
 			home.setEndTime(24 * 3600);
@@ -462,7 +486,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				((SurveyPlanTrip)plan.getPlanElements().get(plan.getMainActIndex()-1)).getMainMode() :
 					((SurveyPlanTrip)plan.getPlanElements().get(plan.getMainActIndex()+1)).getMainMode();
 		
-				this.currentSearchSpace = new HashSet<>();
+		this.currentSearchSpace = new HashSet<>();
 				
 		this.currentMainActCell = locateActivityInCell(plan.getMainActType(), mainMode, person);
 		
@@ -470,6 +494,12 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 		this.currentMainActLocation = shootLocationForActType(this.currentMainActCell,
 				plan.getMainActType(), distance, plan, mainMode, person);
+		
+		if(this.geoinformation.getLanduseType().equals(ActivityLocations.facilities)){
+			
+			this.currentMainActFacility = chooseActivityFacilityInAdminUnit(this.currentMainActCell, plan.getMainActType());
+			
+		}
 
 		// To locate intermediate activities, create a search space and add the home and main activity cells
 		this.currentSearchSpace.add(this.currentHomeCell);
@@ -727,15 +757,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		double minFactor = 0.75;
 		double maxFactor = 1.5;
 		
-		if(this.scenario.getActivityFacilities().getFacilities().isEmpty()){
-			
-			return shootGeometry(au, actType, d, minFactor, maxFactor, templatePlan, mode, personTemplate);
-			
-		} else {
-			
-			return shootFacility(au, actType, d, minFactor, maxFactor, templatePlan, mode, personTemplate);
-			
-		}
+		return shootGeometry(au, actType, d, minFactor, maxFactor, templatePlan, mode, personTemplate);
 		
 	}
 	
@@ -743,7 +765,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			SurveyPlan templatePlan, String mode, SurveyPerson personTemplate){
 		
 		// Get all landuse geometries of the current activity type within the given administrative unit
-		List<Geometry> closest = (List<Geometry>) this.geoinformation.getQuadTreeForActType(actType).getRing
+		List<Landuse> closest = (List<Landuse>) this.geoinformation.getLanduseOfType(actType).getRing
 					(this.lastActCoord.getX(), this.lastActCoord.getY(), d * minFactor, d * maxFactor);
 		
 		// If there were any landuse geometries found, randomly choose one of the geometries.
@@ -753,19 +775,19 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			if(!closest.isEmpty()){
 				
 				double w = 0;
-				for(Geometry g : closest){
-					w+=g.getArea();
+				for(Landuse g : closest){
+					w+=g.getGeometry().getArea();
 				}
 				
 				double shootingRandom = this.random.nextDouble() * w;
 				double accumulatedWeight = 0.0d;
 				Geometry area = null;
 				
-				for(Geometry g : closest){
+				for(Landuse g : closest){
 					
-					accumulatedWeight += g.getArea();
+					accumulatedWeight += g.getGeometry().getArea();
 					if(shootingRandom <= accumulatedWeight){
-						area = g;
+						area = g.getGeometry();
 						break;
 					}
 					
@@ -776,10 +798,10 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				
 			} else {
 				
-				Geometry area = this.geoinformation.getQuadTreeForActType(actType)
+				Landuse area = this.geoinformation.getLanduseOfType(actType)
 						.getClosest(this.lastActCoord.getX(), this.lastActCoord.getY());
 				
-				return this.transformation.transform(GeometryUtils.shoot(area, this.random));
+				return this.transformation.transform(GeometryUtils.shoot(area.getGeometry(), this.random));
 				
 			}
 		
@@ -793,11 +815,11 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				double accumulatedWeight = 0.0d;
 				Geometry area = null;
 				
-				for(Geometry g : closest){
+				for(Landuse g : closest){
 					
-					accumulatedWeight += g.getArea();
+					accumulatedWeight += g.getGeometry().getArea();
 					if(shootingRandom <= accumulatedWeight){
-						area = g;
+						area = g.getGeometry();
 						break;
 					}
 					
@@ -807,87 +829,14 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				
 			} else {
 				
-				Geometry area = this.geoinformation.getQuadTreeForActType(actType).getClosest(
+				Landuse area = this.geoinformation.getLanduseOfType(actType).getClosest(
 						this.lastActCoord.getX(), this.lastActCoord.getY());
 				
-				return this.transformation.transform(GeometryUtils.shoot(area, this.random));
+				return this.transformation.transform(GeometryUtils.shoot(area.getGeometry(), this.random));
 				
 			}
 			
 		}
-		
-	}
-	
-	private Coord shootFacility(AdministrativeUnit au, String actType, double d, double minFactor, double maxFactor,
-			SurveyPlan templatePlan, String mode, SurveyPerson personTemplate){
-		
-		List<ActivityFacility> closest = (List<ActivityFacility>) this.geoinformation.getQuadTreeForFacilityActType(actType).getRing
-				(this.lastActCoord.getX(), this.lastActCoord.getY(), d * minFactor, d * maxFactor);
-		
-		if(closest != null){
-			
-			if(!closest.isEmpty()){
-				
-				double shootingRandom = this.random.nextInt(closest.size());
-				double accumulatedWeight = 0.0d;
-				ActivityFacility area = null;
-				
-				for(ActivityFacility g : closest){
-					
-					accumulatedWeight++;
-					if(shootingRandom <= accumulatedWeight){
-						area = g;
-						break;
-					}
-					
-				}
-				
-				
-				return (area.getCoord());
-				
-			} else {
-				
-				ActivityFacility area = this.geoinformation.getQuadTreeForFacilityActType(actType)
-						.getClosest(this.lastActCoord.getX(), this.lastActCoord.getY());
-				
-				return (area.getCoord());
-				
-			}
-		
-		} else {
-			
-//			closest = au.getLanduseGeometries().get(actType);
-//			
-//			if(!closest.isEmpty()){
-//				
-//				double shootingRandom = this.random.nextDouble() * au.getWeightForKey(actType);
-//				double accumulatedWeight = 0.0d;
-//				Geometry area = null;
-//				
-//				for(Geometry g : closest){
-//					
-//					accumulatedWeight += g.getArea();
-//					if(shootingRandom <= accumulatedWeight){
-//						area = g;
-//						break;
-//					}
-//					
-//				}
-//				
-//				return this.transformation.transform(GeometryUtils.shoot(area, this.random));
-//				
-//			} else {
-//				
-//				Geometry area = this.geoinformation.getQuadTreeForActType(actType).getClosest(
-//						this.lastActCoord.getX(), this.lastActCoord.getY());
-//				
-//				return this.transformation.transform(GeometryUtils.shoot(area, this.random));
-//				
-//			}
-			
-		}
-		
-		return null;
 		
 	}
 

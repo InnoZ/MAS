@@ -8,7 +8,7 @@ import com.innoz.toolbox.io.database.DatabaseReader;
 import com.innoz.toolbox.io.database.datasets.OsmDataset;
 import com.innoz.toolbox.io.database.datasets.OsmPointDataset;
 import com.innoz.toolbox.io.database.datasets.OsmPolygonDataset;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Building;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Building;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.utils.osm.OsmKey2ActivityType;
 
@@ -124,7 +124,7 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 
 			} else {
 				
-				reader.addGeometry(landuse, dataset.getGeometry());
+				reader.addGeometry(landuse, new Building(dataset.getGeometry()));
 				
 			}
 			
@@ -352,7 +352,7 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 		if(actType != null){
 
 			// Add the landuse geometry to the geoinformation if we have a valid activity option for it
-			this.reader.addGeometry(actType, dataset.getGeometry());
+			this.reader.addGeometry(actType, new Building(dataset.getGeometry()));
 			
 			Building closest = this.reader.getBuildingsQuadTree().getClosest(dataset.getGeometry().getCentroid().getX(),
 					dataset.getGeometry().getCentroid().getY());

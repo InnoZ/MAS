@@ -24,6 +24,7 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.facilities.ActivityFacility;
 import org.matsim.facilities.ActivityFacilityImpl;
+import org.matsim.facilities.ActivityOption;
 import org.matsim.facilities.FacilitiesWriter;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
@@ -43,8 +44,10 @@ import com.innoz.toolbox.run.parallelization.DataProcessingAlgoThread;
 import com.innoz.toolbox.run.parallelization.MultithreadedModule;
 import com.innoz.toolbox.scenarioGeneration.facilities.FacilitiesCreator;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Building;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Building;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.ProxyFacility;
 import com.innoz.toolbox.scenarioGeneration.network.OsmNodeEntry;
 import com.innoz.toolbox.scenarioGeneration.network.WayEntry;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
@@ -331,18 +334,9 @@ public class DatabaseReader {
 
 						this.geoinformation.addAdministrativeUnit(new AdministrativeUnit(district));
 						
-//						if(!this.geoinformation.getAdminUnits().containsKey(district)){
-//							this.geoinformation.getAdminUnits().put(district,
-//									new District(district));
-//						}
-//						this.geoinformation.getAdminUnits().get(district).getAdminUnits()
-//							.put(key, au);
-						
 					}
 					
 					this.geoinformation.addAdministrativeUnit(au);
-					
-//					this.geoinformation.addSubUnit(au);
 					
 					// Store all geometries inside a collection to get the survey area geometry in
 					// the end
@@ -427,6 +421,11 @@ public class DatabaseReader {
 					for(ActivityFacility f : scenario.getActivityFacilities().getFacilities().values()){
 						
 						((ActivityFacilityImpl)f).setCoord(ct.transform(f.getCoord()));
+						for(ActivityOption option : f.getActivityOptions().values()){
+							
+							this.addGeometry(option.getType(), new ProxyFacility(f));
+							
+						}
 						
 					}
 					
@@ -579,7 +578,7 @@ public class DatabaseReader {
 	 * @param landuse The MATSim activity option that can be performed at this location.
 	 * @param g The geometry of the activity location.
 	 */
-	public void addGeometry(String landuse, Geometry g){
+	public void addGeometry(String landuse, Landuse g){
 		
 		synchronized(this.geoinformation){
 		
@@ -600,11 +599,13 @@ public class DatabaseReader {
 			
 		}
 		
+		Geometry geometry = g.getGeometry();
+		
 		// Check if the geometry is not null
-		if(g != null){
+		if(geometry != null){
 			
 			// Check if the geometry is valid (e.g. not intersecting itself)
-			if(g.isValid()){
+			if(geometry.isValid()){
 
 				for(Node<AdministrativeUnit> adminUnitNode : this.geoinformation.getAdminUnits()){
 
@@ -613,31 +614,35 @@ public class DatabaseReader {
 					if(au.getGeometry() != null){
 
 						// Add the landuse geometry to the administrative unit containing it or skip it if it's outside of the survey area
-						if(au.getGeometry().contains(g) || au.getGeometry().touches(g) || au.getGeometry().intersects(g)){
+						if(au.getGeometry().contains(geometry) || au.getGeometry().touches(geometry) || au.getGeometry().intersects(geometry)){
 							
-							au.addLanduseGeometry(landuse, g);
+							au.addLanduse(landuse, g);
 							if(!landuse.equals(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
-								au.addLanduseGeometry(ActivityTypes.WORK, g);
+								au.addLanduse(ActivityTypes.WORK, g);
 							}
 							
 							// If we don't have a quad tree for this activity type already, create a new one
-							if(this.geoinformation.getQuadTreeForActType(landuse) == null){
+							if(this.geoinformation.getLanduseOfType(landuse) == null){
 								
 								this.geoinformation.createQuadTreeForActType(landuse, new double[]{minX,minY,maxX,maxY});
 								
 							}
-							if(this.geoinformation.getQuadTreeForActType(ActivityTypes.WORK) == null){
+							
+							if(this.geoinformation.getLanduseOfType(ActivityTypes.WORK) == null){
+								
 								this.geoinformation.createQuadTreeForActType(ActivityTypes.WORK, new double[]{minX,minY,maxX,maxY});
+								
 							}
 							
 							// Add the landuse geometry's centroid as new quad tree entry
-							Coord c = ct.transform(MGC.point2Coord(g.getCentroid()));
+							Coord c = ct.transform(MGC.point2Coord(geometry.getCentroid()));
 							
+							// Add the landuse geometry's centroid as new quad tree entry
 							if(this.boundingBox.contains(MGC.coord2Point(c))){
 								
-								this.geoinformation.getQuadTreeForActType(landuse).put(c.getX(), c.getY(), g);
+								this.geoinformation.getLanduseOfType(landuse).put(c.getX(), c.getY(), g);
 								if(!landuse.equals(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
-									this.geoinformation.getQuadTreeForActType(ActivityTypes.WORK).put(c.getX(), c.getY(), g);
+									this.geoinformation.getLanduseOfType(ActivityTypes.WORK).put(c.getX(), c.getY(), g);
 								}
 								
 							}
