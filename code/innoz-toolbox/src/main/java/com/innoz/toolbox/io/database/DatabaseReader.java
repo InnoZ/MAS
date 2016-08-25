@@ -389,29 +389,29 @@ public class DatabaseReader {
 			
 			if(!configuration.getActivityLocationsType().equals(ActivityLocations.landuse)){
 				
-				for(Node<AdministrativeUnit> au : this.geoinformation.getAdminUnits()){
-					
-					au.getData().getLanduseGeometries().clear();
-					
-				}
+//				for(Node<AdministrativeUnit> au : this.geoinformation.getAdminUnits()){
+//					
+//					au.getData().getLanduseGeometries().clear();
+//					
+//				}
 				
 				if(configuration.getActivityLocationsType().equals(ActivityLocations.facilities)){
 					
-					minX = Double.MAX_VALUE;
-					minY = Double.MAX_VALUE;
-					maxX = Double.MIN_VALUE;
-					maxY = Double.MIN_VALUE;
+//					minX = Double.MAX_VALUE;
+//					minY = Double.MAX_VALUE;
+//					maxX = Double.MIN_VALUE;
+//					maxY = Double.MIN_VALUE;
+//					
+//					for(Coordinate coord : this.boundingBox.getCoordinates()){
+//						if(coord.x < minX) minX = coord.x;
+//						if(coord.x > maxX) maxX = coord.x;
+//						if(coord.y < minY) minY = coord.y;
+//						if(coord.y > maxY) maxY = coord.y;
+//					}
 					
-					for(Coordinate coord : this.boundingBox.getCoordinates()){
-						if(coord.x < minX) minX = coord.x;
-						if(coord.x > maxX) maxX = coord.x;
-						if(coord.y < minY) minY = coord.y;
-						if(coord.y > maxY) maxY = coord.y;
-					}
-					
-					new FacilitiesCreator().create(scenario, geoinformation, buildingList, minX, minY, maxX, maxY);
+					new FacilitiesCreator().create(this, scenario, geoinformation, buildingList, minX, minY, maxX, maxY);
 
-					this.buildingList = null;
+//					this.buildingList = null;
 					
 				} else {
 					
@@ -555,7 +555,7 @@ public class DatabaseReader {
 	
 	/**
 	 * 
-	 * Adds a landuse geometry to the geoinformationo container.
+	 * Adds a landuse geometry to the geoinformation container.
 	 * 
 	 * @param landuse The MATSim activity option that can be performed at this location.
 	 * @param g The geometry of the activity location.
@@ -589,48 +589,42 @@ public class DatabaseReader {
 			// Check if the geometry is valid (e.g. not intersecting itself)
 			if(geometry.isValid()){
 
-				for(Node<AdministrativeUnit> adminUnitNode : this.geoinformation.getAdminUnits()){
+				for(AdministrativeUnit au : this.geoinformation.getAdminUnitsWithGeometry()){
 
-					AdministrativeUnit au = adminUnitNode.getData();
-					
-					if(au.getGeometry() != null){
-
-						// Add the landuse geometry to the administrative unit containing it or skip it if it's outside of the survey area
-						if(au.getGeometry().contains(geometry) || au.getGeometry().touches(geometry) || au.getGeometry().intersects(geometry)){
+					// Add the landuse geometry to the administrative unit containing it or skip it if it's outside of the survey area
+					if(au.getGeometry().contains(geometry) || au.getGeometry().touches(geometry) || au.getGeometry().intersects(geometry)){
+						
+						au.addLanduse(landuse, g);
+						if(!landuse.equals(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
+							au.addLanduse(ActivityTypes.WORK, g);
+						}
+						
+						// If we don't have a quad tree for this activity type already, create a new one
+						if(this.geoinformation.getLanduseOfType(landuse) == null){
 							
-							au.addLanduse(landuse, g);
-							if(!landuse.equals(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
-								au.addLanduse(ActivityTypes.WORK, g);
-							}
-							
-							// If we don't have a quad tree for this activity type already, create a new one
-							if(this.geoinformation.getLanduseOfType(landuse) == null){
-								
-								this.geoinformation.createQuadTreeForActType(landuse, new double[]{minX,minY,maxX,maxY});
-								
-							}
-							
-							if(this.geoinformation.getLanduseOfType(ActivityTypes.WORK) == null){
-								
-								this.geoinformation.createQuadTreeForActType(ActivityTypes.WORK, new double[]{minX,minY,maxX,maxY});
-								
-							}
-							
-							// Add the landuse geometry's centroid as new quad tree entry
-							Coord c = ct.transform(MGC.point2Coord(geometry.getCentroid()));
-							
-							// Add the landuse geometry's centroid as new quad tree entry
-							if(this.boundingBox.contains(MGC.coord2Point(c))){
-								
-								this.geoinformation.getLanduseOfType(landuse).put(c.getX(), c.getY(), g);
-								if(!landuse.equals(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
-									this.geoinformation.getLanduseOfType(ActivityTypes.WORK).put(c.getX(), c.getY(), g);
-								}
-								
-							}
+							this.geoinformation.createQuadTreeForActType(landuse, new double[]{minX,minY,maxX,maxY});
 							
 						}
 						
+						if(this.geoinformation.getLanduseOfType(ActivityTypes.WORK) == null){
+							
+							this.geoinformation.createQuadTreeForActType(ActivityTypes.WORK, new double[]{minX,minY,maxX,maxY});
+							
+						}
+						
+						// Add the landuse geometry's centroid as new quad tree entry
+						Coord c = ct.transform(MGC.point2Coord(geometry.getCentroid()));
+						
+						// Add the landuse geometry's centroid as new quad tree entry
+						if(this.boundingBox.contains(MGC.coord2Point(c))){
+							
+							this.geoinformation.getLanduseOfType(landuse).put(c.getX(), c.getY(), g);
+							if(!landuse.equals(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
+								this.geoinformation.getLanduseOfType(ActivityTypes.WORK).put(c.getX(), c.getY(), g);
+							}
+							
+						}
+							
 					}
 					
 				}

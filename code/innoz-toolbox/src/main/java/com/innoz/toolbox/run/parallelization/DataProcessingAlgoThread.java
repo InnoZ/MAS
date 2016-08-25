@@ -92,10 +92,6 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 			
 			if(!reader.getConfiguration().getActivityLocationsType().equals(ActivityLocations.landuse)){
 				
-//				if(!this.reader.getGeoinformation().getSurveyAreaBoundingBox().contains(dataset.getGeometry()) ||
-//						!this.reader.getGeoinformation().getSurveyAreaBoundingBox().touches(dataset.getGeometry()) ||
-//						!this.reader.getGeoinformation().getSurveyAreaBoundingBox().intersects(dataset.getGeometry())){
-
 					for(Building b : this.reader.getBuildingList()){
 
 						if(b.getActivityOptions().isEmpty()){
@@ -115,12 +111,6 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 						}
 						
 					}
-					
-//				} else {
-//					
-//					reader.addGeometry(landuse, dataset.getGeometry());
-//					
-//				}
 
 			} else {
 				

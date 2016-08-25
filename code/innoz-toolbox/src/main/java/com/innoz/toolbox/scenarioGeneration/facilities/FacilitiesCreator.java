@@ -2,12 +2,9 @@ package com.innoz.toolbox.scenarioGeneration.facilities;
 
 import java.util.List;
 
-import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.facilities.ActivityFacilitiesFactory;
 import org.matsim.facilities.ActivityFacility;
@@ -15,21 +12,20 @@ import org.matsim.facilities.ActivityOption;
 import org.matsim.facilities.ActivityOptionImpl;
 import org.matsim.facilities.OpeningTimeImpl;
 
-import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
+import com.innoz.toolbox.io.database.DatabaseReader;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Building;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.ProxyFacility;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.utils.GlobalNames;
-import com.innoz.toolbox.utils.data.Tree.Node;
 
 public class FacilitiesCreator {
 
-	public void create(final Scenario scenario, final Geoinformation geoinformation, List<Building> buildingList,
+	public void create(final DatabaseReader reader, final Scenario scenario, final Geoinformation geoinformation, List<Building> buildingList,
 			double minX, double minY, double maxX, double maxY){
 		
-		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(GlobalNames.WGS84
-				, GlobalNames.UTM32N);
+//		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(GlobalNames.WGS84
+//				, GlobalNames.UTM32N);
 		
 		ActivityFacilitiesFactory factory = scenario.getActivityFacilities().getFactory();
 		
@@ -57,40 +53,34 @@ public class FacilitiesCreator {
 						facility.addActivityOption(option);
 						option.setCapacity(building.getGeometry().getArea());
 						
-						if(geoinformation.getLanduseOfType(act) == null){
-							
-							geoinformation.createQuadTreeForActType(act, new double[]{minX,minY,maxX,maxY});
-							
-						}
+						reader.addGeometry(act, proxy);
 						
-						Coord c = transformation.transform(MGC.point2Coord(building.getGeometry().getCentroid()));
-						geoinformation.getLanduseOfType(act).put(c.getX(), c.getY(), proxy);
-						
-						for(Node<AdministrativeUnit> node : geoinformation.getAdminUnits()){
-							
-							AdministrativeUnit unit = node.getData();
-							
-							if(unit.getGeometry() != null && unit.getGeometry().contains(building.getGeometry())){
-								
-								unit.addLanduse(act, proxy);
-								
-							}
-							
-						}
+//						if(geoinformation.getLanduseOfType(act) == null){
+//							
+//							geoinformation.createQuadTreeForActType(act, new double[]{minX,minY,maxX,maxY});
+//							
+//						}
+//						
+//						Coord c = transformation.transform(MGC.point2Coord(building.getGeometry().getCentroid()));
+//						geoinformation.getLanduseOfType(act).put(c.getX(), c.getY(), proxy);
+//						
+//						
+//						
+//						for(Node<AdministrativeUnit> node : geoinformation.getAdminUnits()){
+//							
+//							AdministrativeUnit unit = node.getData();
+//							
+//							if(unit.getGeometry() != null && unit.getGeometry().contains(building.getGeometry())){
+//								
+//								unit.addLanduse(act, proxy);
+//								
+//							}
+//							
+//						}
 						
 					}
 					
 				}
-				
-			}
-			
-			if(!facility.getActivityOptions().containsKey(ActivityTypes.LEISURE) &&
-					!facility.getActivityOptions().containsKey(ActivityTypes.HOME) &&
-					!facility.getActivityOptions().containsKey(ActivityTypes.WORK)){
-				
-				ActivityOption option = factory.createActivityOption(ActivityTypes.WORK);
-				((ActivityOptionImpl)option).addOpeningTime(getOpeningTimeForActivityOption(option.getType()));
-				facility.addActivityOption(option);
 				
 			}
 			
