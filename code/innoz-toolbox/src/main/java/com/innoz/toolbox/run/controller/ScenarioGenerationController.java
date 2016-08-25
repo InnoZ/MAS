@@ -13,9 +13,14 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.gbl.MatsimRandom;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PopulationWriter;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.misc.Time;
+import org.matsim.facilities.ActivityFacility;
+import org.matsim.facilities.ActivityFacilityImpl;
 import org.matsim.facilities.FacilitiesWriter;
 import org.matsim.households.HouseholdsWriterV10;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
@@ -23,6 +28,7 @@ import org.matsim.vehicles.VehicleWriterV1;
 import org.opengis.referencing.FactoryException;
 
 import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.config.Configuration.ActivityLocations;
 import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.config.Configuration.VehicleSource;
@@ -33,6 +39,7 @@ import com.innoz.toolbox.scenarioGeneration.config.InitialConfigCreator;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.network.NetworkCreatorFromPsql;
 import com.innoz.toolbox.scenarioGeneration.population.PopulationCreator;
+import com.innoz.toolbox.utils.GlobalNames;
 import com.vividsolutions.jts.io.ParseException;
 
 public class ScenarioGenerationController extends DefaultController {
@@ -116,7 +123,21 @@ public class ScenarioGenerationController extends DefaultController {
 				
 			}
 			
-			new FacilitiesWriter(scenario.getActivityFacilities()).write(configuration.getOutputDirectory() + "facilities.xml.gz");
+			if(configuration.getActivityLocationsType().equals(ActivityLocations.facilities)){
+
+				CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(GlobalNames.WGS84, GlobalNames.UTM32N);
+				
+				for(ActivityFacility facility : scenario.getActivityFacilities().getFacilities().values()){
+					
+					((ActivityFacilityImpl)facility).setCoord(transformation.transform(facility.getCoord()));
+					((ActivityFacilityImpl)facility).setLinkId(NetworkUtils.getNearestLink(scenario.getNetwork(),
+							facility.getCoord()).getId());
+					
+				}
+				
+				new FacilitiesWriter(scenario.getActivityFacilities()).write(configuration.getOutputDirectory() + "facilities.xml.gz");
+				
+			}
 			
 			if(configuration.isWritingDatabaseOutput()){
 				

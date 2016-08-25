@@ -49,7 +49,7 @@ public class FacilitiesCreator {
 					
 					if(!facility.getActivityOptions().containsKey(actType)){
 						
-						ProxyFacility proxy = new ProxyFacility(facility);
+						ProxyFacility proxy = new ProxyFacility(facility, building.getGeometry().getArea());
 
 						// If the activity is of any of the sub types, take only the main activity type
 						ActivityOption option = factory.createActivityOption(actType);
@@ -72,7 +72,7 @@ public class FacilitiesCreator {
 							
 							if(unit.getGeometry() != null && unit.getGeometry().contains(building.getGeometry())){
 								
-								unit.addLanduse(actType, proxy);
+								unit.addLanduse(act, proxy);
 								
 							}
 							

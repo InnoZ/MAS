@@ -23,7 +23,6 @@ public class AdministrativeUnit {
 	private Geometry geometry;
 	
 	private Map<String, List<Landuse>> landuseGeometries;
-//	private Map<String, List<Geometry>> buildingsGeometries;
 	
 	private Map<String, Double> weightForKey = new HashMap<>();
 	
@@ -31,7 +30,6 @@ public class AdministrativeUnit {
 		
 		this.id = id;
 		this.landuseGeometries = new HashMap<String, List<Landuse>>();
-//		this.buildingsGeometries = new HashMap<String, List<Geometry>>();
 		
 	}
 	
@@ -71,7 +69,7 @@ public class AdministrativeUnit {
 		}
 		
 		this.landuseGeometries.get(key).add(value);
-		double weight = this.weightForKey.get(key) + value.getGeometry().getArea();
+		double weight = this.weightForKey.get(key) + value.getWeight();
 		this.weightForKey.put(key, weight);
 		
 	}
@@ -85,10 +83,6 @@ public class AdministrativeUnit {
 	public Map<String, List<Landuse>> getLanduseGeometries(){
 		return this.landuseGeometries;
 	}
-	
-//	public Map<String, List<Geometry>> getBuildingsGeometries(){
-//		return this.buildingsGeometries;
-//	}
 	
 	public int getNumberOfInhabitants(){
 		return this.nInhabitants;

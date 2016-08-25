@@ -28,4 +28,11 @@ public class Building implements Landuse {
 		return this.geometry;
 	}
 	
+	@Override
+	public double getWeight(){
+		
+		return this.geometry.getArea();
+		
+	}
+	
 }

@@ -39,6 +39,7 @@ import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.ProxyFacility;
 import com.innoz.toolbox.scenarioGeneration.population.mobilityAttitude.MobilityAttitudeGroups;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyHousehold;
@@ -173,6 +174,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 					if(this.geoinformation.getLanduseType().equals(ActivityLocations.facilities)){
 						
 						homeFacility = chooseActivityFacilityInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
+						homeLocation = transformation.transform(homeFacility.getCoord());
 						
 					} else {
 						
@@ -406,6 +408,10 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			// If there are at least two plan elements in the chosen template plan, generate the plan elements
 			if(planTemplate.getPlanElements().size() > 1){
 				
+				if(person.getId().toString().equals("150860080080_2329841_1084")){
+					System.out.println();
+				}
+				
 				// Distribute activities in the survey area (or its vicinity) according to the distribution matrix
 				List<String> cellIds = distributeActivitiesInCells(personTemplate, planTemplate, container);
 				
@@ -492,6 +498,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 		double distance = container.getModeStatsContainer().get(mainMode).getMean();
 		
+		//TODO
 		this.currentMainActLocation = shootLocationForActType(this.currentMainActCell,
 				plan.getMainActType(), distance, plan, mainMode, person);
 		
@@ -700,6 +707,10 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		Activity activity = population.getFactory().createActivityFromCoord(type.split("_")[0], coord);
 		activity.setStartTime(start);
 		activity.setEndTime(end);
+		if(this.geoinformation.getLanduseType().equals(ActivityLocations.facilities)){
+			activity.setFacilityId(((ProxyFacility)this.geoinformation.getLanduseOfType(type)
+					.getClosest(coord.getX(), coord.getY())).get().getId());
+		}
 		
 		if(end - start < 900){
 			
@@ -776,7 +787,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				
 				double w = 0;
 				for(Landuse g : closest){
-					w+=g.getGeometry().getArea();
+					w += g.getWeight();
 				}
 				
 				double shootingRandom = this.random.nextDouble() * w;
@@ -785,7 +796,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				
 				for(Landuse g : closest){
 					
-					accumulatedWeight += g.getGeometry().getArea();
+					accumulatedWeight += g.getWeight();
 					if(shootingRandom <= accumulatedWeight){
 						area = g.getGeometry();
 						break;
@@ -817,7 +828,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				
 				for(Landuse g : closest){
 					
-					accumulatedWeight += g.getGeometry().getArea();
+					accumulatedWeight += g.getWeight();
 					if(shootingRandom <= accumulatedWeight){
 						area = g.getGeometry();
 						break;

@@ -9,10 +9,12 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 public class ProxyFacility implements Landuse {
 
 	private final ActivityFacility facility;
+	private double weight;
 	
-	public ProxyFacility(final ActivityFacility facility){
+	public ProxyFacility(final ActivityFacility facility, double weight){
 		
 		this.facility = facility;
+		this.weight = weight;
 		
 	}
 	
@@ -26,6 +28,13 @@ public class ProxyFacility implements Landuse {
 	public Geometry getGeometry(){
 		
 		return new GeometryFactory().createPoint(MGC.coord2Coordinate(facility.getCoord()));
+		
+	}
+	
+	@Override
+	public double getWeight(){
+		
+		return this.weight;
 		
 	}
 	

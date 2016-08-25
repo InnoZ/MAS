@@ -94,11 +94,17 @@ public abstract class DemandGenerationAlgorithm {
 			
 			AdministrativeUnit admin = node.getData();
 			
-			r2 += admin.getWeightForKey(activityType);
+			double w = admin.getWeightForKey(activityType);
 			
-			if(r <= r2 && admin.getLanduseGeometries().get(activityType) != null){
+			if(w > 0){
+
+				r2 += w;
 				
-				return admin;
+				if(r <= r2 && admin.getLanduseGeometries().get(activityType) != null){
+					
+					return admin;
+					
+				}
 				
 			}
 			
@@ -115,7 +121,7 @@ public abstract class DemandGenerationAlgorithm {
 		
 		for(Landuse g : admin.getLanduseGeometries().get(activityType)){
 			
-			accumulatedWeight += g.getGeometry().getArea();
+			accumulatedWeight += g.getWeight();
 			
 			if(p <= accumulatedWeight){
 
@@ -137,7 +143,7 @@ public abstract class DemandGenerationAlgorithm {
 		
 		for(Landuse g : admin.getLanduseGeometries().get(activityType)){
 			
-			accumulatedWeight += g.getGeometry().getArea();
+			accumulatedWeight += g.getWeight();
 			
 			if(p <= accumulatedWeight){
 
@@ -195,11 +201,11 @@ public abstract class DemandGenerationAlgorithm {
 		if(mode != null){
 
 			// If the person walked, it most likely didn't leave the last cell (to avoid very long walk legs)
-			if(mode.equals(TransportMode.walk) && fromId != null){
-				
-				return this.geoinformation.getAdminUnit(fromId).getData();
-				
-			}
+//			if(mode.equals(TransportMode.walk) && fromId != null){
+//				
+//				return this.geoinformation.getAdminUnit(fromId).getData();
+//				
+//			}
 			
 			// Add the transport mode used
 			modes.add(mode);
@@ -246,7 +252,6 @@ public abstract class DemandGenerationAlgorithm {
 			
 			adminUnits = new HashSet<AdministrativeUnit>();
 			adminUnits.addAll(this.geoinformation.getAdminUnitsWithGeometry());
-//			adminUnits.remove(this.currentHomeCell);
 			
 		}
 		
@@ -270,7 +275,7 @@ public abstract class DemandGenerationAlgorithm {
 					
 				}
 				
-				if(Double.isFinite(disutility)){
+				if(Double.isFinite(disutility) && disutility != 0){
 					
 					toId2Disutility.put(au.getId(), disutility);
 					sumOfWeights += disutility;

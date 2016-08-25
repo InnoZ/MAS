@@ -22,10 +22,6 @@ import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.matsim.facilities.ActivityFacility;
-import org.matsim.facilities.ActivityFacilityImpl;
-import org.matsim.facilities.ActivityOption;
-import org.matsim.facilities.FacilitiesWriter;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
@@ -47,7 +43,6 @@ import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Building;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.ProxyFacility;
 import com.innoz.toolbox.scenarioGeneration.network.OsmNodeEntry;
 import com.innoz.toolbox.scenarioGeneration.network.WayEntry;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
@@ -417,19 +412,6 @@ public class DatabaseReader {
 					new FacilitiesCreator().create(scenario, geoinformation, buildingList, minX, minY, maxX, maxY);
 
 					this.buildingList = null;
-					
-					for(ActivityFacility f : scenario.getActivityFacilities().getFacilities().values()){
-						
-						((ActivityFacilityImpl)f).setCoord(ct.transform(f.getCoord()));
-						for(ActivityOption option : f.getActivityOptions().values()){
-							
-							this.addGeometry(option.getType(), new ProxyFacility(f));
-							
-						}
-						
-					}
-					
-					new FacilitiesWriter(scenario.getActivityFacilities()).write("/home/dhosse/facilities.xml.gz");
 					
 				} else {
 					
