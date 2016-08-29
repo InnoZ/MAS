@@ -389,30 +389,10 @@ public class DatabaseReader {
 			
 			if(!configuration.getActivityLocationsType().equals(ActivityLocations.landuse)){
 				
-//				for(Node<AdministrativeUnit> au : this.geoinformation.getAdminUnits()){
-//					
-//					au.getData().getLanduseGeometries().clear();
-//					
-//				}
-				
 				if(configuration.getActivityLocationsType().equals(ActivityLocations.facilities)){
-					
-//					minX = Double.MAX_VALUE;
-//					minY = Double.MAX_VALUE;
-//					maxX = Double.MIN_VALUE;
-//					maxY = Double.MIN_VALUE;
-//					
-//					for(Coordinate coord : this.boundingBox.getCoordinates()){
-//						if(coord.x < minX) minX = coord.x;
-//						if(coord.x > maxX) maxX = coord.x;
-//						if(coord.y < minY) minY = coord.y;
-//						if(coord.y > maxY) maxY = coord.y;
-//					}
 					
 					new FacilitiesCreator().create(this, scenario, geoinformation, buildingList, minX, minY, maxX, maxY);
 
-//					this.buildingList = null;
-					
 				} else {
 					
 					MultithreadedModule module = new MultithreadedModule(configuration.getNumberOfThreads());
