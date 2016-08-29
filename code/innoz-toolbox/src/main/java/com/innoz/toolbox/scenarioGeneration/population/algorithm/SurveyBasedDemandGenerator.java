@@ -293,7 +293,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 								templatePersons.values()));
 				
 				//TODO: number of inhabitants for admin units
-				for(int i = 0; i < 10000 * configuration.getScaleFactor(); i++){
+				for(int i = 0; i < au.getNumberOfInhabitants() * configuration.getScaleFactor(); i++){
 					
 					Coord homeCoord = chooseActivityCoordInAdminUnit(au, ActivityTypes.HOME);
 					population.addPerson(createPerson(configuration, personTemplate, population, personAttributes, personalRandom, i, homeCoord, null, container, 0d));
@@ -329,6 +329,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		this.lastActCoord = null;
 		this.lastActCell = null;
 		this.currentSearchSpace = null;
+		this.currentHomeFacility = null;
+		this.currentMainActFacility = null;
 		
 		// Create a new MATSim person and an empty plan
 		Person person = population.getFactory().createPerson(Id.createPersonId(this.currentHomeCell.getId() + "_" + personTemplate.getId() + "_" + i));
