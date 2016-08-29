@@ -60,6 +60,8 @@ public class Tree<T> {
 				
 			} else if(child.data.toString().contains(data.toString())){
 				
+				//TODO There is no guarantee, we get a valid tree, e.g. existing nodes <03444>, <03454> and new node <03>
+				// only one of the existing nodes would be child of the new node
 				swap(data, child);
 				return true;
 				
