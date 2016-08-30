@@ -43,6 +43,8 @@ public class CountsFromNetworkShapefile {
 	
 	public void run(final Scenario scenario, String inputShapefile, String outputCountsFile, String trafficGraphType){
 		
+		Set<String> hashes = new HashSet<>();
+		
 		List<CountsLink> countsLinks = new ArrayList<>();
 		Collection<SimpleFeature> features = new ShapeFileReader().readFileAndInitialize(inputShapefile);
 		
@@ -51,8 +53,10 @@ public class CountsFromNetworkShapefile {
 			String name = (String)feature.getAttribute("NAME");
 			Double dtv = (Double)feature.getAttribute("DTV");
 			Geometry geometry = (Geometry)feature.getDefaultGeometry();
-			if(dtv >= 10000){
+			String hash = name + "_" + dtv;
+			if(!hashes.contains(hash)){
 				countsLinks.add(new CountsLink(name, dtv, geometry));
+				hashes.add(hash);
 			}
 			
 		}
@@ -132,10 +136,10 @@ public class CountsFromNetworkShapefile {
 	enum TrafficGraph{
 		
 		mid(new double[]{
-			0.0026, 0.0012, 0.0007, 0.001, 0.0029, 0.0153, 0.0299,
-			0.0712, 0.0674, 0.0595, 0.0523, 0.0607, 0.0707, 0.0564,
-			0.0657, 0.0731, 0.0772, 0.0915, 0.0703, 0.0554, 0.0332,
-			0.0194, 0.0158, 0.0065
+				0.0026290631, 0.0011950287,	0.0007170172, 0.0009560229, 0.0028680688, 0.0152963671,
+				0.029875717, 0.0712237094, 0.0673996176, 0.0595124283, 0.0523422562, 0.060707457,
+				0.0707456979, 0.0564053537, 0.0657265774, 0.0731357553, 0.0771988528, 0.0915391969,
+				0.0702676864, 0.0554493308, 0.0332217973, 0.0193594646,	0.0157743786, 0.0064531549
 		}),
 		
 		// types
