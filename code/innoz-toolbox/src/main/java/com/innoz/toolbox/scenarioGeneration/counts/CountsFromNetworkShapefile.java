@@ -29,8 +29,9 @@ public class CountsFromNetworkShapefile {
 	public static void main(String args[]){
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		new MatsimNetworkReader(scenario.getNetwork()).readFile("/home/dhosse/scenarios/3connect/network.xml.gz");
-		new CountsFromNetworkShapefile().run(scenario, "/home/dhosse/02_Data/DTV_Osna/Straсennetz OsnabrБck DTV.shp", "");
+		new MatsimNetworkReader(scenario.getNetwork()).readFile("/home/dhosse/osGtfs/network.xml.gz");
+		new CountsFromNetworkShapefile().run(scenario, "/home/dhosse/02_Data/DTV_Osna/Straсennetz OsnabrБck DTV.shp",
+				"/home/dhosse/counts.xml.gz", TrafficGraph.mid.name());
 		
 	}
 	
@@ -43,14 +44,16 @@ public class CountsFromNetworkShapefile {
 	public void run(final Scenario scenario, String inputShapefile, String outputCountsFile, String trafficGraphType){
 		
 		List<CountsLink> countsLinks = new ArrayList<>();
-		Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(inputShapefile);
+		Collection<SimpleFeature> features = new ShapeFileReader().readFileAndInitialize(inputShapefile);
 		
 		for(SimpleFeature feature : features){
 			
 			String name = (String)feature.getAttribute("NAME");
 			Double dtv = (Double)feature.getAttribute("DTV");
 			Geometry geometry = (Geometry)feature.getDefaultGeometry();
-			countsLinks.add(new CountsLink(name, dtv, geometry));
+			if(dtv >= 10000){
+				countsLinks.add(new CountsLink(name, dtv, geometry));
+			}
 			
 		}
 		
@@ -64,6 +67,9 @@ public class CountsFromNetworkShapefile {
 		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation("EPSG:3044", "EPSG:32632");
 		Set<Id<Link>> visitedLinkIds = new HashSet<>();
 		Counts<Link> counts = new Counts<Link>();
+		counts.setYear(2016);
+		counts.setName("OS");
+		counts.setDescription("Counts from OS DTV network");
 		
 		for(CountsLink cl : countsLinks){
 			
@@ -77,7 +83,7 @@ public class CountsFromNetworkShapefile {
 				
 				double[] hourlyVolumes = resolveDTV(cl.dtv, trafficGraphType);
 				
-				for(int i = 0; i < hourlyVolumes.length; i++){
+				for(int i = 1; i < hourlyVolumes.length; i++){
 				
 					count.createVolume(i, hourlyVolumes[i]);
 					
@@ -124,6 +130,13 @@ public class CountsFromNetworkShapefile {
 	}
 	
 	enum TrafficGraph{
+		
+		mid(new double[]{
+			0.0026, 0.0012, 0.0007, 0.001, 0.0029, 0.0153, 0.0299,
+			0.0712, 0.0674, 0.0595, 0.0523, 0.0607, 0.0707, 0.0564,
+			0.0657, 0.0731, 0.0772, 0.0915, 0.0703, 0.0554, 0.0332,
+			0.0194, 0.0158, 0.0065
+		}),
 		
 		// types
 		uniform(new double[]{
