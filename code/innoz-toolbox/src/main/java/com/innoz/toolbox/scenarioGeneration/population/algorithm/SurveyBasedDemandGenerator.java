@@ -321,7 +321,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	 */
 	@SuppressWarnings("deprecation")
 	private Person createPerson(Configuration configuration, SurveyPerson personTemplate, Population population,
-			ObjectAttributes personAttributes, double personalRandom, int i, Coord homeCoord, ActivityFacility homeFacility, SurveyDataContainer container, double hhIncome) {
+			ObjectAttributes personAttributes, double personalRandom, int i, Coord homeCoord, ActivityFacility homeFacility,
+			SurveyDataContainer container, double hhIncome) {
 
 		// Initialize main act location, last leg, last act cell and the coordinate of the last activity as null to avoid errors...
 		this.currentMainActLocation = null;
@@ -329,7 +330,6 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		this.lastActCoord = null;
 		this.lastActCell = null;
 		this.currentSearchSpace = null;
-		this.currentHomeFacility = null;
 		this.currentMainActFacility = null;
 		
 		// Create a new MATSim person and an empty plan
@@ -409,10 +409,6 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
 			// If there are at least two plan elements in the chosen template plan, generate the plan elements
 			if(planTemplate.getPlanElements().size() > 1){
-				
-				if(person.getId().toString().equals("150860080080_2329841_1084")){
-					System.out.println();
-				}
 				
 				// Distribute activities in the survey area (or its vicinity) according to the distribution matrix
 				List<String> cellIds = distributeActivitiesInCells(personTemplate, planTemplate, container);
