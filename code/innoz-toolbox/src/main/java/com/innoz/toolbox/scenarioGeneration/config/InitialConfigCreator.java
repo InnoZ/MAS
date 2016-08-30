@@ -77,6 +77,8 @@ public class InitialConfigCreator {
 
 		ActivityParams education = new ActivityParams(ActivityTypes.EDUCATION);
 		education.setTypicalDuration(6 * 3600);
+		education.setOpeningTime(8 * 3600);
+		education.setClosingTime(20 * 3600);
 		config.planCalcScore().addActivityParams(education);
 		
 		ActivityParams home = new ActivityParams(ActivityTypes.HOME);
@@ -93,6 +95,8 @@ public class InitialConfigCreator {
 		
 		ActivityParams shopping = new ActivityParams(ActivityTypes.SHOPPING);
 		shopping.setTypicalDuration(1 * 3600);
+		shopping.setOpeningTime(8 * 3600);
+		shopping.setClosingTime(20 * 3600);
 		config.planCalcScore().addActivityParams(shopping);
 		
 		ActivityParams work = new ActivityParams(ActivityTypes.WORK);
@@ -101,6 +105,8 @@ public class InitialConfigCreator {
 		
 		ActivityParams kindergarten = new ActivityParams(ActivityTypes.KINDERGARTEN);
 		kindergarten.setTypicalDuration(3 * 3600);
+		kindergarten.setOpeningTime(7 * 3600);
+		kindergarten.setClosingTime(16 * 3600);
 		config.planCalcScore().addActivityParams(kindergarten);
 		
 	}
