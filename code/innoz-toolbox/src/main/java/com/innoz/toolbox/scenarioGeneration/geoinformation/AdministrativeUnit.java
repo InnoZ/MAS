@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class AdministrativeUnit {
@@ -21,16 +22,14 @@ public class AdministrativeUnit {
 	
 	private Geometry geometry;
 	
-	private Map<String, List<Geometry>> landuseGeometries;
-	private Map<String, List<Geometry>> buildingsGeometries;
+	private Map<String, List<Landuse>> landuseGeometries;
 	
 	private Map<String, Double> weightForKey = new HashMap<>();
 	
 	public AdministrativeUnit(String id){
 		
 		this.id = id;
-		this.landuseGeometries = new HashMap<String, List<Geometry>>();
-		this.buildingsGeometries = new HashMap<String, List<Geometry>>();
+		this.landuseGeometries = new HashMap<String, List<Landuse>>();
 		
 	}
 	
@@ -60,14 +59,19 @@ public class AdministrativeUnit {
 		this.geometry = geometry;
 	}
 
-	public void addLanduseGeometry(String key, Geometry value){
+	public void addLanduse(String key, Landuse value){
+		
 		if(!this.landuseGeometries.containsKey(key)){
+			
 			this.landuseGeometries.put(key, new ArrayList<>());
 			this.weightForKey.put(key, 0.);
+			
 		}
+		
 		this.landuseGeometries.get(key).add(value);
-		double weight = this.weightForKey.get(key) + value.getArea();
+		double weight = this.weightForKey.get(key) + value.getWeight();
 		this.weightForKey.put(key, weight);
+		
 	}
 	
 	public double getWeightForKey(String key){
@@ -76,12 +80,8 @@ public class AdministrativeUnit {
 		} else return 0d;
 	}
 	
-	public Map<String, List<Geometry>> getLanduseGeometries(){
+	public Map<String, List<Landuse>> getLanduseGeometries(){
 		return this.landuseGeometries;
-	}
-	
-	public Map<String, List<Geometry>> getBuildingsGeometries(){
-		return this.buildingsGeometries;
 	}
 	
 	public int getNumberOfInhabitants(){
@@ -112,6 +112,11 @@ public class AdministrativeUnit {
 		if(lod != null){
 			this.networkDetail = lod;
 		}
+	}
+	
+	@Override
+	public String toString(){
+		return this.id;
 	}
 
 }

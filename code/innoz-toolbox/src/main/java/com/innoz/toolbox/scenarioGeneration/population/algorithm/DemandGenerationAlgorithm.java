@@ -15,19 +15,21 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
-
-import com.vividsolutions.jts.geom.Geometry;
+import org.matsim.facilities.ActivityFacility;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.District;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.ProxyFacility;
 import com.innoz.toolbox.scenarioGeneration.population.PopulationCreator;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyHousehold;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPlanTrip;
+import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.utils.GeometryUtils;
+import com.innoz.toolbox.utils.data.Tree.Node;
 
 public abstract class DemandGenerationAlgorithm {
 
@@ -57,6 +59,8 @@ public abstract class DemandGenerationAlgorithm {
 	
 	Coord currentHomeLocation = null;
 	Coord currentMainActLocation = null;
+	ActivityFacility currentHomeFacility = null;
+	ActivityFacility currentMainActFacility = null;
 	SurveyPlanTrip lastLeg = null;
 	Coord lastActCoord = null;
 	double c = 0d;
@@ -74,25 +78,33 @@ public abstract class DemandGenerationAlgorithm {
 		this.scenario = scenario;
 		
 		// Initialize the disutilities for traveling from each cell to each other cell
-				// to eventually get a gravitation model.
+		// to eventually get a gravitation model.
 		this.distribution = distribution;
 		
 	}
 	
 	public abstract void run(final Configuration configuration, String ids);
 
-	AdministrativeUnit chooseAdminUnitInsideDistrict(District district, String activityType){
+	AdministrativeUnit chooseAdminUnit(AdministrativeUnit district, String activityType){
 		
 		double r = random.nextDouble() * this.geoinformation.getTotalWeightForLanduseKey(district.getId(), activityType);
 		double r2 = 0.;
 		
-		for(AdministrativeUnit admin : district.getAdminUnits().values()){
+		for(Node<AdministrativeUnit> node : geoinformation.getAdminUnit(district.getId()).getChildren()){
 			
-			r2 += admin.getWeightForKey(activityType);
+			AdministrativeUnit admin = node.getData();
 			
-			if(r <= r2 && admin.getLanduseGeometries().get(activityType) != null){
+			double w = admin.getWeightForKey(activityType);
+			
+			if(w > 0){
+
+				r2 += w;
 				
-				return admin;
+				if(r <= r2 && admin.getLanduseGeometries().get(activityType) != null){
+					
+					return admin;
+					
+				}
 				
 			}
 			
@@ -107,14 +119,36 @@ public abstract class DemandGenerationAlgorithm {
 		double p = random.nextDouble() * admin.getWeightForKey(activityType);
 		double accumulatedWeight = 0.;
 		
-		for(Geometry g : admin.getLanduseGeometries().get(activityType)){
+		for(Landuse g : admin.getLanduseGeometries().get(activityType)){
 			
-			accumulatedWeight += g.getArea();
+			accumulatedWeight += g.getWeight();
 			
 			if(p <= accumulatedWeight){
 
 				// Shoot the location
-				return transformation.transform(GeometryUtils.shoot(g, random));
+				return transformation.transform(GeometryUtils.shoot(g.getGeometry(), random));
+
+			}
+			
+		}
+		
+		return null;
+		
+	}
+	
+	ActivityFacility chooseActivityFacilityInAdminUnit(AdministrativeUnit admin, String activityType){
+		
+		double p = random.nextDouble() * admin.getWeightForKey(activityType);
+		double accumulatedWeight = 0;
+		
+		for(Landuse g : admin.getLanduseGeometries().get(activityType)){
+			
+			accumulatedWeight += g.getWeight();
+			
+			if(p <= accumulatedWeight){
+
+				// Shoot the location
+				return ((ProxyFacility)g).get();
 
 			}
 			
@@ -160,14 +194,18 @@ public abstract class DemandGenerationAlgorithm {
 			fromId = this.currentHomeCell.getId();
 		}
 		
+		if(activityType.split("_")[0].equals(ActivityTypes.EDUCATION) && this.currentHomeCell.getWeightForKey(ActivityTypes.EDUCATION) > 0){
+			return this.currentHomeCell;
+		}
+		
 		if(mode != null){
 
 			// If the person walked, it most likely didn't leave the last cell (to avoid very long walk legs)
-			if(mode.equals(TransportMode.walk) && fromId != null){
-				
-				return this.geoinformation.getAdminUnitById(fromId);
-				
-			}
+//			if(mode.equals(TransportMode.walk) && fromId != null){
+//				
+//				return this.geoinformation.getAdminUnit(fromId).getData();
+//				
+//			}
 			
 			// Add the transport mode used
 			modes.add(mode);
@@ -213,8 +251,7 @@ public abstract class DemandGenerationAlgorithm {
 		if(adminUnits == null){
 			
 			adminUnits = new HashSet<AdministrativeUnit>();
-			adminUnits.addAll(this.geoinformation.getSubUnits().values());
-//			adminUnits.remove(this.currentHomeCell);
+			adminUnits.addAll(this.geoinformation.getAdminUnitsWithGeometry());
 			
 		}
 		
@@ -238,7 +275,7 @@ public abstract class DemandGenerationAlgorithm {
 					
 				}
 				
-				if(Double.isFinite(disutility)){
+				if(Double.isFinite(disutility) && disutility != 0){
 					
 					toId2Disutility.put(au.getId(), disutility);
 					sumOfWeights += disutility;
@@ -257,9 +294,9 @@ public abstract class DemandGenerationAlgorithm {
 			
 			accumulatedWeight += entry.getValue();
 			if(r <= accumulatedWeight){
-				result = this.geoinformation.getSubUnits().get(entry.getKey());
+				result = this.geoinformation.getAdminUnit(entry.getKey()).getData();
 				if(result == null){
-					result = this.geoinformation.getSubUnits().get(entry.getKey());
+					result = this.geoinformation.getAdminUnit(entry.getKey()).getData();
 				}
 				break;
 			}

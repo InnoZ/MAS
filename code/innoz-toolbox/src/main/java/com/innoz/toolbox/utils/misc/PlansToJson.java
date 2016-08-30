@@ -26,6 +26,7 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.PolylineFeatureFactory;
 import org.opengis.feature.simple.SimpleFeature;
 
+import com.innoz.toolbox.utils.GlobalNames;
 import com.vividsolutions.jts.geom.Coordinate;
 
 /**
@@ -38,6 +39,13 @@ import com.vividsolutions.jts.geom.Coordinate;
  *
  */
 public class PlansToJson {
+	
+	static final String PAR_DEPARTURE = "started_at";
+	static final String PAR_ARRIVAL = "finished_at";
+	static final String PAR_MODE = "mode";
+	static final String PAR_SPEED = "kmh";
+	
+	enum Modes{car};
 	
 	/*
 	 * EXAMPLE USAGE
@@ -55,7 +63,7 @@ public class PlansToJson {
 	
 	public static void run(String plansFile, String networkFile) throws IOException{
 		
-		double d = 0.25d;
+		double d = 0.025d;
 		
 		Random random = MatsimRandom.getLocalInstance();
 		
@@ -64,13 +72,16 @@ public class PlansToJson {
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
 		new MatsimPopulationReader(scenario).readFile(plansFile);
 
-		CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation("EPSG:32632", "EPSG:4326");
+		CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(GlobalNames.UTM32N, GlobalNames.WGS84);
 		
 		List<SimpleFeature> features = new ArrayList<>();
 		
 		PolylineFeatureFactory pfactory = new PolylineFeatureFactory.Builder()
-				.addAttribute("departure", Double.class)
-				.addAttribute("arrival", Double.class)
+				.setCrs(MGC.getCRS(GlobalNames.WGS84))
+				.addAttribute(PAR_DEPARTURE, Double.class)
+				.addAttribute(PAR_ARRIVAL, Double.class)
+				.addAttribute(PAR_MODE, String.class)
+				.addAttribute(PAR_SPEED, Integer.class)
 				.create();
 		
 		for(Person person : scenario.getPopulation().getPersons().values()){
@@ -103,13 +114,11 @@ public class PlansToJson {
 							for(Id<Link> id : route.getLinkIds()){
 								
 								current = scenario.getNetwork().getLinks().get(id);
-								coordinates.add(MGC.coord2Coordinate(ct.transform(current.getFromNode().getCoord())));
 								coordinates.add(MGC.coord2Coordinate(ct.transform(current.getToNode().getCoord())));
 								
 							}
 							
 							current = scenario.getNetwork().getLinks().get(route.getEndLinkId());
-							coordinates.add(MGC.coord2Coordinate(ct.transform(current.getFromNode().getCoord())));
 							coordinates.add(MGC.coord2Coordinate(ct.transform(current.getToNode().getCoord())));
 						
 							Coordinate[] coords = new Coordinate[coordinates.size()];
@@ -118,8 +127,10 @@ public class PlansToJson {
 							}
 							
 							SimpleFeature feature = pfactory.createPolyline(coords);
-							feature.setAttribute("departure", departure);
-							feature.setAttribute("arrival", arrival);
+							feature.setAttribute(PAR_DEPARTURE, departure);
+							feature.setAttribute(PAR_ARRIVAL, arrival);
+							feature.setAttribute(PAR_MODE, Modes.car.name());
+							feature.setAttribute(PAR_SPEED, (int)(3.6 * route.getDistance() / (arrival-departure)));
 							features.add(feature);
 							
 						}

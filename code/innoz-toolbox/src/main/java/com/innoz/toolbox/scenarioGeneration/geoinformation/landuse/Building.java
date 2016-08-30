@@ -1,11 +1,11 @@
-package com.innoz.toolbox.scenarioGeneration.geoinformation;
+package com.innoz.toolbox.scenarioGeneration.geoinformation.landuse;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-public class Building {
+public class Building implements Landuse {
 
 	private Set<String> activityOptions;
 	private final Geometry geometry;
@@ -23,8 +23,16 @@ public class Building {
 		this.activityOptions.add(activityType);
 	}
 	
+	@Override
 	public Geometry getGeometry(){
 		return this.geometry;
+	}
+	
+	@Override
+	public double getWeight(){
+		
+		return this.geometry.getArea();
+		
 	}
 	
 }

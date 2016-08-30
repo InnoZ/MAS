@@ -1,15 +1,5 @@
 package com.innoz.toolbox.scenarioGeneration.population.algorithm;
 
-import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.District;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
-import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
-import com.innoz.toolbox.utils.GeometryUtils;
-
-import java.util.Map.Entry;
-
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -19,6 +9,14 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
+
+import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
+import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
+import com.innoz.toolbox.utils.GeometryUtils;
+import com.innoz.toolbox.utils.data.Tree.Node;
 
 public class DummyDemandGenerator extends DemandGenerationAlgorithm {
 
@@ -58,25 +56,25 @@ public class DummyDemandGenerator extends DemandGenerationAlgorithm {
 		// From each administrative unit to each administrative unit, create a certain amount of commuters
 		for(String s : ids.split(",")){
 
-			District d = this.geoinformation.getAdminUnits().get(s);
+			Node<AdministrativeUnit> d = this.geoinformation.getAdminUnit(s);
 			
-			for(Entry<String,AdministrativeUnit> fromEntry : d.getAdminUnits().entrySet()){
+			for(Node<AdministrativeUnit> fromEntry : d.getChildren()){
 				
-				for(Entry<String,AdministrativeUnit> toEntry : d.getAdminUnits().entrySet()){
+				for(Node<AdministrativeUnit> toEntry : d.getChildren()){
 
 					//TODO maybe make the max number configurable...
 					for(int i = 0; i < 1000; i++){
 
 						// Create a new person and an empty plan
 						Person person = scenario.getPopulation().getFactory().createPerson(Id.createPersonId(
-								fromEntry.getKey() + "_" + toEntry.getKey() + "-" + i));
+								fromEntry.getData().getId() + "_" + toEntry.getData().getId() + "-" + i));
 						Plan plan = scenario.getPopulation().getFactory().createPlan();
 						
 						// Shoot the activity coords (home activity located inside of the FROM admin unit,
 						// work activity inside of the TO admin unit)
-						Coord homeCoord = transformation.transform(GeometryUtils.shoot(fromEntry.getValue()
+						Coord homeCoord = transformation.transform(GeometryUtils.shoot(fromEntry.getData()
 								.getGeometry(),random));
-						Coord workCoord = transformation.transform(GeometryUtils.shoot(toEntry.getValue()
+						Coord workCoord = transformation.transform(GeometryUtils.shoot(toEntry.getData()
 								.getGeometry(),random));
 						
 						// Create activities and legs and add them to the plan

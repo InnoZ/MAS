@@ -658,7 +658,7 @@ public final class Configuration {
 		map.put(OVERWRITE_FILES, Boolean.toString(this.overwriteExistingFiles));
 		map.put(DEMAND_DATA_SOURCE, this.surveyType.name());
 		map.put(SUBPOPULATIONS_TYPE, this.subpopulation.name());
-		map.put(ACTIVITY_LOCATIONS_TYPE, ActivityLocations.buildings.name());
+		map.put(ACTIVITY_LOCATIONS_TYPE, this.actLocs.name());
 		map.put(POPULATION_TYPE, this.popType.name());
 		map.put(DAY_TYPES, this.dayType.name());
 		map.put(VEHICLES_SOURCE, this.vehSource.name());

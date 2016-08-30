@@ -1,6 +1,8 @@
 package com.innoz.toolbox.scenarioGeneration.geoinformation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.matsim.api.core.v01.Coord;
@@ -59,94 +61,102 @@ public class Distribution {
 		
 		Map<String, Double> rowMinima = new HashMap<>();
 		
-		Map<String, AdministrativeUnit> adminUnits = new HashMap<>();
-		adminUnits.putAll(geoinformation.getSubUnits());
+		List<AdministrativeUnit> adminUnits = new ArrayList<>();
+		adminUnits.addAll(geoinformation.getAdminUnitsWithGeometry());
 		
-		for(AdministrativeUnit u1 : adminUnits.values()){
+		for(AdministrativeUnit u1 : adminUnits){
 			
 			rowMinima.put(u1.getId(), Double.MAX_VALUE);
 			
-			for(AdministrativeUnit u2 : adminUnits.values()){
-				
-				double distance = 0d;
+			for(AdministrativeUnit u2 : adminUnits){
 
-				Coord u1Coord = transformation.transform(MGC.point2Coord(u1.getGeometry().getCentroid()));
-				Coord u2Coord = transformation.transform(MGC.point2Coord(u2.getGeometry().getCentroid()));
-				
-				if(!u1.equals(u2)){
+				if(u1.getGeometry() != null && u2.getGeometry() != null){
+			
+					double distance = 0d;
 
-//					distance = CoordUtils.calcDistance(u1Coord, u2Coord);
-					Node fromNode = NetworkUtils.getNearestRightEntryLink(this.network, u1Coord).getToNode();
-					Node toNode = NetworkUtils.getNearestRightEntryLink(this.network, u2Coord).getFromNode();
+					Coord u1Coord = transformation.transform(MGC.point2Coord(u1.getGeometry().getCentroid()));
+					Coord u2Coord = transformation.transform(MGC.point2Coord(u2.getGeometry().getCentroid()));
 					
-					Path path = this.lcpc.calcLeastCostPath(fromNode, toNode, 0, null, null);
-					
-					for(Link link : path.links){
-						distance += link.getLength();
+					if(!u1.equals(u2)){
+
+//						distance = CoordUtils.calcDistance(u1Coord, u2Coord);
+						Node fromNode = NetworkUtils.getNearestRightEntryLink(this.network, u1Coord).getToNode();
+						Node toNode = NetworkUtils.getNearestRightEntryLink(this.network, u2Coord).getFromNode();
+						
+						Path path = this.lcpc.calcLeastCostPath(fromNode, toNode, 0, null, null);
+						
+						for(Link link : path.links){
+							distance += link.getLength();
+						}
+						
+						if(distance < rowMinima.get(u1.getId())){
+							rowMinima.put(u1.getId(), distance);
+						}
+						
+					} else {
+						
+						distance = 1000d;
+						
 					}
-					
-					if(distance < rowMinima.get(u1.getId())){
-						rowMinima.put(u1.getId(), distance);
-					}
-					
-				} else {
-					
-					distance = 1000d;
+
+					distances.createEntry(u1.getId(), u2.getId(), distance);
 					
 				}
 
-				distances.createEntry(u1.getId(), u2.getId(), distance);
-				
 			}
 			
 		}
 		
-		for(AdministrativeUnit u1 : adminUnits.values()){
-			for(AdministrativeUnit u2 : adminUnits.values()){
+		for(AdministrativeUnit u1 : adminUnits){
+			for(AdministrativeUnit u2 : adminUnits){
 				if(u1.equals(u2)){
 					distances.createEntry(u1.getId(), u2.getId(), rowMinima.get(u1.getId()) / 3 );
 				}
 			}
 		}
 		
-		for(AdministrativeUnit u1 : adminUnits.values()){
+		for(AdministrativeUnit u1 : adminUnits){
 			
-			for(AdministrativeUnit u2 : adminUnits.values()){
+			for(AdministrativeUnit u2 : adminUnits){
 				
-				for(String key : activityTypes){
-					
-					//create one matrix per act type at the destination
-					if(!transitionMatrices.containsKey(key)){
-						transitionMatrices.put(key, new HashMap<>());
-					}
-					
-					for(String mode : modes){
+				if(distances.getEntry(u1.getId(), u2.getId()) != null){
+				
+					for(String key : activityTypes){
 						
-						if(!transitionMatrices.get(key).containsKey(mode)){
-							
-							transitionMatrices.get(key).put(mode, new Matrix(key + "_" + mode, ""));
-						
+						//create one matrix per act type at the destination
+						if(!transitionMatrices.containsKey(key)){
+							transitionMatrices.put(key, new HashMap<>());
 						}
+						
+						for(String mode : modes){
+							
+							if(!transitionMatrices.get(key).containsKey(mode)){
+								
+								transitionMatrices.get(key).put(mode, new Matrix(key + "_" + mode, ""));
+							
+							}
 
-						double proba = Double.NEGATIVE_INFINITY;
-						
-						if(u2.getLanduseGeometries().containsKey(key)){
+							double proba = Double.NEGATIVE_INFINITY;
 							
-							double distance = distances.getEntry(u1.getId(), u2.getId()).getValue();
-							double speed = Modes.getSpeedForMode(mode);
-							double weight = /*u2.getWeightForKey(key) +*/ u2.getLanduseGeometries().get(key).size();
-//							double avgDistance = parser.modeStats.get(mode).getMean();
-							double a = Math.exp((-6d / 3600d) * (distance / speed));
-							proba = weight * a;
+							if(u2.getLanduseGeometries().containsKey(key)){
+								
+								double distance = distances.getEntry(u1.getId(), u2.getId()).getValue();
+								double speed = Modes.getSpeedForMode(mode);
+								double weight = /*u2.getWeightForKey(key) +*/ u2.getLanduseGeometries().get(key).size();
+//								double avgDistance = parser.modeStats.get(mode).getMean();
+								double a = Math.exp((-6d / 3600d) * (distance / speed));
+								proba = weight * a;
+								
+							}
 							
+//							if((mode.equals(TransportMode.walk)) && !u1.equals(u2)){
+//								proba = Double.NEGATIVE_INFINITY;
+//							}
+							
+							transitionMatrices.get(key).get(mode).createEntry(u1.getId(), u2.getId(), proba);
+								
 						}
-						
-//						if((mode.equals(TransportMode.walk)) && !u1.equals(u2)){
-//							proba = Double.NEGATIVE_INFINITY;
-//						}
-						
-						transitionMatrices.get(key).get(mode).createEntry(u1.getId(), u2.getId(), proba);
-							
+					
 					}
 					
 				}

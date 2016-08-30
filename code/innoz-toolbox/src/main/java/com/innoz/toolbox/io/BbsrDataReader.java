@@ -1,14 +1,14 @@
 package com.innoz.toolbox.io;
 
-import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.District;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
-import com.innoz.toolbox.utils.io.AbstractCsvReader;
-
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+
+import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
+import com.innoz.toolbox.utils.data.Tree.Node;
+import com.innoz.toolbox.utils.io.AbstractCsvReader;
 
 public class BbsrDataReader {
 
@@ -42,32 +42,8 @@ public class BbsrDataReader {
 		};
 		
 		reader.read(in);
-		
-		for(District d : geoinformation.getAdminUnits().values()){
 
-			for(String key : d.getAdminUnits().keySet()){
-
-				String subKey = key.substring(0, 5);
-				if(subKey.startsWith("0")) subKey = subKey.substring(1);
-				AdministrativeUnit unit = d.getAdminUnits().get(key);
-				
-				int regionType = this.key2Type.get(subKey);
-				
-				unit.setRegionType(regionType);
-				
-//				geoinformation.getStatesSet().add(unit.getBland());
-				
-				if(!geoinformation.getRegionTypes().containsKey(unit.getRegionType())){
-					
-					geoinformation.getRegionTypes().put(unit.getRegionType(), new HashSet<Integer>());
-					
-				}
-				
-				geoinformation.getRegionTypes().get(unit.getRegionType()).add(this.key2Type.get(subKey));
-				
-			}
-			
-		}
+		process(geoinformation);
 		
 	}
 	
@@ -100,33 +76,31 @@ public class BbsrDataReader {
 		
 		reader.read(file);
 		
-		for(District d : geoinformation.getAdminUnits().values()){
-
-			for(String key : d.getAdminUnits().keySet()){
-
-				String subKey = key.substring(0, 5);
-				if(subKey.startsWith("0")) subKey = subKey.substring(1);
-				AdministrativeUnit unit = d.getAdminUnits().get(key);
+		process(geoinformation);
+		
+	}
+	
+	private void process(Geoinformation geoinformation){
+		
+		for(Node<AdministrativeUnit> node : geoinformation.getAdminUnits()){
+			
+			AdministrativeUnit unit = node.getData();
+			String key = unit.getId();
+			
+			String subKey = key.substring(0, 5);
+			if(subKey.startsWith("0")) subKey = subKey.substring(1);
+			
+			int regionType = this.key2Type.get(subKey);
+			
+			unit.setRegionType(regionType);
+			
+			if(!geoinformation.getRegionTypes().containsKey(unit.getRegionType())){
 				
-				if(this.key2Type.containsKey(subKey)){
-
-					int regionType = this.key2Type.get(subKey);
-					
-					unit.setRegionType(regionType);
-					
-//					geoinformation.getStatesSet().add(unit.getBland());
-					
-					if(!geoinformation.getRegionTypes().containsKey(unit.getRegionType())){
-					
-						geoinformation.getRegionTypes().put(unit.getRegionType(), new HashSet<Integer>());
-						
-					}
-					
-					geoinformation.getRegionTypes().get(unit.getRegionType()).add(this.key2Type.get(subKey));
-					
-				}
+				geoinformation.getRegionTypes().put(unit.getRegionType(), new HashSet<Integer>());
 				
 			}
+			
+			geoinformation.getRegionTypes().get(unit.getRegionType()).add(this.key2Type.get(subKey));
 			
 		}
 		

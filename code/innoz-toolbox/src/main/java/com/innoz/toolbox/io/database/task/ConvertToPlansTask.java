@@ -155,6 +155,7 @@ public class ConvertToPlansTask implements SurveyDataTask {
 									warnCounterLicense++;
 								} else if(warnCounterLicense == 5){
 									log.info("Further occurences of this message are suppressed.");
+									warnCounterLicense++;
 								}
 								person.setCarAvailable(true);
 								person.setHasLicense(true);
