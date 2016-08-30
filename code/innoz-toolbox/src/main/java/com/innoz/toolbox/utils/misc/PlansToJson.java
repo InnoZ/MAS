@@ -54,16 +54,14 @@ public class PlansToJson {
 	
 		String filebase = "/home/dhosse/dataForDatahubVis/";
 		try {
-			PlansToJson.run(filebase + "output_plans.xml.gz", filebase + "output_network.xml.gz");
+			PlansToJson.run(filebase + "output_plans.xml.gz", filebase + "output_network.xml.gz", 0.05);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 	}
 	
-	public static void run(String plansFile, String networkFile) throws IOException{
-		
-		double d = 0.025d;
+	public static void run(String plansFile, String networkFile, double d) throws IOException{
 		
 		Random random = MatsimRandom.getLocalInstance();
 		
