@@ -7,6 +7,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.innoz.toolbox.config.Configuration.DayType;
 import com.innoz.toolbox.io.SurveyConstants;
@@ -15,19 +16,23 @@ import com.innoz.toolbox.io.database.handler.PersonAgeHandler;
 import com.innoz.toolbox.io.database.handler.PersonCarAvailabilityHandler;
 import com.innoz.toolbox.io.database.handler.PersonEmploymentHandler;
 import com.innoz.toolbox.io.database.handler.PersonIdHandler;
+import com.innoz.toolbox.io.database.handler.PersonIsMobileHandler;
 import com.innoz.toolbox.io.database.handler.PersonLicenseHandler;
 import com.innoz.toolbox.io.database.handler.PersonSexHandler;
 import com.innoz.toolbox.io.database.handler.PersonWeightHandler;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
+import com.innoz.toolbox.utils.data.Tree.Node;
 
 public class ReadPersonDatabaseTask extends DatabaseTask {
 	
 	private final DayType dayType;
 
-	public ReadPersonDatabaseTask(SurveyConstants constants, DayType dayType) {
+	public ReadPersonDatabaseTask(SurveyConstants constants, Geoinformation geoinformation, Set<String> ids, DayType dayType) {
 		
-		super(constants);
+		super(constants, geoinformation, ids);
 		this.dayType = dayType;
 		
 		this.handlers = new HashSet<>();
@@ -38,6 +43,7 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 		this.handlers.add(new PersonLicenseHandler());
 		this.handlers.add(new PersonSexHandler());
 		this.handlers.add(new PersonWeightHandler());
+		this.handlers.add(new PersonIsMobileHandler());
 	
 	}
 
@@ -54,10 +60,48 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 		
 		q = "select * from " + table;
 		
+		if(container.getHouseholds() == null){
+			
+			if(surveyType.equals("mid")){
+				
+				q +=  " where ";
+				
+				int cntOut = 0;
+				Set<Integer> knownRegionTypes = new HashSet<>();
+
+				for(Node<AdministrativeUnit> node: geoinformation.getAdminUnits()){
+					
+					AdministrativeUnit entry = node.getData();
+					
+					if(ids.contains(entry.getId().substring(0, 5))&&!knownRegionTypes.contains(entry.getRegionType())){
+					
+						cntOut++;
+						
+						q += SurveyConstants.regionType(surveyType) + " = " + entry.getRegionType();
+						knownRegionTypes.add(entry.getRegionType());
+
+						if(cntOut < ids.size()){
+
+							q += " or ";
+							
+						}
+						
+					}
+					
+				}
+				
+			} else {
+				
+				q += " where st_code=44"; //Osnabrück 
+				
+			}
+			
+		}
+		
 		if(dayType.equals(DayType.weekday)){
-			q += " where " + SurveyConstants.dayOfTheWeek(surveyType) + " < 6";
+			q += " and " + SurveyConstants.dayOfTheWeek(surveyType) + " < 6";
 		} else if(dayType.equals(DayType.weekend)){
-			q += " where " + SurveyConstants.dayOfTheWeek(surveyType) + " > 5";
+			q += " and " + SurveyConstants.dayOfTheWeek(surveyType) + " > 5";
 		}
 		
 		q += ";";
@@ -65,10 +109,15 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 		resultSet = statement.executeQuery(q);
 		
 		while(resultSet.next()){
-			
+
+			boolean contained = true;
 			String hhId = resultSet.getString(SurveyConstants.householdId(surveyType));
 			
-			if(container.getHouseholds().containsKey(hhId)){
+			if(container.getHouseholds() != null){
+				contained = container.getHouseholds().containsKey(hhId);
+			}
+			
+			if(contained){
 
 				Map<String, String> attributes = new HashMap<>();
 				attributes.put(SurveyConstants.personId(surveyType), hhId + resultSet.getString(SurveyConstants.personId(surveyType)));
@@ -78,6 +127,7 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 				attributes.put(SurveyConstants.personSex(surveyType), resultSet.getString(SurveyConstants.personSex(surveyType)));
 				attributes.put(SurveyConstants.personAge(surveyType), resultSet.getString(SurveyConstants.personAge(surveyType)));
 				attributes.put(SurveyConstants.personEmployment(surveyType), resultSet.getString(SurveyConstants.personEmployment(surveyType)));
+				attributes.put(SurveyConstants.mobile(surveyType), resultSet.getString(SurveyConstants.mobile(surveyType)));
 				
 				SurveyPerson person = new SurveyPerson();
 				

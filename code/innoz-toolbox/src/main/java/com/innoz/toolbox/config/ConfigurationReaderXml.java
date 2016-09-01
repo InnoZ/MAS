@@ -161,9 +161,12 @@ public class ConfigurationReaderXml extends DefaultHandler {
 		String id = atts.getValue("id");
 		
 		String nHH = atts.getValue(Configuration.NUMBER_OF_HH);
+		String nP = atts.getValue(Configuration.NUMBER_OF_P);
 		if(nHH == null) nHH = "0";
+		if(nP == null) nP = "0";
 		
 		int hh = Integer.parseInt(nHH);
+		int p = Integer.parseInt(nP);
 		
 		String levelOfDetail = atts.getValue(Configuration.LOD_NETWORK);
 		if(levelOfDetail == null) levelOfDetail = "6";
@@ -194,8 +197,8 @@ public class ConfigurationReaderXml extends DefaultHandler {
 				
 			}
 			
-			this.configuration.adminUnits.put(id, new AdminUnitEntry(s, hh, lod));
-			
+			this.configuration.adminUnits.put(id, new AdminUnitEntry(s, hh, p, lod));
+		
 		}
 		
 	}

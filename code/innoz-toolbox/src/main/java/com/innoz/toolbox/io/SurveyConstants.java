@@ -46,6 +46,8 @@ public final class SurveyConstants {
 		WSOURCE("w01", "v_start_lage"),
 		WSINK("w13", "v_ziel_lage"),
 		
+		MOBILE("mobil", ""),
+		
 		VID("vmid", null),
 		VFUEL("h048", null),
 		VSEG("seg_kba", null);
@@ -327,6 +329,12 @@ public final class SurveyConstants {
 	public static String getSexMale(){
 		
 		return PSEX_MALE;
+		
+	}
+	
+	public static String mobile(String namespace){
+		
+		return SurveyConstant.MOBILE.getName(namespace);
 		
 	}
 	

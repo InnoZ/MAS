@@ -129,8 +129,17 @@ public class SurveyDataContainer {
 		
 	}
 	
+	boolean b = false;
+	
 	public double getSumOfPersonWeights(){
 		
+		if(!b){
+			b = true;
+			this.sumOfPersonWeights = 0.0;
+			for(SurveyPerson p : this.persons.values()){
+				this.sumOfPersonWeights += p.getWeight();
+			}
+		}
 		return this.sumOfPersonWeights;
 		
 	}

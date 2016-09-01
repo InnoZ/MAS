@@ -15,7 +15,7 @@ public class PersonRemovalTask implements DataContainerTask {
 		
 		for(SurveyPerson person : container.getPersons().values()){
 			
-			if(person.getLogbook().isEmpty()){
+			if(person.getLogbook().isEmpty() && person.isMobile()){
 				
 				toRemove.add(person.getId());
 				

@@ -164,6 +164,7 @@ public class DatabaseReader {
 						AdministrativeUnit unit = d.getData();
 						
 						unit.setNumberOfHouseholds(entry.getNumberOfHouseholds());
+						unit.setNumberOfInhabitants(entry.getNumberOfInhabitants());
 						
 						for(Node<AdministrativeUnit> au : d.getChildren()){
 							

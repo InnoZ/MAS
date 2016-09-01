@@ -104,6 +104,10 @@ public class AdministrativeUnit {
 		return this.nHouseholds;
 	}
 	
+	public void setNumberOfInhabitants(int n){
+		this.nInhabitants = n;
+	}
+	
 	public Integer getNetworkDetail(){
 		return this.networkDetail;
 	}

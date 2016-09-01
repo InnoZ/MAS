@@ -38,6 +38,8 @@ public class SurveyPerson implements SurveyObject {
 	private List<SurveyPlan> plans;
 	
 	private Map<Integer, Logbook> day2logbook;
+	
+	private boolean isMobile;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	public SurveyPerson(){
@@ -286,6 +288,14 @@ public class SurveyPerson implements SurveyObject {
 	
 	public Map<Integer,Logbook> getLogbook(){
 		return this.day2logbook;
+	}
+	
+	public boolean isMobile(){
+		return this.isMobile;
+	}
+	
+	public void setMobile(boolean mobile){
+		this.isMobile = mobile;
 	}
 	
 }

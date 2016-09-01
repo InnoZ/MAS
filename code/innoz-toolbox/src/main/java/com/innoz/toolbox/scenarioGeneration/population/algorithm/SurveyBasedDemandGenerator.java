@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -225,6 +224,103 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		}
 		
 	}
+	
+	/**
+	 * 
+	 * Creates an initial demand on person level. This means, it's not more detailed than {@link #createHouseholds(Configuration, Scenario, MidDatabaseParser)} 
+	 * but completely ignores households and locates every person individually in the survey area.
+	 * 
+	 * @param configuration The scenario generation configuration file.
+	 * @param scenario The MATSim scenario.
+	 * @param parser The survey parser.
+	 */
+	private void createPersons(Configuration configuration, SurveyDataContainer container,
+			String ids){
+		
+		// Get the MATSim population and initialize person attributes
+		Population population = scenario.getPopulation();
+		ObjectAttributes personAttributes = new ObjectAttributes();
+		scenario.addScenarioElement(com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.PERSON_ATTRIBUTES,
+				personAttributes);
+		
+		// TODO this is not final and most likely won't work like that /dhosse, 05/16
+		
+		for(String s : ids.split(",")){
+
+			AdministrativeUnit d = this.geoinformation.getAdminUnit(s).getData();
+			
+			for(int i = 0; i < d.getNumberOfInhabitants() * configuration.getScaleFactor(); i++){
+				
+				this.currentHomeCell = chooseAdminUnit(d, ActivityTypes.HOME);
+				
+				// Choose a template person (weighted, same method as above)
+				SurveyPerson template = null;
+				
+				double accumulatedWeight = 0.;
+				double rand = this.random.nextDouble() * container.getSumOfPersonWeights();
+				
+				for(String pId : container.getPersons().keySet()){
+					
+					SurveyPerson p = container.getPersons().get(pId);
+					
+					if(p != null){
+						
+						accumulatedWeight += p.getWeight();
+						if(accumulatedWeight >= rand){
+							
+							template = p;
+							break;
+							
+						}
+						
+					}
+					
+				}
+				
+				// Set global home location for the entire household
+				Coord homeLocation = null;
+				ActivityFacility homeFacility = null;
+	
+				// Go through all residential areas of the home cell and randomly choose one of them
+				if(this.currentHomeCell.getLanduseGeometries().containsKey(ActivityTypes.HOME)){
+					
+					if(this.geoinformation.getLanduseType().equals(ActivityLocations.facilities)){
+						
+						homeFacility = chooseActivityFacilityInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
+						homeLocation = transformation.transform(homeFacility.getCoord());
+						
+					} else {
+						
+						homeLocation = chooseActivityCoordInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
+						
+					}
+					
+				} else {
+				
+					// If no residential areas exist within the home cell, shoot a random coordinate
+					homeLocation = this.transformation.transform(GeometryUtils.shoot(
+							this.currentHomeCell.getGeometry(), this.random));
+					
+				}
+				
+				String personId = template.getId();
+				SurveyPerson templatePerson = container.getPersons().get(personId);
+				
+				Person person = createPerson(configuration, templatePerson, population, personAttributes, this.random.nextDouble(),
+						population.getPersons().size(), homeLocation, homeFacility, container, 0.0);
+				
+				// If the resulting MATSim person is not null, add it
+				if(person != null){
+					
+					population.addPerson(person);
+					
+				}
+	
+			}
+
+		}
+		
+	}
 
 	private void createSurveyVehicles(SurveyDataContainer container, SurveyHousehold template,
 			Household household) {
@@ -258,54 +354,6 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 	}
 	
-	/**
-	 * 
-	 * Creates an initial demand on person level. This means, it's not more detailed than {@link #createHouseholds(Configuration, Scenario, MidDatabaseParser)} 
-	 * but completely ignores households and locates every person individually in the survey area.
-	 * 
-	 * @param configuration The scenario generation configuration file.
-	 * @param scenario The MATSim scenario.
-	 * @param parser The survey parser.
-	 */
-	private void createPersons(Configuration configuration, SurveyDataContainer container,
-			String ids){
-		
-		// Get the MATSim population and initialize person attributes
-		Population population = scenario.getPopulation();
-		ObjectAttributes personAttributes = new ObjectAttributes();
-		scenario.addScenarioElement(com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.PERSON_ATTRIBUTES,
-				personAttributes);
-		
-		// TODO this is not final and most likely won't work like that /dhosse, 05/16
-		for(Node<AdministrativeUnit> d : this.geoinformation.getAdminUnits()){
-
-			for(Node<AdministrativeUnit> node : d.getChildren()){
-				
-				AdministrativeUnit au = node.getData();
-				
-				double personalRandom = this.random.nextDouble();
-				
-				Map<String,SurveyPerson> templatePersons = container.getPersons();
-				SurveyPerson personTemplate = null;
-				
-				personTemplate = com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.getTemplate(templatePersons,
-						personalRandom * com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.getTotalWeight(
-								templatePersons.values()));
-				
-				//TODO: number of inhabitants for admin units
-				for(int i = 0; i < au.getNumberOfInhabitants() * configuration.getScaleFactor(); i++){
-					
-					Coord homeCoord = chooseActivityCoordInAdminUnit(au, ActivityTypes.HOME);
-					population.addPerson(createPerson(configuration, personTemplate, population, personAttributes, personalRandom, i, homeCoord, null, container, 0d));
-					
-				}
-				
-			}
-			
-		}
-		
-	}
-
 	/**
 	 * 
 	 * Creates a MATSim person with an initial daily plan from a template taken from survey data.

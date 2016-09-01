@@ -25,9 +25,17 @@ public class TaskRunner {
 		
 		Set<Logbook> toRemove;
 		
+		Set<SurveyPerson> removePersons = new HashSet<>();
+		
+		int nEmpty = 0;
+		
 		for(SurveyPerson person : collection){
 			
+			int size = new Integer(person.getLogbook().size()).intValue();
+			
 			toRemove = new HashSet<>();
+			
+			if(person.getLogbook().values().isEmpty()) nEmpty++;
 			
 			for(Logbook logbook : person.getLogbook().values()){
 				
@@ -43,6 +51,20 @@ public class TaskRunner {
 				person.getLogbook().values().remove(logbook);
 				
 			}
+			
+			if(person.getLogbook().size() < size){
+				
+				removePersons.add(person);
+				
+			}
+			
+		}
+		
+		System.out.println(nEmpty);
+		
+		for(SurveyPerson person : removePersons){
+			
+			collection.remove(person);
 			
 		}
 		

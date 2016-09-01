@@ -46,8 +46,9 @@ public class RunnerActionListener implements ActionListener, Runnable {
 		
 			int nHouseholds = entry.getValue().equals("") ? 0 : Integer.parseInt(entry.getValue());
 			
+			//TODO #Persons is hard-coded for the time being, needs to be put into a db table
 			this.mainFrame.getConfiguration().getAdminUnitEntries().put(entry.getKey(), new AdminUnitEntry(entry.getKey(),
-					nHouseholds, null));
+					nHouseholds, 0, null));
 			
 			surveyAreaIds.append(entry.getKey() + ",");
 		
@@ -62,8 +63,9 @@ public class RunnerActionListener implements ActionListener, Runnable {
 			
 			int nHouseholds = entry.getValue().equals("") ? 0 : Integer.parseInt(entry.getValue());
 			
+			//TODO #Persons is hard-coded for the time being, needs to be put into a db table
 			this.mainFrame.getConfiguration().getAdminUnitEntries().put(entry.getKey(), new AdminUnitEntry(entry.getKey(),
-					nHouseholds, null));
+					nHouseholds, 0, null));
 			
 			vicinityIds.append(entry.getKey());
 		}

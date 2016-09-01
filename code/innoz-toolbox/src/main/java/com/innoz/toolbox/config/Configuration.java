@@ -44,6 +44,7 @@ public final class Configuration {
 	public static final String POPULATION_TYPE = "populationType";
 	
 	public static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
+	public static final String NUMBER_OF_P = "numberOfInhabitants";
 	public static final String LOD_NETWORK = "networkDetail";
 	
 	public static final String SUBPOPULATIONS_TYPE = "subpopulationsType";
@@ -559,6 +560,7 @@ public final class Configuration {
 		
 		String id;
 		int numberOfHouseholds;
+		int numberOfInhabitants;
 		Integer lodNetwork;
 		
 		/**
@@ -569,10 +571,11 @@ public final class Configuration {
 		 * @param nHouseholds The number of households contained.
 		 * @param lod The level of detail the network should have inside the administrative unit's geometry.
 		 */
-		public AdminUnitEntry(String id, int nHouseholds, Integer lod){
+		public AdminUnitEntry(String id, int nHouseholds, int nInhabitants, Integer lod){
 			
 			this.id = id;
 			this.numberOfHouseholds = nHouseholds;
+			this.numberOfInhabitants = nInhabitants;
 			this.lodNetwork = lod;
 			
 		}
@@ -595,6 +598,10 @@ public final class Configuration {
 		 */
 		public int getNumberOfHouseholds(){
 			return this.numberOfHouseholds;
+		}
+		
+		public int getNumberOfInhabitants(){
+			return this.numberOfInhabitants;
 		}
 		
 		/**

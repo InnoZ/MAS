@@ -13,6 +13,7 @@ import com.innoz.toolbox.config.Configuration.VehicleSource;
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.task.ConvertToPlansTask;
 import com.innoz.toolbox.io.database.task.HouseholdRemovalTask;
+import com.innoz.toolbox.io.database.task.PersonRemovalTask;
 import com.innoz.toolbox.io.database.task.ReadHouseholdDatabaseTask;
 import com.innoz.toolbox.io.database.task.ReadPersonDatabaseTask;
 import com.innoz.toolbox.io.database.task.ReadWayDatabaseTask;
@@ -71,13 +72,13 @@ public class SurveyDatabaseParserV2 {
 				
 				log.info("Creating survey persons...");
 				
-				new ReadPersonDatabaseTask(constants, configuration.getUsedDayTypes()).parse(connection, container, configuration.getSurveyType().name());
+				new ReadPersonDatabaseTask(constants, geoinformation, ids, configuration.getUsedDayTypes()).parse(connection, container, configuration.getSurveyType().name());
 				
 				log.info("Read " + container.getPersons().size() + " persons...");
 				
 				log.info("Creating survey ways...");
 
-				new ReadWayDatabaseTask(constants, configuration.getUsedDayTypes()).parse(connection, container, configuration.getSurveyType().name());
+				new ReadWayDatabaseTask(constants, geoinformation, ids, configuration.getUsedDayTypes()).parse(connection, container, configuration.getSurveyType().name());
 				
 				if(configuration.getVehicleSource().equals(VehicleSource.survey) && configuration.getSurveyType().equals("mid")){
 				
@@ -127,8 +128,14 @@ public class SurveyDatabaseParserV2 {
 		TaskRunner.exec(new ValidateMissingTravelTimes(), container.getPersons().values());
 		TaskRunner.exec(new ValidateNegativeTravelTimes(), container.getPersons().values());
 		TaskRunner.exec(new ValidateOverlappingStages(), container.getPersons().values());
-//		TaskRunner.exec(new PersonRemovalTask(), container);
-		TaskRunner.exec(new HouseholdRemovalTask(), container);
+		TaskRunner.exec(new PersonRemovalTask(), container);
+		
+		if(container.getHouseholds() != null){
+			
+			TaskRunner.exec(new HouseholdRemovalTask(), container);
+			
+		}
+		
 		new ConvertToPlansTask().run(container);
 		new ResolveRoundTripsTask().run(container);
 		

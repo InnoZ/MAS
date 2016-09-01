@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.innoz.toolbox.config.Configuration.DayType;
 import com.innoz.toolbox.io.SurveyConstants;
@@ -22,6 +23,7 @@ import com.innoz.toolbox.io.database.handler.LegPurposeHandler;
 import com.innoz.toolbox.io.database.handler.LegTravelTimeHandler;
 import com.innoz.toolbox.io.database.handler.Logbook;
 import com.innoz.toolbox.io.database.handler.SurveyStage;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 
@@ -29,9 +31,9 @@ public class ReadWayDatabaseTask extends DatabaseTask {
 
 	private final DayType dayType;
 	
-	public ReadWayDatabaseTask(SurveyConstants constants, DayType dayType){
+	public ReadWayDatabaseTask(SurveyConstants constants, Geoinformation geoinformation, Set<String> ids, DayType dayType){
 		
-		super(constants);
+		super(constants, geoinformation, ids);
 		this.dayType = dayType;
 		
 		this.handlers = new HashSet<>();
@@ -75,9 +77,17 @@ public class ReadWayDatabaseTask extends DatabaseTask {
 		while(resultSet.next()){
 			
 			String householdId = resultSet.getString(SurveyConstants.householdId(surveyType));
+			boolean contained = true;
+			
+			if(container.getHouseholds() != null){
+				
+				contained = container.getHouseholds().containsKey(householdId);
+				
+			}
+			
 			String personId = resultSet.getString(SurveyConstants.personId(surveyType));
 			
-			if(container.getHouseholds().containsKey(householdId) && container.getPersons().containsKey(householdId + personId)){
+			if(contained && container.getPersons().containsKey(householdId + personId)){
 
 				Map<String, String> attributes = new HashMap<>();
 				

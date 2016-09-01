@@ -22,14 +22,9 @@ import com.innoz.toolbox.utils.data.Tree.Node;
 
 public class ReadHouseholdDatabaseTask extends DatabaseTask {
 	
-	private Geoinformation geoinformation;
-	private Set<String> ids;
-
 	public ReadHouseholdDatabaseTask(SurveyConstants constants, Geoinformation geoinformation, Set<String> ids) {
 
-		super(constants);
-		this.geoinformation = geoinformation;
-		this.ids = ids;
+		super(constants, geoinformation, ids);
 		
 		this.handlers = new HashSet<>();
 		this.handlers.add(new HouseholdIdHandler());
@@ -75,20 +70,6 @@ public class ReadHouseholdDatabaseTask extends DatabaseTask {
 				}
 				
 			}
-			
-//			for(Entry<Integer, Set<Integer>> entry : geoinformation.getRegionTypes().entrySet()){
-//
-//				cntOut++;
-//				
-//				q += SurveyConstants.regionType(surveyType) + " = " + entry.getKey();
-//
-//				if(cntOut < geoinformation.getRegionTypes().size()){
-//
-//					q += " or ";
-//					
-//				}
-//				
-//			}
 			
 		} else {
 			
