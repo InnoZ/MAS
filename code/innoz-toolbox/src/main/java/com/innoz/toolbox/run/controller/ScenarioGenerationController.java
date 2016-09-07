@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.core.config.Config;
@@ -31,10 +33,10 @@ import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.ActivityLocations;
 import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.config.Configuration.PopulationType;
-import com.innoz.toolbox.config.Configuration.VehicleSource;
 import com.innoz.toolbox.io.BbsrDataReader;
 import com.innoz.toolbox.io.database.DatabaseReader;
 import com.innoz.toolbox.io.database.DatabaseUpdater;
+import com.innoz.toolbox.scenarioGeneration.carsharing.CreateCarsharingVehicles;
 import com.innoz.toolbox.scenarioGeneration.config.InitialConfigCreator;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.network.NetworkCreatorFromPsql;
@@ -56,6 +58,7 @@ public class ScenarioGenerationController extends DefaultController {
 		try {
 			
 			double t0 = System.currentTimeMillis();
+			Logger.getLogger(org.matsim.matrices.Matrix.class).setLevel(Level.OFF);
 			
 			// Dump scenario generation settings on the console and create the output directory
 			new File(configuration.getOutputDirectory()).mkdirs();
@@ -85,6 +88,8 @@ public class ScenarioGenerationController extends DefaultController {
 			nc.setCleanNetwork(true);
 			nc.setScaleMaxSpeed(true);
 			nc.create(dbReader);
+
+			CreateCarsharingVehicles.run(configuration, scenario);
 			
 			// Create a MATSim population
 			new PopulationCreator(geoinformation).run(configuration, scenario);
@@ -114,12 +119,8 @@ public class ScenarioGenerationController extends DefaultController {
 					
 				}
 				
-				if(configuration.getVehicleSource().equals(VehicleSource.survey)){
-	
-					new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration
-							.getOutputDirectory() + "vehicles.xml.gz");
-					
-				}
+				new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration
+						.getOutputDirectory() + "vehicles.xml.gz");
 				
 			}
 			
