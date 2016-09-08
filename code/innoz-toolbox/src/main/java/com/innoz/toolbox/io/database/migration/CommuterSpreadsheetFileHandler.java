@@ -1,15 +1,8 @@
 package com.innoz.toolbox.io.database.migration;
 
-import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.ConfigurationUtils;
-import com.innoz.toolbox.config.SshConnector;
-import com.innoz.toolbox.io.database.DatabaseConstants;
-import com.innoz.toolbox.utils.TextUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashSet;
@@ -23,6 +16,12 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
+import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.config.ConfigurationUtils;
+import com.innoz.toolbox.config.PsqlAdapter;
+import com.innoz.toolbox.config.SshConnector;
+import com.innoz.toolbox.io.database.DatabaseConstants;
+import com.innoz.toolbox.utils.TextUtils;
 import com.jcraft.jsch.JSchException;
 
 /**
@@ -70,9 +69,7 @@ public class CommuterSpreadsheetFileHandler {
 				CommuterSpreadsheetFileHandler handler = new CommuterSpreadsheetFileHandler();
 				
 				// Instantiate a postgresql driver and establish a connection to the remote database
-				Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
-				handler.connection = DriverManager.getConnection(DatabaseConstants.PSQL_URL + configuration.getLocalPort() +
-						"/" + DatabaseConstants.SURVEYS_DB, configuration.getDatabaseUsername(), configuration.getDatabasePassword());
+				handler.connection = PsqlAdapter.createConnection(configuration, DatabaseConstants.SURVEYS_DB);
 				
 				// If the connection could be established, proceed
 				if(handler.connection != null){

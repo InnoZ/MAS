@@ -1,7 +1,6 @@
 package com.innoz.toolbox.io.database;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -33,6 +32,7 @@ import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.ActivityLocations;
 import com.innoz.toolbox.config.Configuration.AdminUnitEntry;
 import com.innoz.toolbox.config.Configuration.PopulationSource;
+import com.innoz.toolbox.config.PsqlAdapter;
 import com.innoz.toolbox.io.database.datasets.OsmPointDataset;
 import com.innoz.toolbox.io.database.datasets.OsmPolygonDataset;
 import com.innoz.toolbox.run.parallelization.BuildingThread;
@@ -130,10 +130,7 @@ public class DatabaseReader {
 		try {
 			
 			// Create a postgresql database connection
-			Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
-			Connection connection = DriverManager.getConnection(DatabaseConstants.PSQL_URL +
-					configuration.getLocalPort() + "/" + DatabaseConstants.GEODATA_DB, configuration.getDatabaseUsername(),
-					configuration.getDatabasePassword());
+			Connection connection = PsqlAdapter.createConnection(configuration, DatabaseConstants.GEODATA_DB);
 			
 			if(connection != null){
 
@@ -655,9 +652,7 @@ public class DatabaseReader {
 		Map<Coordinate, OsmNodeEntry> coordinates2Nodes = new HashMap<>();
 		
 		// Connect to the geodata database
-		Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
-		Connection connection = DriverManager.getConnection(DatabaseConstants.PSQL_URL + configuration.getLocalPort() + "/"
-				+ DatabaseConstants.GEODATA_DB, configuration.getDatabaseUsername(), configuration.getDatabasePassword());
+		Connection connection = PsqlAdapter.createConnection(configuration, DatabaseConstants.GEODATA_DB);
 	
 		if(connection != null){
 

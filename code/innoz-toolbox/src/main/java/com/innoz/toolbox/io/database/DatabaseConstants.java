@@ -9,11 +9,6 @@ package com.innoz.toolbox.io.database;
  */
 public final class DatabaseConstants {
 
-	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
-	public static final String PSQL_DRIVER = "org.postgresql.Driver";
-	public static final String PSQL_URL = "jdbc:postgresql://localhost:";
-	/////////////////////////////////////////////////////////////////////////////////////////
-	
 	//DATABASES//////////////////////////////////////////////////////////////////////////////
 	public static final String DEFAULT_USER = "postgres";
 	public static final String DEFAULT_PASSWORD = "postgres";

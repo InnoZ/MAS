@@ -1,7 +1,6 @@
 package com.innoz.toolbox.io.database;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -11,6 +10,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.config.PsqlAdapter;
 import com.innoz.toolbox.scenarioGeneration.population.commuters.CommuterDataElement;
 
 public class CommuterDatabaseParser {
@@ -27,9 +27,7 @@ public class CommuterDatabaseParser {
 			
 			this.commuterData = new HashSet<CommuterDataElement> ();
 			
-			Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
-			Connection connection = DriverManager.getConnection(DatabaseConstants.PSQL_URL + configuration.getLocalPort() +
-					"/" + DatabaseConstants.SURVEYS_DB, configuration.getDatabaseUsername(), configuration.getDatabasePassword());
+			Connection connection = PsqlAdapter.createConnection(configuration, DatabaseConstants.SURVEYS_DB);
 		
 			if(connection != null){
 				

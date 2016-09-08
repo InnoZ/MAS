@@ -1,7 +1,6 @@
 package com.innoz.toolbox.io.database;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Set;
 
@@ -10,6 +9,7 @@ import org.apache.log4j.Logger;
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.config.Configuration.VehicleSource;
+import com.innoz.toolbox.config.PsqlAdapter;
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.task.ConvertToPlansTask;
 import com.innoz.toolbox.io.database.task.HouseholdRemovalTask;
@@ -51,10 +51,7 @@ public class SurveyDatabaseParserV2 {
 			log.info("Parsing surveys database to create a synthetic population");
 			
 			// Instantiate a new postgreSQL driver and establish a connection to the mobility database
-			Class.forName(DatabaseConstants.PSQL_DRIVER).newInstance();
-			Connection connection = DriverManager.getConnection(DatabaseConstants.PSQL_URL +
-					configuration.getLocalPort() + "/" + DatabaseConstants.SURVEYS_DB, 
-					configuration.getDatabaseUsername(), configuration.getDatabasePassword());
+			Connection connection = PsqlAdapter.createConnection(configuration, DatabaseConstants.SURVEYS_DB);
 		
 			if(connection != null){
 				
