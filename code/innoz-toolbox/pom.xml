@@ -149,7 +149,7 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>carsharing</artifactId>
-			<version>0.9.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
