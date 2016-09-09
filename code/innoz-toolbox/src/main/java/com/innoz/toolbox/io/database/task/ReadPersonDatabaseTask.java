@@ -60,7 +60,7 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 		
 		q = "select * from " + table;
 		
-		if(container.getHouseholds() == null){
+//		if(container.getHouseholds() == null){
 			
 			if(surveyType.equals("mid")){
 				
@@ -96,7 +96,7 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 				
 			}
 			
-		}
+//		}
 		
 		if(dayType.equals(DayType.weekday)){
 			q += " and " + SurveyConstants.dayOfTheWeek(surveyType) + " < 6";
