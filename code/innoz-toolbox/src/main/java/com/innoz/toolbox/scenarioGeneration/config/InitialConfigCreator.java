@@ -15,6 +15,15 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams;
 import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
 
+/**
+ * 
+ * Creates a MATSim config file. The input file paths are set to the output directory set in the 
+ * {@link com.innoz.toolbox.config.Configuration}. The most important simulation parameters are set
+ * to default values that should work for the start of a model calibration.
+ * 
+ * @author dhosse
+ *
+ */
 public class InitialConfigCreator {
 	
 	public static Config create(final Configuration configuration){
@@ -28,6 +37,7 @@ public class InitialConfigCreator {
 		// Plans config group
 		config.plans().setInputFile(configuration.getOutputDirectory() + "plans.xml.gz");
 		
+		// If the population was created somewhat sophisticated (i.e. from survey data), dump the persons' attributes
 		if(configuration.getPopulationSource().equals(PopulationSource.survey)){
 			
 			config.plans().setInputPersonAttributeFile(configuration.getOutputDirectory() + "personAttributes.xml.gz");
@@ -43,17 +53,9 @@ public class InitialConfigCreator {
 			
 		}
 
-//		if(configuration.getSubpopulationsType().equals(Subpopulations.mobility_attitude)){
-//			
-//			MobilityAttitudeGroups.addScoringParameterSets(config);
-//			
-//		} else {
+		// Add activity types to the scoring parameters
+		addBasicActivityParams(config);
 			
-			// Add activity types to the scoring parameters
-			addBasicActivityParams(config);
-			
-//		}
-		
 		// Add mode parameters
 		addBasicModeParams(config);
 		
@@ -72,7 +74,13 @@ public class InitialConfigCreator {
 		return config;
 		
 	}
-	
+
+	/**
+	 * 
+	 * Creates and adds default activity parameters for commonly used main activity types.
+	 * 
+	 * @param config
+	 */
 	private static void addBasicActivityParams(Config config){
 
 		ActivityParams education = new ActivityParams(ActivityTypes.EDUCATION);
@@ -110,7 +118,13 @@ public class InitialConfigCreator {
 		config.planCalcScore().addActivityParams(kindergarten);
 		
 	}
-	
+
+	/**
+	 * 
+	 * Creates and adds default mode parameters for the main modes.
+	 * 
+	 * @param config
+	 */
 	private static void addBasicModeParams(Config config){
 		
 		{
