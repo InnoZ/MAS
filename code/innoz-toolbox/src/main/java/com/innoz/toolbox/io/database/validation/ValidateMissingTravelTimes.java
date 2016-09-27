@@ -13,7 +13,7 @@ public class ValidateMissingTravelTimes implements Validator {
 			String start = stage.getStartTime();
 			String end = stage.getEndTime();
 			
-			if(start == null || end == null){
+			if(start == null || end == null || start.equals(end)){
 				logbook.setDelete(true);
 				return false;
 			}
