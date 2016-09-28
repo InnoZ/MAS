@@ -81,9 +81,10 @@ public class Runner {
 							
 							serverConnection = SshConnector.connectShell(c, reader);
 							reader.setPrompt("> ");
-							SshConnector.setDbUserData(c, reader);
 							
 						}
+						
+						SshConnector.setDbUserData(c, reader);
 						
 						reader.setPrompt("> ");
 						
