@@ -12,15 +12,15 @@ public class LegTravelTimeHandler implements DefaultHandler {
 		
 		SurveyStage stage = (SurveyStage)obj;
 		
-		int time = calcSeconds(attributes, true, surveyType);
-		stage.setStartTime(Integer.toString(time));
+		double time = calcSeconds(attributes, true, surveyType);
+		stage.setStartTime(Double.toString(time));
 		
 		time = calcSeconds(attributes, false, surveyType);
-		stage.setEndTime(Integer.toString(time));
+		stage.setEndTime(Double.toString(time));
 
 	}
 	
-	private int calcSeconds(Map<String, String> attributes, boolean mode, String surveyType) {
+	private double calcSeconds(Map<String, String> attributes, boolean mode, String surveyType) {
 		
 		String hKey = SurveyConstants.wayArrivalHour(surveyType);
 		String mKey = SurveyConstants.wayArrivalMinute(surveyType);
@@ -42,7 +42,7 @@ public class LegTravelTimeHandler implements DefaultHandler {
 			time += 86400;
 		}
 
-		return (int)time;
+		return time;
 		
 	}
 

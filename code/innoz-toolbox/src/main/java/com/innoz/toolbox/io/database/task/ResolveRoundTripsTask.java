@@ -35,24 +35,24 @@ public class ResolveRoundTripsTask implements SurveyDataTask {
 
 						if(stage.getDestination().equals("ROUND_TRIP")){
 							
-							int start = Integer.parseInt(stage.getStartTime());
-							int end = Integer.parseInt(stage.getEndTime());
-							int duration = end - start;
+							double start = Double.parseDouble(stage.getStartTime());
+							double end = Double.parseDouble(stage.getEndTime());
+							int duration = (int)(end - start);
 							double distance = Double.parseDouble(stage.getDistance());
 							
 							SurveyStage st2 = new SurveyStage();
 							st2.setDestination("HOME");
 							st2.setPurpose(stage.getPurpose());
 							st2.setDistance(Double.toString(distance / 2));
-							st2.setEndTime(Integer.toString(start + duration / 2 - 1));
+							st2.setEndTime(Double.toString(start + duration / 2 - 1));
 							st2.setMode(stage.getMode());
-							st2.setStartTime(Integer.toString(start));
+							st2.setStartTime(Double.toString(start));
 							
 							stages.add(st2);
 							
 							stage.setDistance(Double.toString(distance / 2));
-							stage.setStartTime(Integer.toString(start + duration / 2));
-							stage.setEndTime(Integer.toString(end));
+							stage.setStartTime(Double.toString(start + duration / 2));
+							stage.setEndTime(Double.toString(end));
 							stage.setPurpose(prevAct);
 							
 						}

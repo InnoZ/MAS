@@ -88,7 +88,7 @@ public class ReadWayDatabaseTask extends DatabaseTask {
 			String personId = resultSet.getString(SurveyConstants.personId(surveyType));
 			
 			if(contained && container.getPersons().containsKey(householdId + personId)){
-
+				
 				Map<String, String> attributes = new HashMap<>();
 				
 				attributes.put(SurveyConstants.sortedWayId(surveyType), resultSet.getString(SurveyConstants.sortedWayId(surveyType)));
