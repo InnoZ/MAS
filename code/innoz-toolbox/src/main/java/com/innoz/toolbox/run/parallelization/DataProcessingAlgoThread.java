@@ -191,7 +191,8 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 			
 		} else if(OsmKey2ActivityType.leisure.contains(tag) || OsmKey2ActivityType.eating.contains(tag)
 				|| OsmKey2ActivityType.culture.contains(tag) || OsmKey2ActivityType.sports.contains(tag)
-				|| OsmKey2ActivityType.furtherEducation.contains(tag) || OsmKey2ActivityType.events.contains(tag)){
+				|| OsmKey2ActivityType.furtherEducation.contains(tag) || OsmKey2ActivityType.events.contains(tag)
+				|| OsmKey2ActivityType.allotment.contains(tag)){
 			
 			if(OsmKey2ActivityType.eating.contains(tag)){
 				
@@ -212,6 +213,10 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 			} else if(OsmKey2ActivityType.events.contains(tag)){
 				
 				return ActivityTypes.EVENT;
+				
+			} else if(OsmKey2ActivityType.allotment.equals(tag)){
+				
+				return ActivityTypes.ALLOTMENT;
 				
 			} else {
 				
@@ -276,6 +281,10 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 			
 			return ActivityTypes.SHOPPING;
 			
+		} else if(landuseTag.equals("allotments")){
+			
+			return ActivityTypes.ALLOTMENT;
+			
 		}
 		
 		return null;
@@ -284,8 +293,7 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 	
 	private String getTypeOfBuilding(String buildingTag){
 		
-		if(buildingTag.equals("apartments") || buildingTag.equals("detached") || buildingTag.equals("house")
-				|| buildingTag.equals("semi")|| buildingTag.equals("terrace")){
+		if(buildingTag.equals("apartments") || buildingTag.equals("residential")){
 			
 			return ActivityTypes.HOME;
 			

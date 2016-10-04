@@ -49,6 +49,9 @@ public class OsmKey2ActivityType {
 			+ "playground,summer_camp,swimming_area,track,"
 			+ "water_park,wildlife_hide,ice_cream,pub,bar,bbq,biergarten");
 	
+	//DISTINCT ACTIVITIES
+	public static final String allotment = "allotment";
+	
 	//eat and drink
 	public static final Set<String> eating = CollectionUtils.stringToSet(
 			"cafe,fast_food,food_court,restaurant");

@@ -37,6 +37,7 @@ public class ActivityTypes {
 	public static final String CULTURE = "leisure_culture";
 	public static final String FURTHER = "leisure_furtherEdu";
 	public static final String EVENT = "leisure_event";
+	public static final String ALLOTMENT = "leisure_allotment";
 	
 	public static final String OTHER = "other"; //10,11
 	public static final String HEALTH = "other_healthcare";

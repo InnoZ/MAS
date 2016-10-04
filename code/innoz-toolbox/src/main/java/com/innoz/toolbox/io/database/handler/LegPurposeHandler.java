@@ -73,6 +73,10 @@ public class LegPurposeHandler implements DefaultHandler {
 					
 					actType = ActivityTypes.EATING;
 					
+				} else if(subtype.equals("707")){
+					
+					actType = ActivityTypes.ALLOTMENT;
+					
 				}
 				
 			}

@@ -21,11 +21,8 @@ import com.innoz.toolbox.utils.GlobalNames;
 
 public class FacilitiesCreator {
 
-	public void create(final DatabaseReader reader, final Scenario scenario, final Geoinformation geoinformation, List<Building> buildingList,
-			double minX, double minY, double maxX, double maxY){
-		
-//		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(GlobalNames.WGS84
-//				, GlobalNames.UTM32N);
+	public void create(final DatabaseReader reader, final Scenario scenario, final Geoinformation geoinformation,
+			List<Building> buildingList, double minX, double minY, double maxX, double maxY){
 		
 		ActivityFacilitiesFactory factory = scenario.getActivityFacilities().getFactory();
 		
@@ -35,58 +32,40 @@ public class FacilitiesCreator {
 			
 			if(building.getGeometry() != null){
 				
-			ActivityFacility facility = factory.createActivityFacility(Id.create(cnt, ActivityFacility.class), MGC.point2Coord(building.getGeometry().getCentroid()));
-			
-			for(String act : building.getActivityOptions()){
-
-				if(act != null){
-					
-					String actType = act.split(GlobalNames.UNDERLINE)[0];
-					
-					if(!facility.getActivityOptions().containsKey(actType)){
+				ActivityFacility facility = factory.createActivityFacility(Id.create(cnt, ActivityFacility.class),
+						MGC.point2Coord(building.getGeometry().getCentroid()));
+				
+				for(String act : building.getActivityOptions()){
+	
+					if(act != null){
 						
-						ProxyFacility proxy = new ProxyFacility(facility, building.getGeometry().getArea());
-
-						// If the activity is of any of the sub types, take only the main activity type
-						ActivityOption option = factory.createActivityOption(actType);
-						((ActivityOptionImpl)option).addOpeningTime(getOpeningTimeForActivityOption(option.getType()));
-						facility.addActivityOption(option);
-						option.setCapacity(building.getGeometry().getArea());
+						String actType = act.split(GlobalNames.UNDERLINE)[0];
 						
-						reader.addGeometry(act, proxy);
-						
-//						if(geoinformation.getLanduseOfType(act) == null){
-//							
-//							geoinformation.createQuadTreeForActType(act, new double[]{minX,minY,maxX,maxY});
-//							
-//						}
-//						
-//						Coord c = transformation.transform(MGC.point2Coord(building.getGeometry().getCentroid()));
-//						geoinformation.getLanduseOfType(act).put(c.getX(), c.getY(), proxy);
-//						
-//						
-//						
-//						for(Node<AdministrativeUnit> node : geoinformation.getAdminUnits()){
-//							
-//							AdministrativeUnit unit = node.getData();
-//							
-//							if(unit.getGeometry() != null && unit.getGeometry().contains(building.getGeometry())){
-//								
-//								unit.addLanduse(act, proxy);
-//								
-//							}
-//							
-//						}
+						if(!facility.getActivityOptions().containsKey(actType)){
+							
+							ProxyFacility proxy = new ProxyFacility(facility, building.getGeometry().getArea());
+	
+							// If the activity is of any of the sub types, take only the main activity type
+							ActivityOption option = factory.createActivityOption(actType);
+							((ActivityOptionImpl)option).addOpeningTime(getOpeningTimeForActivityOption(option.getType()));
+							facility.addActivityOption(option);
+							option.setCapacity(building.getGeometry().getArea());
+							
+							reader.addGeometry(act, proxy);
+							
+						}
 						
 					}
 					
 				}
 				
-			}
-			
-			scenario.getActivityFacilities().addActivityFacility(facility);
-			
-			cnt++;
+				if(!facility.getActivityOptions().isEmpty()){
+					
+					scenario.getActivityFacilities().addActivityFacility(facility);
+					
+					cnt++;
+					
+				}
 			
 			}
 			
