@@ -41,19 +41,19 @@ public class FacilitiesCreator {
 						
 						String actType = act.split(GlobalNames.UNDERLINE)[0];
 						
+						ProxyFacility proxy = new ProxyFacility(facility, building.getGeometry().getArea());
+						
 						if(!facility.getActivityOptions().containsKey(actType)){
 							
-							ProxyFacility proxy = new ProxyFacility(facility, building.getGeometry().getArea());
-	
 							// If the activity is of any of the sub types, take only the main activity type
 							ActivityOption option = factory.createActivityOption(actType);
 							((ActivityOptionImpl)option).addOpeningTime(getOpeningTimeForActivityOption(option.getType()));
 							facility.addActivityOption(option);
 							option.setCapacity(building.getGeometry().getArea());
 							
-							reader.addGeometry(act, proxy);
-							
 						}
+						
+						reader.addGeometry(act, proxy);
 						
 					}
 					
