@@ -19,11 +19,15 @@ import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.MatsimNetworkReader;
 import org.matsim.core.population.MatsimPopulationReader;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
+import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.PolylineFeatureFactory;
+import org.matsim.core.utils.misc.Time;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.innoz.toolbox.utils.GlobalNames;
@@ -52,9 +56,9 @@ public class PlansToJson {
 	 */
 	public static void main(String args[]){
 	
-		String filebase = "/home/dhosse/dataForDatahubVis/";
+		String filebase = "/home/dhosse/dataForDatahubVis/egap/";
 		try {
-			PlansToJson.run(filebase + "output_plans.xml.gz", filebase + "output_network.xml.gz", 0.05);
+			PlansToJson.run(filebase + "output_plans.xml.gz", filebase + "output_network.xml.gz", 1d);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -82,6 +86,9 @@ public class PlansToJson {
 				.addAttribute(PAR_SPEED, Integer.class)
 				.create();
 		
+		Dijkstra dijkstra = new Dijkstra(scenario.getNetwork(), new FreespeedTravelTimeAndDisutility(-6, 6, 0),
+				new FreespeedTravelTimeAndDisutility(-6, 6, 0));
+		
 		for(Person person : scenario.getPopulation().getPersons().values()){
 			
 			if(random.nextDouble() <= d){
@@ -96,40 +103,49 @@ public class PlansToJson {
 						
 						if(leg.getRoute() instanceof NetworkRoute){
 							
-							NetworkRoute route = (NetworkRoute)leg.getRoute();
-							
-							double departure = leg.getDepartureTime();
-							double arrival = departure + leg.getTravelTime();
-							
-							Link current = scenario.getNetwork().getLinks().get(route.getStartLinkId());
-							
-							List<Coordinate> coordinates = new ArrayList<>();
-							
-							coordinates.add(MGC.coord2Coordinate(ct.transform(current.getFromNode().getCoord())));
-							coordinates.add(MGC.coord2Coordinate(ct.transform(current.getToNode().getCoord())));
+							if(leg.getMode().equals("onewaycarsharing")){
 
-							
-							for(Id<Link> id : route.getLinkIds()){
+								NetworkRoute route = (NetworkRoute)leg.getRoute();
 								
-								current = scenario.getNetwork().getLinks().get(id);
+								double departure = leg.getDepartureTime();
+								double arrival = departure + leg.getTravelTime();
+								
+								if(departure == Time.UNDEFINED_TIME) departure = 0d;
+								if(arrival == Time.UNDEFINED_TIME) arrival = 0d;
+								
+								Path path = dijkstra.calcLeastCostPath(scenario.getNetwork().getLinks().get(route.getStartLinkId()).getToNode(),
+										scenario.getNetwork().getLinks().get(route.getEndLinkId()).getFromNode(), 0, person, null);
+								
+								Link current = scenario.getNetwork().getLinks().get(route.getStartLinkId());
+								
+								List<Coordinate> coordinates = new ArrayList<>();
+								
+								coordinates.add(MGC.coord2Coordinate(ct.transform(current.getFromNode().getCoord())));
 								coordinates.add(MGC.coord2Coordinate(ct.transform(current.getToNode().getCoord())));
+
+								
+								for(Link link : path.links){
+									
+									coordinates.add(MGC.coord2Coordinate(ct.transform(link.getToNode().getCoord())));
+									
+								}
+								
+								current = scenario.getNetwork().getLinks().get(route.getEndLinkId());
+								coordinates.add(MGC.coord2Coordinate(ct.transform(current.getToNode().getCoord())));
+							
+								Coordinate[] coords = new Coordinate[coordinates.size()];
+								for(int i = 0 ; i < coordinates.size() ; i++){
+									coords[i] = coordinates.get(i);
+								}
+								
+								SimpleFeature feature = pfactory.createPolyline(coords);
+								feature.setAttribute(PAR_DEPARTURE, departure);
+								feature.setAttribute(PAR_ARRIVAL, arrival);
+								feature.setAttribute(PAR_MODE, leg.getMode());
+								feature.setAttribute(PAR_SPEED, (int)(3.6 * route.getDistance() / (arrival-departure)));
+								features.add(feature);
 								
 							}
-							
-							current = scenario.getNetwork().getLinks().get(route.getEndLinkId());
-							coordinates.add(MGC.coord2Coordinate(ct.transform(current.getToNode().getCoord())));
-						
-							Coordinate[] coords = new Coordinate[coordinates.size()];
-							for(int i = 0 ; i < coordinates.size() ; i++){
-								coords[i] = coordinates.get(i);
-							}
-							
-							SimpleFeature feature = pfactory.createPolyline(coords);
-							feature.setAttribute(PAR_DEPARTURE, departure);
-							feature.setAttribute(PAR_ARRIVAL, arrival);
-							feature.setAttribute(PAR_MODE, Modes.car.name());
-							feature.setAttribute(PAR_SPEED, (int)(3.6 * route.getDistance() / (arrival-departure)));
-							features.add(feature);
 							
 						}
 						
