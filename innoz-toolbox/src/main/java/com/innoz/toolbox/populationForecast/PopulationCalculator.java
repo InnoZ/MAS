@@ -1,4 +1,4 @@
-package com.innoz.toolbox.populationForecast.populationCalc;
+package com.innoz.toolbox.populationForecast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class PopulationCalculator {
 			populationMap.put(year, ageGroupsM);
 			for (int ii = 0; ii < ageGroupsArrayList.size(); ii++){
 				populationMap.get(year).put(ageGroupsArrayList.get(ii), calcPopulation(populationMap, year, gkzRow, filepath, ageGroupsArrayList.get(ii)));
-			}		
+			}	
 		};
 		
 		System.out.println(populationMap.values());
@@ -80,7 +80,7 @@ public class PopulationCalculator {
 		
 //		calculation for all ageGroups beginning in 2014	
 		if (year == 2014) {
-			pop = xlsx.getXLSCalcValues(year, gkzRow, filepath, ageGroup);
+			pop = xlsx.getXLSCalcValues(year, gkzRow, filepath, ageGroup, populationMap);
 //			System.out.println("test  " + year);
 		}
 		
