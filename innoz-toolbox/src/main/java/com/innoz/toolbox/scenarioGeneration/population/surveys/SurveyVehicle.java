@@ -2,16 +2,22 @@ package com.innoz.toolbox.scenarioGeneration.population.surveys;
 
 import org.matsim.vehicles.EngineInformation.FuelType;
 
-public class SurveyVehicle {
+public class SurveyVehicle implements SurveyObject {
 
 	private String id;
 	private int kbaClass;
 	private FuelType fuelType;
 	
+	public SurveyVehicle(){};
+
 	public SurveyVehicle(String id){
 		
 		this.id = id;
 		
+	}
+	
+	public void setId(String id){
+		this.id = id;
 	}
 	
 	public String getId(){
@@ -45,6 +51,12 @@ public class SurveyVehicle {
 	
 	public FuelType getFuelType(){
 		return this.fuelType;
+	}
+
+	public void setFuelType(String string) {
+
+		this.setFuelType(Integer.parseInt(string));
+		
 	}
 	
 }

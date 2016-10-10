@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.PopulationType;
+import com.innoz.toolbox.config.Configuration.SurveyType;
 import com.innoz.toolbox.config.Configuration.VehicleSource;
 import com.innoz.toolbox.config.PsqlAdapter;
 import com.innoz.toolbox.io.SurveyConstants;
@@ -16,6 +17,7 @@ import com.innoz.toolbox.io.database.task.HouseholdRemovalTask;
 import com.innoz.toolbox.io.database.task.PersonRemovalTask;
 import com.innoz.toolbox.io.database.task.ReadHouseholdDatabaseTask;
 import com.innoz.toolbox.io.database.task.ReadPersonDatabaseTask;
+import com.innoz.toolbox.io.database.task.ReadVehicleDatabaseTask;
 import com.innoz.toolbox.io.database.task.ReadWayDatabaseTask;
 import com.innoz.toolbox.io.database.task.ResolveRoundTripsTask;
 import com.innoz.toolbox.io.database.task.SortStagesTask;
@@ -77,11 +79,11 @@ public class SurveyDatabaseParserV2 {
 
 				new ReadWayDatabaseTask(constants, geoinformation, ids, configuration.getUsedDayTypes()).parse(connection, container, configuration.getSurveyType().name());
 				
-				if(configuration.getVehicleSource().equals(VehicleSource.survey) && configuration.getSurveyType().equals("mid")){
+				if(configuration.getVehicleSource().equals(VehicleSource.survey) && configuration.getSurveyType().equals(SurveyType.mid)){
 				
-					log.info("Creating survey cars...");
-					
-//					parseVehiclesDatabase(connection, container);
+//					log.info("Creating survey cars...");
+//					
+//					new ReadVehicleDatabaseTask(constants, geoinformation, ids).parse(connection, container, configuration.getSurveyType().name());
 					
 				}
 	
