@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.matsim.core.utils.collections.CollectionUtils;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.PsqlAdapter;
@@ -33,21 +34,18 @@ public class CommuterDatabaseParser {
 				
 				// Select the entries that contain the administrative areas we defined in the
 				// configuration.
-				
-				Set<String> allAdminUnits = new HashSet<String>();
-				
-				for(String key : configuration.getAdminUnitEntries().keySet()){
-					
-					allAdminUnits.add(key);
-					
-				}
-				
-				String homeString = createChainedStatementFromSet(allAdminUnits, "home_id");
-				String workString = createChainedStatementFromSet(allAdminUnits, "work_id");
-				
-				this.execute(connection, "2015_commuters", homeString, workString);
-//				this.execute(connection, "2015_reverse", homeString, workString);
-//				this.execute(connection, "2015_internal", homeString, workString);
+				Set<String> surveyAreaIds = CollectionUtils.stringToSet(configuration.getSurveyAreaIds());
+				Set<String> vicinityIds = CollectionUtils.stringToSet(configuration.getVicinityIds());
+
+				this.execute(connection, "2015_reverse",
+						createChainedStatementFromSet(surveyAreaIds, "home_id"),
+						createChainedStatementFromSet(vicinityIds, "work_id"));
+				this.execute(connection, "2015_commuters",
+						createChainedStatementFromSet(vicinityIds, "home_id"),
+						createChainedStatementFromSet(surveyAreaIds, "work_id"));
+				this.execute(connection, "2015_internal",
+						createChainedStatementFromSet(surveyAreaIds, "home_id"),
+						createChainedStatementFromSet(vicinityIds, "work_id"));
 				
 				
 			}
@@ -66,9 +64,13 @@ public class CommuterDatabaseParser {
 		String q = null;
 		
 		if(!table.equals("2015_internal")){
-			q = "select * from commuters.\"" + table + "\" where (" + homeString + ") or (" + workString + ");";
+			
+			q = "select * from commuters.\"" + table + "\" where (" + homeString + ") and (" + workString + ");";
+			
 		} else {
+			
 			q = "select * from commuters.\"" + table + "\" where (" + homeString + ");";
+			
 		}
 		
 		Statement statement = connection.createStatement();

@@ -64,11 +64,11 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 		
 		int n = 0;
 		
-		Set<String> toIds = CollectionUtils.stringToSet(configuration.getSurveyAreaIds());
+//		Set<String> toIds = CollectionUtils.stringToSet(configuration.getSurveyAreaIds());
 		
 		for(CommuterDataElement entry : parser.getCommuterRelations()){
 			
-			if(idSet.contains(entry.getFromId()) && toIds.contains(entry.getToId())){
+			if(idSet.contains(entry.getFromId())/* && toIds.contains(entry.getToId())*/){
 
 				for(int i = n; i < n + (entry.getNumberOfCommuters() * configuration.getScaleFactor()); i++){
 					
