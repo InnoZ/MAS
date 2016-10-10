@@ -51,7 +51,7 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 	 * The home and work locations are chosen according to landuse data and a gravitation model.</br>
 	 * 
 	 * @param configuration The scenario generation configuration file.
-	 * @param scenario A Matsim scenario.
+	 * @param ids The admin unit ids of the commuters' home locations
 	 */
 	private void createCommuterPopulation(Configuration configuration, String ids){
 		
@@ -92,6 +92,9 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 
 		if(this.geoinformation.getAdminUnit(homeId) == null || this.geoinformation.getAdminUnit(workId) == null){
 			
+			log.warn("Could not find geometry for home or work cell! Thus, no agent"
+					+ "was created.");
+			log.info("Check administrative unit ids for missing or wrong entries...");
 			return;
 			
 		}
