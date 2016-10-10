@@ -47,7 +47,7 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 	 * <li>work
 	 * <li>home
 	 * </ol>
-	 * 
+	 * <br>
 	 * The home and work locations are chosen according to landuse data and a gravitation model.</br>
 	 * 
 	 * @param configuration The scenario generation configuration file.
@@ -64,11 +64,9 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 		
 		int n = 0;
 		
-//		Set<String> toIds = CollectionUtils.stringToSet(configuration.getSurveyAreaIds());
-		
 		for(CommuterDataElement entry : parser.getCommuterRelations()){
 			
-			if(idSet.contains(entry.getFromId())/* && toIds.contains(entry.getToId())*/){
+			if(idSet.contains(entry.getFromId())){
 
 				for(int i = n; i < n + (entry.getNumberOfCommuters() * configuration.getScaleFactor()); i++){
 					
