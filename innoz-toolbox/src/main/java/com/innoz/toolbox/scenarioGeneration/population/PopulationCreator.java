@@ -15,7 +15,10 @@ import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
+import com.innoz.toolbox.scenarioGeneration.population.algorithm.CommuterDemandGenerator;
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.DemandGenerationAlgorithm;
+import com.innoz.toolbox.scenarioGeneration.population.algorithm.DummyDemandGenerator;
+import com.innoz.toolbox.scenarioGeneration.population.algorithm.SurveyBasedDemandGenerator;
 import com.innoz.toolbox.utils.GlobalNames;
 
 /**
@@ -115,9 +118,31 @@ public class PopulationCreator {
 		
 		if(!populationType.name().equals(PopulationSource.none)){
 
-			((DemandGenerationAlgorithm)Class.forName(populationType.name()).getConstructor(
-					Scenario.class, Geoinformation.class, CoordinateTransformation.class, Distribution.class).newInstance(
-					scenario, this.geoinformation, this.transformation, this.distribution)).run(configuration, ids);
+			String className = null;
+			
+			// Choose the demand generation method according to what type of population was defined in the configuration
+			switch(populationType){
+			
+				case dummy: 	className = DummyDemandGenerator.class.getName();
+								break;
+								
+				case commuter:	className = CommuterDemandGenerator.class.getName();
+								break;
+								
+				case survey:	className = SurveyBasedDemandGenerator.class.getName();
+								break;
+								
+				default: 		break;
+			
+			}
+			
+			if(className != null){
+				
+				((DemandGenerationAlgorithm)Class.forName(className).getConstructor(
+						Scenario.class, Geoinformation.class, CoordinateTransformation.class, Distribution.class).newInstance(
+						scenario, this.geoinformation, this.transformation, this.distribution)).run(configuration, ids);
+				
+			}
 			
 		}
 		
