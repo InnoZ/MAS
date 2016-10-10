@@ -15,10 +15,8 @@ import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
-import com.innoz.toolbox.scenarioGeneration.population.algorithm.CommuterDemandGenerator;
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.DemandGenerationAlgorithm;
-import com.innoz.toolbox.scenarioGeneration.population.algorithm.DummyDemandGenerator;
-import com.innoz.toolbox.scenarioGeneration.population.algorithm.SurveyBasedDemandGenerator;
+import com.innoz.toolbox.utils.GlobalNames;
 
 /**
  * 
@@ -81,12 +79,12 @@ public class PopulationCreator {
 				// Create the coordinate transformation for all of the geometries
 				// This could also be done by just passing the auth id strings, but doing it this way suppresses
 				// warnings.
-				CoordinateReferenceSystem from = CRS.decode("EPSG:4326", true);
+				CoordinateReferenceSystem from = CRS.decode(GlobalNames.WGS84, true);
 				CoordinateReferenceSystem to = CRS.decode(configuration.getCrs(), true);
 				transformation = TransformationFactory.getCoordinateTransformation(
 						from.toString(), to.toString());
 				
-				this.distribution = new Distribution(scenario.getNetwork(), this.geoinformation, transformation);
+				this.distribution = new Distribution(scenario.getNetwork(), this.geoinformation, this.transformation);
 			
 				
 				log.info("Creating population for MATSim scenario...");
@@ -114,31 +112,12 @@ public class PopulationCreator {
 			ClassNotFoundException{
 		
 		log.info("Selected type of population: " + populationType.name());
+		
+		if(!populationType.name().equals(PopulationSource.none)){
 
-		String className = null;
-		
-		// Choose the demand generation method according to what type of population was defined in the configuration
-		switch(populationType){
-		
-			case dummy: 	className = DummyDemandGenerator.class.getName();
-							break;
-							
-			case commuter:	className = CommuterDemandGenerator.class.getName();
-							break;
-							
-			case survey:	className = SurveyBasedDemandGenerator.class.getName();
-							break;
-							
-			default: 		break;
-		
-		}
-		
-		if(className != null){
-			
-			((DemandGenerationAlgorithm)Class.forName(className).getConstructor(
+			((DemandGenerationAlgorithm)Class.forName(populationType.name()).getConstructor(
 					Scenario.class, Geoinformation.class, CoordinateTransformation.class, Distribution.class).newInstance(
-									scenario, this.geoinformation, transformation, distribution)).run(configuration,
-									ids);
+					scenario, this.geoinformation, this.transformation, this.distribution)).run(configuration, ids);
 			
 		}
 		
