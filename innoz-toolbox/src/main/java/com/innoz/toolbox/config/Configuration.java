@@ -7,6 +7,8 @@ import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
+import com.innoz.toolbox.utils.GlobalNames;
+
 /**
  * 
  * Class that holds all relevant parameters for the semi-automatic generation of a MATSim pre-base scenario.
@@ -65,7 +67,7 @@ public final class Configuration {
 	//CONFIGURABLE///////////////////////////////////////////////////////////////////////////
 	String surveyAreaIds;
 	String vicinityIds;
-	String crs = "EPSG:32632";
+	String crs = GlobalNames.UTM32N;
 	String outputDirectory = ".";
 	
 	PopulationType popType = PopulationType.households;
