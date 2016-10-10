@@ -69,9 +69,13 @@ public class ReadVehicleDatabaseTask extends DatabaseTask {
 					handler.handle(vehicle, attributes, surveyType);
 					
 				}
-				
-				container.getHouseholds().get(hhId).getVehicleIds().add(vehicle.getId());
-				container.getVehicles().put(vehicle.getId(), vehicle);
+
+				if(vehicle.getFuelType() != null){
+
+					container.getHouseholds().get(hhId).getVehicleIds().add(vehicle.getId());
+					container.getVehicles().put(vehicle.getId(), vehicle);
+					
+				}
 				
 			}
 			

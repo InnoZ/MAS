@@ -322,10 +322,10 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 	}
 
+	int vehicleCounter = 0;
+	
 	private void createSurveyVehicles(SurveyDataContainer container, SurveyHousehold template,
 			Household household) {
-		
-		int vehicleCounter = 0;
 		
 		for(String vid : template.getVehicleIds()){
 			
@@ -333,22 +333,26 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			
 			VehicleType type = VehicleTypes.getVehicleTypeForKey(v.getKbaClass(), v.getFuelType());
 			
-			if(!scenario.getVehicles().getVehicleTypes().containsKey(type.getId())){
-				scenario.getVehicles().addVehicleType(type);
-			}
-			
-			Vehicle vehicle = scenario.getVehicles().getFactory().createVehicle(Id.create(template.getId() + "_" + vid +
-					"_" + v.getFuelType().name() + "_" + vehicleCounter, Vehicle.class), type);
-			scenario.getVehicles().addVehicle(vehicle);
-			vehicleCounter++;
-			
-			if(household.getVehicleIds() == null){
+			if(type != null){
+
+				if(!scenario.getVehicles().getVehicleTypes().containsKey(type.getId())){
+					scenario.getVehicles().addVehicleType(type);
+				}
 				
-				((HouseholdImpl)household).setVehicleIds(new ArrayList<Id<Vehicle>>());
+				Vehicle vehicle = scenario.getVehicles().getFactory().createVehicle(Id.create(vid +
+						"_" + v.getFuelType().name() + "_" + vehicleCounter, Vehicle.class), type);
+				scenario.getVehicles().addVehicle(vehicle);
+				vehicleCounter++;
+				
+				if(household.getVehicleIds() == null){
+					
+					((HouseholdImpl)household).setVehicleIds(new ArrayList<Id<Vehicle>>());
+					
+				}
+				
+				household.getVehicleIds().add(vehicle.getId());
 				
 			}
-			
-			household.getVehicleIds().add(vehicle.getId());
 			
 		}
 		

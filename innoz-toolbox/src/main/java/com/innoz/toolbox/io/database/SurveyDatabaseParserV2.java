@@ -81,9 +81,9 @@ public class SurveyDatabaseParserV2 {
 				
 				if(configuration.getVehicleSource().equals(VehicleSource.survey) && configuration.getSurveyType().equals(SurveyType.mid)){
 				
-//					log.info("Creating survey cars...");
-//					
-//					new ReadVehicleDatabaseTask(constants, geoinformation, ids).parse(connection, container, configuration.getSurveyType().name());
+					log.info("Creating survey cars...");
+					
+					new ReadVehicleDatabaseTask(constants, geoinformation, ids).parse(connection, container, configuration.getSurveyType().name());
 					
 				}
 	
