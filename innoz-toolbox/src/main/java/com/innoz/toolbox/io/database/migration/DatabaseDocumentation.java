@@ -23,6 +23,8 @@ import com.jcraft.jsch.JSchException;
 public class DatabaseDocumentation {
 
 	final static String HTML_HEADER = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">";
+
+	final static String HTML = "html";
 	final static String HEAD = "head";
 	final static String BODY = "body";
 	
@@ -64,13 +66,17 @@ public class DatabaseDocumentation {
 					String schemaname = results.getString("schemaname");
 					String tablename = results.getString("tablename");
 					
-					if(!db2Schemas2Tables.get(database).containsKey(schemaname)){
-					
-						db2Schemas2Tables.get(database).put(schemaname, new ArrayList<>());
+					if(!schemaname.equals("pg_catalog") && !schemaname.equals("information_schema")){
 
+						if(!db2Schemas2Tables.get(database).containsKey(schemaname)){
+							
+							db2Schemas2Tables.get(database).put(schemaname, new ArrayList<>());
+
+						}
+						
+						db2Schemas2Tables.get(database).get(schemaname).add(new TableEntry(tablename));
+						
 					}
-					
-					db2Schemas2Tables.get(database).get(schemaname).add(new TableEntry(tablename));
 					
 				}
 				
