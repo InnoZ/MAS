@@ -489,7 +489,7 @@ public class NetworkCreatorFromPsql {
 
 					freespeed = resolveUnknownFreespeedTag(freespeedTag);
 					
-					if(freespeed == 0 && !unknownTags.contains(freespeedTag)){
+					if(!unknownTags.contains(freespeedTag)){
 						
 						unknownTags.add(freespeedTag);
 						log.warn("Could not parse freespeed tag: " + freespeedTag + ". Ignoring it.");
