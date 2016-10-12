@@ -1,4 +1,4 @@
-package com.innoz.toolbox.config;
+package com.innoz.toolbox.config.groups;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,10 +15,6 @@ public abstract class ConfigurationGroup {
 		this.params = new HashMap<String, Object>();
 		
 	}
-	
-	abstract void initParams();
-	
-	abstract void addParam(String key, String value);
 	
 	public Map<String, String> getParams(){
 			
