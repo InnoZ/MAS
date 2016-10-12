@@ -1,0 +1,147 @@
+package com.innoz.energy.config;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.matsim.core.api.internal.MatsimParameters;
+import org.matsim.core.config.ConfigGroup;
+import org.matsim.core.config.ReflectiveConfigGroup;
+import org.matsim.core.config.ReflectiveConfigGroup.StringGetter;
+import org.matsim.core.config.ReflectiveConfigGroup.StringSetter;
+
+public final class EnergyConsumptionConfigGroup extends ConfigGroup {
+
+	public static final String GROUP_NAME = "activityEnergyConsumption";
+	
+	public static final String COMPUTATION_METHOD = "computationMethod";
+	public static final String WRITER_FREQ = "writerFrequency";
+	
+	public enum ComputationMethod{daily,hourly};
+	
+	private ComputationMethod method = ComputationMethod.daily;
+	private int writerFrequency = 10;
+	
+	public EnergyConsumptionConfigGroup() {
+		
+		super(GROUP_NAME);
+		this.addParam(COMPUTATION_METHOD, this.method.name());
+		this.addParam(WRITER_FREQ, Integer.toString(this.writerFrequency));
+		
+	}
+	
+	public void addEneryConsumptionParams(String actType, double energyConsumption){
+		
+		EnergyConsumptionParams params = new EnergyConsumptionParams(actType);
+		params.setEnergyConsumptionInKiloWattHours(energyConsumption);
+		super.addParameterSet(params);
+		
+	}
+	
+	@Override
+	public Map<String, String> getComments(){
+		
+		Map<String, String> map = new HashMap<String, String>();
+		map.put(COMPUTATION_METHOD, "The method for calculating the energy consumption of activities. Possible values:"
+				+ " daily, hourly.'daily' uses an average consumption for the whole (simulated) day. 'hourly' (NOT IMPLEMENTED)"
+				+ "uses hourly consumption values.");
+		map.put(WRITER_FREQ, "The frequency of dumping the energy consumption stats into a file. '0' means disabled.");
+		return map;
+		
+	}
+	
+	@SuppressWarnings("unchecked")
+	public EnergyConsumptionParams getEnergyConsumptionParams(String actType){
+		
+		Collection<EnergyConsumptionParams> params = (Collection<EnergyConsumptionParams>) getParameterSets().get(EnergyConsumptionParams.SET_TYPE);
+		
+		for(EnergyConsumptionParams pars : params){
+			
+			if(pars.getActivityType().equals(actType)){
+				
+				return pars;
+				
+			}
+			
+		}
+		
+		return null;
+		
+	}
+
+	@StringGetter(COMPUTATION_METHOD)
+	public ComputationMethod getComputationMethod(){
+		
+		return this.method;
+		
+	}
+	
+	@StringSetter(COMPUTATION_METHOD)
+	public void setComputationMethod(ComputationMethod m){
+		
+		this.method = m;
+		
+	}
+	
+	@StringGetter(WRITER_FREQ)
+	public int getWriterFrequency(){
+		
+		return this.writerFrequency;
+		
+	}
+	
+	@StringSetter(WRITER_FREQ)
+	public void setWriterFrequency(int freq){
+		
+		this.writerFrequency = freq;
+		
+	}
+	
+	public static class EnergyConsumptionParams extends ReflectiveConfigGroup implements MatsimParameters {
+
+		private static final String SET_TYPE = "energyConsumptionParams";
+		
+		public static final String ACT_TYPE = "actType";
+		public static final String ENERGY_CONSUMPTION = "energyConsumptionInKiloWattHours";
+		
+		private String actType;
+		private double energyConsumptionInKiloWattHours = 0.0;
+		
+		public EnergyConsumptionParams(String actType) {
+			
+			super(SET_TYPE);
+			this.actType = actType;
+			
+		}
+		
+		@StringGetter(ACT_TYPE)
+		public String getActivityType(){
+			
+			return this.actType;
+			
+		}
+		
+		@StringSetter(ACT_TYPE)
+		void setActivityType(String actType){
+			
+			this.actType = actType;
+			
+		}
+		
+		@StringGetter(ENERGY_CONSUMPTION)
+		public double getEnergyConsumptionInKiloWattHours(){
+			
+			return this.energyConsumptionInKiloWattHours;
+			
+		}
+		
+		@StringSetter(ENERGY_CONSUMPTION)
+		void setEnergyConsumptionInKiloWattHours(double energyConsumptionInKiloWattHours){
+			
+			this.energyConsumptionInKiloWattHours = energyConsumptionInKiloWattHours;
+			
+		}
+		
+	}
+
+}

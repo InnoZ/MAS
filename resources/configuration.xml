@@ -28,7 +28,7 @@
 	<numberOfThreads v="2" />
 
 	<surveyData>
-		<activityLocationsType v="buildings" />
+		<activityLocationsType v="facilities" />
 		<populationType v="households"/>
 		<vehiclesSource v="matsim" />
 		<onlyWorkingDays v="true"/>

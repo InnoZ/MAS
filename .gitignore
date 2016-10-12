@@ -2,6 +2,7 @@
 input/**/* 
 output/**/*
 .project
+.settings/**/*
 #ignore auto-generated binaries
 code/scenarioGeneration/InnoZtools/bin/innoz/
 #ignore user-specific classpaths
