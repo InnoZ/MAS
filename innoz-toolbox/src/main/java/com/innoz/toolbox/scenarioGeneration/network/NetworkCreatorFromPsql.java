@@ -486,8 +486,10 @@ public class NetworkCreatorFromPsql {
 					freespeed = Double.parseDouble(freespeedTag) / 3.6;
 					
 				} catch(NumberFormatException e){
+
+					freespeed = resolveUnknownFreespeedTag(freespeedTag);
 					
-					if(!unknownTags.contains(freespeedTag)){
+					if(freespeed == 0 && !unknownTags.contains(freespeedTag)){
 						
 						unknownTags.add(freespeedTag);
 						log.warn("Could not parse freespeed tag: " + freespeedTag + ". Ignoring it.");
@@ -637,6 +639,28 @@ public class NetworkCreatorFromPsql {
 
 		}
 			
+	}
+	
+	private double resolveUnknownFreespeedTag(String s){
+		
+		double kmh = 0;
+		
+		if("DE:urban".equals(s)){
+			
+			kmh = 50;
+			
+		} else if("DE:rural".equals(s)){
+			
+			kmh = 100;
+			
+		} else if("DE:motorway".equals(s) || "none".equals(s)){
+			
+			kmh = 130;
+			
+		}
+		
+		return kmh / 3.6;
+		
 	}
 		
 	public Geometry getBufferedArea(){
