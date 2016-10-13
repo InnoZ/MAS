@@ -132,7 +132,7 @@ public class CommuterDatabaseParser {
 			
 			}
 			
-			result.append(var + " = '" + s + "'");
+			result.append(var + " like '" + s + "%'");
 			isFirst = false;
 			
 		}

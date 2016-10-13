@@ -119,7 +119,7 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 		plan.addLeg(firstLeg);
 		
 		Activity workAct = population.getFactory().createActivityFromCoord(ActivityTypes.WORK, workLocation);
-		workAct.setMaximumDuration(8 * 3600);
+		workAct.setMaximumDuration(9 * 3600);
 		plan.addActivity(workAct);
 		
 		Leg secondLeg = population.getFactory().createLeg(TransportMode.car);
