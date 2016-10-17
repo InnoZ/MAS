@@ -30,21 +30,21 @@
 		<!-- Defines if transit should be explicitly (i.e. schedules, transit stops) modeled (true / false)  -->
 		<createTransit v="false" />
 		<!-- The type of population that should be created during demand generation. Possible values: complete, dummy, none-->
-		<populationType v="survey" />
-		<populationTypeVicinity v="commuter" />
+		<populationSource v="survey" />
+		<populationSourceVicinity v="commuter" />
 		<scaleFactor v="1.0" />
 		<outputDirectory v="/home/dhosse/scenarios/3connect/" />
 		<overwriteExistingFiles v="true"/>
 		<demandSource v="mid" />
-		<useMobilityAttitudeGroups v="true" />
+		<subpopulationsType v="mobility_attitude" />
 		<numberOfThreads v="2" />
 	</scenario>
 
 	<surveyData>
-		<useBuildings v="true" />
-		<useHouseholds v="true" />
+		<activityLocationsType v="buildings" />
+		<populationType v="households" />
+		<vehiclesSource v="matsim" />
 		<onlyWorkingDays v="true"/>
-		<useVehicles v="false" />
 	</surveyData>
 
 	<database>

@@ -20,8 +20,8 @@
 		</areaSet>	
 		<coordinateSystem v="EPSG:32632" />
 		<createTransit v="false" />
-		<populationType v="survey" />
-		<populationTypeVicinity v="none" />
+		<populationSource v="survey" />
+		<populationSourceVicinity v="none" />
 		<scaleFactor v="1.0" />
 		<outputDirectory v="/home/dhosse/scenarios/eGAP/" />
 		<overwriteExistingFiles v="true"/>
@@ -30,10 +30,10 @@
 	<numberOfThreads v="2" />
 
 	<surveyData>
-		<useBuildings v="true" />
-		<useHouseholds v="true" />
+		<activityLocationsType v="buildings" />
+		<populationType v="households" />
+		<vehiclesSource v="matsim" />
 		<onlyWorkingDays v="true"/>
-		<useVehicles v="false" />
 	</surveyData>
 
 	<database>
