@@ -10,10 +10,10 @@ public class ConfigurationUtils {
 		return new Configuration();
 	}
 	
-	public static void set(Configuration configuration, String parameter, Object value){
-		
-		configuration.setParam(parameter, value);
-		
-	}
+//	public static void set(Configuration configuration, String parameter, Object value){
+//		
+//		configuration.setParam(parameter, value);
+//		
+//	}
 	
 }

@@ -55,7 +55,7 @@ public class RunnerActionListener implements ActionListener, Runnable {
 		}
 		
 		String surveyArea = surveyAreaIds.toString().length() > 0 ? surveyAreaIds.toString() : null;
-		ConfigurationUtils.set(this.mainFrame.getConfiguration(), Configuration.SURVEY_AREA_IDS, surveyArea);
+//		ConfigurationUtils.set(this.mainFrame.getConfiguration(), Configuration.SURVEY_AREA_IDS, surveyArea);
 		
 		StringBuilder vicinityIds = new StringBuilder();
 		
@@ -71,10 +71,10 @@ public class RunnerActionListener implements ActionListener, Runnable {
 		}
 		
 		String vicinity = vicinityIds.toString().length() > 0 ? vicinityIds.toString() : null;
-		ConfigurationUtils.set(this.mainFrame.getConfiguration(), Configuration.VICINITY_IDS, vicinity);
-		ConfigurationUtils.set(this.mainFrame.getConfiguration(), Configuration.OVERWRITE_FILES, 
-				this.mainFrame.getMainPanel().getOverwrite().isSelected());
-		ConfigurationUtils.set(this.mainFrame.getConfiguration(), Configuration.OUTPUT_DIR, outputDir);
+//		ConfigurationUtils.set(this.mainFrame.getConfiguration(), Configuration.VICINITY_IDS, vicinity);
+//		ConfigurationUtils.set(this.mainFrame.getConfiguration(), Configuration.OVERWRITE_FILES, 
+//				this.mainFrame.getMainPanel().getOverwrite().isSelected());
+//		ConfigurationUtils.set(this.mainFrame.getConfiguration(), Configuration.OUTPUT_DIR, outputDir);
 
 		new ScenarioGenerationController(this.mainFrame.getConfiguration()).run();
 		

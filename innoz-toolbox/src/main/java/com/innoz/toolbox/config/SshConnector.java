@@ -144,9 +144,9 @@ public class SshConnector {
 	public static void setDbUserData(Configuration configuration, ConsoleReader reader) throws IOException{
 		configuration.setDatabaseUser(reader.readLine("> Enter database user name: "));
 		configuration.setDatabasePassword(new String(reader.readLine("> Enter database password: ", new Character('*'))));
-		if(!connected){
-			ConfigurationUtils.set(configuration, Configuration.LOCAL_PORT, 5432);
-		}
+//		if(!connected){
+//			ConfigurationUtils.set(configuration, Configuration.LOCAL_PORT, 5432);
+//		}
 	}
 
 	/**

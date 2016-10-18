@@ -11,15 +11,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.innoz.toolbox.config.Configuration.ActivityLocations;
-import com.innoz.toolbox.config.Configuration.AdminUnitEntry;
-import com.innoz.toolbox.config.Configuration.DayType;
-import com.innoz.toolbox.config.Configuration.PopulationSource;
-import com.innoz.toolbox.config.Configuration.PopulationType;
-import com.innoz.toolbox.config.Configuration.Subpopulations;
-import com.innoz.toolbox.config.Configuration.SurveyType;
-import com.innoz.toolbox.config.Configuration.VehicleSource;
-
 public class ConfigurationReaderXml extends DefaultHandler {
 	
 	private final Configuration configuration;
@@ -54,93 +45,93 @@ public class ConfigurationReaderXml extends DefaultHandler {
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes){
 		
-		if(qName.equalsIgnoreCase("areaSet")){
-			
-			if(attributes.getValue("k").equalsIgnoreCase("surveyArea")){
-				
-				this.creatingSurveyArea = true;
-				
-			} else if(attributes.getValue("k").equalsIgnoreCase("vicinity")){
-				
-				this.creatingVicinity = true;
-				
-			}
-			
-		} else if(qName.equalsIgnoreCase("adminUnit")){
-			
-			createAdminUnit(attributes);
-			
-		} else if(qName.equalsIgnoreCase(Configuration.CRS)){
-			
-			this.configuration.crs = attributes.getValue("v");
-			
-		} else if(qName.equalsIgnoreCase("useTransit")){
-			
-		} else if(qName.equalsIgnoreCase(Configuration.POPULATION_SOURCE)){
-			
-			this.configuration.popSource = PopulationSource.valueOf(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.POPULATION_SOURCE_V)){
-			
-			this.configuration.popSourceV = PopulationSource.valueOf(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.SCALE_FACTOR)){
-			
-			this.configuration.scaleFactor = Double.parseDouble(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.OUTPUT_DIR)){
-			
-			this.configuration.outputDirectory = attributes.getValue("v");
-			
-		} else if(qName.equalsIgnoreCase(Configuration.ACTIVITY_LOCATIONS_TYPE)){
-			
-			this.configuration.actLocs = ActivityLocations.valueOf(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.POPULATION_TYPE)){
-			
-			this.configuration.popType = PopulationType.valueOf(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.DAY_TYPES)){
-			
-			this.configuration.dayType = DayType.valueOf(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.VEHICLES_SOURCE)){
-			
-			this.configuration.vehSource = VehicleSource.valueOf(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.LOCAL_PORT)){
-			
-			this.configuration.localPort = Integer.parseInt(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.OVERWRITE_FILES)){
-			
-			this.configuration.overwriteExistingFiles = Boolean.parseBoolean(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.WRITE_DB_OUTPUT)){
-			
-			this.configuration.writeDatabaseTables = Boolean.parseBoolean(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.WRITE_INTO_DATAHUB)){
-			
-			this.configuration.writeIntoDatahub = Boolean.parseBoolean(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.DB_TABLE_SUFFIX)){
-			
-			this.configuration.tableSuffix = attributes.getValue("v");
-			
-		} else if(qName.equalsIgnoreCase(Configuration.DEMAND_DATA_SOURCE)){
-			
-			this.configuration.surveyType = SurveyType.valueOf(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.SUBPOPULATIONS_TYPE)){
-
-			this.configuration.subpopulation = Subpopulations.valueOf(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.N_THREADS)){
-			
-			this.configuration.numberOfThreads = Integer.parseInt(attributes.getValue("v"));
-			
-		}
+//		if(qName.equalsIgnoreCase("areaSet")){
+//			
+//			if(attributes.getValue("k").equalsIgnoreCase("surveyArea")){
+//				
+//				this.creatingSurveyArea = true;
+//				
+//			} else if(attributes.getValue("k").equalsIgnoreCase("vicinity")){
+//				
+//				this.creatingVicinity = true;
+//				
+//			}
+//			
+//		} else if(qName.equalsIgnoreCase("adminUnit")){
+//			
+//			createAdminUnit(attributes);
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.CRS)){
+//			
+//			this.configuration.crs = attributes.getValue("v");
+//			
+//		} else if(qName.equalsIgnoreCase("useTransit")){
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.POPULATION_SOURCE)){
+//			
+//			this.configuration.popSource = PopulationSource.valueOf(attributes.getValue("v"));
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.POPULATION_SOURCE_V)){
+//			
+//			this.configuration.popSourceV = PopulationSource.valueOf(attributes.getValue("v"));
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.SCALE_FACTOR)){
+//			
+//			this.configuration.scaleFactor = Double.parseDouble(attributes.getValue("v"));
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.OUTPUT_DIR)){
+//			
+//			this.configuration.outputDirectory = attributes.getValue("v");
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.ACTIVITY_LOCATIONS_TYPE)){
+//			
+//			this.configuration.actLocs = ActivityLocations.valueOf(attributes.getValue("v"));
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.POPULATION_TYPE)){
+//			
+//			this.configuration.popType = PopulationType.valueOf(attributes.getValue("v"));
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.DAY_TYPES)){
+//			
+//			this.configuration.dayType = DayType.valueOf(attributes.getValue("v"));
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.VEHICLES_SOURCE)){
+//			
+//			this.configuration.vehSource = VehicleSource.valueOf(attributes.getValue("v"));
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.LOCAL_PORT)){
+//			
+//			this.configuration.localPort = Integer.parseInt(attributes.getValue("v"));
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.OVERWRITE_FILES)){
+//			
+//			this.configuration.overwriteExistingFiles = Boolean.parseBoolean(attributes.getValue("v"));
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.WRITE_DB_OUTPUT)){
+//			
+//			this.configuration.writeDatabaseTables = Boolean.parseBoolean(attributes.getValue("v"));
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.WRITE_INTO_DATAHUB)){
+//			
+//			this.configuration.writeIntoDatahub = Boolean.parseBoolean(attributes.getValue("v"));
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.DB_TABLE_SUFFIX)){
+//			
+//			this.configuration.tableSuffix = attributes.getValue("v");
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.DEMAND_DATA_SOURCE)){
+//			
+//			this.configuration.surveyType = SurveyType.valueOf(attributes.getValue("v"));
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.SUBPOPULATIONS_TYPE)){
+//
+//			this.configuration.subpopulation = Subpopulations.valueOf(attributes.getValue("v"));
+//			
+//		} else if(qName.equalsIgnoreCase(Configuration.N_THREADS)){
+//			
+//			this.configuration.numberOfThreads = Integer.parseInt(attributes.getValue("v"));
+//			
+//		}
 		
 	}
 	
@@ -158,48 +149,48 @@ public class ConfigurationReaderXml extends DefaultHandler {
 	
 	private void createAdminUnit(Attributes atts){
 		
-		String id = atts.getValue("id");
-		
-		String nHH = atts.getValue(Configuration.NUMBER_OF_HH);
-		String nP = atts.getValue(Configuration.NUMBER_OF_P);
-		if(nHH == null) nHH = "0";
-		if(nP == null) nP = "0";
-		
-		int hh = Integer.parseInt(nHH);
-		int p = Integer.parseInt(nP);
-		
-		String levelOfDetail = atts.getValue(Configuration.LOD_NETWORK);
-		if(levelOfDetail == null) levelOfDetail = "6";
-		
-		Integer lod = Integer.parseInt(levelOfDetail);
-		
-		for(String s : id.split(Configuration.COMMENT)){
-
-			if(this.creatingSurveyArea){
-				
-				if(this.configuration.surveyAreaIds == null){
-				
-					this.configuration.surveyAreaIds = new String("");
-					
-				}
-				
-				this.configuration.surveyAreaIds += s + ",";
-				
-			} else if(this.creatingVicinity){
-				
-				if(this.configuration.vicinityIds == null){
-					
-					this.configuration.vicinityIds = new String("");
-					
-				}
-				
-				this.configuration.vicinityIds += s + ",";
-				
-			}
-			
-			this.configuration.adminUnits.put(id, new AdminUnitEntry(s, hh, p, lod));
-		
-		}
+//		String id = atts.getValue("id");
+//		
+//		String nHH = atts.getValue(Configuration.NUMBER_OF_HH);
+//		String nP = atts.getValue(Configuration.NUMBER_OF_P);
+//		if(nHH == null) nHH = "0";
+//		if(nP == null) nP = "0";
+//		
+//		int hh = Integer.parseInt(nHH);
+//		int p = Integer.parseInt(nP);
+//		
+//		String levelOfDetail = atts.getValue(Configuration.LOD_NETWORK);
+//		if(levelOfDetail == null) levelOfDetail = "6";
+//		
+//		Integer lod = Integer.parseInt(levelOfDetail);
+//		
+//		for(String s : id.split(Configuration.COMMENT)){
+//
+//			if(this.creatingSurveyArea){
+//				
+//				if(this.configuration.surveyAreaIds == null){
+//				
+//					this.configuration.surveyAreaIds = new String("");
+//					
+//				}
+//				
+//				this.configuration.surveyAreaIds += s + ",";
+//				
+//			} else if(this.creatingVicinity){
+//				
+//				if(this.configuration.vicinityIds == null){
+//					
+//					this.configuration.vicinityIds = new String("");
+//					
+//				}
+//				
+//				this.configuration.vicinityIds += s + ",";
+//				
+//			}
+//			
+//			this.configuration.adminUnits.put(id, new AdminUnitEntry(s, hh, p, lod));
+//		
+//		}
 		
 	}
 	

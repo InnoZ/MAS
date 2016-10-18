@@ -115,42 +115,42 @@ public class Runner {
 						
 							if(part.startsWith("-")){
 								
-								if(part.equals("-schema-name") || part.equals("-s")){
-									
-									ConfigurationUtils.set(c, Configuration.DB_SCHEMA_NAME, parts[i + 1]);
-									
-								} else if(part.equals("-table-suffix") || part.equals("-t")){
-									
-									ConfigurationUtils.set(c, Configuration.DB_TABLE_SUFFIX, parts[i + 1]);
-									
-								} else if(part.equals("-remote") || part.equals("-r")){
-									
-									ConfigurationUtils.set(c, Configuration.WRITE_INTO_DATAHUB, true);
-									
-									if(!serverConnection){
-										
-										serverConnection = SshConnector.connectShell(c, reader);
-										reader.setPrompt("> ");
-											
-									}
-									
-								} else if(part.equals("-attributes-file") || part.equals("-af")){
-									
-									attributesFile = parts[i + 1];
-									
-								} else if(part.equals("-vehicles-file") || part.equals("-vf")){
-									
-									vehiclesFile = parts[i + 1];
-									
-								} else if(part.equals("-network-file") || part.equals("-nf")){
-									
-									networkFile = parts[i+1];
-									
-								} else if(part.equals("-plans-file") || part.equals("-pf")){
-									
-									inputPlansFile = parts[i+1];
-									
-								}
+//								if(part.equals("-schema-name") || part.equals("-s")){
+//									
+//									ConfigurationUtils.set(c, Configuration.DB_SCHEMA_NAME, parts[i + 1]);
+//									
+//								} else if(part.equals("-table-suffix") || part.equals("-t")){
+//									
+//									ConfigurationUtils.set(c, Configuration.DB_TABLE_SUFFIX, parts[i + 1]);
+//									
+//								} else if(part.equals("-remote") || part.equals("-r")){
+//									
+//									ConfigurationUtils.set(c, Configuration.WRITE_INTO_DATAHUB, true);
+//									
+//									if(!serverConnection){
+//										
+//										serverConnection = SshConnector.connectShell(c, reader);
+//										reader.setPrompt("> ");
+//											
+//									}
+//									
+//								} else if(part.equals("-attributes-file") || part.equals("-af")){
+//									
+//									attributesFile = parts[i + 1];
+//									
+//								} else if(part.equals("-vehicles-file") || part.equals("-vf")){
+//									
+//									vehiclesFile = parts[i + 1];
+//									
+//								} else if(part.equals("-network-file") || part.equals("-nf")){
+//									
+//									networkFile = parts[i+1];
+//									
+//								} else if(part.equals("-plans-file") || part.equals("-pf")){
+//									
+//									inputPlansFile = parts[i+1];
+//									
+//								}
 								
 							}
 							

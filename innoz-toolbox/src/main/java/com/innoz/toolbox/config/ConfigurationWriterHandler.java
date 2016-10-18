@@ -85,26 +85,26 @@ public class ConfigurationWriterHandler {
 		out.write(NEWLINE);
 		out.write(NEWLINE);
 		
-		Map<String, String> params = configuration.getParams();
-		Map<String, String> comments = configuration.getComments();
-		
-		for(Entry<String, String> param : params.entrySet()){
-			
-			String comment = comments.get(param.getKey());
-			if(comment != null){
-				out.write(indent);
-				out.write("<!--" + comment + " -->");
-				out.write(NEWLINE);
-			}
-			
-			out.write(indent);
-			out.write("<" + param.getKey() + " v=\"" + param.getValue() + "\"/>");
-			out.write(NEWLINE);
-			out.write(NEWLINE);
-			
-		}
-		
-		out.write(NEWLINE);
+//		Map<String, String> params = configuration.getParams();
+//		Map<String, String> comments = configuration.getComments();
+//		
+//		for(Entry<String, String> param : params.entrySet()){
+//			
+//			String comment = comments.get(param.getKey());
+//			if(comment != null){
+//				out.write(indent);
+//				out.write("<!--" + comment + " -->");
+//				out.write(NEWLINE);
+//			}
+//			
+//			out.write(indent);
+//			out.write("<" + param.getKey() + " v=\"" + param.getValue() + "\"/>");
+//			out.write(NEWLINE);
+//			out.write(NEWLINE);
+//			
+//		}
+//		
+//		out.write(NEWLINE);
 		
 	}
 	

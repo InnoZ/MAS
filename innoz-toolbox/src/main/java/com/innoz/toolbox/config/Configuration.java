@@ -3,10 +3,12 @@ package com.innoz.toolbox.config;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
+import com.innoz.toolbox.config.groups.MiscConfigurationGroup;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup;
 import com.innoz.toolbox.utils.GlobalNames;
 
 /**
@@ -17,50 +19,49 @@ import com.innoz.toolbox.utils.GlobalNames;
  *
  */
 public final class Configuration {
-
-	//TAGS///////////////////////////////////////////////////////////////////////////////////
-	static final String SEP = "\t";
-	static final String COMMENT = "#";
-	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	private static final Logger log = Logger.getLogger(Configuration.class);
-	
-	public static final String SURVEY_AREA = "surveyArea";
-	public static final String VICINITY = "vicinity";
-	
-	public static final String SURVEY_AREA_IDS = "surveyAreaIds";
-	public static final String VICINITY_IDS = "vicinityIds";
-	public static final String CRS = "coordinateSystem";
-	public static final String OUTPUT_DIR = "outputDirectory";
-	public static final String SCALE_FACTOR = "scaleFactor";
-	public static final String ACTIVITY_LOCATIONS_TYPE = "activityLocationsType";
-	public static final String CREATE_TRANSIT = "createTransit";
 
-	public static final String DEMAND_DATA_SOURCE = "demandSource";
-	public static final String POPULATION_SOURCE = "populationSource";
-	public static final String POPULATION_SOURCE_V = "populationSourceVicinity";
-	public static final String VEHICLES_SOURCE = "vehiclesSource";
+	private MiscConfigurationGroup misc;
+	private ScenarioConfigurationGroup scenario;
+	private SurveyPopulationConfigurationGroup surveyPopulation;
 	
-	public static final String DAY_TYPES = "dayTypes";
-	public static final String POPULATION_TYPE = "populationType";
-	
-	public static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
-	public static final String NUMBER_OF_P = "numberOfInhabitants";
-	public static final String LOD_NETWORK = "networkDetail";
-	
-	public static final String SUBPOPULATIONS_TYPE = "subpopulationsType";
-	
-	public static final String LOCAL_PORT = "localPort";
-	public static final String DB_SCHEMA_NAME = "databaseSchemaName";
-	public static final String DB_TABLE_SUFFIX = "tableSuffix";
-	public static final String WRITE_DB_OUTPUT = "writeTables";
-	public static final String WRITE_INTO_DATAHUB = "intoMobilityDatahub";
-	
-	public static final String RANDOM_SEED = "randomSeed";
-	public static final String OVERWRITE_FILES = "overwriteExistingFiles";
-	
-	public static final String N_THREADS = "numberOfThreads";
+//	public static final String SURVEY_AREA = "surveyArea";
+//	public static final String VICINITY = "vicinity";
+//	
+//	public static final String SURVEY_AREA_IDS = "surveyAreaIds";
+//	public static final String VICINITY_IDS = "vicinityIds";
+//	public static final String CRS = "coordinateSystem";
+//	public static final String OUTPUT_DIR = "outputDirectory";
+//	public static final String SCALE_FACTOR = "scaleFactor";
+//	public static final String ACTIVITY_LOCATIONS_TYPE = "activityLocationsType";
+//	public static final String CREATE_TRANSIT = "createTransit";
+//
+//	public static final String DEMAND_DATA_SOURCE = "demandSource";
+//	public static final String POPULATION_SOURCE = "populationSource";
+//	public static final String POPULATION_SOURCE_V = "populationSourceVicinity";
+//	public static final String VEHICLES_SOURCE = "vehiclesSource";
+//	
+//	public static final String DAY_TYPES = "dayTypes";
+//	public static final String POPULATION_TYPE = "populationType";
+//	
+//	public static final String NUMBER_OF_HH = "numberOfHouseholds"; //TODO write this into gadm.districs!
+//	public static final String NUMBER_OF_P = "numberOfInhabitants";
+//	public static final String LOD_NETWORK = "networkDetail";
+//	
+//	public static final String SUBPOPULATIONS_TYPE = "subpopulationsType";
+//	
+//	public static final String LOCAL_PORT = "localPort";
+//	public static final String DB_SCHEMA_NAME = "databaseSchemaName";
+//	public static final String DB_TABLE_SUFFIX = "tableSuffix";
+//	public static final String WRITE_DB_OUTPUT = "writeTables";
+//	public static final String WRITE_INTO_DATAHUB = "intoMobilityDatahub";
+//	
+//	public static final String RANDOM_SEED = "randomSeed";
+//	public static final String OVERWRITE_FILES = "overwriteExistingFiles";
+//	
+//	public static final String N_THREADS = "numberOfThreads";
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
@@ -191,42 +192,42 @@ public final class Configuration {
 	 * @param param The string identifier of the parameter.
 	 * @param value The value to which the parameter is to be set.
 	 */
-	void setParam(String param, Object value){
-		
-		switch(param){
-		
-			case SURVEY_AREA_IDS: this.surveyAreaIds = (String) value;
-				break;
-			
-			case VICINITY_IDS: this.vicinityIds = (String) value;
-				break;
-			
-			case OUTPUT_DIR: this.outputDirectory = (String) value;
-				break;
-			
-			case OVERWRITE_FILES: this.overwriteExistingFiles = (Boolean) value;
-				break;
-				
-			case POPULATION_TYPE: this.popType = PopulationType.valueOf((String) value);
-				break;
-				
-			case DB_SCHEMA_NAME: this.dbNameSpace = (String) value;
-				break;
-				
-			case DB_TABLE_SUFFIX: this.tableSuffix = (String) value;
-				break;
-				
-			case WRITE_INTO_DATAHUB: this.writeIntoDatahub = (Boolean) value;
-				break;
-				
-			case LOCAL_PORT: this.localPort = (Integer) value;
-				break;
-			
-			default: return ;
-			
-		}
-		
-	}
+//	void setParam(String param, Object value){
+//		
+//		switch(param){
+//		
+//			case SURVEY_AREA_IDS: this.surveyAreaIds = (String) value;
+//				break;
+//			
+//			case VICINITY_IDS: this.vicinityIds = (String) value;
+//				break;
+//			
+//			case OUTPUT_DIR: this.outputDirectory = (String) value;
+//				break;
+//			
+//			case OVERWRITE_FILES: this.overwriteExistingFiles = (Boolean) value;
+//				break;
+//				
+//			case POPULATION_TYPE: this.popType = PopulationType.valueOf((String) value);
+//				break;
+//				
+//			case DB_SCHEMA_NAME: this.dbNameSpace = (String) value;
+//				break;
+//				
+//			case DB_TABLE_SUFFIX: this.tableSuffix = (String) value;
+//				break;
+//				
+//			case WRITE_INTO_DATAHUB: this.writeIntoDatahub = (Boolean) value;
+//				break;
+//				
+//			case LOCAL_PORT: this.localPort = (Integer) value;
+//				break;
+//			
+//			default: return ;
+//			
+//		}
+//		
+//	}
 	
 	/**
 	 * Validates the configuration. Only errors that may eventually cause exceptions are taken into account here.
@@ -541,13 +542,13 @@ public final class Configuration {
 	 */
 	public void dumpSettings(){
 		
-		log.info("Dump of configuration settings:");
-		
-		for(Entry<String,String> entry : getParams().entrySet()){
-			
-			log.info(entry.getKey() + "\t" + entry.getValue());
-			
-		}
+//		log.info("Dump of configuration settings:");
+//		
+//		for(Entry<String,String> entry : getParams().entrySet()){
+//			
+//			log.info(entry.getKey() + "\t" + entry.getValue());
+//			
+//		}
 		
 	}
 	
@@ -654,55 +655,73 @@ public final class Configuration {
 		return this.popSourceV;
 	}
 	
-	public Map<String, String> getParams(){
+//	public Map<String, String> getParams(){
+//		
+//		Map<String, String> map = new HashMap<>();
+//		
+//		map.put(CRS, this.crs);
+//		map.put(CREATE_TRANSIT, Boolean.toString(this.useTransit));
+//		map.put(POPULATION_SOURCE, this.popSource.name());
+//		map.put(POPULATION_SOURCE_V, this.popSourceV.name());
+//		map.put(SCALE_FACTOR, Double.toString(this.scaleFactor));
+//		map.put(OUTPUT_DIR, this.outputDirectory);
+//		map.put(OVERWRITE_FILES, Boolean.toString(this.overwriteExistingFiles));
+//		map.put(DEMAND_DATA_SOURCE, this.surveyType.name());
+//		map.put(SUBPOPULATIONS_TYPE, this.subpopulation.name());
+//		map.put(ACTIVITY_LOCATIONS_TYPE, this.actLocs.name());
+//		map.put(POPULATION_TYPE, this.popType.name());
+//		map.put(DAY_TYPES, this.dayType.name());
+//		map.put(VEHICLES_SOURCE, this.vehSource.name());
+//		map.put(LOCAL_PORT, Integer.toString(this.localPort));
+//		map.put(WRITE_DB_OUTPUT, Boolean.toString(this.writeDatabaseTables));
+//		map.put(N_THREADS, Integer.toString(numberOfThreads));
+//		map.put(SURVEY_AREA_IDS, this.surveyAreaIds);
+//		map.put(VICINITY_IDS, this.vicinityIds);
+//		
+//		return map;
+//		
+//	}
+	
+//	public Map<String, String> getComments(){
+//		
+//		Map<String, String> map = new HashMap<>();
+//		
+//		map.put(CRS, "The coordinate reference system that applies to the study area.");
+//		map.put(CREATE_TRANSIT, "NOT IMPLEMENTED YET! Defines if MATSim transit should be modeled or not. Default: false.");
+//		map.put(POPULATION_SOURCE, "The source of the population that is created as initial demand in the survey area. Possible values are: none, dummy, commuter, survey.");
+//		map.put(POPULATION_SOURCE_V, "The source of the population that is created as initial demand for the vicinity. Possible values are: none, dummy, commuter, survey.");
+//		map.put(SCALE_FACTOR, "The scale factor for the amount of households / persons to be created and for the supply side to reduce capacities. Any numeric value between 0 and 1.");
+//		map.put(OUTPUT_DIR, "The directory containing all output files of the scenario generation process.");
+//		map.put(OVERWRITE_FILES, "Switch to 'yes' to overwrite existing files in the output directory. Default: false.");
+//		map.put(DEMAND_DATA_SOURCE, "The data source for demand generation. Only applies to population type 'survey' at the moment. Default is 'mid', for Osnabrück, also 'srv' is possible.");
+//		map.put(SUBPOPULATIONS_TYPE, "Defines the type of subpopulation that is used to classify persons. Possible values are 'none' and 'mobility_attitude' (only valid for Osnabrück).");
+//		map.put(ACTIVITY_LOCATIONS_TYPE, "'Yes' means: Demand is spatially distributed on the level of individual buildings. If switched to 'no', activities will be randomly distributed in landuse areas. Default: yes.");
+//		map.put(POPULATION_TYPE, "Defines the type of population created. Possible values are 'persons' and 'households' (default).");
+//		map.put(DAY_TYPES, "Defines if all days or only working days (Mo-Fr) should be used for generating plans. Default: 'weekday'.");
+//		map.put(VEHICLES_SOURCE, "Defines if household vehicles should be created from survey or not. This only works, if the population type is 'households'. Default: 'matsim' (i.e. use MATSim default vehicles).");
+//		map.put(LOCAL_PORT, "The local network port for the ssh connection.");
+//		map.put(WRITE_DB_OUTPUT, "Defines if the data created according to this configuration should be written into database tables or not. Default: no.");
+//		map.put(N_THREADS, "Number of threads that are executed at the same time. Deault value is '1'.");
+//		
+//		return map;
+//		
+//	}
+	
+	public final MiscConfigurationGroup misc(){
 		
-		Map<String, String> map = new HashMap<>();
-		
-		map.put(CRS, this.crs);
-		map.put(CREATE_TRANSIT, Boolean.toString(this.useTransit));
-		map.put(POPULATION_SOURCE, this.popSource.name());
-		map.put(POPULATION_SOURCE_V, this.popSourceV.name());
-		map.put(SCALE_FACTOR, Double.toString(this.scaleFactor));
-		map.put(OUTPUT_DIR, this.outputDirectory);
-		map.put(OVERWRITE_FILES, Boolean.toString(this.overwriteExistingFiles));
-		map.put(DEMAND_DATA_SOURCE, this.surveyType.name());
-		map.put(SUBPOPULATIONS_TYPE, this.subpopulation.name());
-		map.put(ACTIVITY_LOCATIONS_TYPE, this.actLocs.name());
-		map.put(POPULATION_TYPE, this.popType.name());
-		map.put(DAY_TYPES, this.dayType.name());
-		map.put(VEHICLES_SOURCE, this.vehSource.name());
-		map.put(LOCAL_PORT, Integer.toString(this.localPort));
-		map.put(WRITE_DB_OUTPUT, Boolean.toString(this.writeDatabaseTables));
-		map.put(N_THREADS, Integer.toString(numberOfThreads));
-		map.put(SURVEY_AREA_IDS, this.surveyAreaIds);
-		map.put(VICINITY_IDS, this.vicinityIds);
-		
-		return map;
+		return this.misc;
 		
 	}
 	
-	public Map<String, String> getComments(){
+	public final ScenarioConfigurationGroup scenario(){
 		
-		Map<String, String> map = new HashMap<>();
+		return this.scenario;
 		
-		map.put(CRS, "The coordinate reference system that applies to the study area.");
-		map.put(CREATE_TRANSIT, "NOT IMPLEMENTED YET! Defines if MATSim transit should be modeled or not. Default: false.");
-		map.put(POPULATION_SOURCE, "The source of the population that is created as initial demand in the survey area. Possible values are: none, dummy, commuter, survey.");
-		map.put(POPULATION_SOURCE_V, "The source of the population that is created as initial demand for the vicinity. Possible values are: none, dummy, commuter, survey.");
-		map.put(SCALE_FACTOR, "The scale factor for the amount of households / persons to be created and for the supply side to reduce capacities. Any numeric value between 0 and 1.");
-		map.put(OUTPUT_DIR, "The directory containing all output files of the scenario generation process.");
-		map.put(OVERWRITE_FILES, "Switch to 'yes' to overwrite existing files in the output directory. Default: false.");
-		map.put(DEMAND_DATA_SOURCE, "The data source for demand generation. Only applies to population type 'survey' at the moment. Default is 'mid', for Osnabrück, also 'srv' is possible.");
-		map.put(SUBPOPULATIONS_TYPE, "Defines the type of subpopulation that is used to classify persons. Possible values are 'none' and 'mobility_attitude' (only valid for Osnabrück).");
-		map.put(ACTIVITY_LOCATIONS_TYPE, "'Yes' means: Demand is spatially distributed on the level of individual buildings. If switched to 'no', activities will be randomly distributed in landuse areas. Default: yes.");
-		map.put(POPULATION_TYPE, "Defines the type of population created. Possible values are 'persons' and 'households' (default).");
-		map.put(DAY_TYPES, "Defines if all days or only working days (Mo-Fr) should be used for generating plans. Default: 'weekday'.");
-		map.put(VEHICLES_SOURCE, "Defines if household vehicles should be created from survey or not. This only works, if the population type is 'households'. Default: 'matsim' (i.e. use MATSim default vehicles).");
-		map.put(LOCAL_PORT, "The local network port for the ssh connection.");
-		map.put(WRITE_DB_OUTPUT, "Defines if the data created according to this configuration should be written into database tables or not. Default: no.");
-		map.put(N_THREADS, "Number of threads that are executed at the same time. Deault value is '1'.");
+	}
+	
+	public final SurveyPopulationConfigurationGroup surveyPopulation(){
 		
-		return map;
+		return this.surveyPopulation;
 		
 	}
 	
