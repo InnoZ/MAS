@@ -8,26 +8,34 @@ public class MiscConfigurationGroup extends ConfigurationGroup {
 	static final String GROUP_NAME = "misc";
 	
 	public static final String CRS = "coordinateSystem";
+	public static final String NUMBER_OF_THREADS = "numberOfThreads";
 	public static final String OUTPUT_DIR = "outputDirectory";
 	public static final String OVERWRITE_EXISTING_FILES = "overwriteExistingFiles";
 	
 	private String coordinateSystem = "EPSG:4326";
+	private int numberOfThreads;
 	private String outputDirectory = ".";
 	private boolean overwriteExistingFiles = false;
 	
-	MiscConfigurationGroup() {
+	public MiscConfigurationGroup() {
 		
 		super(GROUP_NAME);
+		this.params.put(CRS, this.coordinateSystem);
+		this.params.put(NUMBER_OF_THREADS, this.numberOfThreads);
+		this.params.put(OUTPUT_DIR, this.outputDirectory);
+		this.params.put(OVERWRITE_EXISTING_FILES, this.overwriteExistingFiles);
 		
 	}
 
 	@Override
-	Map<String, String> getComments() {
+	public Map<String, String> getComments() {
 		
 		Map<String, String> map = new HashMap<>();
 		
 		map.put(CRS, "The coordinate reference system that applies to the study area.");
+		map.put(NUMBER_OF_THREADS, "Number of threads that are executed at the same time. Deault value is '1'.");
 		map.put(OUTPUT_DIR, "The directory containing all output files of the scenario generation process.");
+		map.put(OVERWRITE_EXISTING_FILES, "Switch to 'yes' to overwrite existing files in the output directory. Default: false.");
 		
 		return map;
 	}
@@ -41,6 +49,18 @@ public class MiscConfigurationGroup extends ConfigurationGroup {
 	public void setCoordinateSystem(String crs){
 		
 		this.coordinateSystem = crs;
+		
+	}
+	
+	public int getNumberOfThreads(){
+		
+		return this.numberOfThreads;
+		
+	}
+	
+	public void setNumberOfThreads(int n){
+		
+		this.numberOfThreads = n;
 		
 	}
 	

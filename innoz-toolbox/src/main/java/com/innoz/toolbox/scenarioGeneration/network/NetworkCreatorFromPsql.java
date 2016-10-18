@@ -108,7 +108,7 @@ public class NetworkCreatorFromPsql {
 		this.geoinformation = geoinformation;
 		
 		CoordinateReferenceSystem from = CRS.decode("EPSG:4326", true);
-		CoordinateReferenceSystem to = CRS.decode(configuration.getCrs(), true);
+		CoordinateReferenceSystem to = CRS.decode(configuration.misc().getCoordinateSystem(), true);
 		this.transformation = TransformationFactory.getCoordinateTransformation(
 				from.toString(), to.toString());
 		this.configuration = configuration;
@@ -569,7 +569,7 @@ public class NetworkCreatorFromPsql {
 			}
 			
 			// Set the link's capacity and the resulting freespeed (if it's meant to be scaled)
-			double capacity = lanesPerDirection * laneCapacity * this.configuration.getScaleFactor();
+			double capacity = lanesPerDirection * laneCapacity * this.configuration.scenario().getScaleFactor();
 			
 			if(this.scaleMaxSpeed){
 				

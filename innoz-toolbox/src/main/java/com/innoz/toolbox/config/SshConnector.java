@@ -44,14 +44,14 @@ public class SshConnector {
 		// Set user names and passwords for ssh and database
 		String sshuser = sshData[0];
 		String sshpassword = sshData[1];
-		configuration.setDatabaseUser(sshData[2]);
-		configuration.setDatabasePassword(sshData[3]);
+		configuration.psql().setPsqlUser(sshData[2]);
+		configuration.psql().setPsqlPassword(sshData[3]);
 		
 		// Set hosts and ports for the connection
 		String sshhost = "playground";
 		String remoteHost = "localhost";
-		int nLocalPort = configuration.getLocalPort();
-		int nRemotePort = configuration.getRemotePort();
+		int nLocalPort = configuration.psql().getPsqlPort();
+		int nRemotePort = 5432;
 		
 		final JSch jsch = new JSch();
 
@@ -117,8 +117,8 @@ public class SshConnector {
 		// Set hosts and ports for the connection
 		String sshhost = "playground";
 		String remoteHost = "localhost";
-		int nLocalPort = configuration.getLocalPort();
-		int nRemotePort = configuration.getRemotePort();
+		int nLocalPort = configuration.psql().getPsqlPort();
+		int nRemotePort = 5432;
 		
 		final JSch jsch = new JSch();
 
@@ -142,8 +142,8 @@ public class SshConnector {
 	}
 	
 	public static void setDbUserData(Configuration configuration, ConsoleReader reader) throws IOException{
-		configuration.setDatabaseUser(reader.readLine("> Enter database user name: "));
-		configuration.setDatabasePassword(new String(reader.readLine("> Enter database password: ", new Character('*'))));
+		configuration.psql().setPsqlUser(reader.readLine("> Enter database user name: "));
+		configuration.psql().setPsqlPassword(new String(reader.readLine("> Enter database password: ", new Character('*'))));
 //		if(!connected){
 //			ConfigurationUtils.set(configuration, Configuration.LOCAL_PORT, 5432);
 //		}

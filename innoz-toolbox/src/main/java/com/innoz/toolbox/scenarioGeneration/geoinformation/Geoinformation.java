@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.matsim.core.utils.collections.QuadTree;
 
-import com.innoz.toolbox.config.Configuration.ActivityLocations;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
 import com.innoz.toolbox.utils.data.Tree;
 import com.innoz.toolbox.utils.data.Tree.Node;
@@ -48,7 +48,7 @@ public class Geoinformation {
 	protected Geometry catchmentAreaPt;
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
-	public Geoinformation(ActivityLocations type){
+	public Geoinformation(ActivityLocationsType type){
 		
 		// Initialize the tree with the highest level admin unit (Germany)
 		this.adminUnitTree = new Tree<AdministrativeUnit>(new AdministrativeUnit("0"));
@@ -58,7 +58,7 @@ public class Geoinformation {
 		
 	}
 	
-	public ActivityLocations getLanduseType(){
+	public ActivityLocationsType getLanduseType(){
 		
 		return this.landuseData.getType();
 		

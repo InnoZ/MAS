@@ -6,13 +6,13 @@ import java.util.Map.Entry;
 
 public abstract class ConfigurationGroup {
 
-	final String groupName;
-	Map<String, Object> params;
+	public final String groupName;
+	Map<String, Object> params = new HashMap<String, Object>();
+	Map<String, ConfigurationGroup> parameterSets = new HashMap<>();
 	
-	ConfigurationGroup(String name){
+	public ConfigurationGroup(String name){
 		
 		this.groupName = name;
-		this.params = new HashMap<String, Object>();
 		
 	}
 	
@@ -30,6 +30,18 @@ public abstract class ConfigurationGroup {
 			
 	}
 	
-	abstract Map<String, String> getComments();
+	public Map<String, ConfigurationGroup> getParameterSets(){
+		
+		return this.parameterSets;
+		
+	}
+	
+	public void addParameterSet(ConfigurationGroup set){
+		
+		parameterSets.put(set.groupName, set);
+		
+	}
+	
+	public abstract Map<String, String> getComments();
 	
 }

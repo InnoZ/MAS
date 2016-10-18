@@ -13,16 +13,21 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 	
 	private long randomSeed = 4711L;
 	private double scaleFactor = 1d;
-	private ActivityLocationsType actLocsType = ActivityLocationsType.buildings;
+	private ActivityLocationsType actLocsType = ActivityLocationsType.BUILDINGS;
 	
 	public enum ActivityLocationsType{
-		buildings,
-		facilities
+		BUILDINGS,
+		FACILITIES,
+		LANDUSE
 	};
 	
-	ScenarioConfigurationGroup() {
+	public ScenarioConfigurationGroup() {
 		
 		super(GROUP_NAME);
+		this.params.put(ACT_LOCATIONS_TYPE, this.actLocsType);
+		this.params.put(RANDOM_SEED, this.randomSeed);
+		this.params.put(SCALE_FACTOR, this.scaleFactor);
+		
 	}
 	
 	public ActivityLocationsType getActivityLocationsType(){
@@ -62,16 +67,98 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 	}
 
 	@Override
-	Map<String, String> getComments() {
+	public Map<String, String> getComments() {
 		
 		Map<String, String> map = new HashMap<>();
 		
-		map.put(ACT_LOCATIONS_TYPE, "Possible values: buildings, facilities.");
+		map.put(ACT_LOCATIONS_TYPE, "Possible values: BUILDINGS, FACILITIES, LANDUSE.");
 		map.put(RANDOM_SEED, "The seed for the pseudo random number generator for the generation of the scenario.");
 		map.put(SCALE_FACTOR, "The scale factor for the amount of households / persons to be created and for the supply"
 				+ " side to scale capacities. Any numeric value between 0 and 1.");
 		
 		return map;
+		
+	}
+	
+	public static class AreaSet extends ConfigurationGroup {
+
+		public static final String SET_TYPE = "areaSet";
+		
+		public static final String IDS = "ids";
+		public static final String NETWORK_LEVEL = "networkLevel";
+		public static final String POPULATION_SOURCE = "populationSource";
+		
+		private String ids;
+		private int networkLevel = 6;
+		private PopulationSource populationSource;
+		
+		public enum PopulationSource{
+			COMMUTER,
+			SURVEY
+		};
+		
+		public AreaSet() {
+			
+			super(SET_TYPE);
+			this.params.put(IDS, this.ids);
+			this.params.put(NETWORK_LEVEL, this.networkLevel);
+			this.params.put(POPULATION_SOURCE, this.populationSource);
+			
+		}
+
+		@Override
+		public Map<String, String> getComments() {
+			
+			Map<String, String> map = new HashMap<>();
+			
+			map.put(IDS, "The keys (GKZ) of the administrative areas. Multiple keys should be comma-separated.");
+			map.put(NETWORK_LEVEL, "The lowest osm road level that should be displayed in the area. "
+					+ "1: motorway, motorway_link; 2: trunk, trunk_link; 3: primary, primary_link; "
+					+ "4: secondary; 5: tertiary; 6: living_street, minor, residential, unclassified."
+					+ " For a documentation of the osm road types see http://wiki.openstreetmap.org/wiki/Key:highway");
+			map.put(POPULATION_SOURCE, "The source for the demand generation. Possible values: COMMUTER, SURVEY.");
+			
+			return map;
+			
+		}
+		
+		public String getIds(){
+			
+			return this.ids;
+			
+		}
+		
+		public void setIds(String ids){
+			
+			this.ids = ids;
+			this.params.put(IDS, ids);
+			
+		}
+		
+		public int getNetworkLevel(){
+			
+			return this.networkLevel;
+			
+		}
+		
+		public void setNetworkLevel(int level){
+			
+			this.networkLevel = level;
+			
+		}
+		
+		public PopulationSource getPopulationSource(){
+			
+			return this.populationSource;
+			
+		}
+		
+		public void setPopulationSource(PopulationSource source){
+			
+			this.populationSource = source;
+			this.params.put(POPULATION_SOURCE, source);
+			
+		}
 		
 	}
 

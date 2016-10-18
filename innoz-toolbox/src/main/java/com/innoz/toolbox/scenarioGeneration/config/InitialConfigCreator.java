@@ -1,19 +1,14 @@
 package com.innoz.toolbox.scenarioGeneration.config;
 
-import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.Configuration.PopulationSource;
-import com.innoz.toolbox.config.Configuration.PopulationType;
-import com.innoz.toolbox.config.Configuration.Subpopulations;
-import com.innoz.toolbox.config.Configuration.VehicleSource;
-import com.innoz.toolbox.scenarioGeneration.population.mobilityAttitude.MobilityAttitudeGroups;
-import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
-
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams;
 import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
+
+import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 
 /**
  * 
@@ -32,26 +27,26 @@ public class InitialConfigCreator {
 		Config config = ConfigUtils.createConfig();
 
 		// Network config group
-		config.network().setInputFile(configuration.getOutputDirectory() + "network.xml.gz");
+		config.network().setInputFile(configuration.misc().getOutputDirectory() + "network.xml.gz");
 		
 		// Plans config group
-		config.plans().setInputFile(configuration.getOutputDirectory() + "plans.xml.gz");
+		config.plans().setInputFile(configuration.misc().getOutputDirectory() + "plans.xml.gz");
 		
 		// If the population was created somewhat sophisticated (i.e. from survey data), dump the persons' attributes
-		if(configuration.getPopulationSource().equals(PopulationSource.survey)){
+//		if(configuration.getPopulationSource().equals(PopulationSource.survey)){
 			
-			config.plans().setInputPersonAttributeFile(configuration.getOutputDirectory() + "personAttributes.xml.gz");
+			config.plans().setInputPersonAttributeFile(configuration.misc().getOutputDirectory() + "personAttributes.xml.gz");
 		
-		}
+//		}
 		
 		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
 	
 		// If households are used, adapt the parameters that define the usage in MATSim
-		if(configuration.getPopulationType().equals(PopulationType.households)){
+//		if(configuration.getPopulationType().equals(PopulationType.households)){
 			
-			config.households().setInputFile(configuration.getOutputDirectory() + "households.xml.gz");
+			config.households().setInputFile(configuration.misc().getOutputDirectory() + "households.xml.gz");
 			
-		}
+//		}
 
 		// Add activity types to the scoring parameters
 		addBasicActivityParams(config);
@@ -60,16 +55,16 @@ public class InitialConfigCreator {
 		addBasicModeParams(config);
 		
 		// QSim config group
-		config.qsim().setFlowCapFactor(configuration.getScaleFactor());
-		config.qsim().setStorageCapFactor(configuration.getScaleFactor());
+		config.qsim().setFlowCapFactor(configuration.scenario().getScaleFactor());
+		config.qsim().setStorageCapFactor(configuration.scenario().getScaleFactor());
 
 		// If non-generic vehicles are used, adapt the parameters that define the usage in MATSim
-		if(configuration.getVehicleSource().equals(VehicleSource.survey)){
+//		if(configuration.getVehicleSource().equals(VehicleSource.survey)){
 			
 			config.qsim().setVehiclesSource(VehiclesSource.fromVehiclesData);
-			config.vehicles().setVehiclesFile(configuration.getOutputDirectory() + "vehicles.xml.gz");
+			config.vehicles().setVehiclesFile(configuration.misc().getOutputDirectory() + "vehicles.xml.gz");
 			
-		}
+//		}
 		
 		return config;
 		
