@@ -30,9 +30,17 @@ public final class EnergyConsumptionConfigGroup extends ConfigGroup {
 		
 	}
 	
-	public void addEneryConsumptionParams(String actType, double energyConsumption){
+	public void addActivityEneryConsumptionParams(String actType, double energyConsumption){
 		
-		EnergyConsumptionParams params = new EnergyConsumptionParams(actType);
+		ActivityEnergyConsumptionParams params = new ActivityEnergyConsumptionParams(actType);
+		params.setEnergyConsumptionInKiloWattHours(energyConsumption);
+		super.addParameterSet(params);
+		
+	}
+	
+	public void addLegEnergyConsumptionParams(String mode, double energyConsumption){
+		
+		LegEnergyConsumptionParams params = new LegEnergyConsumptionParams(mode);
 		params.setEnergyConsumptionInKiloWattHours(energyConsumption);
 		super.addParameterSet(params);
 		
@@ -51,11 +59,11 @@ public final class EnergyConsumptionConfigGroup extends ConfigGroup {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public EnergyConsumptionParams getEnergyConsumptionParams(String actType){
+	public ActivityEnergyConsumptionParams getEnergyConsumptionParams(String actType){
 		
-		Collection<EnergyConsumptionParams> params = (Collection<EnergyConsumptionParams>) getParameterSets().get(EnergyConsumptionParams.SET_TYPE);
+		Collection<ActivityEnergyConsumptionParams> params = (Collection<ActivityEnergyConsumptionParams>) getParameterSets().get(ActivityEnergyConsumptionParams.SET_TYPE);
 		
-		for(EnergyConsumptionParams pars : params){
+		for(ActivityEnergyConsumptionParams pars : params){
 			
 			if(pars.getActivityType().equals(actType)){
 				
@@ -97,9 +105,9 @@ public final class EnergyConsumptionConfigGroup extends ConfigGroup {
 		
 	}
 	
-	public static class EnergyConsumptionParams extends ReflectiveConfigGroup implements MatsimParameters {
+	public static class ActivityEnergyConsumptionParams extends ReflectiveConfigGroup implements MatsimParameters {
 
-		private static final String SET_TYPE = "energyConsumptionParams";
+		private static final String SET_TYPE = "activityEnergyConsumptionParams";
 		
 		public static final String ACT_TYPE = "actType";
 		public static final String ENERGY_CONSUMPTION = "energyConsumptionInKiloWattHours";
@@ -107,7 +115,7 @@ public final class EnergyConsumptionConfigGroup extends ConfigGroup {
 		private String actType;
 		private double energyConsumptionInKiloWattHours = 0.0;
 		
-		public EnergyConsumptionParams(String actType) {
+		public ActivityEnergyConsumptionParams(String actType) {
 			
 			super(SET_TYPE);
 			this.actType = actType;
@@ -125,6 +133,53 @@ public final class EnergyConsumptionConfigGroup extends ConfigGroup {
 		void setActivityType(String actType){
 			
 			this.actType = actType;
+			
+		}
+		
+		@StringGetter(ENERGY_CONSUMPTION)
+		public double getEnergyConsumptionInKiloWattHours(){
+			
+			return this.energyConsumptionInKiloWattHours;
+			
+		}
+		
+		@StringSetter(ENERGY_CONSUMPTION)
+		void setEnergyConsumptionInKiloWattHours(double energyConsumptionInKiloWattHours){
+			
+			this.energyConsumptionInKiloWattHours = energyConsumptionInKiloWattHours;
+			
+		}
+		
+	}
+	
+	public static class LegEnergyConsumptionParams extends ReflectiveConfigGroup implements MatsimParameters {
+
+		private static final String SET_TYPE = "legEnergyConsumptionParams";
+		
+		public static final String MODE = "mode";
+		public static final String ENERGY_CONSUMPTION = "energyConsumptionInKiloWattHours";
+		
+		private String mode;
+		private double energyConsumptionInKiloWattHours = 0.0;
+		
+		public LegEnergyConsumptionParams(String mode) {
+			
+			super(SET_TYPE);
+			this.mode = mode;
+			
+		}
+		
+		@StringGetter(MODE)
+		public String getActivityType(){
+			
+			return this.mode;
+			
+		}
+		
+		@StringSetter(MODE)
+		void setActivityType(String actType){
+			
+			this.mode = actType;
 			
 		}
 		

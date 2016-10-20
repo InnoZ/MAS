@@ -1,6 +1,7 @@
 package com.innoz.energy.example;
 
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
@@ -15,17 +16,19 @@ public class RunExample {
 	//TODO create example scenario in resources folder
 	public static void main(String args[]){
 		
-		Config config = ConfigUtils.loadConfig("/home/dhosse/scenarios/dessau/config.xml.gz");
+		Config config = ConfigUtils.loadConfig("/home/dhosse/scenarios/burg/config.xml.gz");
 		EnergyConsumptionConfigGroup aec = new EnergyConsumptionConfigGroup();
-		aec.addEneryConsumptionParams("home", 1.0);
-		aec.addEneryConsumptionParams("work", 2.0);
-		aec.addEneryConsumptionParams("other", 0.5);
-		aec.addEneryConsumptionParams("education", 0.75);
+		aec.addActivityEneryConsumptionParams("home", 1.0);
+		aec.addActivityEneryConsumptionParams("work", 2.0);
+		aec.addActivityEneryConsumptionParams("other", 0.5);
+		aec.addActivityEneryConsumptionParams("education", 0.75);
+		aec.addActivityEneryConsumptionParams("leisure", 4.0);
+		aec.addLegEnergyConsumptionParams(TransportMode.car, 0.04);
 		config.addModule(aec);
 		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 		config.controler().setLastIteration(0);
-		config.controler().setOutputDirectory("/home/dhosse/scenarios/dessau/output/");
+		config.controler().setOutputDirectory("/home/dhosse/scenarios/burg/output/");
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
