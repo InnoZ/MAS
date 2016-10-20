@@ -89,7 +89,7 @@ public class ScenarioGenerationController extends DefaultController {
 			nc.setScaleMaxSpeed(true);
 			nc.create(dbReader);
 
-			CreateCarsharingVehicles.run(configuration, scenario);
+//			CreateCarsharingVehicles.run(configuration, scenario);
 			
 			// Create a MATSim population
 			new PopulationCreator(geoinformation).run(configuration, scenario);
