@@ -273,6 +273,8 @@ public class NetworkCreatorFromPsql {
 					
 					if(this.levelOfDetail > 4){
 						
+						if(this.configuration.getScaleFactor() <= 0.1) return;
+						
 						this.setHighwayDefaults(5, TERTIARY, 1,  30.0/3.6, 0.8,  600, "car");
 						
 						if(this.levelOfDetail > 5){
@@ -571,7 +573,7 @@ public class NetworkCreatorFromPsql {
 			}
 			
 			// Set the link's capacity and the resulting freespeed (if it's meant to be scaled)
-			double capacity = lanesPerDirection * laneCapacity * this.configuration.getScaleFactor();
+			double capacity = lanesPerDirection * laneCapacity;
 			
 			if(this.scaleMaxSpeed){
 				
