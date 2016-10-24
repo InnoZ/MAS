@@ -16,7 +16,7 @@ public class RunExample {
 	//TODO create example scenario in resources folder
 	public static void main(String args[]){
 		
-		Config config = ConfigUtils.loadConfig("/home/dhosse/scenarios/burg/config.xml.gz");
+		Config config = ConfigUtils.loadConfig("/home/dhosse/scenarios/berlin/config.xml.gz");
 		EnergyConsumptionConfigGroup aec = new EnergyConsumptionConfigGroup();
 		aec.addActivityEneryConsumptionParams("home", 1.0);
 		aec.addActivityEneryConsumptionParams("work", 2.0);
@@ -28,7 +28,9 @@ public class RunExample {
 		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 		config.controler().setLastIteration(0);
-		config.controler().setOutputDirectory("/home/dhosse/scenarios/burg/output/");
+		config.controler().setOutputDirectory("/home/dhosse/scenarios/berlin/output/");
+		
+		config.qsim().setEndTime(30*3600);
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
