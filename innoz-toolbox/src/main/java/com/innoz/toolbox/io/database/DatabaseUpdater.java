@@ -71,7 +71,7 @@ public class DatabaseUpdater {
 		String dbName = DatabaseConstants.SIMULATIONS_DB;
 		String dbUser = configuration.getDatabaseUsername();
 		String dbPassword = configuration.getDatabasePassword();
-		int localPort = configuration.getLocalPort();
+		int localPort = configuration.psql().getPsqlPort();
 		
 		try {
 			

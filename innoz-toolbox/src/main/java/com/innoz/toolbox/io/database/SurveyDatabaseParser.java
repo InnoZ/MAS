@@ -21,6 +21,7 @@ import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.Configuration.DayType;
 import com.innoz.toolbox.config.Configuration.PopulationType;
 import com.innoz.toolbox.config.Configuration.VehicleSource;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.DayTypes;
 import com.innoz.toolbox.config.PsqlAdapter;
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.handler.DefaultHandler;
@@ -83,9 +84,10 @@ public class SurveyDatabaseParser {
 		
 			if(connection != null){
 
-				boolean onlyWorkingDays = configuration.getUsedDayTypes().equals(DayType.weekday) ? true : false;
+				boolean onlyWorkingDays = configuration.surveyPopulation().getDayTypes().equals(DayTypes.weekday) ?
+						true : false;
 				
-				if(configuration.getPopulationType().equals(PopulationType.households)){
+				if(configuration.scenario().getPopulationType().equals(PopulationType.households)){
 					
 					log.info("Creating survey households...");
 					

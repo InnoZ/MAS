@@ -31,6 +31,7 @@ import org.opengis.referencing.operation.TransformException;
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.PsqlAdapter;
 import com.innoz.toolbox.config.groups.ConfigurationGroup;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.io.database.datasets.OsmPointDataset;
 import com.innoz.toolbox.io.database.datasets.OsmPolygonDataset;
@@ -366,7 +367,7 @@ public class DatabaseReader {
 			throws NoSuchAuthorityCodeException, FactoryException{
 
 		final CoordinateReferenceSystem fromCRS = CRS.decode(GlobalNames.WGS84, true);
-		final CoordinateReferenceSystem toCRS = CRS.decode(configuration.getCrs(), true);
+		final CoordinateReferenceSystem toCRS = CRS.decode(configuration.misc().getCoordinateSystem(), true);
 		
 		this.ct = TransformationFactory.getCoordinateTransformation(fromCRS.toString(),
 				toCRS.toString());
@@ -390,15 +391,15 @@ public class DatabaseReader {
 			// Read point geometries
 			readPointData(connection);
 			
-			if(!configuration.getActivityLocationsType().equals(ActivityLocations.landuse)){
+			if(!configuration.scenario().getActivityLocationsType().equals(ActivityLocationsType.LANDUSE)){
 				
-				if(configuration.getActivityLocationsType().equals(ActivityLocations.facilities)){
+				if(configuration.scenario().getActivityLocationsType().equals(ActivityLocationsType.FACILITIES)){
 					
 					new FacilitiesCreator().create(this, scenario, geoinformation, buildingList, minX, minY, maxX, maxY);
 
 				} else {
 					
-					MultithreadedModule module = new MultithreadedModule(configuration.getNumberOfThreads());
+					MultithreadedModule module = new MultithreadedModule(configuration.misc().getNumberOfThreads());
 					module.initThreads(BuildingThread.class.getName(), this);
 					for(Building b : this.buildingList){
 						module.handle(b);
@@ -472,7 +473,7 @@ public class DatabaseReader {
 		statement.close();
 		
 		//post process
-		MultithreadedModule module = new MultithreadedModule(configuration.getNumberOfThreads());
+		MultithreadedModule module = new MultithreadedModule(configuration.misc().getNumberOfThreads());
 		module.initThreads(DataProcessingAlgoThread.class.getName(), this, "buildings");
 		for(OsmPolygonDataset dataset : this.polygonData.get("buildings")){
 			module.handle(dataset);
@@ -527,7 +528,7 @@ public class DatabaseReader {
 		statement.close();
 		
 		//post process
-		MultithreadedModule module = new MultithreadedModule(configuration.getNumberOfThreads());
+		MultithreadedModule module = new MultithreadedModule(configuration.misc().getNumberOfThreads());
 		module.initThreads(DataProcessingAlgoThread.class.getName(), this, "amenities");
 		for(OsmPointDataset dataset : this.pointData){
 			module.handle(dataset);
