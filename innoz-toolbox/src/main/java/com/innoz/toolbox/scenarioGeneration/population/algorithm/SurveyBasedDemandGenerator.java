@@ -29,17 +29,13 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.Configuration.ActivityLocations;
-import com.innoz.toolbox.config.Configuration.PopulationType;
-import com.innoz.toolbox.config.Configuration.Subpopulations;
-import com.innoz.toolbox.config.Configuration.VehicleSource;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
 import com.innoz.toolbox.io.database.SurveyDatabaseParserV2;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.ProxyFacility;
-import com.innoz.toolbox.scenarioGeneration.population.mobilityAttitude.MobilityAttitudeGroups;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyHousehold;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
@@ -86,7 +82,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		parser.run(configuration, container, this.geoinformation, CollectionUtils.stringToSet(ids));
 		
 		// Choose the method for demand generation that has been specified in the configuration
-		if(configuration.getPopulationType().equals(PopulationType.households)){
+		if(configuration.surveyPopulation().useHouseholds()){
 		
 			createHouseholds(configuration, container, ids);
 			
@@ -127,7 +123,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
 			AdministrativeUnit d = this.geoinformation.getAdminUnit(s).getData();
 			
-			for(int i = 0; i < d.getNumberOfHouseholds() * configuration.getScaleFactor(); i++){
+			for(int i = 0; i < d.getNumberOfHouseholds() * configuration.scenario().getScaleFactor(); i++){
 				
 				this.currentHomeCell = chooseAdminUnit(d, ActivityTypes.HOME);
 				
@@ -170,7 +166,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				// Go through all residential areas of the home cell and randomly choose one of them
 				if(this.currentHomeCell.getLanduseGeometries().containsKey(ActivityTypes.HOME)){
 					
-					if(this.geoinformation.getLanduseType().equals(ActivityLocations.facilities)){
+					if(this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
 						
 						homeFacility = chooseActivityFacilityInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
 						homeLocation = transformation.transform(homeFacility.getCoord());
@@ -209,7 +205,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				}
 				
 				// If we model non-generic cars, create all cars that were reported in the survey and add them to the household
-				if(configuration.getVehicleSource().equals(VehicleSource.survey)){
+				if(configuration.surveyPopulation().getVehicleType().equals(com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.VehicleType.SURVEY)){
 					
 					createSurveyVehicles(container, template,
 							household);
@@ -249,7 +245,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
 			AdministrativeUnit d = this.geoinformation.getAdminUnit(s).getData();
 			
-			for(int i = 0; i < d.getNumberOfInhabitants() * configuration.getScaleFactor(); i++){
+			for(int i = 0; i < d.getNumberOfInhabitants() * configuration.scenario().getScaleFactor(); i++){
 				
 				this.currentHomeCell = chooseAdminUnit(d, ActivityTypes.HOME);
 				
@@ -284,7 +280,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				// Go through all residential areas of the home cell and randomly choose one of them
 				if(this.currentHomeCell.getLanduseGeometries().containsKey(ActivityTypes.HOME)){
 					
-					if(this.geoinformation.getLanduseType().equals(ActivityLocations.facilities)){
+					if(this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
 						
 						homeFacility = chooseActivityFacilityInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
 						homeLocation = transformation.transform(homeFacility.getCoord());
@@ -413,13 +409,14 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			personAttributes.putAttribute(person.getId().toString(), "FF_CARD", "true");
 		}
 		
-		if(configuration.getSubpopulationsType().equals(Subpopulations.mobility_attitude)){
-			String mag = MobilityAttitudeGroups.assignPersonToGroup(person, random,
-					hhIncome, personAttributes);
-			if(mag != null){
-				personAttributes.putAttribute(person.getId().toString(), "mobilityAttitude", mag);
-			}
-		}
+		//TODO add possibility to generate subpopulations somewhere in the configuration groups...
+//		if(configuration.scenario().getSubpopulationsType().equals(Subpopulations.mobility_attitude)){
+//			String mag = MobilityAttitudeGroups.assignPersonToGroup(person, random,
+//					hhIncome, personAttributes);
+//			if(mag != null){
+//				personAttributes.putAttribute(person.getId().toString(), "mobilityAttitude", mag);
+//			}
+//		}
 		
 		// Check if there are any plans for the person (if it is a mobile person)
 		if(personTemplate.getPlans().size() > 0){
@@ -496,7 +493,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				// If there is only one plan element, create a 24hrs home activity
 				Activity home = population.getFactory().createActivityFromCoord(ActivityTypes.HOME, homeCoord);
 				
-				if(this.geoinformation.getLanduseType().equals(ActivityLocations.facilities)){
+				if(this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
 
 					home.setFacilityId(homeFacility.getId());
 					
@@ -514,7 +511,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			// If there is only one plan element, create a 24hrs home activity
 			Activity home = population.getFactory().createActivityFromCoord(ActivityTypes.HOME, homeCoord);
 			
-			if(this.geoinformation.getLanduseType().equals(ActivityLocations.facilities)){
+			if(this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
 
 				home.setFacilityId(homeFacility.getId());
 				
@@ -552,7 +549,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		this.currentMainActLocation = shootLocationForActType(this.currentMainActCell,
 				plan.getMainActType(), distance, plan, mainMode, person);
 		
-		if(this.geoinformation.getLanduseType().equals(ActivityLocations.facilities)){
+		if(this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
 			
 			this.currentMainActFacility = chooseActivityFacilityInAdminUnit(this.currentMainActCell, plan.getMainActType());
 			
@@ -757,7 +754,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		Activity activity = population.getFactory().createActivityFromCoord(type.split("_")[0], coord);
 		activity.setStartTime(start);
 		activity.setEndTime(end);
-		if(this.geoinformation.getLanduseType().equals(ActivityLocations.facilities)){
+		if(this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
 			activity.setFacilityId(((ProxyFacility)this.geoinformation.getLanduseOfType(type)
 					.getClosest(coord.getX(), coord.getY())).get().getId());
 		}

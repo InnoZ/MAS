@@ -29,10 +29,9 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.Configuration.ActivityLocations;
-import com.innoz.toolbox.config.Configuration.AdminUnitEntry;
-import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.config.PsqlAdapter;
+import com.innoz.toolbox.config.groups.ConfigurationGroup;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.io.database.datasets.OsmPointDataset;
 import com.innoz.toolbox.io.database.datasets.OsmPolygonDataset;
 import com.innoz.toolbox.run.parallelization.BuildingThread;
@@ -150,31 +149,37 @@ public class DatabaseReader {
 					
 				}
 				
-				for(AdminUnitEntry entry : configuration.getAdminUnitEntries().values()){
+				for(ConfigurationGroup cg : configuration.scenario().getAreaSets().values()){
+					
+					AreaSet entry = (AreaSet)cg;
+					
+					for(String uid : entry.getIds().split(",")){
 
-					String id = entry.getId().startsWith("0") ? entry.getId().substring(1) : entry.getId();
-					
-					Node<AdministrativeUnit> d = this.geoinformation.getAdminUnit(id);
-					
-					if(d != null){
+						String id = uid.startsWith("0") ? uid.substring(1) : uid;
 						
-						AdministrativeUnit unit = d.getData();
+						Node<AdministrativeUnit> d = this.geoinformation.getAdminUnit(id);
 						
-						unit.setNumberOfHouseholds(entry.getNumberOfHouseholds());
-						unit.setNumberOfInhabitants(entry.getNumberOfInhabitants());
-						
-						for(Node<AdministrativeUnit> au : d.getChildren()){
+						if(d != null){
 							
-							if(au.getData().getId().startsWith(id)){
+							AdministrativeUnit unit = d.getData();
+							
+							unit.setNumberOfHouseholds(entry.getNumberOfHouseholds());
+							unit.setNumberOfInhabitants(entry.getNumberOfInhabitants());
+							
+							for(Node<AdministrativeUnit> au : d.getChildren()){
 								
-								au.getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
+								if(au.getData().getId().startsWith(id)){
+									
+									au.getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
+									
+								}
 								
 							}
 							
 						}
 						
 					}
-					
+
 				}
 				
 				if(!configuration.getPopulationSource().equals(PopulationSource.none)
@@ -225,7 +230,7 @@ public class DatabaseReader {
 
 		// This is needed to transform the WGS84 geometries into the specified CRS
 		MathTransform t = CRS.findMathTransform(CRS.decode(GlobalNames.WGS84, true),
-				CRS.decode(configuration.getCrs(), true));
+				CRS.decode(configuration.misc().getCoordinateSystem(), true));
 		
 		// A collection to temporarily store all geometries
 		List<Geometry> geometryCollection = new ArrayList<Geometry>();

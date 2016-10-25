@@ -8,7 +8,7 @@ public abstract class ConfigurationGroup {
 
 	public final String groupName;
 	Map<String, Object> params = new HashMap<String, Object>();
-	Map<String, ConfigurationGroup> parameterSets = new HashMap<>();
+	Map<String, Map<String, ConfigurationGroup>> parameterSets = new HashMap<>();
 	
 	public ConfigurationGroup(String name){
 		
@@ -30,15 +30,9 @@ public abstract class ConfigurationGroup {
 			
 	}
 	
-	public Map<String, ConfigurationGroup> getParameterSets(){
+	public Map<String, Map<String, ConfigurationGroup>> getParameterSets(){
 		
 		return this.parameterSets;
-		
-	}
-	
-	public void addParameterSet(ConfigurationGroup set){
-		
-		parameterSets.put(set.groupName, set);
 		
 	}
 	

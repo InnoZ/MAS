@@ -68,11 +68,15 @@ public class ConfigurationWriterHandler {
 			
 		}
 		
-		Map<String, ConfigurationGroup> paramSets = configuration.getParameterSets();
+		Map<String, Map<String, ConfigurationGroup>> paramSets = configuration.getParameterSets();
 		
-		for(ConfigurationGroup set : paramSets.values()){
+		for(Map<String, ConfigurationGroup> set : paramSets.values()){
 			
-			writeConfigurationGroup(set, out);
+			for(ConfigurationGroup group : set.values()){
+
+				writeConfigurationGroup(group, out);
+				
+			}
 			
 		}
 		

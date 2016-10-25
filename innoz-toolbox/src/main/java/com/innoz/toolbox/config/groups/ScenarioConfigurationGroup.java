@@ -65,6 +65,28 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 		this.scaleFactor = scaleFactor;
 		
 	}
+	
+	public void addAreaSet(AreaSet set){
+		
+		if(!this.parameterSets.containsKey(set.groupName)){
+			
+			this.parameterSets.put(set.groupName, new HashMap<>());
+			
+		}
+		
+		if(set.populationSource != null){
+			this.parameterSets.get(set.groupName).put(set.populationSource.name(), set);
+		} else {
+			this.parameterSets.get(set.groupName).put(null, set);
+		}
+		
+	}
+	
+	public Map<String, ConfigurationGroup> getAreaSets(){
+		
+		return this.getParameterSets().get(AreaSet.SET_TYPE);
+		
+	}
 
 	@Override
 	public Map<String, String> getComments() {
@@ -94,6 +116,7 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 		
 		public enum PopulationSource{
 			COMMUTER,
+			NONE,
 			SURVEY
 		};
 		

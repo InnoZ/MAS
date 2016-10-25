@@ -1,6 +1,7 @@
 package com.innoz.toolbox.scenarioGeneration.population;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.geotools.referencing.CRS;
@@ -12,12 +13,13 @@ import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.Configuration.PopulationSource;
+import com.innoz.toolbox.config.groups.ConfigurationGroup;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.PopulationSource;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.CommuterDemandGenerator;
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.DemandGenerationAlgorithm;
-import com.innoz.toolbox.scenarioGeneration.population.algorithm.DummyDemandGenerator;
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.SurveyBasedDemandGenerator;
 import com.innoz.toolbox.utils.GlobalNames;
 
@@ -76,25 +78,31 @@ public class PopulationCreator {
 		
 		try {
 			
-			if(!configuration.getPopulationSource().equals(PopulationSource.none) ||
-					!configuration.getVicinityPopulationSource().equals(PopulationSource.none)){
-				
-				// Create the coordinate transformation for all of the geometries
-				// This could also be done by just passing the auth id strings, but doing it this way suppresses
-				// warnings.
-				CoordinateReferenceSystem from = CRS.decode(GlobalNames.WGS84, true);
-				CoordinateReferenceSystem to = CRS.decode(configuration.getCrs(), true);
-				transformation = TransformationFactory.getCoordinateTransformation(
-						from.toString(), to.toString());
-				
-				this.distribution = new Distribution(scenario.getNetwork(), this.geoinformation, this.transformation);
+			Map<String, ConfigurationGroup> areaSets = configuration.scenario().getAreaSets();
 			
+			for(String key : areaSets.keySet()){
 				
-				log.info("Creating population for MATSim scenario...");
-			
-				runI(configuration, scenario, configuration.getPopulationSource(), configuration.getSurveyAreaIds());
-				runI(configuration, scenario, configuration.getVicinityPopulationSource(), configuration.getVicinityIds());
-			
+				if(!key.equals(PopulationSource.NONE.name()) && PopulationSource.valueOf(key) != null){
+					
+					AreaSet set = (AreaSet)areaSets.get(key);
+					
+					// Create the coordinate transformation for all of the geometries
+					// This could also be done by just passing the auth id strings, but doing it this way suppresses
+					// warnings.
+					CoordinateReferenceSystem from = CRS.decode(GlobalNames.WGS84, true);
+					CoordinateReferenceSystem to = CRS.decode(configuration.misc().getCoordinateSystem(), true);
+					transformation = TransformationFactory.getCoordinateTransformation(
+							from.toString(), to.toString());
+					
+					this.distribution = new Distribution(scenario.getNetwork(), this.geoinformation, this.transformation);
+				
+					
+					log.info("Creating population for MATSim scenario...");
+				
+					runI(configuration, scenario, PopulationSource.valueOf(key), set.getIds());
+					
+				}
+				
 			}
 		
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException |
@@ -116,36 +124,29 @@ public class PopulationCreator {
 		
 		log.info("Selected type of population: " + populationType.name());
 		
-		if(!populationType.name().equals(PopulationSource.none)){
-
-			String className = null;
-			
-			// Choose the demand generation method according to what type of population was defined in the configuration
-			switch(populationType){
-			
-				case dummy: 	className = DummyDemandGenerator.class.getName();
-								break;
-								
-				case commuter:	className = CommuterDemandGenerator.class.getName();
-								break;
-								
-				case survey:	className = SurveyBasedDemandGenerator.class.getName();
-								break;
-								
-				default: 		break;
-			
-			}
-			
-			if(className != null){
-				
-				((DemandGenerationAlgorithm)Class.forName(className).getConstructor(
-						Scenario.class, Geoinformation.class, CoordinateTransformation.class, Distribution.class).newInstance(
-						scenario, this.geoinformation, this.transformation, this.distribution)).run(configuration, ids);
-				
-			}
-			
+		String className = null;
+		
+		// Choose the demand generation method according to what type of population was defined in the configuration
+		switch(populationType){
+							
+			case COMMUTER:	className = CommuterDemandGenerator.class.getName();
+							break;
+							
+			case SURVEY:	className = SurveyBasedDemandGenerator.class.getName();
+							break;
+							
+			default: 		break;
+		
 		}
 		
+		if(className != null){
+			
+			((DemandGenerationAlgorithm)Class.forName(className).getConstructor(
+					Scenario.class, Geoinformation.class, CoordinateTransformation.class, Distribution.class).newInstance(
+					scenario, this.geoinformation, this.transformation, this.distribution)).run(configuration, ids);
+			
+		}
+			
 	}
 	
 }

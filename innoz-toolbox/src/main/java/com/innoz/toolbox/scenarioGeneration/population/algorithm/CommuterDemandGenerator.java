@@ -68,7 +68,7 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 			
 			if(idSet.contains(entry.getFromId())){
 				
-				int d = (int) (entry.getNumberOfCommuters() * configuration.getScaleFactor());
+				int d = (int) (entry.getNumberOfCommuters() * configuration.scenario().getScaleFactor());
 
 				for(int i = n; i < n + d; i++){
 					
