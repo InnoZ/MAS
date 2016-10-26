@@ -37,20 +37,33 @@ public class RunImport {
 		ageGroupsArrayList.add("65-75");
 		ageGroupsArrayList.add("75-85");
 		ageGroupsArrayList.add("85-101");
-		
-		XLStoCSV converter = new XLStoCSV();
-		CSVtoPostgreSQL importer = new CSVtoPostgreSQL();
-		
+			
+//		import bbsr raw data
 		for (int ii = 0; ii < ageGroupsArrayList.size() ; ii++){
 			
 			filename = ageGroupsArrayList.get(ii) + "_m";
-            converter.xls(inputFolder, outputFolder, filename);
-            importer.csv(outputFolder, filename, database, schema);
+			XLStoCSV.xls(inputFolder, outputFolder, filename);
+			CSVtoPostgreSQL.csv(outputFolder, filename, database, schema);
             
 			filename = ageGroupsArrayList.get(ii) + "_w";
-			converter.xls(inputFolder, outputFolder, filename);
-			importer.csv(outputFolder, filename, database, schema);
+			XLStoCSV.xls(inputFolder, outputFolder, filename);
+			CSVtoPostgreSQL.csv(outputFolder, filename, database, schema);
 		}
+
+//		import Zensus data
+		ageGroupsArrayList.add("0-10");
+		ageGroupsArrayList.add("75-101");
+		for (int ii = 0; ii < ageGroupsArrayList.size() ; ii++){
+			
+			filename = "Z" + ageGroupsArrayList.get(ii) + "_m";
+            XLStoCSV.xls(inputFolder, outputFolder, filename);
+            CSVtoPostgreSQL.csv(outputFolder, filename, database, schema);
+            
+			filename = "Z" + ageGroupsArrayList.get(ii) + "_w";
+			XLStoCSV.xls(inputFolder, outputFolder, filename);
+			CSVtoPostgreSQL.csv(outputFolder, filename, database, schema);
+		}
+
     }
 	
 

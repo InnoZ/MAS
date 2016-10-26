@@ -15,7 +15,6 @@ public class CSVtoPostgreSQL {
     	  c = DriverManager
 			  .getConnection("jdbc:postgresql://localhost:5432/" + database,
 			  "postgres", "postgres");
-    	  System.out.println();
     	  System.out.println("Opened database successfully");
     	  stmt = c.createStatement();
     	  String sql;
@@ -32,11 +31,22 @@ public class CSVtoPostgreSQL {
     	  stmt.executeUpdate(sql);
     	  
 //    	  Create Table with currently 44 columns
+//    	  if Zensus-Data only 17 columns
+    	  int lastColumn = 2040;
+    	  if (tableName.contains("Z")){
+    		  lastColumn = 2013; 
+    		  if (tableName.contains("0to5")){
+    			  lastColumn = 2012;
+    		  }
+    	  }
     	  sql =	"CREATE TABLE " +  tableName + "("
     	  		+ "Land		integer,"
     	  		+ "GKZ		integer,"
     	  		+ "Name		char(50)";
-    	  for (int year = 2000 ; year < 2041; year++){
+    	  if (tableName.contains("Z")){
+    		  sql = sql + ", Raumkategorie int";
+    	  }
+    	  for (int year = 2000 ; year <= lastColumn; year++){
     		  sql = sql + ", year" + year + " integer";
     	  }
     	  sql = sql + ")";
@@ -47,6 +57,7 @@ public class CSVtoPostgreSQL {
     	  sql =	"COPY " + tableName + " FROM '" + outputFolder + filename + ".csv' CSV Header DELIMITER ';'";
     	  stmt.executeUpdate(sql);
        	  System.out.println(sql);
+       	  System.out.println();
     	  
     	  stmt.close();
     	  c.close();
