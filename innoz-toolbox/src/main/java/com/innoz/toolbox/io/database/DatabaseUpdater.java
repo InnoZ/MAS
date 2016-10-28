@@ -1,6 +1,7 @@
 package com.innoz.toolbox.io.database;
 
 import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.config.groups.PsqlConfigurationGroup.OutputTablesParameterSet;
 import com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils;
 
 import java.io.BufferedReader;
@@ -69,13 +70,13 @@ public class DatabaseUpdater {
 		
 		// Initialize database, user, password and port for the MobilityDatahub
 		String dbName = DatabaseConstants.SIMULATIONS_DB;
-		String dbUser = configuration.getDatabaseUsername();
-		String dbPassword = configuration.getDatabasePassword();
+		String dbUser = configuration.psql().getPsqlUser();
+		String dbPassword = configuration.psql().getPsqlPassword();
 		int localPort = configuration.psql().getPsqlPort();
 		
 		try {
 			
-			if(!configuration.isWritingIntoMobilityDatahub()){
+			if(!configuration.psql().isWritingIntoMobilityDatahub()){
 				
 				// Change these parameters if the tables are only written into a local database
 				dbName = DatabaseConstants.SIMULATIONS_DB_LOCAL;
@@ -122,23 +123,25 @@ public class DatabaseUpdater {
 				
 				log.info("Connection to database established.");
 				
+				OutputTablesParameterSet ot = (OutputTablesParameterSet)configuration.psql().getOutputTablesParameterSet();
+				
 				// ...could be established - proceed
 				if(scenario.getPopulation().getPersons().size() > 0){
 
 					if(scenario.getScenarioElement(PersonUtils.PERSON_ATTRIBUTES) != null){
 
-						processPersons(connection, configuration.getDatabaseSchemaName());
+						processPersons(connection, ot.getSchemaName());
 							
 					}
 						
-					processPlans(connection, configuration.getDatabaseSchemaName(), configuration.getTableSuffix());
+					processPlans(connection, ot.getSchemaName(), ot.getScenarioName());
 					
 				}
 			
 				if(this.vehiclesFile != null && scenario.getNetwork().getLinks().size() > 0) {
 					
-					processVehicles(connection, scenario.getNetwork(), this.vehiclesFile, configuration.getDatabaseSchemaName(),
-							configuration.getTableSuffix());
+					processVehicles(connection, scenario.getNetwork(), this.vehiclesFile, ot.getSchemaName(),
+							ot.getScenarioName());
 					
 				}
 				
