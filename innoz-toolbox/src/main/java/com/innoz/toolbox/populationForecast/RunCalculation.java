@@ -8,10 +8,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class RunCalculation {
 	
-	static int calcYear = 2014;
+	static int calcYear = 2031;
 	static int gkz = 1001;
 	static String schema = "bbsrprognose.";
 	static String calcTable = schema + "aaagkz" + gkz + "year" + calcYear;
@@ -44,11 +45,13 @@ public class RunCalculation {
 		DatabaseMetaData md = con.getMetaData();
 		rs = md.getTables(null, "bbsrprognose", null, new String[] { "TABLE" });
 		while (rs.next()) {
-			if (rs.getString(3).startsWith("agegroup") && !rs.getString(3).contains("0to10") && !rs.getString(3).contains("75to101")){
+			if (rs.getString(3).startsWith("agegroup") && !rs.getString(3).contains("00to10") && !rs.getString(3).contains("75to101")){
 				ageGroupsArrayList.add(rs.getString(3));
 			}
-		}		
+		}	
+		
 		System.out.println("Number of ageGroups:  " + ageGroupsArrayList.size());
+		System.out.println(ageGroupsArrayList);
 		
 //		Create calculation table
 		sql = "DROP TABLE IF EXISTS " + calcTable ;
@@ -71,44 +74,18 @@ public class RunCalculation {
 			}
 		}
 		
-		// get blcluster
-		sql = "SELECT land FROM " + schema + "agegroupz0to5m WHERE gkz= '" + gkz + "'  ";
-//		System.out.println(sql);
-		rs = st.executeQuery(sql);
-		int blcluster = 0;
-		while (rs.next()){
-			blcluster = rs.getInt(1);
-		}
-//		Schleswig-Holstein, Niedersachsen and Bremen are categorized by 3
-		if (blcluster == 1 || blcluster == 3 || blcluster == 4){
-			blcluster = 3;
-		}
-//		Rheinland-Pfalz and Saarland are categorized by 7
-		if (blcluster == 7 || blcluster == 10){
-			blcluster = 7;
-		}
-//		Brandenburg and Mecklenburg-Vorpommern are categorized by 12
-		if (blcluster == 12 || blcluster == 13){
-			blcluster = 12;
-		}
-//		Sachsen, Sachsen-Anhalt and Thüringen are categorized by 14
-		if (blcluster == 14 || blcluster == 15 || blcluster == 16){
-			blcluster = 14;
-		}
-		sql = "SELECT raumkategorie FROM " + schema + "agegroupz0to5m WHERE gkz= '" + gkz + "'  ";
-//		System.out.println(sql);
-		rs = st.executeQuery(sql);
-		int raumKategorie = 0;
-		while (rs.next()){
-			raumKategorie = rs.getInt(1);
-		}
+		int blcluster = getBLCluster();
+		int raumkategorie = getRaumkategorie();
+		
+		System.out.println(blcluster + " " + raumkategorie);
 		
 //		Distribution of migration by population of 2013 for each gkz within its cluster and raumKategorie
-		double migrationFactorWithinCluster = getMigrationFactorWithinCluster(blcluster, raumKategorie, ageGroupsArrayList) ;
-		System.out.println("blcluster: " + blcluster + " Kreistyp: " + raumKategorie + " migrationFactorWithinCluster: " + migrationFactorWithinCluster); 	
+		double migrationFactorByBLCluster 	= getMigrationFactorByBLCluster(blcluster, raumkategorie);
+		double migrationFactorWithinCluster = getMigrationFactorWithinCluster(blcluster, raumkategorie, ageGroupsArrayList) ;
+		System.out.println("blcluster: " + blcluster + " Kreistyp: " + raumkategorie + " migrationFactorWithinCluster: " + migrationFactorWithinCluster); 	
   		
 		int pop = 0;
-		
+		HashMap<String, Integer> kohortMap = new HashMap<String, Integer>();
 		
 //  	Calculation
 		for (int year = 2013; year <= calcYear; year++){
@@ -119,24 +96,24 @@ public class RunCalculation {
   					
   					if (year >= 2009 && year <=2013){
   						
-//  					ageGroups 0to5 and 5to10 are standardized by 0to10
-  						if ( year == 2013 && (ageGroup.contains("z0to5") || ageGroup.contains("z5to10"))){
+//  					ageGroups 00to05 and 05to10 are standardized by 00to10
+  						if ( year == 2013 && (ageGroup.contains("z00to05") || ageGroup.contains("z05to10"))){
   							int popBefore 				= getPopFromSQL(year - 1, ageGroup);
-  							int pop0to10;
-  							int pop0to10Before;
+  							int pop00to10;
+  							int pop00to10Before;
   							if (ageGroup.endsWith("m")){
-  	  							pop0to10 				= getPopFromSQL(year, "agegroupz0to10m");
-  	  							pop0to10Before 			= getPopFromSQL(year - 1, "agegroupz0to10m");
+  	  							pop00to10 				= getPopFromSQL(year, "agegroupz00to10m");
+  	  							pop00to10Before 			= getPopFromSQL(year - 1, "agegroupz00to10m");
   							}
   	  						else {
-  	  							pop0to10 				= getPopFromSQL(year, "agegroupz0to10w");
-  	  							pop0to10Before 			= getPopFromSQL(year - 1, "agegroupz0to10w");
+  	  							pop00to10 				= getPopFromSQL(year, "agegroupz00to10w");
+  	  							pop00to10Before 			= getPopFromSQL(year - 1, "agegroupz00to10w");
   							}
 //  						Is there a nicer way to do this?
-  							pop = (int) Math.round((popBefore * 1.0 * pop0to10 / pop0to10Before));
+//  							System.out.println(ageGroup + " " + popBefore + " * " + pop00to10  + " / " + pop00to10Before + " = " + pop);
+  							pop = (int) Math.round((popBefore * 1.0 * pop00to10 / pop00to10Before));
   						}
-  						else { 
-  							
+  						else {  							
 //  						ageGroups 75to85 and 85to101 are standardized by 75to101
   							if ( year == 2013 && (ageGroup.contains("z75to85") || ageGroup.contains("z85to101"))){
 	  							int popBefore 			= getPopFromSQL(year - 1, ageGroup);
@@ -150,7 +127,6 @@ public class RunCalculation {
 	  	  							pop75to101 			= getPopFromSQL(year, "agegroupz75to101w");
 	  	  							pop75to101Before 	= getPopFromSQL(year - 1, "agegroupz75to101w");
 	  							}
-	//  						Is there a nicer way to do this?
 	  							pop = (int) Math.round((popBefore * 1.0 * pop75to101 / pop75to101Before));
   							}
   							else {
@@ -160,17 +136,15 @@ public class RunCalculation {
   							
   					}
   					
-//  				Not finished yet
+//  				Not finished yet. deaths missing
   					if (year >= 2014){
-//  						DC4 + (S$475*$'0-101'.BY4)
-//  						s475 = S476*$'0-101'.S$488 
-//  						s476 = =$Wanderung_AltersG.$AG$9
-//  						'0-101'.BY4=(R4/R$493)*$W_Anteile_BLblcluster.$O$491
-//  						
+//  						System.out.println(kohortMap);
   						int bbsr = getPopFromSQL(year, ageGroupBBSR);
   						double innoZvorl;
   						int newBornKids = 0;
-  						if (ageGroup.contains("0to5")){
+  						int kohortMovement = 0;
+  						int diffInnoZBBSR 	= (int) Math.round(getPopFromCalculation(year - 1, ageGroup) - getPopFromSQL(year - 1, ageGroupBBSR));
+  						if (ageGroup.contains("z00to05")){
   							int sumPotentialMothers = 
   									  (getPopFromCalculation(year -1, "agegroupz18to25w") - getPopFromSQL(year -1, "agegroup18to25w")) 
   									+ (getPopFromCalculation(year -1, "agegroupz25to35w") - getPopFromSQL(year -1, "agegroup25to35w")) 
@@ -181,16 +155,63 @@ public class RunCalculation {
   							else {
   								newBornKids = (int) Math.round(sumPotentialMothers * (1 - boyQuotient) * totalFertilityRate / (45 - 18));
   							}
+  							kohortMap.put(ageGroup, (int)Math.round(diffInnoZBBSR / 5.0));
+  							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 4.0 / 5.0);
   						}
-  						int diffInnoZBBSR 	= (int) Math.round(getPopFromCalculation(year - 1, ageGroup) - getPopFromSQL(year - 1, ageGroupBBSR));
-  						innoZvorl 			= (int) Math.round(bbsr + newBornKids + (diffInnoZBBSR * 4.0 / 5.0));
-//  						System.out.println(year + " " + ageGroup + " pop: " + pop + " diffInnoZBBSR: " + diffInnoZBBSR + " newBornKids: " + newBornKids + " innoZvorl: " + innoZvorl + " lastCalcPop: " + getPopFromCalculation(year, ageGroup, st) + " popBBSR: " + bbsr + " bbsrold: " + getPopFromSQL(year - 1, ageGroupBBSR, st));
-//  						adding latest foreign movements (S$475*$'0-101'.BY4)
-//  						'0-101'.BY4 = (R4/R$493)*$W_Anteile_BLblcluster.$O$491
+  						if (ageGroup.contains("z05to10")){
+  							kohortMovement = kohortMap.get(ageGroup.replace("z05to10", "z00to05"));
+  							kohortMap.put(ageGroup, (int)Math.round(diffInnoZBBSR / 5.0));
+  							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 4.0 / 5.0);
+  						}
+  						if (ageGroup.contains("z10to18")){
+  							kohortMovement = kohortMap.get(ageGroup.replace("z10to18", "z05to10"));
+  							kohortMap.put(ageGroup, (int)Math.round(diffInnoZBBSR / 8.0));
+  							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 7.0 / 8.0);
+  						}
+  						if (ageGroup.contains("z18to25")){
+  							kohortMovement = kohortMap.get(ageGroup.replace("z18to25", "z10to18"));
+  							kohortMap.put(ageGroup, (int)Math.round(diffInnoZBBSR / 7.0));
+  							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 6.0 / 7.0);
+  						}
+  						if (ageGroup.contains("z25to35")){
+  							kohortMovement = kohortMap.get(ageGroup.replace("z25to35", "z18to25"));
+  							kohortMap.put(ageGroup, (int)Math.round(diffInnoZBBSR / 7.0));
+  							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 6.0 / 7.0);
+  						}
+  						if (ageGroup.contains("z35to45")){
+  							kohortMovement = kohortMap.get(ageGroup.replace("z35to45", "z25to35"));
+  							kohortMap.put(ageGroup, (int)Math.round(diffInnoZBBSR / 10.0));
+  							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 9.0 / 10.0);
+  						}
+  						if (ageGroup.contains("z45to55")){
+  							kohortMovement = kohortMap.get(ageGroup.replace("z45to55", "z35to45"));
+  							kohortMap.put(ageGroup, (int)Math.round(diffInnoZBBSR / 10.0));
+  							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 9.0 / 10.0);
+  						}
+  						if (ageGroup.contains("z55to65")){
+  							kohortMovement = kohortMap.get(ageGroup.replace("z55to65", "z45to55"));
+  							kohortMap.put(ageGroup, (int)Math.round(diffInnoZBBSR / 10.0));
+  							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 9.0 / 10.0);
+  						}
+  						if (ageGroup.contains("z65to75")){
+  							kohortMovement = kohortMap.get(ageGroup.replace("z65to75", "z55to65"));
+  							kohortMap.put(ageGroup, (int)Math.round(diffInnoZBBSR / 10.0));
+  							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 9.0 / 10.0);
+  						}
+  						if (ageGroup.contains("z75to85")){
+  							kohortMovement = kohortMap.get(ageGroup.replace("z75to85", "z65to75"));
+  							kohortMap.put(ageGroup, (int)Math.round(diffInnoZBBSR / 10.0));
+  							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 9.0 / 10.0);
+  						}
+  						if (ageGroup.contains("z85to101")){
+  							kohortMovement = kohortMap.get(ageGroup.replace("z85to101", "z75to85"));
+  							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 14.0 / 15.0);
+  						}
+  						innoZvorl 			= (int) Math.round(bbsr + newBornKids + diffInnoZBBSR + kohortMovement);
   						double migrationFactorByAgeGroup 	= getMigrationFactorByAgeGroup(ageGroupBBSR);
-  						double migrationFactorByBLCluster 	= getMigrationFactorByBLCluster(blcluster, raumKategorie);
   						int migration = (int) Math.round(migration2014 * migrationFactorByAgeGroup * migrationFactorByBLCluster * migrationFactorWithinCluster );
   						pop = (int) (innoZvorl + migration);
+//  						System.out.println("innoZvorl: " + innoZvorl + " bbsr: " + bbsr + " newBornKids: " + newBornKids + " diffInnoZBBSR: " + diffInnoZBBSR + " kohortMovement: " + kohortMovement + " migration: " + migration + " = " + migration2014 + " * " + migrationFactorByAgeGroup + " * " + migrationFactorByBLCluster + " * " + migrationFactorWithinCluster);
   					}
   	  				updateSQL(year, ageGroup, pop);
   				}
@@ -208,6 +229,44 @@ public class RunCalculation {
 		con.close();
 	}
 	
+	private static int getRaumkategorie() throws SQLException {
+		String sql = "SELECT raumkategorie FROM " + schema + "agegroupz00to05m WHERE gkz= '" + gkz + "'  ";
+//		System.out.println(sql);
+		ResultSet rs = st.executeQuery(sql);
+		int raumkategorie = 0;
+		while (rs.next()){
+			raumkategorie = rs.getInt(1);
+		}
+		return raumkategorie;
+	}
+
+	private static int getBLCluster() throws SQLException {
+		String sql = "SELECT land FROM " + schema + "agegroupz00to05m WHERE gkz= '" + gkz + "'  ";
+	//	System.out.println(sql);
+		ResultSet rs = st.executeQuery(sql);
+		int blcluster = 0;
+		while (rs.next()){
+			blcluster = rs.getInt(1);
+		}
+	//	Schleswig-Holstein, Niedersachsen and Bremen are categorized by 3
+		if (blcluster == 1 || blcluster == 3 || blcluster == 4){
+			blcluster = 3;
+		}
+	//	Rheinland-Pfalz and Saarland are categorized by 7
+		if (blcluster == 7 || blcluster == 10){
+			blcluster = 7;
+		}
+	//	Brandenburg and Mecklenburg-Vorpommern are categorized by 12
+		if (blcluster == 12 || blcluster == 13){
+			blcluster = 12;
+		}
+	//	Sachsen, Sachsen-Anhalt and Thüringen are categorized by 14
+		if (blcluster == 14 || blcluster == 15 || blcluster == 16){
+			blcluster = 14;
+		}
+			return blcluster;
+	}
+
 //	gets last year's calculated value
 	private static int getPopFromCalculation (int year, String ageGroup) throws SQLException{
 		String sql = "SELECT year" + (year) + " FROM " + calcTable + " "
@@ -231,7 +290,7 @@ public class RunCalculation {
 		int pop = 0;
 		while (rs.next()){
 				pop = rs.getInt(1);
-//				System.out.println(pop); 
+//				System.out.println("getPopFromSQL: " + year + " " + ageGroup + " " + pop); 
 			}
 		return pop;
 	}
@@ -306,8 +365,9 @@ public class RunCalculation {
 		}
 		
 		for (int ii = 0; ii < ageGroupsArrayList.size(); ii++){
+			String ageGroup = ageGroupsArrayList.get(ii);
 			if ( ageGroupsArrayList.get(ii).contains("z")){
-				sql = "SELECT SUM(year2012) FROM " + schema + ageGroupsArrayList.get(ii) + " WHERE (" + conditionBLCluster + ") AND (" + conditionRaumKategorie + ")";
+				sql = "SELECT SUM(year2012) FROM " + schema + ageGroup + " WHERE (" + conditionBLCluster + ") AND (" + conditionRaumKategorie + ")";
 //				System.out.println(sql);
 				ResultSet rs = st.executeQuery(sql);
 				int result = 0;
@@ -316,7 +376,7 @@ public class RunCalculation {
 				}
 				pop1 = pop1 + result;
 				
-				sql = "SELECT year2012 FROM " + schema + ageGroupsArrayList.get(ii) + " WHERE gkz = " + gkz;
+				sql = "SELECT year2012 FROM " + schema + ageGroup + " WHERE gkz = " + gkz;
 //				System.out.println(sql);
 				rs = st.executeQuery(sql);
 				result = 0;

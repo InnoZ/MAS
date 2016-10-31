@@ -61,6 +61,27 @@ public class RunImportWanderung {
   	  	sql =	"COPY " + tablename + " FROM '" + outputFolder + filename + ".csv' CSV Header DELIMITER '\t'";
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
+  	  	
+//  	  	Sterbetafel
+  	  	filename = "Sterbetafel";
+  	  	tablename = schema + ".deathsbyagegroup";
+  	  	sql = "DROP TABLE IF EXISTS " + tablename ;
+  	  	System.out.println(sql);
+  	  	stmt.executeUpdate(sql);
+  	  	sql =	"CREATE TABLE " +  tablename + "("
+  	  			+ "agegroup			char(50),"
+  	  			+ "year1925			numeric,"
+  	  			+ "year1933			numeric,"
+  	  			+ "year1950			numeric,"
+  	  			+ "year1961			numeric,"
+  	  			+ "year1971			numeric,"
+  	  			+ "year1987			numeric)";
+  	  	System.out.println(sql);
+  	  	stmt.executeUpdate(sql);
+  	  	
+  	  	sql =	"COPY " + tablename + " FROM '" + outputFolder + filename + ".csv' CSV Header DELIMITER '\t'";
+  	  	System.out.println(sql);
+  	  	stmt.executeUpdate(sql);
 	}
 
 }

@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -27,7 +26,7 @@ public class XLStoCSV {
         if (filename.startsWith("Z")){
         	columnFrom = 0;
         	columnTo = 18;
-        	if (filename.contains("0-5")){
+        	if (filename.contains("00-05")){
         		columnTo = 17;
         	}
         }

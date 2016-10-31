@@ -4,8 +4,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
-
 public class CSVtoPostgreSQL {
    public static void csv(String outputFolder, String filename, String database, String schema) {
       Connection c = null;
@@ -35,7 +33,7 @@ public class CSVtoPostgreSQL {
     	  int lastColumn = 2040;
     	  if (tableName.contains("Z")){
     		  lastColumn = 2013; 
-    		  if (tableName.contains("0to5")){
+    		  if (tableName.contains("00to05")){
     			  lastColumn = 2012;
     		  }
     	  }
