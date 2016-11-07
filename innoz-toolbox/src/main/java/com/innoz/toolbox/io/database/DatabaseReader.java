@@ -164,14 +164,14 @@ public class DatabaseReader {
 							
 							AdministrativeUnit unit = d.getData();
 							
-							unit.setNumberOfHouseholds(entry.getNumberOfHouseholds());
-							unit.setNumberOfInhabitants(entry.getNumberOfInhabitants());
+//							unit.setNumberOfHouseholds(entry.getNumberOfHouseholds());
+//							unit.setNumberOfInhabitants(entry.getNumberOfInhabitants());
 							
 							for(Node<AdministrativeUnit> au : d.getChildren()){
 								
 								if(au.getData().getId().startsWith(id)){
 									
-									au.getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
+//									au.getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
 									
 								}
 								
@@ -183,13 +183,13 @@ public class DatabaseReader {
 
 				}
 				
-				if(!configuration.getPopulationSource().equals(PopulationSource.none)
-						|| !configuration.getVicinityPopulationSource().equals(PopulationSource.none)){
+//				if(!configuration.getPopulationSource().equals(PopulationSource.none)
+//						|| !configuration.getVicinityPopulationSource().equals(PopulationSource.none)){
 
-					// Otherwise, read in the OSM data
-					this.readOsmData(connection, configuration, scenario);
+				// Otherwise, read in the OSM data
+				this.readOsmData(connection, configuration, scenario);
 					
-				}
+//				}
 				
 			}
 			
@@ -236,21 +236,30 @@ public class DatabaseReader {
 		// A collection to temporarily store all geometries
 		List<Geometry> geometryCollection = new ArrayList<Geometry>();
 		
-		getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, true);
-		this.geoinformation.setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection)
-				.convexHull());
+		for(ConfigurationGroup cg : configuration.scenario().getAreaSets().values()){
+			
+			AreaSet set = (AreaSet)cg;
+			getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, set);
 		
-		if(configuration.getVicinityIds() != null){
-			getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, false);
-			this.geoinformation.setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection)
-					.convexHull());
+			if(set.isSurveyArea()){
+				
+				this.geoinformation.setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection)
+						.convexHull());
+				
+			} else{
+				
+				this.geoinformation.setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection)
+						.convexHull());
+				
+			}
+			
 		}
 		
-		for(AdminUnitEntry entry : configuration.getAdminUnitEntries().values()){
-			
-			this.geoinformation.getAdminUnit(entry.getId()).getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
-			
-		}
+//		for(AdminUnitEntry entry : configuration.getAdminUnitEntries().values()){
+//			
+//			this.geoinformation.getAdminUnit(entry.getId()).getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
+//			
+//		}
 //		for(District d : this.geoinformation.getAdminUnits().values()){
 //			d.setnHouseholds(configuration.getAdminUnitEntries().get(d.getId()).getNumberOfHouseholds());
 //		}
@@ -265,21 +274,21 @@ public class DatabaseReader {
 	}
 	
 	private void getAndAddGeodataFromIdSet(Connection connection, Configuration configuration, List<Geometry> geometryCollection,
-			boolean surveyArea) throws SQLException, NoSuchAuthorityCodeException, FactoryException, ParseException,
+			AreaSet areaSet) throws SQLException, NoSuchAuthorityCodeException, FactoryException, ParseException,
 			MismatchedDimensionException, TransformException{
 		
 		// Create a new statement to execute the sql query
 		Statement statement = connection.createStatement();
 		StringBuilder builder = new StringBuilder();
 		
-		String[] ids = surveyArea ? configuration.getSurveyAreaIds().split(",") : configuration.getVicinityIds().split(",");
-		
 		int i = 0;
 		
+		String[] splitIds = areaSet.getIds().split(",");
+		
 		// Append all ids inside the given collection to a string
-		for(String id : ids){
+		for(String id : splitIds){
 
-			if(i < ids.length - 1){
+			if(i < splitIds.length - 1){
 				
 				builder.append(" " + DatabaseConstants.MUN_KEY + " like '" + id + "%' OR");
 				
@@ -323,13 +332,13 @@ public class DatabaseReader {
 					au.setGeometry(geometry);
 					au.setBland((int)bland);
 					
-					if(surveyArea){
+					if(areaSet.isSurveyArea()){
 						bufferedAreasForNetworkGeneration.add(wktReader.read(set.getString("buffer")));
 					}
 
 					if(district != null){
 						
-						au.setNetworkDetail(configuration.getAdminUnitEntries().get(district).getNetworkDetail());
+						au.setNetworkDetail(areaSet.getNetworkLevel());
 
 						this.geoinformation.addAdministrativeUnit(new AdministrativeUnit(district));
 						

@@ -109,10 +109,12 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 		public static final String IDS = "ids";
 		public static final String NETWORK_LEVEL = "networkLevel";
 		public static final String POPULATION_SOURCE = "populationSource";
+		public static final String IS_SURVEY_AREA = "isSurveyArea";
 		
 		private String ids;
 		private int networkLevel = 6;
 		private PopulationSource populationSource;
+		private boolean isSurveyArea;
 		
 		public enum PopulationSource{
 			COMMUTER,
@@ -126,6 +128,7 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 			this.params.put(IDS, this.ids);
 			this.params.put(NETWORK_LEVEL, this.networkLevel);
 			this.params.put(POPULATION_SOURCE, this.populationSource);
+			this.params.put(IS_SURVEY_AREA, this.isSurveyArea);
 			
 		}
 
@@ -180,6 +183,18 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 			
 			this.populationSource = source;
 			this.params.put(POPULATION_SOURCE, source);
+			
+		}
+		
+		public boolean isSurveyArea(){
+			
+			return this.isSurveyArea;
+			
+		}
+		
+		public void setIsSurveyArea(boolean b){
+			
+			this.isSurveyArea = b;
 			
 		}
 		
