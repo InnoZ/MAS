@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -12,13 +13,12 @@ import java.util.HashMap;
 
 public class RunCalculation {
 	
-	static int calcYear = 2031;
-	static int gkz = 1001;
+	static int calcYear = 2015;
+	static int gkz = 11000;
 	static String schema = "bbsrprognose.";
 	static String calcTable = schema + "aaagkz" + gkz + "year" + calcYear;
 	static double boyQuotient = 0.513;
 	static double totalFertilityRate = 1.5;
-	static int migration2014 = 250000;
 	
 	static Connection con = null;
 	static Statement st = null;
@@ -77,8 +77,6 @@ public class RunCalculation {
 		int blcluster = getBLCluster();
 		int raumkategorie = getRaumkategorie();
 		
-		System.out.println(blcluster + " " + raumkategorie);
-		
 //		Distribution of migration by population of 2013 for each gkz within its cluster and raumKategorie
 		double migrationFactorByBLCluster 	= getMigrationFactorByBLCluster(blcluster, raumkategorie);
 		double migrationFactorWithinCluster = getMigrationFactorWithinCluster(blcluster, raumkategorie, ageGroupsArrayList) ;
@@ -89,6 +87,7 @@ public class RunCalculation {
 		
 //  	Calculation
 		for (int year = 2013; year <= calcYear; year++){
+			int migrationYear = getMigration(year); 
   			for (int ii = 0; ii < ageGroupsArrayList.size(); ii++){
   				String ageGroup = ageGroupsArrayList.get(ii);
   				String ageGroupBBSR = ageGroup.replace("z", "");
@@ -144,6 +143,8 @@ public class RunCalculation {
   						int newBornKids = 0;
   						int kohortMovement = 0;
   						int diffInnoZBBSR 	= (int) Math.round(getPopFromCalculation(year - 1, ageGroup) - getPopFromSQL(year - 1, ageGroupBBSR));
+//  					asumed that people older 55 start dying with a certain propability
+  						double deathRate = 1.0;
   						if (ageGroup.contains("z00to05")){
   							int sumPotentialMothers = 
   									  (getPopFromCalculation(year -1, "agegroupz18to25w") - getPopFromSQL(year -1, "agegroup18to25w")) 
@@ -175,8 +176,8 @@ public class RunCalculation {
   						}
   						if (ageGroup.contains("z25to35")){
   							kohortMovement = kohortMap.get(ageGroup.replace("z25to35", "z18to25"));
-  							kohortMap.put(ageGroup, (int)Math.round(diffInnoZBBSR / 7.0));
-  							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 6.0 / 7.0);
+  							kohortMap.put(ageGroup, (int)Math.round(diffInnoZBBSR / 10.0));
+  							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 9.0 / 10.0);
   						}
   						if (ageGroup.contains("z35to45")){
   							kohortMovement = kohortMap.get(ageGroup.replace("z35to45", "z25to35"));
@@ -189,29 +190,36 @@ public class RunCalculation {
   							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 9.0 / 10.0);
   						}
   						if (ageGroup.contains("z55to65")){
+  							deathRate = getDeathRateFromSQL(ageGroup, year);
   							kohortMovement = kohortMap.get(ageGroup.replace("z55to65", "z45to55"));
   							kohortMap.put(ageGroup, (int)Math.round(diffInnoZBBSR / 10.0));
   							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 9.0 / 10.0);
   						}
   						if (ageGroup.contains("z65to75")){
+  							deathRate = getDeathRateFromSQL(ageGroup, year);
   							kohortMovement = kohortMap.get(ageGroup.replace("z65to75", "z55to65"));
   							kohortMap.put(ageGroup, (int)Math.round(diffInnoZBBSR / 10.0));
   							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 9.0 / 10.0);
   						}
   						if (ageGroup.contains("z75to85")){
+  							deathRate = getDeathRateFromSQL(ageGroup, year);
   							kohortMovement = kohortMap.get(ageGroup.replace("z75to85", "z65to75"));
   							kohortMap.put(ageGroup, (int)Math.round(diffInnoZBBSR / 10.0));
   							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 9.0 / 10.0);
   						}
   						if (ageGroup.contains("z85to101")){
+  							deathRate = getDeathRateFromSQL(ageGroup, year);
   							kohortMovement = kohortMap.get(ageGroup.replace("z85to101", "z75to85"));
   							diffInnoZBBSR = (int) Math.round(diffInnoZBBSR * 14.0 / 15.0);
   						}
-  						innoZvorl 			= (int) Math.round(bbsr + newBornKids + diffInnoZBBSR + kohortMovement);
-  						double migrationFactorByAgeGroup 	= getMigrationFactorByAgeGroup(ageGroupBBSR);
-  						int migration = (int) Math.round(migration2014 * migrationFactorByAgeGroup * migrationFactorByBLCluster * migrationFactorWithinCluster );
+  						innoZvorl 			= (int) Math.round(bbsr + newBornKids + (diffInnoZBBSR + kohortMovement) * deathRate);
+  						double migrationFactorByAgeGroup 	= getMigrationFactorByAgeGroup(ageGroup);
+  						int migration = (int) Math.round(migrationYear * migrationFactorByAgeGroup * migrationFactorByBLCluster * migrationFactorWithinCluster );
   						pop = (int) (innoZvorl + migration);
-//  						System.out.println("innoZvorl: " + innoZvorl + " bbsr: " + bbsr + " newBornKids: " + newBornKids + " diffInnoZBBSR: " + diffInnoZBBSR + " kohortMovement: " + kohortMovement + " migration: " + migration + " = " + migration2014 + " * " + migrationFactorByAgeGroup + " * " + migrationFactorByBLCluster + " * " + migrationFactorWithinCluster);
+  						System.out.println("innoZvorl: " + innoZvorl + " bbsr: " + bbsr 
+  								+ " newBornKids: " + newBornKids + " diffInnoZBBSR: " + diffInnoZBBSR 
+  								+ " kohortMovement: " + kohortMovement + " deathRate: " + deathRate
+  								+ " migration: " + migration + " = " + migrationYear + " * " + migrationFactorByAgeGroup + " * " + migrationFactorByBLCluster + " * " + migrationFactorWithinCluster);
   					}
   	  				updateSQL(year, ageGroup, pop);
   				}
@@ -220,7 +228,7 @@ public class RunCalculation {
   			
 //  			Check if the calculation works
 			pop = getPopSumOfYear(year);
-			System.out.println(year + " : " + pop);
+			System.out.println(year + ": " + pop + " inhabitants");
 			System.out.println("_____________________________________________________________________");
   		}
   		
@@ -229,6 +237,55 @@ public class RunCalculation {
 		con.close();
 	}
 	
+//	gets the migration data for the population forecast. raw data needs to be updated. so far only 2014 and 2015 implemented
+	private static int getMigration(int year) throws SQLException {
+		String sql = "SELECT year" + year + " FROM " + schema + "migration WHERE scenario = '1'";
+		ResultSet rs = st.executeQuery(sql);
+//		System.out.println(sql);
+		int migrationYear = 0;
+		while (rs.next()){
+			migrationYear = rs.getInt(1);
+		}
+		return migrationYear;
+	}
+
+//	deathRate is actually the survival rate telling the ratio of people of an ageGroup that will still be allive in the following year
+	private static double getDeathRateFromSQL(String ageGroup, int year) throws SQLException {
+		int ageGroupMaxYear = Integer.parseInt(ageGroup.substring(13, 15));
+		int deathRateCalcYear = year - ageGroupMaxYear;
+		String deathRateCalcYearColumn = "";
+		if (deathRateCalcYear >= 1987){
+			deathRateCalcYearColumn = "year1987";
+			} else {
+				if (deathRateCalcYear >= 1971){
+					deathRateCalcYearColumn = "year1971";
+				} else {
+					if (deathRateCalcYear >= 1961){
+						deathRateCalcYearColumn = "year1961";
+					} else {
+						if (deathRateCalcYear >= 1950){
+							deathRateCalcYearColumn = "year1950";
+						} else {
+							if (deathRateCalcYear >= 1933){
+								deathRateCalcYearColumn = "year1933";
+							} else {
+								deathRateCalcYearColumn = "year1925";			
+						}
+					}
+				}		
+			}
+		}	
+		double deathRate = 1;
+		String sql = "SELECT " + deathRateCalcYearColumn + " FROM " + schema + "deathsbyagegroup WHERE agegroup= '" + ageGroup + "'  ";
+		ResultSet rs = st.executeQuery(sql);
+//		System.out.println(sql);
+		while (rs.next()){
+			deathRate = rs.getDouble(1);
+		}
+		return deathRate;
+	}
+	
+//	gets the Raumkategorie of a certain gkz
 	private static int getRaumkategorie() throws SQLException {
 		String sql = "SELECT raumkategorie FROM " + schema + "agegroupz00to05m WHERE gkz= '" + gkz + "'  ";
 //		System.out.println(sql);
@@ -331,6 +388,7 @@ public class RunCalculation {
 				+ "WHERE agegroup = '" + ageGroup + "'";
 		st.execute(sql);
 		System.out.println(sql); 
+		System.out.println();
 	}
 	
 	private static int getPopSumOfYear(int year) throws SQLException{

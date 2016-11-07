@@ -34,7 +34,7 @@ public class RunImportWanderung {
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
   	  	sql =	"CREATE TABLE " +  tablename + "("
-  	  			+ "ageGroup			char(20),"
+  	  			+ "ageGroup		char(20),"
   	  			+ "agegroupfactor	numeric)";
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
@@ -69,7 +69,7 @@ public class RunImportWanderung {
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
   	  	sql =	"CREATE TABLE " +  tablename + "("
-  	  			+ "agegroup			char(50),"
+  	  			+ "agegroup		char(50),"
   	  			+ "year1925			numeric,"
   	  			+ "year1933			numeric,"
   	  			+ "year1950			numeric,"
