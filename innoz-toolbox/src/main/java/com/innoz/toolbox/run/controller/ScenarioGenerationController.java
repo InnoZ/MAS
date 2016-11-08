@@ -61,7 +61,6 @@ public class ScenarioGenerationController extends DefaultController {
 			new File(configuration.misc().getOutputDirectory()).mkdirs();
 			
 			OutputDirectoryLogging.initLoggingWithOutputDirectory(configuration.misc().getOutputDirectory());
-//			configuration.dumpSettings();
 			
 			// Reset the random seed
 			MatsimRandom.reset(configuration.scenario().getRandomSeed());
@@ -99,28 +98,19 @@ public class ScenarioGenerationController extends DefaultController {
 			new NetworkWriter(scenario.getNetwork()).write(configuration.misc()
 					.getOutputDirectory() + "network.xml.gz");
 	
-//			if(!configuration.scenario().getPopulationSource().equals(PopulationSource.none) ||
-//					!configuration.getVicinityPopulationSource().equals(PopulationSource.none)){
-	
-				new PopulationWriter(scenario.getPopulation()).write(configuration.misc()
-						.getOutputDirectory() + "plans.xml.gz");
+			new PopulationWriter(scenario.getPopulation()).write(configuration.misc()
+					.getOutputDirectory() + "plans.xml.gz");
 				
-				new ObjectAttributesXmlWriter(scenario.getPopulation().
-						getPersonAttributes()).writeFile(configuration.misc().getOutputDirectory()
-								+ "personAttributes.xml.gz");
+			new ObjectAttributesXmlWriter(scenario.getPopulation().
+					getPersonAttributes()).writeFile(configuration.misc().getOutputDirectory()
+							+ "personAttributes.xml.gz");
 					
-//				if(configuration.getPopulationType().equals(PopulationType.households)){
+			new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration.misc()
+					.getOutputDirectory() + "households.xml.gz");
 					
-					new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration.misc()
-							.getOutputDirectory() + "households.xml.gz");
-					
-//				}
+			new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration.misc()
+					.getOutputDirectory() + "vehicles.xml.gz");
 				
-				new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration.misc()
-						.getOutputDirectory() + "vehicles.xml.gz");
-				
-//			}
-			
 			if(configuration.scenario().getActivityLocationsType().equals(ActivityLocationsType.FACILITIES)){
 
 				CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(GlobalNames.WGS84, GlobalNames.UTM32N);
@@ -136,12 +126,6 @@ public class ScenarioGenerationController extends DefaultController {
 				new FacilitiesWriter(scenario.getActivityFacilities()).write(configuration.misc().getOutputDirectory() + "facilities.xml.gz");
 				
 			}
-			
-//			if(configuration.isWritingDatabaseOutput()){
-//				
-//				new DatabaseUpdater().update(configuration, scenario, null);
-//				
-//			}
 			
 			double t1 = System.currentTimeMillis();
 			

@@ -36,14 +36,6 @@ public final class Configuration {
 	String sshPassword;
 	String databaseUser = "postgres";
 	String userPassword = "postgres";
-	
-//	public enum PopulationType{persons,households};
-//	public enum PopulationSource{dummy,commuter,survey,none};
-//	public enum Subpopulations{none,mobility_attitude};
-//	public enum VehicleSource{matsim, survey};
-//	public enum ActivityLocations{landuse, buildings, facilities};
-//	public enum DayType{weekday, weekend, all};
-//	public enum SurveyType{mid,srv};
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
 	/**
@@ -88,63 +80,12 @@ public final class Configuration {
 	}
 	
 	/**
-	 * 
-	 * Sets the configurable parameters of the configuration to their default values.
-	 * 
-	 */
-	public void reset(){
-		
-//		this.surveyAreaIds = null;
-//		this.vicinityIds = null;
-//		this.crs = "EPSG:32632";
-//		this.outputDirectory = ".";
-//		this.popSource = PopulationSource.survey;
-//		this.popSourceV = PopulationSource.none;
-//		this.popType = PopulationType.households;
-//		this.vehSource = VehicleSource.matsim;
-//		this.dayType = DayType.weekday;
-//		this.actLocs = ActivityLocations.buildings;
-//		this.adminUnits = new HashMap<String, Configuration.AdminUnitEntry>();
-//		this.randomSeed = 4711L;
-//		this.scaleFactor = 1.0d;
-//		this.writeDatabaseTables = false;
-//		this.writeIntoDatahub = false;
-//		this.dbNameSpace = null;
-//		this.overwriteExistingFiles = false;
-		
-	}
-	
-	/**
 	 * Validates the configuration. Only errors that may eventually cause exceptions are taken into account here.
 	 */
 	private void validate(){
 		
 		boolean validationError = false;
 
-		// A survey area must be defined!
-//		if(this.surveyAreaIds.isEmpty()){
-//			
-//			validationError = true;
-//			log.error("You must specify at least one survey area by its id!");
-//			log.info("See table gadm.districts in mobility database for information.");
-//			
-//		}
-		
-		// Non-generic cars can only be used along w/ households.
-//		if(!this.popType.equals(PopulationType.households) && this.vehSource.equals(VehicleSource.survey)){
-//			
-//			validationError = true;
-//			log.error("You disabled the use of households data but enabled cars. This won't work!");
-//			
-//		}
-//		
-//		if((this.subpopulation.equals(Subpopulations.mobility_attitude) || this.surveyType.equals("srv")) && !this.surveyAreaIds.contains("03404")){
-//			
-//			validationError = true;
-//			log.error("SrV data as well as data for mobility attitude groups (Mobilitätstypen) are only valid for Osnabrück!");
-//			
-//		}
-		
 		// Check if the output directory exists and has files in it.
 		File f = new File(this.misc.getOutputDirectory());
 		if(f.exists()){

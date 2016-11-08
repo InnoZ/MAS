@@ -8,6 +8,7 @@ import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams
 import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
 
 import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.VehicleType;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 
 /**
@@ -32,22 +33,13 @@ public class InitialConfigCreator {
 		// Plans config group
 		config.plans().setInputFile(configuration.misc().getOutputDirectory() + "plans.xml.gz");
 		
-		// If the population was created somewhat sophisticated (i.e. from survey data), dump the persons' attributes
-//		if(configuration.getPopulationSource().equals(PopulationSource.survey)){
-			
-			config.plans().setInputPersonAttributeFile(configuration.misc().getOutputDirectory() + "personAttributes.xml.gz");
-		
-//		}
+		config.plans().setInputPersonAttributeFile(configuration.misc().getOutputDirectory() + "personAttributes.xml.gz");
 		
 		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
 	
 		// If households are used, adapt the parameters that define the usage in MATSim
-//		if(configuration.getPopulationType().equals(PopulationType.households)){
+		config.households().setInputFile(configuration.misc().getOutputDirectory() + "households.xml.gz");
 			
-			config.households().setInputFile(configuration.misc().getOutputDirectory() + "households.xml.gz");
-			
-//		}
-
 		// Add activity types to the scoring parameters
 		addBasicActivityParams(config);
 			
@@ -58,13 +50,12 @@ public class InitialConfigCreator {
 		config.qsim().setFlowCapFactor(configuration.scenario().getScaleFactor());
 		config.qsim().setStorageCapFactor(configuration.scenario().getScaleFactor());
 
-		// If non-generic vehicles are used, adapt the parameters that define the usage in MATSim
-//		if(configuration.getVehicleSource().equals(VehicleSource.survey)){
+		if(configuration.surveyPopulation().getVehicleType().equals(VehicleType.SURVEY)){
 			
 			config.qsim().setVehiclesSource(VehiclesSource.fromVehiclesData);
 			config.vehicles().setVehiclesFile(configuration.misc().getOutputDirectory() + "vehicles.xml.gz");
 			
-//		}
+		}
 		
 		return config;
 		

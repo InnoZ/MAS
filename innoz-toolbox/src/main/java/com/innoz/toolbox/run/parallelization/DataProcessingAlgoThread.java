@@ -349,9 +349,6 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 		
 		if(actType != null){
 
-			// Add the landuse geometry to the geoinformation if we have a valid activity option for it
-//			this.reader.addGeometry(actType, new Building(dataset.getGeometry()));
-			
 			Building closest = this.reader.getBuildingsQuadTree().getClosest(dataset.getGeometry().getCentroid().getX(),
 					dataset.getGeometry().getCentroid().getY());
 			

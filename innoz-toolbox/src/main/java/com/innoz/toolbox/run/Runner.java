@@ -90,8 +90,6 @@ public class Runner {
 						
 						new ScenarioGenerationController(c).run();
 						
-						c.reset();
-						
 					} else if(command.equals("help") || command.equals("h")){
 						
 						printHelpStack(writer);
@@ -160,8 +158,6 @@ public class Runner {
 						
 						new DatabaseUpdaterController(c, inputPlansFile, networkFile, vehiclesFile, attributesFile).run();
 							
-						c.reset();
-						
 					} else if(command.equals("connect") || command.equals("c")){
 						
 						if(!serverConnection){
