@@ -25,11 +25,16 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
-		<dependency>
-			<groupId>com.innoz.toolbox</groupId>
-			<artifactId>innoz-toolbox</artifactId>
-			<version>0.1-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
+	<dependency>
+		<groupId>com.innoz.toolbox</groupId>
+		<artifactId>innoz-toolbox</artifactId>
+		<version>0.1-SNAPSHOT</version>
+		<scope>provided</scope>
+	</dependency>
+	<dependency>
+    <groupId>com.github.cverges</groupId>
+    <artifactId>expect4j</artifactId>
+    <version>1.9</version>
+	</dependency>
   </dependencies>
 </project>

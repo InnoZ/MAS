@@ -17,5 +17,14 @@ public class PsqlAdapter {
 				configuration.getDatabaseUsername(), configuration.getDatabasePassword());
 		
 	}
+	
+	public static Connection createConnection(String dbName) throws SQLException,
+	InstantiationException, IllegalAccessException, ClassNotFoundException{
+		
+	Class.forName(PSQL_DRIVER).newInstance();
+	return DriverManager.getConnection(PSQL_URL + 3200 + "/" + dbName,
+			"postgres", "postgres");
+		
+	}
 		
 }

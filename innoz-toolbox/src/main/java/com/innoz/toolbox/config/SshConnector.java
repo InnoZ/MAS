@@ -74,7 +74,7 @@ public class SshConnector {
 	    
 	}
 	
-	static void connect(String sshUser, String sshPassword, int localPort, int remotePort) throws JSchException{
+	public static void connect(String sshUser, String sshPassword, int localPort, int remotePort) throws JSchException{
 		
 		// Set hosts and ports for the connection
 		String sshhost = "playground";
