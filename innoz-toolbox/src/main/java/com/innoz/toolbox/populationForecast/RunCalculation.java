@@ -13,10 +13,15 @@ import java.util.HashMap;
 
 public class RunCalculation {
 	
-	static int calcYear = 2015;
+	static int calcYear = 2040;
 	static int gkz = 11000;
 	static String schema = "bbsrprognose.";
 	static String calcTable = schema + "aaagkz" + gkz + "year" + calcYear;
+	static String migrationTable = "migration";
+	static String migrationScenario = "1";
+	static String migrationByAgeGroupTable = "migrationbyagegroup";
+	static String migrationByClusterTable = "migrationbycluster";
+	static String deathsTable = "deathsbyagegroup";
 	static double boyQuotient = 0.513;
 	static double totalFertilityRate = 1.5;
 	
@@ -43,15 +48,15 @@ public class RunCalculation {
 		ArrayList<String> ageGroupsArrayList = new ArrayList<String>();
 		// list all tables in schema and add them to ArrayList ageGroupArrayList
 		DatabaseMetaData md = con.getMetaData();
-		rs = md.getTables(null, "bbsrprognose", null, new String[] { "TABLE" });
+		rs = md.getTables(null, schema.replace(".", ""), null, new String[] { "TABLE" });
 		while (rs.next()) {
 			if (rs.getString(3).startsWith("agegroup") && !rs.getString(3).contains("00to10") && !rs.getString(3).contains("75to101")){
 				ageGroupsArrayList.add(rs.getString(3));
 			}
 		}	
 		
-		System.out.println("Number of ageGroups:  " + ageGroupsArrayList.size());
-		System.out.println(ageGroupsArrayList);
+//		System.out.println("Number of ageGroups:  " + ageGroupsArrayList.size());
+//		System.out.println(ageGroupsArrayList);
 		
 //		Create calculation table
 		sql = "DROP TABLE IF EXISTS " + calcTable ;
@@ -93,7 +98,7 @@ public class RunCalculation {
   				String ageGroupBBSR = ageGroup.replace("z", "");
   				if (ageGroup.contains("z")){
   					
-  					if (year >= 2009 && year <=2013){
+  					if (year == 2013){
   						
 //  					ageGroups 00to05 and 05to10 are standardized by 00to10
   						if ( year == 2013 && (ageGroup.contains("z00to05") || ageGroup.contains("z05to10"))){
@@ -136,7 +141,7 @@ public class RunCalculation {
   					}
   					
 //  				Not finished yet. deaths missing
-  					if (year >= 2014){
+  					else {
 //  						System.out.println(kohortMap);
   						int bbsr = getPopFromSQL(year, ageGroupBBSR);
   						double innoZvorl;
@@ -216,30 +221,28 @@ public class RunCalculation {
   						double migrationFactorByAgeGroup 	= getMigrationFactorByAgeGroup(ageGroup);
   						int migration = (int) Math.round(migrationYear * migrationFactorByAgeGroup * migrationFactorByBLCluster * migrationFactorWithinCluster );
   						pop = (int) (innoZvorl + migration);
-  						System.out.println("innoZvorl: " + innoZvorl + " bbsr: " + bbsr 
-  								+ " newBornKids: " + newBornKids + " diffInnoZBBSR: " + diffInnoZBBSR 
-  								+ " kohortMovement: " + kohortMovement + " deathRate: " + deathRate
-  								+ " migration: " + migration + " = " + migrationYear + " * " + migrationFactorByAgeGroup + " * " + migrationFactorByBLCluster + " * " + migrationFactorWithinCluster);
+//  						System.out.println("innoZvorl: " + innoZvorl + " bbsr: " + bbsr 
+//  								+ " newBornKids: " + newBornKids + " diffInnoZBBSR: " + diffInnoZBBSR 
+//  								+ " kohortMovement: " + kohortMovement + " deathRate: " + deathRate
+//  								+ " migration: " + migration + " = " + migrationYear + " * " + migrationFactorByAgeGroup + " * " + migrationFactorByBLCluster + " * " + migrationFactorWithinCluster);
   					}
   	  				updateSQL(year, ageGroup, pop);
   				}
 
   			} 
   			
-//  			Check if the calculation works
-			pop = getPopSumOfYear(year);
-			System.out.println(year + ": " + pop + " inhabitants");
-			System.out.println("_____________________________________________________________________");
+			printResult(year);
   		}
-  		
-//  	  	sql = "DROP TABLE IF EXISTS " + calcTable ;
-//  	  	st.executeUpdate(sql);
+  	  	sql = "DROP TABLE IF EXISTS " + calcTable ;
+  	  	st.executeUpdate(sql);
+  	  	System.out.println("_____________________________________________________________________");
+  	  	System.out.println(calcTable + " dropped successfully");
 		con.close();
 	}
 	
 //	gets the migration data for the population forecast. raw data needs to be updated. so far only 2014 and 2015 implemented
 	private static int getMigration(int year) throws SQLException {
-		String sql = "SELECT year" + year + " FROM " + schema + "migration WHERE scenario = '1'";
+		String sql = "SELECT year" + year + " FROM " + schema + migrationTable + " WHERE scenario = '" + migrationScenario + "'";
 		ResultSet rs = st.executeQuery(sql);
 //		System.out.println(sql);
 		int migrationYear = 0;
@@ -256,27 +259,19 @@ public class RunCalculation {
 		String deathRateCalcYearColumn = "";
 		if (deathRateCalcYear >= 1987){
 			deathRateCalcYearColumn = "year1987";
-			} else {
-				if (deathRateCalcYear >= 1971){
-					deathRateCalcYearColumn = "year1971";
-				} else {
-					if (deathRateCalcYear >= 1961){
-						deathRateCalcYearColumn = "year1961";
-					} else {
-						if (deathRateCalcYear >= 1950){
-							deathRateCalcYearColumn = "year1950";
-						} else {
-							if (deathRateCalcYear >= 1933){
-								deathRateCalcYearColumn = "year1933";
-							} else {
-								deathRateCalcYearColumn = "year1925";			
-						}
-					}
-				}		
-			}
-		}	
+		} else if (deathRateCalcYear >= 1971){
+			deathRateCalcYearColumn = "year1971";
+		} else if (deathRateCalcYear >= 1961){
+			deathRateCalcYearColumn = "year1961";
+		} else if (deathRateCalcYear >= 1950){
+			deathRateCalcYearColumn = "year1950";
+		} else if (deathRateCalcYear >= 1933){
+			deathRateCalcYearColumn = "year1933";
+		} else {
+			deathRateCalcYearColumn = "year1925";			
+		}
 		double deathRate = 1;
-		String sql = "SELECT " + deathRateCalcYearColumn + " FROM " + schema + "deathsbyagegroup WHERE agegroup= '" + ageGroup + "'  ";
+		String sql = "SELECT " + deathRateCalcYearColumn + " FROM " + schema + deathsTable + " WHERE agegroup= '" + ageGroup + "'  ";
 		ResultSet rs = st.executeQuery(sql);
 //		System.out.println(sql);
 		while (rs.next()){
@@ -387,18 +382,26 @@ public class RunCalculation {
 		String sql = "UPDATE " + calcTable + " SET year" + year + " = " + pop + " "
 				+ "WHERE agegroup = '" + ageGroup + "'";
 		st.execute(sql);
-		System.out.println(sql); 
-		System.out.println();
+//		System.out.println(sql);
 	}
 	
-	private static int getPopSumOfYear(int year) throws SQLException{
-		String sql = "SELECT SUM(year" + year + ") FROM " + calcTable;
+	private static void printResult(int year) throws SQLException{
+//		result
+		System.out.println("_____________________________________________________________________");
+		System.out.println(year);
+		String sql = "SELECT agegroup, year" + year + " FROM " + calcTable;
 		ResultSet rs = st.executeQuery(sql);
 		int pop = 0;
 		while (rs.next()){
+			System.out.println(rs.getString(1) + " " + rs.getInt(2));;		
+		}
+		sql = "SELECT SUM(year" + year + ") FROM " + calcTable;
+		rs = st.executeQuery(sql);
+		pop = 0;
+		while (rs.next()){
 			pop = rs.getInt(1);		
 		}
-		return pop;
+		System.out.println(year + ": " + pop + " inhabitants");
 	}
 	
 	private static double getMigrationFactorWithinCluster(int blcluster, int raumKategorie, ArrayList<String> ageGroupsArrayList) throws SQLException{

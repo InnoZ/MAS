@@ -33,7 +33,7 @@ public class CSVtoPostgreSQL {
     	  int lastColumn = 2040;
     	  if (tableName.contains("Z")){
     		  lastColumn = 2013; 
-    		  if (tableName.contains("00to05")){
+    		  if (tableName.contains("00to05")||tableName.contains("05to10")||tableName.contains("75to85")||tableName.contains("85to101")){
     			  lastColumn = 2012;
     		  }
     	  }

@@ -26,7 +26,7 @@ public class XLStoCSV {
         if (filename.startsWith("Z")){
         	columnFrom = 0;
         	columnTo = 18;
-        	if (filename.contains("00-05")){
+        	if (filename.contains("00-05")||filename.contains("05-10")||filename.contains("75-85")||filename.contains("85-101")){
         		columnTo = 17;
         	}
         }
