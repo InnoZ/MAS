@@ -98,7 +98,7 @@ public class XLStoCSV {
 	                data.append('\n'); 
                 }
         }
-
+        workbook.close();
         fos.write(data.toString().getBytes());
         fos.close();
         System.out.println(inputFile.toString() + "  transformed to csv");
