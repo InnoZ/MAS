@@ -23,10 +23,6 @@ public class MiscConfigurationGroup extends ConfigurationGroup {
 	public MiscConfigurationGroup() {
 		
 		super(GROUP_NAME);
-		this.params.put(CRS, this.coordinateSystem);
-		this.params.put(NUMBER_OF_THREADS, this.numberOfThreads);
-		this.params.put(OUTPUT_DIR, this.outputDirectory);
-		this.params.put(OVERWRITE_EXISTING_FILES, this.overwriteExistingFiles);
 		
 	}
 

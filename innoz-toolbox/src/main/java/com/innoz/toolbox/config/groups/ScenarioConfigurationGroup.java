@@ -3,6 +3,9 @@ package com.innoz.toolbox.config.groups;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.matsim.core.config.ReflectiveConfigGroup.StringGetter;
+import org.matsim.core.config.ReflectiveConfigGroup.StringSetter;
+
 public class ScenarioConfigurationGroup extends ConfigurationGroup {
 
 	final static String GROUP_NAME = "scenario";
@@ -24,42 +27,45 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 	public ScenarioConfigurationGroup() {
 		
 		super(GROUP_NAME);
-		this.params.put(ACT_LOCATIONS_TYPE, this.actLocsType);
-		this.params.put(RANDOM_SEED, this.randomSeed);
-		this.params.put(SCALE_FACTOR, this.scaleFactor);
 		
 	}
 	
+	@StringGetter(ACT_LOCATIONS_TYPE)
 	public ActivityLocationsType getActivityLocationsType(){
 		
 		return this.actLocsType;
 		
 	}
-	
+
+	@StringSetter(ACT_LOCATIONS_TYPE)
 	public void setActivityLocationsType(ActivityLocationsType type){
 		
 		this.actLocsType = type;
 		
 	}
 	
+	@StringGetter(RANDOM_SEED)
 	public long getRandomSeed(){
 		
 		return this.randomSeed;
 		
 	}
 	
+	@StringSetter(RANDOM_SEED)
 	public void setRandomSeed(long seed){
 		
 		this.randomSeed = seed;
 		
 	}
 	
+	@StringGetter(SCALE_FACTOR)
 	public double getScaleFactor(){
 		
 		return this.scaleFactor;
 		
 	}
 	
+	@StringSetter(SCALE_FACTOR)
 	public void setScaleFactor(double scaleFactor) {
 	
 		this.scaleFactor = scaleFactor;
@@ -125,10 +131,6 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 		public AreaSet() {
 			
 			super(SET_TYPE);
-			this.params.put(IDS, this.ids);
-			this.params.put(NETWORK_LEVEL, this.networkLevel);
-			this.params.put(POPULATION_SOURCE, this.populationSource);
-			this.params.put(IS_SURVEY_AREA, this.isSurveyArea);
 			
 		}
 
@@ -148,50 +150,56 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 			
 		}
 		
+		@StringGetter(IDS)
 		public String getIds(){
 			
 			return this.ids;
 			
 		}
 		
+		@StringSetter(IDS)
 		public void setIds(String ids){
 			
 			this.ids = ids;
-			this.params.put(IDS, ids);
 			
 		}
 		
+		@StringGetter(NETWORK_LEVEL)
 		public int getNetworkLevel(){
 			
 			return this.networkLevel;
 			
 		}
 		
+		@StringSetter(NETWORK_LEVEL)
 		public void setNetworkLevel(int level){
 			
 			this.networkLevel = level;
 			
 		}
 		
+		@StringGetter(POPULATION_SOURCE)
 		public PopulationSource getPopulationSource(){
 			
 			return this.populationSource;
 			
 		}
 		
+		@StringSetter(POPULATION_SOURCE)
 		public void setPopulationSource(PopulationSource source){
 			
 			this.populationSource = source;
-			this.params.put(POPULATION_SOURCE, source);
 			
 		}
 		
+		@StringGetter(IS_SURVEY_AREA)
 		public boolean isSurveyArea(){
 			
 			return this.isSurveyArea;
 			
 		}
 		
+		@StringSetter(IS_SURVEY_AREA)
 		public void setIsSurveyArea(boolean b){
 			
 			this.isSurveyArea = b;

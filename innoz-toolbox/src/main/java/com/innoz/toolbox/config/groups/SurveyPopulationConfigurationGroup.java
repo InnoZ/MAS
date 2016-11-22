@@ -3,6 +3,9 @@ package com.innoz.toolbox.config.groups;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.matsim.core.config.ReflectiveConfigGroup.StringGetter;
+import org.matsim.core.config.ReflectiveConfigGroup.StringSetter;
+
 public class SurveyPopulationConfigurationGroup extends ConfigurationGroup {
 
 	final static String GROUP_NAME = "surveyPopulation";
@@ -37,55 +40,59 @@ public class SurveyPopulationConfigurationGroup extends ConfigurationGroup {
 	public SurveyPopulationConfigurationGroup() {
 		
 		super(GROUP_NAME);
-		this.params.put(SURVEY_TYPE, this.source);
-		this.params.put(DAY_TYPES, this.dayTypes);
-		this.params.put(VEHICLE_TYPE, this.vehicleType);
-		this.params.put(USE_HOUSEHOLDS, this.useHouseholds);
 		
 	}
-	
+
+	@StringGetter(SURVEY_TYPE)
 	public SurveyType getSurveyType(){
 		
 		return this.source;
 		
 	}
 	
+	@StringSetter(SURVEY_TYPE)
 	public void setSurveyType(SurveyType type){
 		
 		this.source = type;
 		
 	}
 	
+	@StringGetter(DAY_TYPES)
 	public DayTypes getDayTypes(){
 		
 		return this.dayTypes;
 		
 	}
 	
+	@StringSetter(DAY_TYPES)
 	public void setDayTypes(DayTypes types){
 		
 		this.dayTypes = types;
 		
 	}
 	
+	@StringGetter(VEHICLE_TYPE)
 	public VehicleType getVehicleType(){
 		
 		return this.vehicleType;
 		
 	}
 	
+	@StringSetter(VEHICLE_TYPE)
 	public void setVehicleType(VehicleType type){
 		
 		this.vehicleType = type;
 		
 	}
 	
+	@StringGetter(USE_HOUSEHOLDS)
 	public boolean useHouseholds(){
 		
 		return this.useHouseholds;
 		
 	}
 	
+	@StringSetter(USE_HOUSEHOLDS)
 	public void setUseHouseholds(boolean b){
 		
 		this.useHouseholds = b;

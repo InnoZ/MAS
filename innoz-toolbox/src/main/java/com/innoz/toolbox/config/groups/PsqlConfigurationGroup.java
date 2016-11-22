@@ -23,10 +23,6 @@ public class PsqlConfigurationGroup extends ConfigurationGroup {
 	public PsqlConfigurationGroup() {
 		
 		super(GROUP_NAME);
-		this.params.put(DB_USER, this.dbUser);
-		this.params.put(DB_PASSWORD, this.dbPassword);
-		this.params.put(LOCAL_PORT, this.localPort);
-		this.params.put(IS_WRITING_INTO_DATAHUB, Boolean.toString(this.writeIntoDataHub));
 		
 	}
 	
@@ -125,8 +121,6 @@ public class PsqlConfigurationGroup extends ConfigurationGroup {
 		public OutputTablesParameterSet() {
 		
 			super(SET_TYPE);
-			this.params.put(SCENARIO, this.scenarioName);
-			this.params.put(SCHEMA, this.schemaName);
 
 		}
 		

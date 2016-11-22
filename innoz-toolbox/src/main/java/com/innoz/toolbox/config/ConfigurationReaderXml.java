@@ -59,7 +59,7 @@ public class ConfigurationReaderXml extends DefaultHandler {
 			startParameterSet(attributes);
 			
 		} else if(qName.equals(ConfigurationNames.PARAM)){
-			
+	
 			startParameter(attributes);
 			
 		}
@@ -92,19 +92,20 @@ public class ConfigurationReaderXml extends DefaultHandler {
 	
 	private void startParameterSet(Attributes atts){
 		
-		ConfigurationGroup group = groupStack.getFirst().createParameterSet(atts.getValue(ConfigurationNames.VALUE));
+		ConfigurationGroup group = groupStack.getFirst().createParameterSet(atts.getValue(ConfigurationNames.NAME));
 		groupStack.addFirst(group);
 		
 	}
 	
 	private void startParameter(Attributes atts){
 		
-		groupStack.getFirst().addParam(atts.getValue(ConfigurationNames.NAME), ConfigurationNames.VALUE);
+		groupStack.getFirst().addParam(atts.getValue(ConfigurationNames.NAME), atts.getValue(ConfigurationNames.VALUE));
 		
 	}
 	
 	public static void main(String args[]){
-		new ConfigurationReaderXml(ConfigurationUtils.createConfiguration()).read("/home/dhosse/newConfiguration.xml");
+		Configuration c = ConfigurationUtils.createConfiguration();
+		new ConfigurationReaderXml(c).read("/home/dhosse/newConfiguration.xml");
 	}
 	
 }

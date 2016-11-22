@@ -34,17 +34,21 @@ public class ConfigurationWriterHandler {
 	
 	public void writeConfiguration(final Configuration configuration, final BufferedWriter out) throws IOException{
 		
-		writeConfigurationGroup(configuration.misc(), out);
-		writeConfigurationGroup(configuration.psql(), out);
-		writeConfigurationGroup(configuration.scenario(), out);
-		writeConfigurationGroup(configuration.surveyPopulation(), out);
+		writeConfigurationGroup(configuration.misc(), out, true);
+		writeConfigurationGroup(configuration.psql(), out, true);
+		writeConfigurationGroup(configuration.scenario(), out, true);
+		writeConfigurationGroup(configuration.surveyPopulation(), out, true);
 		
 	}
 	
-	private void writeConfigurationGroup(ConfigurationGroup configuration, BufferedWriter out) throws IOException{
+	private void writeConfigurationGroup(ConfigurationGroup configuration, BufferedWriter out, boolean isGroup) throws IOException{
 		
 		out.write(indent);
-		out.write("<" + ConfigurationNames.GROUP + " name=\"" + configuration.groupName + "\">");
+		if(isGroup){
+			out.write("<" + ConfigurationNames.GROUP + " name=\"" + configuration.groupName + "\">");
+		} else {
+			out.write("<" + ConfigurationNames.PARAMETER_SET + " name=\"" + configuration.groupName + "\">");
+		}
 		out.write(NEWLINE);
 		out.write(NEWLINE);
 
@@ -76,7 +80,7 @@ public class ConfigurationWriterHandler {
 			
 			for(ConfigurationGroup group : set.values()){
 
-				writeConfigurationGroup(group, out);
+				writeConfigurationGroup(group, out, false);
 				
 			}
 			
@@ -85,7 +89,11 @@ public class ConfigurationWriterHandler {
 		indent = indent.replaceFirst(TAB, "");
 		
 		out.write(indent);
-		out.write("</" + ConfigurationNames.GROUP + ">");
+		if(isGroup){
+			out.write("</" + ConfigurationNames.GROUP + ">");
+		} else{
+			out.write("</" + ConfigurationNames.PARAMETER_SET + ">");
+		}
 		out.write(NEWLINE);
 		out.write(NEWLINE);
 		

@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.PopulationSource;
+
 public class ConfigurationWriter {
 
 	final Configuration configuration;
@@ -37,7 +40,14 @@ public class ConfigurationWriter {
 	}
 	
 	public static void main(String args[]){
-		new ConfigurationWriter(ConfigurationUtils.createConfiguration()).write("/home/dhosse/newConfiguration.xml");
+		Configuration c = ConfigurationUtils.createConfiguration();
+		AreaSet set = new AreaSet();
+		set.setIds("09180");
+		set.setIsSurveyArea(true);
+		set.setNetworkLevel(6);
+		set.setPopulationSource(PopulationSource.SURVEY);
+		c.scenario().addAreaSet(set);
+		new ConfigurationWriter(c).write("/home/dhosse/newConfiguration.xml");
 	}
 	
 }
