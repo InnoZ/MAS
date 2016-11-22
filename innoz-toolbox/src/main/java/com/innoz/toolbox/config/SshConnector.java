@@ -12,13 +12,14 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import jline.console.ConsoleReader;
-
 import org.apache.log4j.Logger;
 
+import com.innoz.toolbox.config.groups.PsqlConfigurationGroup;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+
+import jline.console.ConsoleReader;
 
 /**
  * 
@@ -142,8 +143,8 @@ public class SshConnector {
 	}
 	
 	public static void setDbUserData(Configuration configuration, ConsoleReader reader) throws IOException{
-		configuration.psql().setPsqlUser(reader.readLine("> Enter database user name: "));
-		configuration.psql().setPsqlPassword(new String(reader.readLine("> Enter database password: ", new Character('*'))));
+		configuration.psql().addParam(PsqlConfigurationGroup.DB_USER, reader.readLine("> Enter database user name: "));
+		configuration.psql().addParam(PsqlConfigurationGroup.DB_PASSWORD, reader.readLine("> Enter database password: ", new Character('*')));
 //		if(!connected){
 //			ConfigurationUtils.set(configuration, Configuration.LOCAL_PORT, 5432);
 //		}

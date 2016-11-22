@@ -56,13 +56,13 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 		ResultSet resultSet = null;
 		String q = null;
 		
-		String table = surveyType.equals("mid") ? "mid2008.persons_raw" : "srv2013.persons";
+		String table = surveyType.equalsIgnoreCase("mid") ? "mid2008.persons_raw" : "srv2013.persons";
 		
 		q = "select * from " + table;
 		
 //		if(container.getHouseholds() == null){
 			
-			if(surveyType.equals("mid")){
+			if(surveyType.equalsIgnoreCase("mid")){
 				
 				q +=  " where ";
 				

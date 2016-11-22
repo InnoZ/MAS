@@ -58,7 +58,7 @@ public class ReadWayDatabaseTask extends DatabaseTask {
 		ResultSet resultSet = null;
 		String q = null;
 		
-		String table = surveyType.equals("mid") ? "mid2008.ways_raw" : "srv2013.ways";
+		String table = surveyType.equalsIgnoreCase("mid") ? "mid2008.ways_raw" : "srv2013.ways";
 		
 		q = "select * from " + table;
 		

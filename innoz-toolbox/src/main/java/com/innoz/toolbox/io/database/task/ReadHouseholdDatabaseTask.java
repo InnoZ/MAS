@@ -39,11 +39,11 @@ public class ReadHouseholdDatabaseTask extends DatabaseTask {
 		Statement statement = connection.createStatement();
 		statement.setFetchSize(2000);
 	
-		String table = surveyType.equals("mid") ? "mid2008.households_raw" : "srv2013.households";
+		String table = surveyType.equalsIgnoreCase("mid") ? "mid2008.households_raw" : "srv2013.households";
 		
 		String q = "select * from " + table;
 		
-		if(surveyType.equals("mid")){
+		if(surveyType.equalsIgnoreCase("mid")){
 			
 			q +=  " where ";
 			
