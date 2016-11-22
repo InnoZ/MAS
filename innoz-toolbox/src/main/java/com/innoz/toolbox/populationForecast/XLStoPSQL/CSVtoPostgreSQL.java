@@ -4,8 +4,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
-
 public class CSVtoPostgreSQL {
    public static void csv(String outputFolder, String filename, String database, String schema) {
       Connection c = null;
@@ -15,7 +13,6 @@ public class CSVtoPostgreSQL {
     	  c = DriverManager
 			  .getConnection("jdbc:postgresql://localhost:5432/" + database,
 			  "postgres", "postgres");
-    	  System.out.println();
     	  System.out.println("Opened database successfully");
     	  stmt = c.createStatement();
     	  String sql;
@@ -32,11 +29,22 @@ public class CSVtoPostgreSQL {
     	  stmt.executeUpdate(sql);
     	  
 //    	  Create Table with currently 44 columns
+//    	  if Zensus-Data only 17 columns
+    	  int lastColumn = 2040;
+    	  if (tableName.contains("Z")){
+    		  lastColumn = 2013; 
+    		  if (tableName.contains("00to05")||tableName.contains("05to10")||tableName.contains("75to85")||tableName.contains("85to101")){
+    			  lastColumn = 2012;
+    		  }
+    	  }
     	  sql =	"CREATE TABLE " +  tableName + "("
     	  		+ "Land		integer,"
     	  		+ "GKZ		integer,"
     	  		+ "Name		char(50)";
-    	  for (int year = 2000 ; year < 2041; year++){
+    	  if (tableName.contains("Z")){
+    		  sql = sql + ", Raumkategorie int";
+    	  }
+    	  for (int year = 2000 ; year <= lastColumn; year++){
     		  sql = sql + ", year" + year + " integer";
     	  }
     	  sql = sql + ")";
@@ -47,6 +55,7 @@ public class CSVtoPostgreSQL {
     	  sql =	"COPY " + tableName + " FROM '" + outputFolder + filename + ".csv' CSV Header DELIMITER ';'";
     	  stmt.executeUpdate(sql);
        	  System.out.println(sql);
+       	  System.out.println();
     	  
     	  stmt.close();
     	  c.close();

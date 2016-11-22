@@ -40,6 +40,7 @@ public class RunMatsim {
 		
 		Config config = ConfigUtils.loadConfig(args[0]);
 		
+		config.controler().setLastIteration(0);
 		config.qsim().setEndTime(30*3600);
 		
 		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);

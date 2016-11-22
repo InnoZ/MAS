@@ -1,7 +1,9 @@
 package com.innoz.toolbox.utils.data;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 
@@ -24,6 +26,7 @@ public class Tree<T> {
 
 	private Node<T> root;
 	private int size = 0;
+	Set<Node<T>> nodesToSwap = new HashSet<>();
 	
 	public Tree(T rootData){
 		
@@ -60,10 +63,7 @@ public class Tree<T> {
 				
 			} else if(child.data.toString().contains(data.toString())){
 				
-				//TODO There is no guarantee, we get a valid tree, e.g. existing nodes <03444>, <03454> and new node <03>
-				// only one of the existing nodes would be child of the new node
-				swap(data, child);
-				return true;
+				nodesToSwap.add(child);
 				
 			}
 			
@@ -71,13 +71,28 @@ public class Tree<T> {
 		
 		if(!isAdded || top.children.isEmpty()){
 			
-			Node<T> node = new Node<T>();
-			node.data = data;
-			node.children = new ArrayList<>();
-			node.parent = top;
-			top.children.add(node);
-			size++;
-			return true;
+			if(nodesToSwap.size() > 0){
+				
+				for(Node<T> node : nodesToSwap){
+					
+					swap(data, node);
+					
+				}
+
+				nodesToSwap = new HashSet<>();
+				return true;
+				
+			} else {
+
+				Node<T> node = new Node<T>();
+				node.data = data;
+				node.children = new ArrayList<>();
+				node.parent = top;
+				top.children.add(node);
+				size++;
+				return true;
+				
+			}
 			
 		}
 		
@@ -87,14 +102,21 @@ public class Tree<T> {
 	
 	void swap(T data, Node<T> existingChild){
 		
-		Node<T> newNode = new Node<>();
-		newNode.data = data;
-		newNode.parent = existingChild.parent;
-		newNode.children = new ArrayList<>();
-		newNode.children.add(existingChild);
-		newNode.parent.children.add(newNode);
-		newNode.parent.children.remove(existingChild);
+		boolean contained = get(data.toString()) != null;
 		
+		Node<T> newNode = contained ? get(data.toString()) : new Node<>();
+		
+		if(!contained){
+
+			newNode.data = data;
+			newNode.children = new ArrayList<>();
+			newNode.parent = existingChild.parent;
+			newNode.parent.children.add(newNode);
+		
+		}
+		
+		newNode.children.add(existingChild);
+		newNode.parent.children.remove(existingChild);
 		existingChild.parent = newNode;
 		
 		size++;
@@ -108,6 +130,8 @@ public class Tree<T> {
 	}
 	
 	Node<T> get(String id, Node<T> top){
+		
+		if(id.equals(top.data.toString())) return top;
 		
 		for(Node<T> child : top.children){
 

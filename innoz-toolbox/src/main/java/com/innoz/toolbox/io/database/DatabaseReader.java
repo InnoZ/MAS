@@ -183,14 +183,9 @@ public class DatabaseReader {
 
 				}
 				
-//				if(!configuration.getPopulationSource().equals(PopulationSource.none)
-//						|| !configuration.getVicinityPopulationSource().equals(PopulationSource.none)){
-
 				// Otherwise, read in the OSM data
 				this.readOsmData(connection, configuration, scenario);
 					
-//				}
-				
 			}
 			
 			// Close the connection when everything's done.
@@ -254,16 +249,7 @@ public class DatabaseReader {
 			}
 			
 		}
-		
-//		for(AdminUnitEntry entry : configuration.getAdminUnitEntries().values()){
-//			
-//			this.geoinformation.getAdminUnit(entry.getId()).getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
-//			
-//		}
-//		for(District d : this.geoinformation.getAdminUnits().values()){
-//			d.setnHouseholds(configuration.getAdminUnitEntries().get(d.getId()).getNumberOfHouseholds());
-//		}
-		
+			
 		// Get the survey area by building the bounding box of all geometries 
 		this.geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection)
 				.convexHull());

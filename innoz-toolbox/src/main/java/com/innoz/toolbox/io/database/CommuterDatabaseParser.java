@@ -43,12 +43,17 @@ public class CommuterDatabaseParser {
 				Set<String> surveyAreaIds = CollectionUtils.stringToSet(((AreaSet)areaSets.get(PopulationSource.SURVEY)).getIds());
 				Set<String> vicinityIds = CollectionUtils.stringToSet(((AreaSet)areaSets.get(PopulationSource.COMMUTER)).getIds());
 
-				this.execute(connection, "2015_reverse",
-						createChainedStatementFromSet(surveyAreaIds, "home_id"),
-						createChainedStatementFromSet(vicinityIds, "work_id"));
-				this.execute(connection, "2015_commuters",
-						createChainedStatementFromSet(vicinityIds, "home_id"),
-						createChainedStatementFromSet(surveyAreaIds, "work_id"));
+				if(!vicinityIds.isEmpty()){
+				
+					this.execute(connection, "2015_reverse",
+							createChainedStatementFromSet(surveyAreaIds, "home_id"),
+							createChainedStatementFromSet(vicinityIds, "work_id"));
+					this.execute(connection, "2015_commuters",
+							createChainedStatementFromSet(vicinityIds, "home_id"),
+							createChainedStatementFromSet(surveyAreaIds, "work_id"));
+					
+				}
+
 				this.execute(connection, "2015_internal",
 						createChainedStatementFromSet(surveyAreaIds, "home_id"),
 						createChainedStatementFromSet(vicinityIds, "work_id"));
@@ -133,7 +138,7 @@ public class CommuterDatabaseParser {
 			
 			}
 			
-			result.append(var + " = '" + s + "'");
+			result.append(var + " like '" + s + "%'");
 			isFirst = false;
 			
 		}

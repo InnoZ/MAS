@@ -1,4 +1,4 @@
-package com.innoz.toolbox.io.database.migration;
+package com.innoz.dbmigration;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

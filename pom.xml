@@ -9,5 +9,7 @@
   <modules>
 	<module>innoz-toolbox</module>
     	<module>energy</module>
+    <module>dbmigration</module>
+    <module>scenarios</module>
   </modules>
 </project>

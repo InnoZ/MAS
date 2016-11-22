@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -15,10 +14,22 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class XLStoCSV {
 	
-	void xls(String inputFolder, String outputFolder, String filename) {
+	public static void xls(String inputFolder, String outputFolder, String filename) {
 		
         File inputFile = new File(inputFolder + filename + ".xls");
         File outputFile = new File(outputFolder + filename + ".csv");
+        
+        int columnFrom = 0;
+        int columnTo = 44;
+        
+//      Zensusdata only for 2009 until 2013
+        if (filename.startsWith("Z")){
+        	columnFrom = 0;
+        	columnTo = 18;
+        	if (filename.contains("00-05")||filename.contains("05-10")||filename.contains("75-85")||filename.contains("85-101")){
+        		columnTo = 17;
+        	}
+        }
         
 		// For storing data into CSV files
         StringBuffer data = new StringBuffer();
@@ -45,14 +56,24 @@ public class XLStoCSV {
 	                while (cellIterator.hasNext()) 
 	                {
 	                        cell = cellIterator.next();
-	                
-	                        if (cell.getColumnIndex() < 44) {
+	                        if (cell.getColumnIndex() >= columnFrom && cell.getColumnIndex() < columnTo) {
 	                        	
 		                        switch (cell.getCellType()) 
 		                        {
 		                        case Cell.CELL_TYPE_BOOLEAN:
 		                                data.append(cell.getBooleanCellValue() + ";");
 		                                break;
+		                                
+		                        case Cell.CELL_TYPE_FORMULA:
+		                            switch (cell.getCachedFormulaResultType()) {
+		                                case Cell.CELL_TYPE_STRING:
+		                                	data.append(cell.getRichStringCellValue().getString()+ ";");
+		                                    break;
+		                                case Cell.CELL_TYPE_NUMERIC:
+		                                    data.append((int) cell.getNumericCellValue()+ ";");
+		                                    break;
+		                            }
+		                            break;
 		                                
 		                        case Cell.CELL_TYPE_NUMERIC:
 		                                data.append((int) cell.getNumericCellValue() + ";");
@@ -77,7 +98,7 @@ public class XLStoCSV {
 	                data.append('\n'); 
                 }
         }
-
+        workbook.close();
         fos.write(data.toString().getBytes());
         fos.close();
         System.out.println(inputFile.toString() + "  transformed to csv");

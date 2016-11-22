@@ -27,7 +27,7 @@ public class EnergyConsumptionHandler implements ActivityStartEventHandler, Acti
 	EnergyConsumptionConfigGroup config;
 	
 	Map<Id<Person>, List<EnergyLog>> consumptionLog = new HashMap<>();
-	double[] totalConsumptionPerHour = new double[24];
+	double[] totalConsumptionPerHour = new double[30];
 	EnergyConsumptionStatsWriter writer = new EnergyConsumptionStatsWriter();
 	
 	@Inject
@@ -46,7 +46,7 @@ public class EnergyConsumptionHandler implements ActivityStartEventHandler, Acti
 	@Override
 	public void reset(int iteration) {
 		
-		this.totalConsumptionPerHour = new double[24];
+		this.totalConsumptionPerHour = new double[30];
 		this.consumptionLog = new HashMap<>();
 		
 		for(Person person : this.controler.getScenario().getPopulation().getPersons().values()){
@@ -118,17 +118,7 @@ public class EnergyConsumptionHandler implements ActivityStartEventHandler, Acti
 					double c = calcEnergyConsumption(log.startTime, log.endTime, log.actType);
 					consumption += c;
 					
-					int start = (int)(log.startTime/3600);
-					int end = (int)(log.endTime/3600);
-					int i = start;
-
-					while(i <= end && i < this.totalConsumptionPerHour.length){
-						
-						int dur = end - start > 0 ? end - start : 1;
-						this.totalConsumptionPerHour[i] += (c / dur);
-						i++;
-						
-					}
+					calcHourlyConsumption(log, c);
 						
 				}
 				
@@ -141,6 +131,35 @@ public class EnergyConsumptionHandler implements ActivityStartEventHandler, Acti
 			this.writer.writeAggregatedStatsPerHour(event.getServices().getControlerIO().getIterationFilename(event.getIteration(),
 					"aggregatedConsumption.txt"), this.totalConsumptionPerHour);
 		
+		}
+		
+	}
+
+	private void calcHourlyConsumption(EnergyLog log, double c) {
+		
+		double duration = log.endTime - log.startTime;
+		int i = (int)(log.startTime/3600);
+
+		if(duration > 0){
+
+			while(i < (log.endTime/3600)){
+				
+				if(i >= this.totalConsumptionPerHour.length) break;
+				
+				double m = (c / duration) * 3600;
+				this.totalConsumptionPerHour[i] += m;
+				i++;
+				
+			}
+			
+			double d = i * 3600 - log.endTime;
+			
+			if(i < 30 && d > 0){
+				this.totalConsumptionPerHour[i] = (c/duration) * d;
+			}
+			
+		} else {
+			System.out.println();
 		}
 		
 	}
