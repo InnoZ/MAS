@@ -37,8 +37,6 @@ public final class Configuration {
 	int localPort = 3200;
 	final int remotePort = 5432;
 	
-	String sshUser;
-	String sshPassword;
 	String databaseUser = "postgres";
 	String userPassword = "postgres";
 	/////////////////////////////////////////////////////////////////////////////////////////	
