@@ -36,4 +36,8 @@ public class ConfigurationWriter {
 		
 	}
 	
+	public static void main(String args[]){
+		new ConfigurationWriter(ConfigurationUtils.createConfiguration()).write("/home/dhosse/newConfiguration.xml");
+	}
+	
 }

@@ -3,6 +3,9 @@ package com.innoz.toolbox.config.groups;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.matsim.core.config.ReflectiveConfigGroup.StringGetter;
+import org.matsim.core.config.ReflectiveConfigGroup.StringSetter;
+
 public class MiscConfigurationGroup extends ConfigurationGroup {
 
 	static final String GROUP_NAME = "misc";
@@ -39,49 +42,57 @@ public class MiscConfigurationGroup extends ConfigurationGroup {
 		
 		return map;
 	}
-	
+
+	@StringGetter(CRS)
 	public String getCoordinateSystem(){
 		
 		return this.coordinateSystem;
 		
 	}
 	
+	@StringSetter(CRS)
 	public void setCoordinateSystem(String crs){
 		
 		this.coordinateSystem = crs;
 		
 	}
 	
+	@StringGetter(NUMBER_OF_THREADS)
 	public int getNumberOfThreads(){
 		
 		return this.numberOfThreads;
 		
 	}
 	
+	@StringSetter(NUMBER_OF_THREADS)
 	public void setNumberOfThreads(int n){
 		
 		this.numberOfThreads = n;
 		
 	}
 	
+	@StringGetter(OUTPUT_DIR)
 	public String getOutputDirectory(){
 		
 		return this.outputDirectory;
 		
 	}
 	
+	@StringSetter(OUTPUT_DIR)
 	public void setOutputDirectory(String dir){
 		
 		this.outputDirectory = dir;
 		
 	}
 	
+	@StringGetter(OVERWRITE_EXISTING_FILES)
 	public boolean isOverwritingExistingFiles(){
 		
 		return this.overwriteExistingFiles;
 		
 	}
 	
+	@StringSetter(OVERWRITE_EXISTING_FILES)
 	public void setOverwriteExistingFiles(boolean b){
 		
 		this.overwriteExistingFiles = b;

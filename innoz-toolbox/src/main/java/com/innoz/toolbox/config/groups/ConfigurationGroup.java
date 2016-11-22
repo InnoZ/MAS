@@ -38,4 +38,28 @@ public abstract class ConfigurationGroup {
 	
 	public abstract Map<String, String> getComments();
 	
+	public ConfigurationGroup createParameterSet(String name){
+		
+		return new ConfigurationGroup(name) {
+			
+			@Override
+			public Map<String, String> getComments() {
+				return null;
+				
+			}
+			
+		};
+		
+	}
+	
+	public void addParameterSet(ConfigurationGroup parameterSet){
+		//TODO
+	}
+	
+	public void addParam(String name, String value){
+		if(this.params.containsKey(name)){
+			this.params.put(name, value);
+		}
+	}
+	
 }

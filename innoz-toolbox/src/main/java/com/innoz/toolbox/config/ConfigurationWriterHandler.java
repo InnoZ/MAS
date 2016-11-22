@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.innoz.toolbox.config.groups.ConfigurationGroup;
+import com.innoz.toolbox.config.groups.ConfigurationNames;
 
 public class ConfigurationWriterHandler {
 
@@ -43,7 +44,7 @@ public class ConfigurationWriterHandler {
 	private void writeConfigurationGroup(ConfigurationGroup configuration, BufferedWriter out) throws IOException{
 		
 		out.write(indent);
-		out.write("<" + configuration.groupName + ">");
+		out.write("<" + ConfigurationNames.GROUP + " name=\"" + configuration.groupName + "\">");
 		out.write(NEWLINE);
 		out.write(NEWLINE);
 
@@ -62,7 +63,8 @@ public class ConfigurationWriterHandler {
 			}
 			
 			out.write(indent);
-			out.write("<" + param.getKey() + " v=\"" + param.getValue() + "\"/>");
+			out.write("<" + ConfigurationNames.PARAM + " " + ConfigurationNames.NAME + "=\"" + param.getKey() + "\" " +
+					ConfigurationNames.VALUE + " =\"" + param.getValue() + "\"/>");
 			out.write(NEWLINE);
 			out.write(NEWLINE);
 			
@@ -83,7 +85,7 @@ public class ConfigurationWriterHandler {
 		indent = indent.replaceFirst(TAB, "");
 		
 		out.write(indent);
-		out.write("</" + configuration.groupName + ">");
+		out.write("</" + ConfigurationNames.GROUP + ">");
 		out.write(NEWLINE);
 		out.write(NEWLINE);
 		

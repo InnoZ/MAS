@@ -1,9 +1,12 @@
 package com.innoz.toolbox.config;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.innoz.toolbox.config.groups.ConfigurationGroup;
 import com.innoz.toolbox.config.groups.MiscConfigurationGroup;
 import com.innoz.toolbox.config.groups.PsqlConfigurationGroup;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup;
@@ -28,6 +31,8 @@ public final class Configuration {
 	private PsqlConfigurationGroup psql;
 	private ScenarioConfigurationGroup scenario;
 	private SurveyPopulationConfigurationGroup surveyPopulation;
+	
+	private Map<String,ConfigurationGroup> groups = new HashMap<>();
 	//NON-CONFIGURABLE///////////////////////////////////////////////////////////////////////
 	int localPort = 3200;
 	final int remotePort = 5432;
@@ -59,9 +64,13 @@ public final class Configuration {
 	Configuration(){
 		
 		this.misc = new MiscConfigurationGroup();
+		this.groups.put("misc", misc);
 		this.psql = new PsqlConfigurationGroup();
+		this.groups.put("psql", psql);
 		this.scenario = new ScenarioConfigurationGroup();
+		this.groups.put("scenario", scenario);
 		this.surveyPopulation = new SurveyPopulationConfigurationGroup();
+		this.groups.put("surveyPopulation", surveyPopulation);
 	
 	}
 	
@@ -156,6 +165,12 @@ public final class Configuration {
 	public final SurveyPopulationConfigurationGroup surveyPopulation(){
 		
 		return this.surveyPopulation;
+		
+	}
+	
+	public final ConfigurationGroup getModule(String name){
+		
+		return this.groups.get(name);
 		
 	}
 	

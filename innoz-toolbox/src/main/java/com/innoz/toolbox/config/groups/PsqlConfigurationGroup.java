@@ -3,6 +3,9 @@ package com.innoz.toolbox.config.groups;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.matsim.core.config.ReflectiveConfigGroup.StringGetter;
+import org.matsim.core.config.ReflectiveConfigGroup.StringSetter;
+
 public class PsqlConfigurationGroup extends ConfigurationGroup {
 
 	public static final String GROUP_NAME = "psql";
@@ -52,49 +55,57 @@ public class PsqlConfigurationGroup extends ConfigurationGroup {
 		return map;
 		
 	}
-	
+
+	@StringGetter(LOCAL_PORT)
 	public int getPsqlPort(){
 		
 		return this.localPort;
 		
 	}
 	
+	@StringSetter(LOCAL_PORT)
 	public void setPsqlPort(int port){
 		
 		this.localPort = port;
 		
 	}
 	
+	@StringGetter(DB_PASSWORD)
 	public String getPsqlPassword(){
 		
 		return this.dbPassword;
 		
 	}
 	
+	@StringSetter(DB_PASSWORD)
 	public void setPsqlPassword(String p){
 		
 		this.dbPassword = p;
 		
 	}
 	
+	@StringGetter(DB_USER)
 	public String getPsqlUser(){
 		
 		return this.dbUser;
 		
 	}
 	
+	@StringSetter(DB_USER)
 	public void setPsqlUser(String user){
 		
 		this.dbUser = user;
 		
 	}
 	
+	@StringGetter(IS_WRITING_INTO_DATAHUB)
 	public boolean isWritingIntoMobilityDatahub(){
 		
 		return this.writeIntoDataHub;
 		
 	}
 	
+	@StringSetter(IS_WRITING_INTO_DATAHUB)
 	public void setWriteIntoMobilityDatahub(boolean b){
 		
 		this.writeIntoDataHub = b;
@@ -119,24 +130,28 @@ public class PsqlConfigurationGroup extends ConfigurationGroup {
 
 		}
 		
+		@StringGetter(SCHEMA)
 		public String getSchemaName(){
 			
 			return this.schemaName;
 			
 		}
 		
+		@StringSetter(SCHEMA)
 		public void setSchemaName(String schemaName){
 			
 			this.schemaName = schemaName;
 			
 		}
 		
+		@StringGetter(SCENARIO)
 		public String getScenarioName(){
 			
 			return this.scenarioName;
 			
 		}
 		
+		@StringSetter(SCENARIO)
 		public void setScenarioName(String scenarioName){
 			
 			this.scenarioName = scenarioName;
