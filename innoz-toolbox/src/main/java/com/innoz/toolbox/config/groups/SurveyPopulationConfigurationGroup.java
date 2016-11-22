@@ -86,7 +86,7 @@ public class SurveyPopulationConfigurationGroup extends ConfigurationGroup {
 	}
 	
 	@StringGetter(USE_HOUSEHOLDS)
-	public boolean useHouseholds(){
+	public boolean isUsingHouseholds(){
 		
 		return this.useHouseholds;
 		

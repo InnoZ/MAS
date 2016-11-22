@@ -38,7 +38,7 @@ public class SurveyDataContainer {
 	
 	public SurveyDataContainer(final Configuration configuration){
 		
-		if(configuration.surveyPopulation().useHouseholds()){
+		if(configuration.surveyPopulation().isUsingHouseholds()){
 			this.households = new HashMap<String, SurveyHousehold>();
 		}
 		

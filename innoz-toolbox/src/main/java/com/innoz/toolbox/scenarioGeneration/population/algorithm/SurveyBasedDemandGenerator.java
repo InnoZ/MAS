@@ -82,7 +82,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		parser.run(configuration, container, this.geoinformation, CollectionUtils.stringToSet(ids));
 		
 		// Choose the method for demand generation that has been specified in the configuration
-		if(configuration.surveyPopulation().useHouseholds()){
+		if(configuration.surveyPopulation().isUsingHouseholds()){
 		
 			createHouseholds(configuration, container, ids);
 			

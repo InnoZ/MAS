@@ -59,7 +59,7 @@ public class SurveyDatabaseParserV2 {
 			
 			if(connection != null){
 				
-				boolean isUsingHouseholds = group.useHouseholds();
+				boolean isUsingHouseholds = group.isUsingHouseholds();
 				
 				if(isUsingHouseholds){
 					

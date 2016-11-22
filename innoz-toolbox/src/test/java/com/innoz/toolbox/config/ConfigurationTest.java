@@ -30,6 +30,7 @@ public class ConfigurationTest {
 				configuration.scenario().getAreaSets());
 		
 		assertEquals(".", configuration.misc().getOutputDirectory());
+		assertEquals(false, configuration.misc().isOverwritingExistingFiles());
 		
 		assertEquals(ActivityLocationsType.BUILDINGS, configuration.scenario().getActivityLocationsType());
 		assertEquals(4711L, configuration.scenario().getRandomSeed());
@@ -38,17 +39,12 @@ public class ConfigurationTest {
 		assertEquals(SurveyType.MiD, configuration.surveyPopulation().getSurveyType());
 		assertEquals(DayTypes.weekday, configuration.surveyPopulation().getDayTypes());
 		assertEquals(VehicleType.DEFAULT, configuration.surveyPopulation().getVehicleType());
+		assertTrue(configuration.surveyPopulation().isUsingHouseholds());
 		
-//		assertNull(configuration.dbNameSpace);
-//		
-//		assertEquals(PopulationType.households, configuration.popType);
-//		assertEquals(PopulationSource.survey, configuration.popSource);
-//		assertEquals(PopulationSource.none, configuration.popSourceV);
-//		
-//		assertTrue(configuration.adminUnits.isEmpty());
-//		assertFalse(configuration.writeDatabaseTables);
-//		assertFalse(configuration.writeIntoDatahub);
-//		assertFalse(configuration.overwriteExistingFiles);
+		assertEquals(null, configuration.scenario().getAreaSets());
+
+		assertEquals(false, configuration.psql().isWritingIntoMobilityDatahub());
+		assertEquals(0, configuration.psql().getParameterSets().size());
 		
 	}
 	
