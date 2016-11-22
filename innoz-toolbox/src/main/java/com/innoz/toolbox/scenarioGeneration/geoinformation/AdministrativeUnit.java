@@ -17,7 +17,7 @@ public class AdministrativeUnit {
 	
 	private Integer networkDetail = 6;
 	
-	private int nInhabitants;
+	private HashMap<String, Integer> populationByAgeGroup;
 	private int nHouseholds;
 	
 	private Geometry geometry;
@@ -84,10 +84,6 @@ public class AdministrativeUnit {
 		return this.landuseGeometries;
 	}
 	
-	public int getNumberOfInhabitants(){
-		return this.nInhabitants;
-	}
-	
 	public void setBland(int bland){
 		this.bland = bland;
 	}
@@ -104,10 +100,6 @@ public class AdministrativeUnit {
 		return this.nHouseholds;
 	}
 	
-	public void setNumberOfInhabitants(int n){
-		this.nInhabitants = n;
-	}
-	
 	public Integer getNetworkDetail(){
 		return this.networkDetail;
 	}
@@ -121,6 +113,18 @@ public class AdministrativeUnit {
 	@Override
 	public String toString(){
 		return this.id;
+	}
+	
+	public void setPopulationMap(HashMap<String, Integer> map){
+		
+		this.populationByAgeGroup = map;
+		
+	}
+	
+	public Map<String, Integer> getPopulationMap(){
+		
+		return this.populationByAgeGroup;
+		
 	}
 
 }

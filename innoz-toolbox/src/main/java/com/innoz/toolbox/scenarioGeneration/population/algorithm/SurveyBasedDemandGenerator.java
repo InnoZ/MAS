@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -245,8 +246,9 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
 			AdministrativeUnit d = this.geoinformation.getAdminUnit(s).getData();
 			
-			for(int i = 0; i < d.getNumberOfInhabitants() * configuration.scenario().getScaleFactor(); i++){
-				
+//			for(int i = 0; i < d.getNumberOfInhabitants() * configuration.scenario().getScaleFactor(); i++){
+			for(Entry<String, Integer> entry : d.getPopulationMap().entrySet()) {
+			
 				this.currentHomeCell = chooseAdminUnit(d, ActivityTypes.HOME);
 				
 				// Choose a template person (weighted, same method as above)
