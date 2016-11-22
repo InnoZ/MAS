@@ -1,6 +1,7 @@
 package com.innoz.toolbox.config;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -30,7 +31,7 @@ public class ConfigurationTest {
 				configuration.scenario().getAreaSets());
 		
 		assertEquals(".", configuration.misc().getOutputDirectory());
-		assertEquals(false, configuration.misc().isOverwritingExistingFiles());
+		assertFalse(configuration.misc().isOverwritingExistingFiles());
 		
 		assertEquals(ActivityLocationsType.BUILDINGS, configuration.scenario().getActivityLocationsType());
 		assertEquals(4711L, configuration.scenario().getRandomSeed());
@@ -43,7 +44,7 @@ public class ConfigurationTest {
 		
 		assertEquals(null, configuration.scenario().getAreaSets());
 
-		assertEquals(false, configuration.psql().isWritingIntoMobilityDatahub());
+		assertFalse(configuration.psql().isWritingIntoMobilityDatahub());
 		assertEquals(0, configuration.psql().getParameterSets().size());
 		
 	}
