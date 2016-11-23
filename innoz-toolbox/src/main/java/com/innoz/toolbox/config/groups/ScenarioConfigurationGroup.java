@@ -13,10 +13,12 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 	public static final String ACT_LOCATIONS_TYPE = "activityLocationsType";
 	public static final String RANDOM_SEED = "randomSeed";
 	public static final String SCALE_FACTOR = "scaleFactor";
+	public static final String YEAR = "year";
 	
 	private long randomSeed = 4711L;
 	private double scaleFactor = 1d;
 	private ActivityLocationsType actLocsType = ActivityLocationsType.BUILDINGS;
+	private int year = 2016;
 	
 	public enum ActivityLocationsType{
 		BUILDINGS,
@@ -72,6 +74,20 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 		
 	}
 	
+	@StringGetter(YEAR)
+	public int getYear(){
+		
+		return this.year;
+		
+	}
+	
+	@StringSetter(YEAR)
+	public void setYear(int year){
+		
+		this.year = year;
+		
+	}
+	
 	public void addAreaSet(AreaSet set){
 		
 		if(!this.parameterSets.containsKey(set.groupName)){
@@ -103,6 +119,7 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 		map.put(RANDOM_SEED, "The seed for the pseudo random number generator for the generation of the scenario.");
 		map.put(SCALE_FACTOR, "The scale factor for the amount of households / persons to be created and for the supply"
 				+ " side to scale capacities. Any numeric value between 0 and 1.");
+		map.put(YEAR, "The year of the scenario.");
 		
 		return map;
 		
