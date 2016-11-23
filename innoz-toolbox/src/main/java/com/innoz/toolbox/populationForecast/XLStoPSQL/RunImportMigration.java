@@ -30,7 +30,7 @@ public class RunImportMigration {
   	  	stmt.executeUpdate(sql);
   	  	
   	  	sql =	"CREATE TABLE " + schema + tablename + " ("
-  	  			+ "scenario			char(20)";
+  	  			+ "scenario			character varying";
   	    for (int year = 2000 ; year <= 2040; year++){
   	    	sql = sql + ", year" + year + " integer";
   	    }

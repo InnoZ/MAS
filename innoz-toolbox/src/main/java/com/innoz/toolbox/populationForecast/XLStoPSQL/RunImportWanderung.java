@@ -11,9 +11,9 @@ public class RunImportWanderung {
 		
 		String outputFolder = "/home/bmoehring/workspace/SchwartzbachData/CSV/";
 		String filename;
-		String database = "mydb";
-		String schema = "bbsrprognose";
-		String tablename;
+		String dbName = "mydb";
+		String dbSchema = "bbsrprognose";
+		String dbTable;
 		
 		
 	    Connection c = null;
@@ -21,55 +21,55 @@ public class RunImportWanderung {
 	    
 		Class.forName("org.postgresql.Driver");
   	  	c = DriverManager
-			  .getConnection("jdbc:postgresql://localhost:5432/" + database,
+			  .getConnection("jdbc:postgresql://localhost:5432/" + dbName,
 			  "postgres", "postgres");
-  	  	System.out.println("Opened database successfully");
+  	  	System.out.println("Opened dbName successfully");
   	  	stmt = c.createStatement();
   	  	String sql;
   	  	
 //  		by ageGroup
   	  	filename = "WanderungAltersG";
-  	  	tablename = schema + ".migrationbyagegroup";
-  	  	sql = "DROP TABLE IF EXISTS " + tablename ;
+  	  	dbTable = dbSchema + ".migrationbyagegroup";
+  	  	sql = "DROP TABLE IF EXISTS " + dbTable ;
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
-  	  	sql =	"CREATE TABLE " +  tablename + "("
-  	  			+ "ageGroup		char(20),"
+  	  	sql =	"CREATE TABLE " +  dbTable + "("
+  	  			+ "ageGroup			character varying,"
   	  			+ "agegroupfactor	numeric)";
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
   	  	
-  	  	sql =	"COPY " + tablename + " FROM '" + outputFolder + filename + ".csv' CSV Header DELIMITER '\t'";
+  	  	sql =	"COPY " + dbTable + " FROM '" + outputFolder + filename + ".csv' CSV Header DELIMITER '\t'";
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
   	  	
 //  	  	by Bundesland and Cluster
   	  	filename = "WanderungBLCluster";
-  	  	tablename = schema + ".migrationbycluster";
-  	  	sql = "DROP TABLE IF EXISTS " + tablename ;
+  	  	dbTable = dbSchema + ".migrationbycluster";
+  	  	sql = "DROP TABLE IF EXISTS " + dbTable ;
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
-  	  	sql =	"CREATE TABLE " +  tablename + "("
+  	  	sql =	"CREATE TABLE " +  dbTable + "("
   	  			+ "Cluster			int,"
-  	  			+ "Bundesland		char(50),"
-  	  			+ "Kreisregion		char(50),"
+  	  			+ "Bundesland		character varying,"
+  	  			+ "Kreisregion		character varying,"
   	  			+ "Kreistyp			numeric,"
   	  			+ "migration		numeric)";
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
   	  	
-  	  	sql =	"COPY " + tablename + " FROM '" + outputFolder + filename + ".csv' CSV Header DELIMITER '\t'";
+  	  	sql =	"COPY " + dbTable + " FROM '" + outputFolder + filename + ".csv' CSV Header DELIMITER '\t'";
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
   	  	
 //  	  	Sterbetafel
   	  	filename = "Sterbetafel";
-  	  	tablename = schema + ".deathsbyagegroup";
-  	  	sql = "DROP TABLE IF EXISTS " + tablename ;
+  	  	dbTable = dbSchema + ".mortalitybyagegroup";
+  	  	sql = "DROP TABLE IF EXISTS " + dbTable ;
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
-  	  	sql =	"CREATE TABLE " +  tablename + "("
-  	  			+ "agegroup		char(50),"
+  	  	sql =	"CREATE TABLE " +  dbTable + "("
+  	  			+ "agegroup			character varying,"
   	  			+ "year1925			numeric,"
   	  			+ "year1933			numeric,"
   	  			+ "year1950			numeric,"
@@ -79,7 +79,7 @@ public class RunImportWanderung {
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
   	  	
-  	  	sql =	"COPY " + tablename + " FROM '" + outputFolder + filename + ".csv' CSV Header DELIMITER '\t'";
+  	  	sql =	"COPY " + dbTable + " FROM '" + outputFolder + filename + ".csv' CSV Header DELIMITER '\t'";
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
 	}

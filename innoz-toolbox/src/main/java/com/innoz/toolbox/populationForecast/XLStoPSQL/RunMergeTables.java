@@ -31,10 +31,10 @@ public class RunMergeTables {
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
   	  	sql =	"CREATE TABLE " + schema + tablename + "("
-	  	  		+ "AgeGroup char(50),"
+	  	  		+ "AgeGroup character varying,"
   	  			+ "Land		integer,"
 	  	  		+ "GKZ		integer,"
-	  	  		+ "Name		char(50),"
+	  	  		+ "Name		character varying,"
 	  	  		+ "Raumkategorie	integer";
 	  	for (int year = 2009 ; year <= 2040; year++){
 	  		sql = sql + ", year" + year + " integer";
@@ -70,6 +70,9 @@ public class RunMergeTables {
   	  				+ " FROM " + schema + ageGroupsArrayList.get(ii);
   	  		System.out.println(sql);
   	  		stmt.execute(sql);
+  	  		sql = "DROP TABLE IF EXISTS " + schema + ageGroupsArrayList.get(ii);
+  	  		System.out.println(sql);
+  	  		stmt.executeUpdate(sql);
   	  	}
   	  	
 //  	year Data:
@@ -94,6 +97,9 @@ public class RunMergeTables {
   	  		}
   	  		System.out.println(sql);
   	  		stmt.execute(sql);
+  	  		sql = "DROP TABLE IF EXISTS " + schema + ageGroupsArrayList.get(ii);
+  	  		System.out.println(sql);
+  	  		stmt.executeUpdate(sql);
   	  	}
   	  	
 	}
