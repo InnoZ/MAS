@@ -16,7 +16,7 @@ public class MiscConfigurationGroup extends ConfigurationGroup {
 	public static final String OVERWRITE_EXISTING_FILES = "overwriteExistingFiles";
 	
 	private String coordinateSystem = "EPSG:4326";
-	private int numberOfThreads;
+	private int numberOfThreads = 1;
 	private String outputDirectory = ".";
 	private boolean overwriteExistingFiles = false;
 	
@@ -32,7 +32,7 @@ public class MiscConfigurationGroup extends ConfigurationGroup {
 		Map<String, String> map = new HashMap<>();
 		
 		map.put(CRS, "The coordinate reference system that applies to the study area.");
-		map.put(NUMBER_OF_THREADS, "Number of threads that are executed at the same time. Deault value is '1'.");
+		map.put(NUMBER_OF_THREADS, "Number of threads that are executed at the same time. Default value is '1'.");
 		map.put(OUTPUT_DIR, "The directory containing all output files of the scenario generation process.");
 		map.put(OVERWRITE_EXISTING_FILES, "Switch to 'yes' to overwrite existing files in the output directory. Default: false.");
 		
