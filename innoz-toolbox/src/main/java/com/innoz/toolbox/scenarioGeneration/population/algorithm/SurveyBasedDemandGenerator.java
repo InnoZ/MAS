@@ -246,74 +246,84 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
 			AdministrativeUnit d = this.geoinformation.getAdminUnit(s).getData();
 			
-//			for(int i = 0; i < d.getNumberOfInhabitants() * configuration.scenario().getScaleFactor(); i++){
 			for(Entry<String, Integer> entry : d.getPopulationMap().entrySet()) {
-			
-				this.currentHomeCell = chooseAdminUnit(d, ActivityTypes.HOME);
+
+				String[] string = com.innoz.toolbox.scenarioGeneration.population
+						.utils.PersonUtils.getAgeRangeAndSex(entry.getKey());
 				
-				// Choose a template person (weighted, same method as above)
-				SurveyPerson template = null;
+				int fromAge = Integer.parseInt(string[0]);
+				int toAge = Integer.parseInt(string[1]);
+				String sex = string[2];
 				
-				double accumulatedWeight = 0.;
-				double rand = this.random.nextDouble() * container.getSumOfPersonWeights();
+				for(int i = 0; i < entry.getValue() * configuration.scenario().getScaleFactor(); i++){
 				
-				for(String pId : container.getPersons().keySet()){
+					this.currentHomeCell = chooseAdminUnit(d, ActivityTypes.HOME);
 					
-					SurveyPerson p = container.getPersons().get(pId);
+					// Choose a template person (weighted, same method as above)
+					SurveyPerson template = null;
 					
-					if(p != null){
+					double accumulatedWeight = 0.;
+					double rand = this.random.nextDouble() * container.getSumOfPersonWeights();
+					
+					for(String pId : container.getPersons().keySet()){
 						
-						accumulatedWeight += p.getWeight();
-						if(accumulatedWeight >= rand){
+						SurveyPerson p = container.getPersons().get(pId);
+						
+						if(p != null){
 							
-							template = p;
-							break;
+							accumulatedWeight += p.getWeight();
+							if(accumulatedWeight >= rand){
+								
+								template = p;
+								break;
+								
+							}
 							
 						}
 						
 					}
 					
-				}
-				
-				// Set global home location for the entire household
-				Coord homeLocation = null;
-				ActivityFacility homeFacility = null;
-	
-				// Go through all residential areas of the home cell and randomly choose one of them
-				if(this.currentHomeCell.getLanduseGeometries().containsKey(ActivityTypes.HOME)){
-					
-					if(this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
+					// Set global home location for the entire household
+					Coord homeLocation = null;
+					ActivityFacility homeFacility = null;
+		
+					// Go through all residential areas of the home cell and randomly choose one of them
+					if(this.currentHomeCell.getLanduseGeometries().containsKey(ActivityTypes.HOME)){
 						
-						homeFacility = chooseActivityFacilityInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
-						homeLocation = transformation.transform(homeFacility.getCoord());
+						if(this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
+							
+							homeFacility = chooseActivityFacilityInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
+							homeLocation = transformation.transform(homeFacility.getCoord());
+							
+						} else {
+							
+							homeLocation = chooseActivityCoordInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
+							
+						}
 						
 					} else {
-						
-						homeLocation = chooseActivityCoordInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
+					
+						// If no residential areas exist within the home cell, shoot a random coordinate
+						homeLocation = this.transformation.transform(GeometryUtils.shoot(
+								this.currentHomeCell.getGeometry(), this.random));
 						
 					}
 					
-				} else {
-				
-					// If no residential areas exist within the home cell, shoot a random coordinate
-					homeLocation = this.transformation.transform(GeometryUtils.shoot(
-							this.currentHomeCell.getGeometry(), this.random));
+					String personId = template.getId();
+					SurveyPerson templatePerson = container.getPersons().get(personId);
 					
+					Person person = createPerson(configuration, templatePerson, population, personAttributes, this.random.nextDouble(),
+							population.getPersons().size(), homeLocation, homeFacility, container, 0.0);
+					
+					// If the resulting MATSim person is not null, add it
+					if(person != null){
+						
+						population.addPerson(person);
+						
+					}
+		
 				}
 				
-				String personId = template.getId();
-				SurveyPerson templatePerson = container.getPersons().get(personId);
-				
-				Person person = createPerson(configuration, templatePerson, population, personAttributes, this.random.nextDouble(),
-						population.getPersons().size(), homeLocation, homeFacility, container, 0.0);
-				
-				// If the resulting MATSim person is not null, add it
-				if(person != null){
-					
-					population.addPerson(person);
-					
-				}
-	
 			}
 
 		}
