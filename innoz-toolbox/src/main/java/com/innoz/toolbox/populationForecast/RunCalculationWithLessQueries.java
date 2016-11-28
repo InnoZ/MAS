@@ -14,6 +14,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.innoz.toolbox.config.SshConnector;
+
 public class RunCalculationWithLessQueries {
 	
 	static int calcYear = 2040;
@@ -24,7 +26,7 @@ public class RunCalculationWithLessQueries {
 	static String migrationTable = "migration";
 	static String migrationByAgeGroupTable = "migrationbyagegroup";
 	static String migrationByClusterTable = "migrationbycluster";
-	static String mortalityTable = "mortalitybyagegroup";
+	static String mortalityTable = "deathsbyagegroup";
 	static double totalFertilityRate = 1.5;
 	static double boyQuotient = 0.513 * totalFertilityRate / (45 - 18);
 	static double girlQuotient = (1 - 0.513)  * totalFertilityRate / (45 - 18);
@@ -35,10 +37,14 @@ public class RunCalculationWithLessQueries {
 	public static void main(String[] args) throws IOException, SQLException, Exception {
 
 		// connect to postgreSQL database
-		String url = "jdbc:postgresql://localhost/mydb";
-		String user = "postgres";
-		String password = "postgres";
-
+		int localPort = 3200;
+		String url = "jdbc:postgresql://localhost:"+localPort+"/population";
+		
+//		your mobility database username and password:
+		String user = "";
+		String password = "";
+		
+		SshConnector.connect(user, password, localPort, 5432);
 		con = DriverManager.getConnection(url, user, password);
 		st = con.createStatement();
 		
@@ -93,6 +99,7 @@ public class RunCalculationWithLessQueries {
 		
   	  	st.close();
 		con.close();
+		SshConnector.disconnect();
 		
 //  	Calculation
 		int pop = 0;

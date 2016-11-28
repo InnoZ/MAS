@@ -5,14 +5,14 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class RunImportWanderung {
+public class RunImportParams {
 
 	public static void main(String[] args) throws ClassNotFoundException, SQLException {
 		
 		String outputFolder = "/home/bmoehring/workspace/SchwartzbachData/CSV/";
 		String filename;
 		String dbName = "mydb";
-		String dbSchema = "bbsrprognose";
+		String dbSchema = "bbsrprognose.";
 		String dbTable;
 		
 		
@@ -23,13 +23,32 @@ public class RunImportWanderung {
   	  	c = DriverManager
 			  .getConnection("jdbc:postgresql://localhost:5432/" + dbName,
 			  "postgres", "postgres");
-  	  	System.out.println("Opened dbName successfully");
+  	  	System.out.println("Opened " + dbName + " successfully");
   	  	stmt = c.createStatement();
   	  	String sql;
   	  	
-//  		by ageGroup
+//  	  	migration
+  	  	dbTable = dbSchema + "migration";
+  	  	sql = "DROP TABLE IF EXISTS " + dbTable ;
+  	  	System.out.println(sql);
+  	  	stmt.executeUpdate(sql);
+  	  	sql =	"CREATE TABLE " + dbTable + " ("
+  	  			+ "scenario			character varying";
+  	    for (int year = 2000 ; year <= 2040; year++){
+  	    	sql = sql + ", year" + year + " integer";
+  	    }
+  	    sql = sql + ")";
+  	  	System.out.println(sql);
+  	  	stmt.executeUpdate(sql);
+  	  	sql = "INSERT INTO " + dbTable 
+  	  			+ " (scenario, year2014, year2015) VALUES "
+  	  			+ " (1,250000,100000)";
+  	  	System.out.println(sql);
+  	  	stmt.execute(sql);
+  	  	
+//  		migration by ageGroup
   	  	filename = "WanderungAltersG";
-  	  	dbTable = dbSchema + ".migrationbyagegroup";
+  	  	dbTable = dbSchema + "migrationbyagegroup";
   	  	sql = "DROP TABLE IF EXISTS " + dbTable ;
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
@@ -43,9 +62,9 @@ public class RunImportWanderung {
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
   	  	
-//  	  	by Bundesland and Cluster
+//  	  	migration by Bundesland and Cluster
   	  	filename = "WanderungBLCluster";
-  	  	dbTable = dbSchema + ".migrationbycluster";
+  	  	dbTable = dbSchema + "migrationbycluster";
   	  	sql = "DROP TABLE IF EXISTS " + dbTable ;
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
@@ -62,9 +81,9 @@ public class RunImportWanderung {
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
   	  	
-//  	  	Sterbetafel
+//  	  	mortality rates
   	  	filename = "Sterbetafel";
-  	  	dbTable = dbSchema + ".mortalitybyagegroup";
+  	  	dbTable = dbSchema + "mortalitybyagegroup";
   	  	sql = "DROP TABLE IF EXISTS " + dbTable ;
   	  	System.out.println(sql);
   	  	stmt.executeUpdate(sql);
