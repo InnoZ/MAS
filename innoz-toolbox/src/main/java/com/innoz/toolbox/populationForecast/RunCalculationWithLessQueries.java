@@ -26,7 +26,7 @@ public class RunCalculationWithLessQueries {
 	static String migrationTable = "migration";
 	static String migrationByAgeGroupTable = "migrationbyagegroup";
 	static String migrationByClusterTable = "migrationbycluster";
-	static String mortalityTable = "deathsbyagegroup";
+	static String mortalityTable = "mortalitybyagegroup";
 	static double totalFertilityRate = 1.5;
 	static double boyQuotient = 0.513 * totalFertilityRate / (45 - 18);
 	static double girlQuotient = (1 - 0.513)  * totalFertilityRate / (45 - 18);
