@@ -80,11 +80,11 @@ public class PopulationCreator {
 			
 			Map<String, ConfigurationGroup> areaSets = configuration.scenario().getAreaSets();
 			
-			for(String key : areaSets.keySet()){
+			for(ConfigurationGroup cg : areaSets.values()){
 				
-				if(!key.equals(PopulationSource.NONE.name()) && PopulationSource.valueOf(key) != null){
-					
-					AreaSet set = (AreaSet)areaSets.get(key);
+				AreaSet set = (AreaSet)cg;
+				
+				if(!set.getPopulationSource().equals(PopulationSource.NONE) && set.getPopulationSource() != null){
 					
 					// Create the coordinate transformation for all of the geometries
 					// This could also be done by just passing the auth id strings, but doing it this way suppresses
@@ -99,7 +99,7 @@ public class PopulationCreator {
 					
 					log.info("Creating population for MATSim scenario...");
 				
-					runI(configuration, scenario, PopulationSource.valueOf(key), set.getIds());
+					runI(configuration, scenario, set.getPopulationSource(), set.getIds());
 					
 				}
 				
