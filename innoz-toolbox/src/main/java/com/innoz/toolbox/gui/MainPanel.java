@@ -42,7 +42,7 @@ public class MainPanel extends JPanel {
 		this.setLayout(new GridLayout(15,1));
 		this.setBackground(new Color(1,1,1,0.5f));
 		this.setPreferredSize(new Dimension(1024,600));
-		this.setEnabled(false);
+//		this.setEnabled(false);
 		
 		JLabel l = new JLabel("<html><font size='10'><strong>Scenario generation parameters</strong></font></html>");
 		l.setMinimumSize(new Dimension(1024, 200));
@@ -57,7 +57,7 @@ public class MainPanel extends JPanel {
 		surveyAreaPanel.add(l1, BorderLayout.LINE_START);
 		
 		JButton addButton = new JButton("Add...");
-		addButton.setEnabled(false);
+//		addButton.setEnabled(false);
 		surveyAreaPanel.add(addButton, BorderLayout.LINE_END);
 		
 		addButton.addActionListener(new ActionListener() {
@@ -120,7 +120,7 @@ public class MainPanel extends JPanel {
 		JLabel l2 = new JLabel("Vicinity ids:");
 		vicinityPanel.add(l2, BorderLayout.LINE_START);
 		JButton addButton2 = new JButton("Add...");
-		addButton2.setEnabled(false);
+//		addButton2.setEnabled(false);
 		vicinityPanel.add(addButton2, BorderLayout.LINE_END);
 		
 		addButton2.addActionListener(new ActionListener() {
@@ -181,7 +181,7 @@ public class MainPanel extends JPanel {
 		this.add(l);
 		
 		chooseOutputDirButton = new JButton("Choose output directory");
-		chooseOutputDirButton.setEnabled(false);
+//		chooseOutputDirButton.setEnabled(false);
 		chooseOutputDirButton.addActionListener(new ActionListener() {
 			
 			@Override
@@ -203,15 +203,15 @@ public class MainPanel extends JPanel {
 		
 		
 		overwrite = new JCheckBox("Overwrite existing files?");
-		overwrite.setEnabled(false);
+//		overwrite.setEnabled(false);
 		this.add(overwrite);
 		
 		network = new JCheckBox("Create network");
-		network.setEnabled(false);
+//		network.setEnabled(false);
 		this.add(network);
 		
 		households = new JCheckBox("Create Households");
-		households.setEnabled(false);
+//		households.setEnabled(false);
 		this.add(households);
 		
 		line = new JSeparator(JSeparator.HORIZONTAL);
@@ -221,12 +221,12 @@ public class MainPanel extends JPanel {
 		this.add(l);
 		
 		runButton = new JButton("Run");
-		runButton.setEnabled(false);
+//		runButton.setEnabled(false);
 		this.add(runButton);
 		runButton.addActionListener(this.mainFrame.getRunnerActionListener());
 		
 		JButton reset = new JButton("Reset");
-		reset.setEnabled(false);
+//		reset.setEnabled(false);
 		this.add(reset);
 		reset.addActionListener(new ActionListener() {
 			

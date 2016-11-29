@@ -35,6 +35,12 @@ public class RunnerActionListener implements ActionListener, Runnable {
 	@Override
 	public void run() {
 		
+		if(!this.mainFrame.isConnected()){
+			ConfigurationUtils.set(this.mainFrame.getConfiguration(), Configuration.LOCAL_PORT, 5432);
+		} else {
+			ConfigurationUtils.set(this.mainFrame.getConfiguration(), Configuration.LOCAL_PORT, 3200);
+		}
+		
 		this.mainFrame.getMainPanel().getRunButton().setEnabled(false);
 		
 		String outputDir = !this.mainFrame.getMainPanel().getChooseOutputDirButton().getText().contains(GuiConstants.CHOOSE) ?
@@ -81,6 +87,8 @@ public class RunnerActionListener implements ActionListener, Runnable {
 		this.mainFrame.getMainPanel().getRunButton().setEnabled(true);
 		
 		JOptionPane.showMessageDialog(this.mainFrame.getFrame(), new JLabel("Output successfully created!"));
+		
+		ConfigurationUtils.set(this.mainFrame.getConfiguration(), Configuration.LOCAL_PORT, 3200);
 		
 	}
 
