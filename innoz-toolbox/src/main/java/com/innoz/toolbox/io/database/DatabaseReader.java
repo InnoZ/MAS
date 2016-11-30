@@ -240,11 +240,11 @@ public class DatabaseReader {
 					.convexHull());
 		}
 		
-//		for(AdminUnitEntry entry : configuration.getAdminUnitEntries().values()){
-//			
-//			this.geoinformation.getAdminUnit(entry.getId()).getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
-//			
-//		}
+		for(AdminUnitEntry entry : configuration.getAdminUnitEntries().values()){
+			
+			this.geoinformation.getAdminUnit(entry.getId()).getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
+			
+		}
 		
 		// Get the survey area by building the bounding box of all geometries 
 		this.geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection)

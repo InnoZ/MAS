@@ -114,7 +114,7 @@ public class PopulationCreator {
 			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException,
 			ClassNotFoundException{
 		
-		if(ids != null && !populationType.name().equals(PopulationSource.none)){
+		if(ids != null && !populationType.equals(PopulationSource.none)){
 			
 			log.info("Selected type of population: " + populationType.name());
 
