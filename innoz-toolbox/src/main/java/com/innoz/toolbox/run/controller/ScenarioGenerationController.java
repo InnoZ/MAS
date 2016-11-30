@@ -33,7 +33,7 @@ import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
 import com.innoz.toolbox.io.BbsrDataReader;
 import com.innoz.toolbox.io.database.DatabaseReader;
-import com.innoz.toolbox.scenarioGeneration.carsharing.CreateCarsharingVehicles;
+import com.innoz.toolbox.populationForecast.PopulationAssignment;
 import com.innoz.toolbox.scenarioGeneration.config.InitialConfigCreator;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.network.NetworkCreatorFromPsql;
@@ -76,6 +76,9 @@ public class ScenarioGenerationController extends DefaultController {
 			dbReader.readGeodataFromDatabase(configuration, scenario);
 			InputStream in = this.getClass().getClassLoader().getResourceAsStream("regionstypen.csv");
 			new BbsrDataReader().read(geoinformation, new InputStreamReader(in));
+			
+			// Create a population forecast and assign the resulting population to the admin units
+			new PopulationAssignment().run(configuration, geoinformation);
 			
 			// Create a MATSim network from OpenStreetMap data
 			NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(),

@@ -96,8 +96,10 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 			
 		}
 		
-		if(set.populationSource != null){
-			this.parameterSets.get(set.groupName).put(set.populationSource.name(), set);
+		boolean isSurveyArea = set.isSurveyArea;
+		
+		if(isSurveyArea){
+			this.parameterSets.get(set.groupName).put("surveyArea", set);
 		} else {
 			this.parameterSets.get(set.groupName).put(null, set);
 		}

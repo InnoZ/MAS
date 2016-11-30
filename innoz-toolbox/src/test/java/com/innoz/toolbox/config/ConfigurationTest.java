@@ -32,6 +32,7 @@ public class ConfigurationTest {
 		
 		assertEquals(".", configuration.misc().getOutputDirectory());
 		assertFalse(configuration.misc().isOverwritingExistingFiles());
+		assertEquals(1, configuration.misc().getNumberOfThreads());
 		
 		assertEquals(ActivityLocationsType.BUILDINGS, configuration.scenario().getActivityLocationsType());
 		assertEquals(4711L, configuration.scenario().getRandomSeed());
