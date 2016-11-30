@@ -40,24 +40,9 @@ public class CommuterDatabaseParser {
 				// configuration.
 				Map<String, ConfigurationGroup> areaSets = configuration.scenario().getAreaSets();
 				
-				Set<String> surveyAreaIds = null;
-				Set<String> vicinityIds = null;
-				
-				for(ConfigurationGroup group : areaSets.values()){
-					
-					AreaSet as = (AreaSet)group;
-					
-					if(as.isSurveyArea()){
-						
-						surveyAreaIds = CollectionUtils.stringToSet(as.getIds());
-						
-					} else {
-						
-						vicinityIds = CollectionUtils.stringToSet(as.getIds());
-						
-					}
-					
-				}
+				Set<String> surveyAreaIds = CollectionUtils.stringToSet(((AreaSet)areaSets.get(PopulationSource.SURVEY)).getIds());
+				Set<String> vicinityIds = CollectionUtils.stringToSet(((AreaSet)areaSets.get(PopulationSource.COMMUTER)).getIds());
+
 				if(!vicinityIds.isEmpty()){
 				
 					this.execute(connection, "2015_reverse",

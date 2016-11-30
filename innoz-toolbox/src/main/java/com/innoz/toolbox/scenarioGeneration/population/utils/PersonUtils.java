@@ -88,12 +88,4 @@ public class PersonUtils {
 		
 	}
 	
-	public static String[] getAgeRangeAndSex(String personGroupString){
-		
-		String s = personGroupString.replace("agegroupz", "");
-		
-		return new String[]{s.substring(0, 2),s.substring(4,6),s.substring(6)};
-		
-	}
-	
 }

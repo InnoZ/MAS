@@ -117,7 +117,7 @@ public class AdministrativeUnit {
 	
 	public void setPopulationMap(HashMap<String, Integer> map){
 		
-		this.populationByAgeGroup = new HashMap<String,Integer>(map);
+		this.populationByAgeGroup = map;
 		
 	}
 	

@@ -15,11 +15,11 @@ import java.util.Map;
 
 public class RunCalculationWithLessQueries {
 	
-//	static int calcYear = 2040;
-//	static int gkz = 11000;
+	static int calcYear = 2040;
+	static int gkz = 11000;
 	static String migrationScenario = "1";
 	static String schema = "bbsrprognose.";
-//	static String calcTable = schema + "aaagkz" + gkz + "year" + calcYear;
+	static String calcTable = schema + "aaagkz" + gkz + "year" + calcYear;
 	static String populationDataTable = "populationdata";
 	static String migrationTable = "migration";
 	static String migrationByAgeGroupTable = "migrationbyagegroup";
@@ -31,11 +31,11 @@ public class RunCalculationWithLessQueries {
 	
 	static Connection con = null;
 	static Statement st = null;
-	
-	public static HashMap<String, Integer> run(String gkz, int calcYear) throws IOException, SQLException {
+
+	public static void main(String[] args) throws IOException, SQLException {
 
 		// connect to postgreSQL database
-		String url = "jdbc:postgresql://localhost/population";
+		String url = "jdbc:postgresql://localhost/mydb";
 		String user = "postgres";
 		String password = "postgres";
 
@@ -43,7 +43,7 @@ public class RunCalculationWithLessQueries {
 		st = con.createStatement();
 		
 		ResultSet rs;
-//		String sql;
+		String sql;
 		
 		// ArrayList including all ageGroups that are used in the bbsr forecast
 		// 0-10 also exists but provides the same values as 0-5 + 5-10 . It is
@@ -62,33 +62,22 @@ public class RunCalculationWithLessQueries {
 		System.out.println(ageGroupsArrayList);
 		
 //		Create calculation table
-//		sql = "DROP TABLE IF EXISTS " + calcTable ;
-//  	  	st.executeUpdate(sql);
-//		System.out.println(sql);
-//		sql = "CREATE TABLE " + calcTable + " (agegroup       varchar(50)";
-//		for (int year = 2000 ; year <= calcYear ; year++){
-//			sql = sql + ", year" + year + " integer";
-//		}
-//		sql =	sql + ")";	
-//		System.out.println(sql);
-//		st.executeUpdate(sql);
+		sql = "DROP TABLE IF EXISTS " + calcTable ;
+  	  	st.executeUpdate(sql);
+		System.out.println(sql);
+		sql = "CREATE TABLE " + calcTable + " (agegroup       varchar(50)";
+		for (int year = 2000 ; year <= calcYear ; year++){
+			sql = sql + ", year" + year + " integer";
+		}
+		sql =	sql + ")";	
+		System.out.println(sql);
+		st.executeUpdate(sql);
 
 //		Create calculation map
 		Map<String, HashMap<String, Integer>> calcMap = new HashMap<String, HashMap<String,Integer>>();
-		for(int year = 2013; year <= calcYear; year++){
-
-			calcMap.put("year"+year, new HashMap<>());
-			
-			for (int ii = 0; ii < ageGroupsArrayList.size(); ii++){
-				
-				String groupString = ageGroupsArrayList.get(ii);
-				
-				if(groupString.contains("z")){
-					calcMap.get("year"+year).put(ageGroupsArrayList.get(ii), 0);
-				}
-				
-			}
-			
+		for (int ii = 0; ii < ageGroupsArrayList.size(); ii++){
+			HashMap<String,Integer> row = new HashMap<String, Integer>();
+			calcMap.put(ageGroupsArrayList.get(ii), row);
 		}
 		
 //		populationData: converts the ResultSet into a Map of Maps
@@ -104,10 +93,10 @@ public class RunCalculationWithLessQueries {
 		Map<String,HashMap<String,Object>> deathsMap = createMapFromSQL(deathsTable, "", "ageGroup");
 		
 //		Distribution of migration by population of 2013 for each gkz within its cluster and raumKategorie
-		int blcluster = getBLCluster(gkz);
-		int raumkategorie = getRaumkategorie(gkz);
+		int blcluster = getBLCluster();
+		int raumkategorie = getRaumkategorie();
 		double migrationFactorByBLCluster 	= getMigrationFactorByBLCluster(blcluster, raumkategorie);
-		double migrationFactorWithinCluster = getMigrationFactorWithinCluster(gkz, blcluster, raumkategorie, ageGroupsArrayList) ;
+		double migrationFactorWithinCluster = getMigrationFactorWithinCluster(blcluster, raumkategorie, ageGroupsArrayList) ;
 		System.out.println("blcluster: " + blcluster + " Kreistyp: " + raumkategorie + " migrationFactorWithinCluster: " + migrationFactorWithinCluster); 	
   		
 //		kohortMap to put aging of agegroups 
@@ -255,9 +244,6 @@ public class RunCalculationWithLessQueries {
   			} 		
 			printResult(year, calcMap, ageGroupsArrayList);
   		}
-		
-		return calcMap.get("year" + Integer.toString(calcYear));
-		
 	}
 	
 //	gets the migration data for the population forecast. raw data needs to be updated. so far only 2014 and 2015 implemented
@@ -299,7 +285,7 @@ public class RunCalculationWithLessQueries {
 	}
 
 //	gets the Raumkategorie of a certain gkz
-	private static int getRaumkategorie(String gkz) throws SQLException {
+	private static int getRaumkategorie() throws SQLException {
 		String sql = "SELECT raumkategorie FROM " + schema + "agegroupz00to05m WHERE gkz= '" + gkz + "'  ";
 //		System.out.println(sql);
 		ResultSet rs = st.executeQuery(sql);
@@ -310,7 +296,7 @@ public class RunCalculationWithLessQueries {
 		return raumkategorie;
 	}
 
-	private static int getBLCluster(String gkz) throws SQLException {
+	private static int getBLCluster() throws SQLException {
 		String sql = "SELECT land FROM " + schema + "agegroupz00to05m WHERE gkz= '" + gkz + "'  ";
 	//	System.out.println(sql);
 		ResultSet rs = st.executeQuery(sql);
@@ -338,14 +324,14 @@ public class RunCalculationWithLessQueries {
 	}
 	
 	private static void updateCalcMap (int year, String ageGroup, int pop, Map<String, HashMap<String, Integer>> calcMap){
-		calcMap.get("year"+year).put(ageGroup, pop);
+		calcMap.get(ageGroup).put("year"+year, pop);
 		
 	}
 	
 	private static int getPopFromCalcMap (int year, String ageGroup, Map<String, HashMap<String, Integer>> calcMap) {
 		int pop;
 		try {
-			pop = (int) calcMap.get("year" + year).get(ageGroup);
+			pop = (int) calcMap.get(ageGroup).get("year" + year);
 		} catch (NullPointerException getDeathsException){
 			System.out.println("calcMap not woring!!!");
 			pop = 0;
@@ -400,15 +386,15 @@ public class RunCalculationWithLessQueries {
 //		from Map
 		for (int ii = 0 ; ii < ageGroupsArrayList.size() ; ii++){
 			if (ageGroupsArrayList.get(ii).contains("z")){
-				System.out.println(ageGroupsArrayList.get(ii) + ": " + calcMap.get("year" + year).get(ageGroupsArrayList.get(ii)));
-				pop = pop +  calcMap.get("year" + year).get(ageGroupsArrayList.get(ii)); 
+				System.out.println(ageGroupsArrayList.get(ii) + ": " + calcMap.get(ageGroupsArrayList.get(ii)).get("year" + year));
+				pop = pop +  calcMap.get(ageGroupsArrayList.get(ii)).get("year" + year); 
 			}
 		}
 		System.out.println(year + ": " + pop + " inhabitants by Maps");
 		System.out.println("_____________________________________________________________________");
 	}
 	
-	private static double getMigrationFactorWithinCluster(String gkz, int blcluster, int raumKategorie, ArrayList<String> ageGroupsArrayList) throws SQLException{
+	private static double getMigrationFactorWithinCluster(int blcluster, int raumKategorie, ArrayList<String> ageGroupsArrayList) throws SQLException{
 		String sql;
 		int pop1 = 0;
 		int pop2 = 0;

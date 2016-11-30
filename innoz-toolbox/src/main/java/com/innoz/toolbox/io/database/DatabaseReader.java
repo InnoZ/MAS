@@ -150,6 +150,39 @@ public class DatabaseReader {
 					
 				}
 				
+				for(ConfigurationGroup cg : configuration.scenario().getAreaSets().values()){
+					
+					AreaSet entry = (AreaSet)cg;
+					
+					for(String uid : entry.getIds().split(",")){
+
+						String id = uid.startsWith("0") ? uid.substring(1) : uid;
+						
+						Node<AdministrativeUnit> d = this.geoinformation.getAdminUnit(id);
+						
+						if(d != null){
+							
+							AdministrativeUnit unit = d.getData();
+							
+//							unit.setNumberOfHouseholds(entry.getNumberOfHouseholds());
+//							unit.setNumberOfInhabitants(entry.getNumberOfInhabitants());
+							
+							for(Node<AdministrativeUnit> au : d.getChildren()){
+								
+								if(au.getData().getId().startsWith(id)){
+									
+//									au.getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
+									
+								}
+								
+							}
+							
+						}
+						
+					}
+
+				}
+				
 				// Otherwise, read in the OSM data
 				this.readOsmData(connection, configuration, scenario);
 					
@@ -214,14 +247,6 @@ public class DatabaseReader {
 						.convexHull());
 				
 			}
-			
-		}
-		
-		for(Node<AdministrativeUnit> node : geoinformation.getAdminUnits()){
-			
-			String id = node.getData().getId();
-			String regionId = id.substring(0, 5);
-			this.geoinformation.addAdministrativeUnit(new AdministrativeUnit(regionId));
 			
 		}
 			
