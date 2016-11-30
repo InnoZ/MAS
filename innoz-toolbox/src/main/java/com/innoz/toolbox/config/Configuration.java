@@ -31,14 +31,7 @@ public final class Configuration {
 	private PsqlConfigurationGroup psql;
 	private ScenarioConfigurationGroup scenario;
 	private SurveyPopulationConfigurationGroup surveyPopulation;
-	
 	private Map<String,ConfigurationGroup> groups = new HashMap<>();
-	//NON-CONFIGURABLE///////////////////////////////////////////////////////////////////////
-	int localPort = 3200;
-	final int remotePort = 5432;
-	
-	String databaseUser = "postgres";
-	String userPassword = "postgres";
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
 	/**
