@@ -11,6 +11,7 @@ import com.innoz.toolbox.config.groups.MiscConfigurationGroup;
 import com.innoz.toolbox.config.groups.PsqlConfigurationGroup;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup;
+import com.innoz.toolbox.config.groups.TracksConfigurationGroup;
 
 /**
  * 
@@ -31,6 +32,7 @@ public final class Configuration {
 	private PsqlConfigurationGroup psql;
 	private ScenarioConfigurationGroup scenario;
 	private SurveyPopulationConfigurationGroup surveyPopulation;
+	private TracksConfigurationGroup tracks;
 	private Map<String,ConfigurationGroup> groups = new HashMap<>();
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
@@ -61,6 +63,7 @@ public final class Configuration {
 		this.scenario = new ScenarioConfigurationGroup();
 		this.groups.put("scenario", scenario);
 		this.surveyPopulation = new SurveyPopulationConfigurationGroup();
+		this.tracks = new TracksConfigurationGroup();
 		this.groups.put("surveyPopulation", surveyPopulation);
 	
 	}
@@ -156,6 +159,12 @@ public final class Configuration {
 	public final SurveyPopulationConfigurationGroup surveyPopulation(){
 		
 		return this.surveyPopulation;
+		
+	}
+	
+	public final TracksConfigurationGroup tracks(){
+		
+		return this.tracks;
 		
 	}
 	
