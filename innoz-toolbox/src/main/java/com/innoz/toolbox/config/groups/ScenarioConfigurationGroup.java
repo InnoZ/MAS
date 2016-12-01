@@ -143,7 +143,8 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 		public enum PopulationSource{
 			COMMUTER,
 			NONE,
-			SURVEY
+			SURVEY,
+			TRACKS
 		};
 		
 		public AreaSet() {
@@ -162,7 +163,8 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 					+ "1: motorway, motorway_link; 2: trunk, trunk_link; 3: primary, primary_link; "
 					+ "4: secondary; 5: tertiary; 6: living_street, minor, residential, unclassified."
 					+ " For a documentation of the osm road types see http://wiki.openstreetmap.org/wiki/Key:highway");
-			map.put(POPULATION_SOURCE, "The source for the demand generation. Possible values: COMMUTER, SURVEY.");
+			map.put(POPULATION_SOURCE, "The source for the demand generation. Possible values: COMMUTER, NONE, SURVEY,"
+					+ " TRACKS. TRACKS is currently under development, so don't use it yet!");
 			
 			return map;
 			
