@@ -1,5 +1,6 @@
 package com.innoz.toolbox.config.groups;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 	private long randomSeed = 4711L;
 	private double scaleFactor = 1d;
 	private ActivityLocationsType actLocsType = ActivityLocationsType.BUILDINGS;
-	private int year = 2016;
+	private int year = Calendar.getInstance().get(Calendar.YEAR);
 	
 	public enum ActivityLocationsType{
 		BUILDINGS,
