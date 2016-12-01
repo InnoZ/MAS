@@ -38,7 +38,8 @@ public class TracksDatabaseReader {
 			
 			Connection c = PsqlAdapter.createConnection(DatabaseConstants.TRACKS_DB);
 			
-			String sql = "SELECT user_id,id,started_at,finished_at,length,mode,st_astext(start_point) as start,st_astext(end_point) as end FROM tracks_rsl;";
+			String sql = "SELECT user_id,id,started_at,finished_at,length,mode,st_astext(start_point) as start,"
+					+ "st_astext(end_point) as end FROM tracks_rsl where started_on='2016-05-25';";
 			
 			Statement s = c.createStatement();
 			
@@ -57,8 +58,13 @@ public class TracksDatabaseReader {
 				TrackedPerson person = this.persons.get(pid);
 				
 				String id = Integer.toString(result.getInt("id"));
-				Geometry startPoint = wkt.read(result.getString("start"));
-				Geometry endPoint = wkt.read(result.getString("end"));
+				String start = result.getString("start");
+				String end = result.getString("end");
+				if(start == null || end == null){
+					continue;
+				}
+				Geometry startPoint = wkt.read(start);
+				Geometry endPoint = wkt.read(end);
 				String mode = result.getString("mode").replace("Mode::", "").toLowerCase();
 				int length = result.getInt("length");
 				String startedAt = result.getString("started_at");
@@ -72,7 +78,7 @@ public class TracksDatabaseReader {
 				t.setStart(MGC.point2Coord((Point)startPoint));
 				t.setStartDateAndTime(startedAt);
 				
-				person.getTracks().put(id, t);
+				person.getTracks().put(startedAt, t);
 				
 				
 			}

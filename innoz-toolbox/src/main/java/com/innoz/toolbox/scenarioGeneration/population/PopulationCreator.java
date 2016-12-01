@@ -19,6 +19,7 @@ import com.innoz.toolbox.scenarioGeneration.population.algorithm.CommuterDemandG
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.DemandGenerationAlgorithm;
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.DummyDemandGenerator;
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.SurveyBasedDemandGenerator;
+import com.innoz.toolbox.scenarioGeneration.population.algorithm.TracksDemandGenerator;
 import com.innoz.toolbox.utils.GlobalNames;
 
 /**
@@ -130,6 +131,9 @@ public class PopulationCreator {
 								break;
 								
 				case survey:	className = SurveyBasedDemandGenerator.class.getName();
+								break;
+								
+				case tracks:	className = TracksDemandGenerator.class.getName();
 								break;
 								
 				default: 		break;

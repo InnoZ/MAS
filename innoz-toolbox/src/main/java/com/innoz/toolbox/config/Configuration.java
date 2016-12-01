@@ -111,7 +111,7 @@ public final class Configuration {
 	String userPassword = "postgres";
 	
 	public enum PopulationType{persons,households};
-	public enum PopulationSource{dummy,commuter,survey,none};
+	public enum PopulationSource{dummy,commuter,survey,tracks,none};
 	public enum Subpopulations{none,mobility_attitude};
 	public enum VehicleSource{matsim, survey};
 	public enum ActivityLocations{landuse, buildings, facilities};
