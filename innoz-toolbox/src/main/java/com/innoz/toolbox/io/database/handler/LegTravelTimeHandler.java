@@ -22,14 +22,14 @@ public class LegTravelTimeHandler implements DefaultHandler {
 	
 	private double calcSeconds(Map<String, String> attributes, boolean mode, String surveyType) {
 		
-		String hKey = SurveyConstants.wayArrivalHour(surveyType);
-		String mKey = SurveyConstants.wayArrivalMinute(surveyType);
-		String dKey = SurveyConstants.wayArrivalDay(surveyType);
+		String hKey = SurveyConstants.tripArrivalHour(surveyType);
+		String mKey = SurveyConstants.tripArrivalMinute(surveyType);
+		String dKey = SurveyConstants.tripArrivalDay(surveyType);
 
 		if(mode) {
-			hKey = SurveyConstants.wayDepartureHour(surveyType);
-			mKey = SurveyConstants.wayDepartureMinute(surveyType);
-			dKey = SurveyConstants.wayDepartureDay(surveyType);
+			hKey = SurveyConstants.tripDepartureHour(surveyType);
+			mKey = SurveyConstants.tripDepartureMinute(surveyType);
+			dKey = SurveyConstants.tripDepartureDay(surveyType);
 		}
 
 		String hour = attributes.get(hKey);

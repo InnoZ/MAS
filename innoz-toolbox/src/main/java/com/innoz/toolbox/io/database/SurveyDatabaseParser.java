@@ -342,7 +342,7 @@ public class SurveyDatabaseParser {
 			query+=" where " + SurveyConstants.dayOfTheWeek(surveyType) + " < 6";
 		}
 		
-		query+= " and " + SurveyConstants.wayTravelDistance(surveyType) + " <> 'NaN' and " + SurveyConstants.wayTravelTime(surveyType) + " <> 'NaN' and "
+		query+= " and " + SurveyConstants.tripTravelDistance(surveyType) + " <> 'NaN' and " + SurveyConstants.tripTravelTime(surveyType) + " <> 'NaN' and "
 				+ SurveyConstants.wayDeparture(surveyType) + " <> 'NaN' and " + SurveyConstants.wayArrival(surveyType) + " <>'NaN' order by "
 				+ SurveyConstants.householdId(surveyType) + "," + SurveyConstants.personId(surveyType) + "," + SurveyConstants.wayId(surveyType) + ";";
 		
@@ -380,15 +380,15 @@ public class SurveyDatabaseParser {
 				}
 				
 				//the act type index at the destination
-				double purpose = set.getDouble(SurveyConstants.wayPurpose(surveyType));
-				double detailedPurpose = surveyType.equalsIgnoreCase("mid") ? set.getDouble(SurveyConstants.wayDetailedPurpose(surveyType)) : 0d;
+				double purpose = set.getDouble(SurveyConstants.tripPurpose(surveyType));
+				double detailedPurpose = surveyType.equalsIgnoreCase("mid") ? set.getDouble(SurveyConstants.tripDetailedPurpose(surveyType)) : 0d;
 				
 				//the main mode of the leg and the mode combination
-				String mainMode = handleMainMode(set.getString(SurveyConstants.wayMode(surveyType)), surveyType);
+				String mainMode = handleMainMode(set.getString(SurveyConstants.tripMode(surveyType)), surveyType);
 //				Set<String> modes = CollectionUtils.stringToSet(set.getString(MiDConstants
 //						.MODE_COMBINATION));
 				
-				double startHour = set.getDouble(SurveyConstants.wayDepartureHour(surveyType));
+				double startHour = set.getDouble(SurveyConstants.tripDepartureHour(surveyType));
 				double startTime = surveyType.equals("mid") ? set.getDouble(SurveyConstants.wayDeparture(surveyType))
 						: set.getDouble(SurveyConstants.wayDeparture(surveyType)) * 60;
 				double endTime = surveyType.equals("mid") ? set.getDouble(SurveyConstants.wayArrival(surveyType))
@@ -396,7 +396,7 @@ public class SurveyDatabaseParser {
 				
 				int startDate = surveyType.equalsIgnoreCase("mid") ? set.getInt(SurveyConstants.startDate(surveyType)) : 0;
 				int endDate = surveyType.equalsIgnoreCase("mid") ? set.getInt(SurveyConstants.endDate(surveyType)) : 0;
-				double travelDistance = 1000 * set.getDouble(SurveyConstants.wayTravelDistance(surveyType));
+				double travelDistance = 1000 * set.getDouble(SurveyConstants.tripTravelDistance(surveyType));
 				
 				if(!container.getModeStatsContainer().containsKey(mainMode)){
 					container.getModeStatsContainer().put(mainMode, new RecursiveStatsContainer());
@@ -429,7 +429,7 @@ public class SurveyDatabaseParser {
 				if(plan.getPlanElements().size() < 1){
 					
 					//add the source activity
-					double firstActType = set.getDouble(SurveyConstants.waySource(surveyType));
+					double firstActType = set.getDouble(SurveyConstants.tripSource(surveyType));
 					SurveyPlanActivity firstAct = new SurveyPlanActivity(handleActTypeAtStart(firstActType));
 					if(firstAct.getActType().equals(ActivityTypes.HOME)){
 						plan.setHomeIndex(0);
@@ -477,7 +477,7 @@ public class SurveyDatabaseParser {
 						
 					}
 					
-					double endPoint = set.getDouble(SurveyConstants.waySink(surveyType));
+					double endPoint = set.getDouble(SurveyConstants.tripSink(surveyType));
 					
 					//if it's a round-based trip, the act types at origin and destination equal
 					if(endPoint == 5){

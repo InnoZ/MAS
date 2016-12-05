@@ -18,7 +18,7 @@ import com.innoz.toolbox.io.database.task.PersonRemovalTask;
 import com.innoz.toolbox.io.database.task.ReadHouseholdDatabaseTask;
 import com.innoz.toolbox.io.database.task.ReadPersonDatabaseTask;
 import com.innoz.toolbox.io.database.task.ReadVehicleDatabaseTask;
-import com.innoz.toolbox.io.database.task.ReadWayDatabaseTask;
+import com.innoz.toolbox.io.database.task.ReadTripsDatabaseTask;
 import com.innoz.toolbox.io.database.task.ResolveRoundTripsTask;
 import com.innoz.toolbox.io.database.task.SortStagesTask;
 import com.innoz.toolbox.io.database.task.TaskRunner;
@@ -75,9 +75,9 @@ public class SurveyDatabaseParserV2 {
 				
 				log.info("Read " + container.getPersons().size() + " persons...");
 				
-				log.info("Creating survey ways...");
+				log.info("Creating survey trips...");
 
-				new ReadWayDatabaseTask(constants, geoinformation, ids, configuration.getUsedDayTypes()).parse(connection, container, configuration.getSurveyType().name());
+				new ReadTripsDatabaseTask(constants, geoinformation, ids, configuration.getUsedDayTypes()).parse(connection, container, configuration.getSurveyType().name());
 				
 				if(configuration.getVehicleSource().equals(VehicleSource.survey) && configuration.getSurveyType().equals(SurveyType.mid)){
 				

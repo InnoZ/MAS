@@ -14,8 +14,8 @@ public class LegPurposeHandler implements DefaultHandler {
 		SurveyStage stage = (SurveyStage)obj;
 		
 		String actType = null;
-		String purpose = attributes.get(SurveyConstants.wayPurpose(surveyType));
-		String subtype = attributes.get(SurveyConstants.wayDetailedPurpose(surveyType));
+		String purpose = attributes.get(SurveyConstants.tripPurpose(surveyType));
+		String subtype = attributes.get(SurveyConstants.tripDetailedPurpose(surveyType));
 		
 		if(purpose.equals("1")){
 			

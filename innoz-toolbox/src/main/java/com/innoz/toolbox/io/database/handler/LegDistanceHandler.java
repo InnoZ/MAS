@@ -12,7 +12,7 @@ public class LegDistanceHandler implements DefaultHandler {
 
 		SurveyStage stage = (SurveyStage)obj;
 		
-		String distance = attributes.get(SurveyConstants.wayTravelDistance(surveyType));
+		String distance = attributes.get(SurveyConstants.tripTravelDistance(surveyType));
 		
 		double d = Double.parseDouble(distance);
 		

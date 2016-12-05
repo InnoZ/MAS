@@ -14,7 +14,7 @@ public class LegModeHandler implements DefaultHandler {
 
 		SurveyStage stage = (SurveyStage)obj;
 		
-		String mode = attributes.get(SurveyConstants.wayMode(surveyType));
+		String mode = attributes.get(SurveyConstants.tripMode(surveyType));
 		if(mode.equals("1")){
 			stage.setMode(TransportMode.walk);
 		} else if(mode.equals("2")){
