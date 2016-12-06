@@ -303,6 +303,8 @@ public abstract class DemandGenerationAlgorithm {
 			
 		}
 		
+		if(result == null) return this.currentHomeCell;
+		
 		return result;
 		
 	}

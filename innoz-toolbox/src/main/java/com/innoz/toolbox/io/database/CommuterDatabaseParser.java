@@ -15,7 +15,6 @@ import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.PsqlAdapter;
 import com.innoz.toolbox.config.groups.ConfigurationGroup;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
-import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.PopulationSource;
 import com.innoz.toolbox.scenarioGeneration.population.commuters.CommuterDataElement;
 
 public class CommuterDatabaseParser {
@@ -39,8 +38,6 @@ public class CommuterDatabaseParser {
 				// Select the entries that contain the administrative areas we defined in the
 				// configuration.
 				Map<String, ConfigurationGroup> areaSets = configuration.scenario().getAreaSets();
-				
-				System.out.println();
 				
 				Set<String> surveyAreaIds = CollectionUtils.stringToSet(((AreaSet)areaSets.get("survey")).getIds());
 				Set<String> vicinityIds = CollectionUtils.stringToSet(((AreaSet)areaSets.get(null)).getIds());

@@ -59,7 +59,7 @@ public class ReadTripsDatabaseTask extends DatabaseTask {
 		ResultSet resultSet = null;
 		String q = null;
 		
-		String table = surveyType.equals("mid") ? "mid2008.trips_raw" : "srv2013.trips";
+		String table = surveyType.equalsIgnoreCase("mid") ? "mid2008.trips_raw" : "srv2013.trips";
 		
 		q = "select * from " + table;
 		

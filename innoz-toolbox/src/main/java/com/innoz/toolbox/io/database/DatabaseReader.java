@@ -154,9 +154,9 @@ public class DatabaseReader {
 					
 					AreaSet entry = (AreaSet)cg;
 					
-					for(String uid : entry.getIds().split(",")){
+					for(String id : entry.getIds().split(",")){
 
-						String id = uid.startsWith("0") ? uid.substring(1) : uid;
+//						String id = uid.startsWith("0") ? uid.substring(1) : uid;
 						
 						Node<AdministrativeUnit> d = this.geoinformation.getAdminUnit(id);
 						
@@ -164,18 +164,18 @@ public class DatabaseReader {
 							
 							AdministrativeUnit unit = d.getData();
 							
-//							unit.setNumberOfHouseholds(entry.getNumberOfHouseholds());
+							unit.setNumberOfHouseholds(entry.getNumberOfHouseholds());
 //							unit.setNumberOfInhabitants(entry.getNumberOfInhabitants());
 							
-							for(Node<AdministrativeUnit> au : d.getChildren()){
-								
-								if(au.getData().getId().startsWith(id)){
-									
+//							for(Node<AdministrativeUnit> au : d.getChildren()){
+//								
+//								if(au.getData().getId().startsWith(id)){
+//									
 //									au.getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
-									
-								}
-								
-							}
+//									
+//								}
+//								
+//							}
 							
 						}
 						

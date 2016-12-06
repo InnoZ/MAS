@@ -246,7 +246,6 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
 			AdministrativeUnit d = this.geoinformation.getAdminUnit(s).getData();
 			
-//			for(int i = 0; i < d.getNumberOfInhabitants() * configuration.scenario().getScaleFactor(); i++){
 			for(Entry<String, Integer> entry : d.getPopulationMap().entrySet()) {
 			
 				this.currentHomeCell = chooseAdminUnit(d, ActivityTypes.HOME);
