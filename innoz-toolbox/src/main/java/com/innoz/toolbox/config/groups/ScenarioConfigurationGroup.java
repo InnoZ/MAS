@@ -138,11 +138,13 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 		public static final String NETWORK_LEVEL = "networkLevel";
 		public static final String POPULATION_SOURCE = "populationSource";
 		public static final String IS_SURVEY_AREA = "isSurveyArea";
+		public static final String NUMBER_OF_HOUSEHOLDS = "numberOfHouseholds";
 		
 		private String ids;
 		private int networkLevel = 6;
 		private PopulationSource populationSource;
 		private boolean isSurveyArea;
+		private int numberOfHouseholds = 0;
 		
 		public enum PopulationSource{
 			COMMUTER,
@@ -227,6 +229,27 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 		public void setIsSurveyArea(boolean b){
 			
 			this.isSurveyArea = b;
+			
+		}
+		
+		/* This part below is, again, a construct that should be put inside a database table.
+		 * But first, we have to figure out
+		 * 1) where to get household numbers on district level OR
+		 * 2) a clever way of assigning persons to households depending on the region type.
+		 * dhosse 12/16
+		 */
+		
+		@StringGetter(NUMBER_OF_HOUSEHOLDS)
+		public int getNumberOfHouseholds(){
+			
+			return this.numberOfHouseholds;
+			
+		}
+		
+		@StringSetter(NUMBER_OF_HOUSEHOLDS)
+		public void setNumberOfHouseholds(int n){
+			
+			this.numberOfHouseholds = n;
 			
 		}
 		
