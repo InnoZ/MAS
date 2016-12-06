@@ -249,7 +249,7 @@ public class DatabaseReader {
 			}
 			
 		}
-			
+
 		// Get the survey area by building the bounding box of all geometries 
 		this.geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection)
 				.convexHull());

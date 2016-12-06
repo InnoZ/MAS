@@ -12,7 +12,7 @@ public class LegIndexHandler implements DefaultHandler {
 
 		SurveyStage stage = (SurveyStage)obj;
 		
-		String index = attributes.get(SurveyConstants.sortedWayId(surveyType));
+		String index = attributes.get(SurveyConstants.sortedTripId(surveyType));
 		stage.setIndex(index);
 
 	}

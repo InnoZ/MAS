@@ -2,7 +2,7 @@ package com.innoz.toolbox.populationForecast.XLStoPSQL;
 
 import java.util.ArrayList;
 
-public class RunImport {
+public class RunImportPopulation {
 
 	public static void main(String[] args) 
     {

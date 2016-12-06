@@ -12,7 +12,7 @@ public class LegDestinationHandler implements DefaultHandler {
 		
 		SurveyStage stage = (SurveyStage)obj;
 		
-		String value = attributes.get(SurveyConstants.waySink(surveyType));
+		String value = attributes.get(SurveyConstants.tripSink(surveyType));
 		
 		if(value.equals("1")) stage.setDestination("HOME");
 		if(value.equals("2")) stage.setDestination("WORK");

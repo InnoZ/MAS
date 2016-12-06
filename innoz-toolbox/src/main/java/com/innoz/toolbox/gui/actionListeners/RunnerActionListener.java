@@ -34,6 +34,12 @@ public class RunnerActionListener implements ActionListener, Runnable {
 	@Override
 	public void run() {
 		
+		if(!this.mainFrame.isConnected()){
+			this.mainFrame.getConfiguration().psql().setPsqlPort(5432);
+		} else {
+			this.mainFrame.getConfiguration().psql().setPsqlPort(3200);
+		}
+		
 		this.mainFrame.getMainPanel().getRunButton().setEnabled(false);
 		
 		String outputDir = !this.mainFrame.getMainPanel().getChooseOutputDirButton().getText().contains(GuiConstants.CHOOSE) ?
@@ -79,6 +85,8 @@ public class RunnerActionListener implements ActionListener, Runnable {
 		this.mainFrame.getMainPanel().getRunButton().setEnabled(true);
 		
 		JOptionPane.showMessageDialog(this.mainFrame.getFrame(), new JLabel("Output successfully created!"));
+		
+		this.mainFrame.getConfiguration().psql().setPsqlPort(3200);
 		
 	}
 
