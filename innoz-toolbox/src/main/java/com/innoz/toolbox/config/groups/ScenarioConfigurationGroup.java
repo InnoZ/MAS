@@ -91,17 +91,21 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 	
 	public void addAreaSet(AreaSet set){
 		
+		String key = set.isSurveyArea ? "survey" : null;
+		
 		if(!this.parameterSets.containsKey(set.groupName)){
 			
 			this.parameterSets.put(set.groupName, new HashMap<>());
 			
 		}
 		
-		if(set.populationSource != null){
-			this.parameterSets.get(set.groupName).put(set.populationSource.name(), set);
-		} else {
-			this.parameterSets.get(set.groupName).put(null, set);
-		}
+		this.parameterSets.get(set.groupName).put(key, set);
+		
+//		if(set.populationSource != null){
+//			this.parameterSets.get(set.groupName).put(set.populationSource.name(), set);
+//		} else {
+//			this.parameterSets.get(set.groupName).put(null, set);
+//		}
 		
 	}
 	

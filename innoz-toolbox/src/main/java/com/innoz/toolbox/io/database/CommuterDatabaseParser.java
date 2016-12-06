@@ -40,8 +40,10 @@ public class CommuterDatabaseParser {
 				// configuration.
 				Map<String, ConfigurationGroup> areaSets = configuration.scenario().getAreaSets();
 				
-				Set<String> surveyAreaIds = CollectionUtils.stringToSet(((AreaSet)areaSets.get(PopulationSource.SURVEY)).getIds());
-				Set<String> vicinityIds = CollectionUtils.stringToSet(((AreaSet)areaSets.get(PopulationSource.COMMUTER)).getIds());
+				System.out.println();
+				
+				Set<String> surveyAreaIds = CollectionUtils.stringToSet(((AreaSet)areaSets.get("survey")).getIds());
+				Set<String> vicinityIds = CollectionUtils.stringToSet(((AreaSet)areaSets.get(null)).getIds());
 
 				if(!vicinityIds.isEmpty()){
 				
