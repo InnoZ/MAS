@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -12,6 +13,8 @@ import org.matsim.core.utils.collections.CollectionUtils;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.PsqlAdapter;
+import com.innoz.toolbox.config.groups.ConfigurationGroup;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.scenarioGeneration.population.commuters.CommuterDataElement;
 
 public class CommuterDatabaseParser {
@@ -34,8 +37,10 @@ public class CommuterDatabaseParser {
 				
 				// Select the entries that contain the administrative areas we defined in the
 				// configuration.
-				Set<String> surveyAreaIds = CollectionUtils.stringToSet(configuration.getSurveyAreaIds());
-				Set<String> vicinityIds = CollectionUtils.stringToSet(configuration.getVicinityIds());
+				Map<String, ConfigurationGroup> areaSets = configuration.scenario().getAreaSets();
+				
+				Set<String> surveyAreaIds = CollectionUtils.stringToSet(((AreaSet)areaSets.get("survey")).getIds());
+				Set<String> vicinityIds = CollectionUtils.stringToSet(((AreaSet)areaSets.get(null)).getIds());
 
 				if(!vicinityIds.isEmpty()){
 				

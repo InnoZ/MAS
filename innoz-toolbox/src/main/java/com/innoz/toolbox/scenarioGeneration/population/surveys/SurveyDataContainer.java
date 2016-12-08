@@ -1,17 +1,16 @@
 package com.innoz.toolbox.scenarioGeneration.population.surveys;
 
-import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.Configuration.PopulationType;
-import com.innoz.toolbox.config.Configuration.VehicleSource;
-import com.innoz.toolbox.scenarioGeneration.population.utils.HashGenerator;
-import com.innoz.toolbox.scenarioGeneration.utils.Hydrograph;
-import com.innoz.toolbox.utils.matsim.RecursiveStatsContainer;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.VehicleType;
+import com.innoz.toolbox.scenarioGeneration.population.utils.HashGenerator;
+import com.innoz.toolbox.scenarioGeneration.utils.Hydrograph;
+import com.innoz.toolbox.utils.matsim.RecursiveStatsContainer;
 
 /**
  * 
@@ -39,11 +38,11 @@ public class SurveyDataContainer {
 	
 	public SurveyDataContainer(final Configuration configuration){
 		
-		if(configuration.getPopulationType().equals(PopulationType.households)){
+		if(configuration.surveyPopulation().isUsingHouseholds()){
 			this.households = new HashMap<String, SurveyHousehold>();
 		}
 		
-		if(configuration.getVehicleSource().equals(VehicleSource.survey)){
+		if(configuration.surveyPopulation().getVehicleType().equals(VehicleType.SURVEY)){
 			this.vehicles = new HashMap<String, SurveyVehicle>();
 		}
 		

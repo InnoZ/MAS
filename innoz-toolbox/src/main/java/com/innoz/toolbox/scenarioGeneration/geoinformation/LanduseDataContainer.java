@@ -5,22 +5,22 @@ import java.util.Map;
 
 import org.matsim.core.utils.collections.QuadTree;
 
-import com.innoz.toolbox.config.Configuration.ActivityLocations;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
 
 public class LanduseDataContainer {
 
 	private Map<String, QuadTree<Landuse>> geometryQuadtree;
-	private final ActivityLocations type;
+	private final ActivityLocationsType type;
 	
-	public LanduseDataContainer(ActivityLocations type){
+	public LanduseDataContainer(ActivityLocationsType type){
 		
 		this.type = type;
 		this.geometryQuadtree = new HashMap<>();
 			
 	}
 	
-	ActivityLocations getType(){
+	ActivityLocationsType getType(){
 		
 		return this.type;
 		

@@ -1,19 +1,17 @@
 package com.innoz.toolbox.run;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.ConfigurationUtils;
 import com.innoz.toolbox.config.SshConnector;
-import com.innoz.toolbox.run.controller.DatabaseUpdaterController;
 import com.innoz.toolbox.run.controller.ScenarioGenerationController;
-
-import java.io.IOException;
-import java.io.PrintWriter;
+import com.jcraft.jsch.JSchException;
 
 import jline.console.ConsoleReader;
 import jline.console.completer.CandidateListCompletionHandler;
 import jline.console.completer.FileNameCompleter;
-
-import com.jcraft.jsch.JSchException;
 
 /**
  * 
@@ -90,8 +88,6 @@ public class Runner {
 						
 						new ScenarioGenerationController(c).run();
 						
-						c.reset();
-						
 					} else if(command.equals("help") || command.equals("h")){
 						
 						printHelpStack(writer);
@@ -99,68 +95,6 @@ public class Runner {
 					} else if(command.equals("")){
 						
 						// Nothing to do
-						
-					} else if(command.startsWith("write-table") || command.startsWith("wt")){
-						
-						String inputPlansFile = null;
-						String networkFile = null;
-						String vehiclesFile = null;
-						String attributesFile = null;
-						
-						String[] parts = command.split(" ");
-						
-						int i = 0;
-						
-						for(String part : parts){
-						
-							if(part.startsWith("-")){
-								
-								if(part.equals("-schema-name") || part.equals("-s")){
-									
-									ConfigurationUtils.set(c, Configuration.DB_SCHEMA_NAME, parts[i + 1]);
-									
-								} else if(part.equals("-table-suffix") || part.equals("-t")){
-									
-									ConfigurationUtils.set(c, Configuration.DB_TABLE_SUFFIX, parts[i + 1]);
-									
-								} else if(part.equals("-remote") || part.equals("-r")){
-									
-									ConfigurationUtils.set(c, Configuration.WRITE_INTO_DATAHUB, true);
-									
-									if(!serverConnection){
-										
-										serverConnection = SshConnector.connectShell(c, reader);
-										reader.setPrompt("> ");
-											
-									}
-									
-								} else if(part.equals("-attributes-file") || part.equals("-af")){
-									
-									attributesFile = parts[i + 1];
-									
-								} else if(part.equals("-vehicles-file") || part.equals("-vf")){
-									
-									vehiclesFile = parts[i + 1];
-									
-								} else if(part.equals("-network-file") || part.equals("-nf")){
-									
-									networkFile = parts[i+1];
-									
-								} else if(part.equals("-plans-file") || part.equals("-pf")){
-									
-									inputPlansFile = parts[i+1];
-									
-								}
-								
-							}
-							
-							i++;
-							
-						}
-						
-						new DatabaseUpdaterController(c, inputPlansFile, networkFile, vehiclesFile, attributesFile).run();
-							
-						c.reset();
 						
 					} else if(command.equals("connect") || command.equals("c")){
 						

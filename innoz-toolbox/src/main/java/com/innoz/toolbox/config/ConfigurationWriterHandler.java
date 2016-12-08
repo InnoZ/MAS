@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.innoz.toolbox.config.Configuration.AdminUnitEntry;
+import com.innoz.toolbox.config.groups.ConfigurationGroup;
+import com.innoz.toolbox.config.groups.ConfigurationNames;
 
 public class ConfigurationWriterHandler {
 
@@ -33,57 +34,25 @@ public class ConfigurationWriterHandler {
 	
 	public void writeConfiguration(final Configuration configuration, final BufferedWriter out) throws IOException{
 		
-		out.write(indent);
-		out.write("<areaSet k=\"surveyArea\">");
-		indent = indent.concat(TAB);
-		out.write(NEWLINE);
-		if(configuration.getSurveyAreaIds() != null){
+		writeConfigurationGroup(configuration.misc(), out, true);
+		writeConfigurationGroup(configuration.psql(), out, true);
+		writeConfigurationGroup(configuration.scenario(), out, true);
+		writeConfigurationGroup(configuration.surveyPopulation(), out, true);
 		
-			for(String s : configuration.getSurveyAreaIds().split(",")){
-				
-				AdminUnitEntry entry = configuration.getAdminUnitEntries().get(s);
-				String id = entry.getId();
-				Integer nHouseholds = entry.getNumberOfHouseholds();
-				Integer networkDetail = entry.getNetworkDetail() != null ? entry.getNetworkDetail() : 6;
-				out.write(indent);
-				out.write("<adminUnit id =\"" + id + "\" numberOfHouseholds=\"" + nHouseholds + "\" networkDetail=\"" 
-						+ networkDetail + "\" />");
-				out.write(NEWLINE);
-				
-			}
-			
+	}
+	
+	private void writeConfigurationGroup(ConfigurationGroup configuration, BufferedWriter out, boolean isGroup) throws IOException{
+		
+		out.write(indent);
+		if(isGroup){
+			out.write("<" + ConfigurationNames.GROUP + " name=\"" + configuration.groupName + "\">");
+		} else {
+			out.write("<" + ConfigurationNames.PARAMETER_SET + " name=\"" + configuration.groupName + "\">");
 		}
-		indent = indent.replaceFirst(NEWLINE, "");
-		out.write(indent);
-		out.write("</areaSet>");
 		out.write(NEWLINE);
 		out.write(NEWLINE);
-		
-		out.write(indent);
-		out.write("<areaSet k=\"vicinity\">");
-		out.write(NEWLINE);
+
 		indent = indent.concat(TAB);
-		if(configuration.getVicinityIds() != null){
-		
-			for(String s : configuration.getVicinityIds().split(",")){
-			
-				out.write(indent);
-				AdminUnitEntry entry = configuration.getAdminUnitEntries().get(s);
-				String id = entry.getId();
-				Integer nHouseholds = entry.getNumberOfHouseholds();
-				Integer networkDetail = entry.getNetworkDetail() != null ? entry.getNetworkDetail() : 4;
-				out.write("<adminUnit id =\"" + id + "\" numberOfHouseholds=\"" + nHouseholds + "\" networkDetail=\"" 
-						+ networkDetail + "\" />");
-				out.write(NEWLINE);
-				
-			}
-			
-		}
-		indent = indent.replaceFirst(TAB, "");
-		out.write(indent);
-		out.write("</areaSet>");
-		out.write(NEWLINE);
-		out.write(NEWLINE);
 		
 		Map<String, String> params = configuration.getParams();
 		Map<String, String> comments = configuration.getComments();
@@ -93,17 +62,39 @@ public class ConfigurationWriterHandler {
 			String comment = comments.get(param.getKey());
 			if(comment != null){
 				out.write(indent);
-				out.write("<!--" + comment + " -->");
+				out.write("<!-- " + comment + " -->");
 				out.write(NEWLINE);
 			}
 			
 			out.write(indent);
-			out.write("<" + param.getKey() + " v=\"" + param.getValue() + "\"/>");
+			out.write("<" + ConfigurationNames.PARAM + " " + ConfigurationNames.NAME + "=\"" + param.getKey() + "\" " +
+					ConfigurationNames.VALUE + " =\"" + param.getValue() + "\"/>");
 			out.write(NEWLINE);
 			out.write(NEWLINE);
 			
 		}
 		
+		Map<String, Map<String, ConfigurationGroup>> paramSets = configuration.getParameterSets();
+		
+		for(Map<String, ConfigurationGroup> set : paramSets.values()){
+			
+			for(ConfigurationGroup group : set.values()){
+
+				writeConfigurationGroup(group, out, false);
+				
+			}
+			
+		}
+		
+		indent = indent.replaceFirst(TAB, "");
+		
+		out.write(indent);
+		if(isGroup){
+			out.write("</" + ConfigurationNames.GROUP + ">");
+		} else{
+			out.write("</" + ConfigurationNames.PARAMETER_SET + ">");
+		}
+		out.write(NEWLINE);
 		out.write(NEWLINE);
 		
 	}

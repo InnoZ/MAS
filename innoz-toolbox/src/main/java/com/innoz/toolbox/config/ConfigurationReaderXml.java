@@ -2,6 +2,8 @@ package com.innoz.toolbox.config;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -11,21 +13,14 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.innoz.toolbox.config.Configuration.ActivityLocations;
-import com.innoz.toolbox.config.Configuration.AdminUnitEntry;
-import com.innoz.toolbox.config.Configuration.DayType;
-import com.innoz.toolbox.config.Configuration.PopulationSource;
-import com.innoz.toolbox.config.Configuration.PopulationType;
-import com.innoz.toolbox.config.Configuration.Subpopulations;
-import com.innoz.toolbox.config.Configuration.SurveyType;
-import com.innoz.toolbox.config.Configuration.VehicleSource;
+import com.innoz.toolbox.config.groups.ConfigurationGroup;
+import com.innoz.toolbox.config.groups.ConfigurationNames;
 
 public class ConfigurationReaderXml extends DefaultHandler {
 	
 	private final Configuration configuration;
 
-	private boolean creatingSurveyArea = false;
-	private boolean creatingVicinity = false;
+	private Deque<ConfigurationGroup> groupStack = new ArrayDeque<>();
 	
 	ConfigurationReaderXml(final Configuration configuration){
 		
@@ -53,92 +48,19 @@ public class ConfigurationReaderXml extends DefaultHandler {
 	
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes){
-		
-		if(qName.equalsIgnoreCase("areaSet")){
-			
-			if(attributes.getValue("k").equalsIgnoreCase("surveyArea")){
-				
-				this.creatingSurveyArea = true;
-				
-			} else if(attributes.getValue("k").equalsIgnoreCase("vicinity")){
-				
-				this.creatingVicinity = true;
-				
-			}
-			
-		} else if(qName.equalsIgnoreCase("adminUnit")){
-			
-			createAdminUnit(attributes);
-			
-		} else if(qName.equalsIgnoreCase(Configuration.CRS)){
-			
-			this.configuration.crs = attributes.getValue("v");
-			
-		} else if(qName.equalsIgnoreCase("useTransit")){
-			
-		} else if(qName.equalsIgnoreCase(Configuration.POPULATION_SOURCE)){
-			
-			this.configuration.popSource = PopulationSource.valueOf(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.POPULATION_SOURCE_V)){
-			
-			this.configuration.popSourceV = PopulationSource.valueOf(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.SCALE_FACTOR)){
-			
-			this.configuration.scaleFactor = Double.parseDouble(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.OUTPUT_DIR)){
-			
-			this.configuration.outputDirectory = attributes.getValue("v");
-			
-		} else if(qName.equalsIgnoreCase(Configuration.ACTIVITY_LOCATIONS_TYPE)){
-			
-			this.configuration.actLocs = ActivityLocations.valueOf(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.POPULATION_TYPE)){
-			
-			this.configuration.popType = PopulationType.valueOf(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.DAY_TYPES)){
-			
-			this.configuration.dayType = DayType.valueOf(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.VEHICLES_SOURCE)){
-			
-			this.configuration.vehSource = VehicleSource.valueOf(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.LOCAL_PORT)){
-			
-			this.configuration.localPort = Integer.parseInt(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.OVERWRITE_FILES)){
-			
-			this.configuration.overwriteExistingFiles = Boolean.parseBoolean(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.WRITE_DB_OUTPUT)){
-			
-			this.configuration.writeDatabaseTables = Boolean.parseBoolean(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.WRITE_INTO_DATAHUB)){
-			
-			this.configuration.writeIntoDatahub = Boolean.parseBoolean(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.DB_TABLE_SUFFIX)){
-			
-			this.configuration.tableSuffix = attributes.getValue("v");
-			
-		} else if(qName.equalsIgnoreCase(Configuration.DEMAND_DATA_SOURCE)){
-			
-			this.configuration.surveyType = SurveyType.valueOf(attributes.getValue("v"));
-			
-		} else if(qName.equalsIgnoreCase(Configuration.SUBPOPULATIONS_TYPE)){
 
-			this.configuration.subpopulation = Subpopulations.valueOf(attributes.getValue("v"));
+		
+		if(qName.equals(ConfigurationNames.GROUP)){
 			
-		} else if(qName.equalsIgnoreCase(Configuration.N_THREADS)){
+			startGroup(qName, attributes);
 			
-			this.configuration.numberOfThreads = Integer.parseInt(attributes.getValue("v"));
+		} else if(qName.equals(ConfigurationNames.PARAMETER_SET)){
+			
+			startParameterSet(attributes);
+			
+		} else if(qName.equals(ConfigurationNames.PARAM)){
+	
+			startParameter(attributes);
 			
 		}
 		
@@ -147,60 +69,43 @@ public class ConfigurationReaderXml extends DefaultHandler {
 	@Override
 	public void endElement(String uri, String localName, String qName){
 		
-		if(qName.equalsIgnoreCase("areaSet")){
+		if(qName.equals(ConfigurationNames.GROUP)||qName.equals(ConfigurationNames.PARAMETER_SET)){
 			
-			this.creatingSurveyArea = false;
-			this.creatingVicinity = false;
+			ConfigurationGroup m = groupStack.removeFirst();
 			
+			if(!groupStack.isEmpty()){
+				
+				groupStack.getFirst().addParameterSet(m);
+				
+			}
+		
 		}
 		
 	}
 	
-	private void createAdminUnit(Attributes atts){
+	private void startGroup(String qName, Attributes atts){
 		
-		String id = atts.getValue("id");
+		final ConfigurationGroup group = this.configuration.getModule(atts.getValue(ConfigurationNames.NAME));
+		groupStack.addFirst(group);
 		
-		String nHH = atts.getValue(Configuration.NUMBER_OF_HH);
-		String nP = atts.getValue(Configuration.NUMBER_OF_P);
-		if(nHH == null) nHH = "0";
-		if(nP == null) nP = "0";
+	}
+	
+	private void startParameterSet(Attributes atts){
 		
-		int hh = Integer.parseInt(nHH);
-		int p = Integer.parseInt(nP);
+		ConfigurationGroup group = groupStack.getFirst().createParameterSet(atts.getValue(ConfigurationNames.NAME));
+		groupStack.addFirst(group);
 		
-		String levelOfDetail = atts.getValue(Configuration.LOD_NETWORK);
-		if(levelOfDetail == null) levelOfDetail = "6";
+	}
+	
+	private void startParameter(Attributes atts){
 		
-		Integer lod = Integer.parseInt(levelOfDetail);
+		groupStack.getFirst().addParam(atts.getValue(ConfigurationNames.NAME), atts.getValue(ConfigurationNames.VALUE));
 		
-		for(String s : id.split(Configuration.COMMENT)){
-
-			if(this.creatingSurveyArea){
-				
-				if(this.configuration.surveyAreaIds == null){
-				
-					this.configuration.surveyAreaIds = new String("");
-					
-				}
-				
-				this.configuration.surveyAreaIds += s + ",";
-				
-			} else if(this.creatingVicinity){
-				
-				if(this.configuration.vicinityIds == null){
-					
-					this.configuration.vicinityIds = new String("");
-					
-				}
-				
-				this.configuration.vicinityIds += s + ",";
-				
-			}
-			
-			this.configuration.adminUnits.put(id, new AdminUnitEntry(s, hh, p, lod));
-		
-		}
-		
+	}
+	
+	public static void main(String args[]){
+		Configuration c = ConfigurationUtils.createConfiguration();
+		new ConfigurationReaderXml(c).read("/home/dhosse/newConfiguration.xml");
 	}
 	
 }

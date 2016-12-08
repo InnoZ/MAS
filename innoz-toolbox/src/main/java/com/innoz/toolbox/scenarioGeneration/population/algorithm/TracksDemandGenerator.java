@@ -38,7 +38,7 @@ public class TracksDemandGenerator extends DemandGenerationAlgorithm {
 		Map<String,TrackedPerson> persons = reader.getPersons();
 
 		CoordinateTransformation transform = TransformationFactory.getCoordinateTransformation(GlobalNames.WGS84,
-				configuration.getCrs());
+				configuration.misc().getCoordinateSystem());
 		
 		Population population = scenario.getPopulation();
 		

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.innoz.toolbox.config.Configuration.DayType;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.DayTypes;
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.handler.DefaultHandler;
 import com.innoz.toolbox.io.database.handler.LegDestinationHandler;
@@ -29,10 +29,10 @@ import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 
 public class ReadTripsDatabaseTask extends DatabaseTask {
 
-	private final DayType dayType;
+	private final DayTypes dayType;
 	
 	public ReadTripsDatabaseTask(SurveyConstants constants, Geoinformation geoinformation, Set<String> ids,
-			DayType dayType){
+			DayTypes dayType){
 		
 		super(constants, geoinformation, ids);
 		this.dayType = dayType;
@@ -59,15 +59,15 @@ public class ReadTripsDatabaseTask extends DatabaseTask {
 		ResultSet resultSet = null;
 		String q = null;
 		
-		String table = surveyType.equals("mid") ? "mid2008.trips_raw" : "srv2013.trips";
+		String table = surveyType.equalsIgnoreCase("mid") ? "mid2008.trips_raw" : "srv2013.trips";
 		
 		q = "select * from " + table;
 		
-		if(dayType.equals(DayType.weekday)){
+		if(dayType.equals(DayTypes.weekday)){
 		
 			q += " where " + SurveyConstants.dayOfTheWeek(surveyType) + " < 6";
 
-		} else if(dayType.equals(DayType.weekend)){
+		} else if(dayType.equals(DayTypes.weekend)){
 			
 			q += " where " + SurveyConstants.dayOfTheWeek(surveyType) + " > 5";
 			

@@ -29,10 +29,10 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.Configuration.ActivityLocations;
-import com.innoz.toolbox.config.Configuration.AdminUnitEntry;
-import com.innoz.toolbox.config.Configuration.PopulationSource;
 import com.innoz.toolbox.config.PsqlAdapter;
+import com.innoz.toolbox.config.groups.ConfigurationGroup;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.io.database.datasets.OsmPointDataset;
 import com.innoz.toolbox.io.database.datasets.OsmPolygonDataset;
 import com.innoz.toolbox.run.parallelization.BuildingThread;
@@ -150,41 +150,42 @@ public class DatabaseReader {
 					
 				}
 				
-				for(AdminUnitEntry entry : configuration.getAdminUnitEntries().values()){
+				for(ConfigurationGroup cg : configuration.scenario().getAreaSets().values()){
+					
+					AreaSet entry = (AreaSet)cg;
+					
+					for(String id : entry.getIds().split(",")){
 
-					String id = entry.getId().startsWith("0") ? entry.getId().substring(1) : entry.getId();
-					
-					Node<AdministrativeUnit> d = this.geoinformation.getAdminUnit(id);
-					
-					if(d != null){
+//						String id = uid.startsWith("0") ? uid.substring(1) : uid;
 						
-						AdministrativeUnit unit = d.getData();
+						Node<AdministrativeUnit> d = this.geoinformation.getAdminUnit(id);
 						
-						unit.setNumberOfHouseholds(entry.getNumberOfHouseholds());
-						unit.setNumberOfInhabitants(entry.getNumberOfInhabitants());
-						
-						for(Node<AdministrativeUnit> au : d.getChildren()){
+						if(d != null){
 							
-							if(au.getData().getId().startsWith(id)){
-								
-								au.getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
-								
-							}
+							AdministrativeUnit unit = d.getData();
+							
+							unit.setNumberOfHouseholds(entry.getNumberOfHouseholds());
+//							unit.setNumberOfInhabitants(entry.getNumberOfInhabitants());
+							
+//							for(Node<AdministrativeUnit> au : d.getChildren()){
+//								
+//								if(au.getData().getId().startsWith(id)){
+//									
+//									au.getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
+//									
+//								}
+//								
+//							}
 							
 						}
 						
 					}
-					
-				}
-				
-				if(!configuration.getPopulationSource().equals(PopulationSource.none)
-						|| !configuration.getVicinityPopulationSource().equals(PopulationSource.none)){
 
-					// Otherwise, read in the OSM data
-					this.readOsmData(connection, configuration, scenario);
-					
 				}
 				
+				// Otherwise, read in the OSM data
+				this.readOsmData(connection, configuration, scenario);
+					
 			}
 			
 			// Close the connection when everything's done.
@@ -225,27 +226,30 @@ public class DatabaseReader {
 
 		// This is needed to transform the WGS84 geometries into the specified CRS
 		MathTransform t = CRS.findMathTransform(CRS.decode(GlobalNames.WGS84, true),
-				CRS.decode(configuration.getCrs(), true));
+				CRS.decode(configuration.misc().getCoordinateSystem(), true));
 		
 		// A collection to temporarily store all geometries
 		List<Geometry> geometryCollection = new ArrayList<Geometry>();
 		
-		getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, true);
-		this.geoinformation.setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection)
-				.convexHull());
-		
-		if(configuration.getVicinityIds() != null){
-			getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, false);
-			this.geoinformation.setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection)
-					.convexHull());
-		}
-		
-		for(AdminUnitEntry entry : configuration.getAdminUnitEntries().values()){
+		for(ConfigurationGroup cg : configuration.scenario().getAreaSets().values()){
 			
-			this.geoinformation.getAdminUnit(entry.getId()).getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
+			AreaSet set = (AreaSet)cg;
+			getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, set);
+		
+			if(set.isSurveyArea()){
+				
+				this.geoinformation.setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection)
+						.convexHull());
+				
+			} else{
+				
+				this.geoinformation.setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection)
+						.convexHull());
+				
+			}
 			
 		}
-		
+
 		// Get the survey area by building the bounding box of all geometries 
 		this.geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection)
 				.convexHull());
@@ -256,21 +260,21 @@ public class DatabaseReader {
 	}
 	
 	private void getAndAddGeodataFromIdSet(Connection connection, Configuration configuration, List<Geometry> geometryCollection,
-			boolean surveyArea) throws SQLException, NoSuchAuthorityCodeException, FactoryException, ParseException,
+			AreaSet areaSet) throws SQLException, NoSuchAuthorityCodeException, FactoryException, ParseException,
 			MismatchedDimensionException, TransformException{
 		
 		// Create a new statement to execute the sql query
 		Statement statement = connection.createStatement();
 		StringBuilder builder = new StringBuilder();
 		
-		String[] ids = surveyArea ? configuration.getSurveyAreaIds().split(",") : configuration.getVicinityIds().split(",");
-		
 		int i = 0;
 		
+		String[] splitIds = areaSet.getIds().split(",");
+		
 		// Append all ids inside the given collection to a string
-		for(String id : ids){
+		for(String id : splitIds){
 
-			if(i < ids.length - 1){
+			if(i < splitIds.length - 1){
 				
 				builder.append(" " + DatabaseConstants.MUN_KEY + " like '" + id + "%' OR");
 				
@@ -314,13 +318,13 @@ public class DatabaseReader {
 					au.setGeometry(geometry);
 					au.setBland((int)bland);
 					
-					if(surveyArea){
+					if(areaSet.isSurveyArea()){
 						bufferedAreasForNetworkGeneration.add(wktReader.read(set.getString("buffer")));
 					}
 
 					if(district != null){
 						
-//						au.setNetworkDetail(configuration.getAdminUnitEntries().get(district).getNetworkDetail());
+						au.setNetworkDetail(areaSet.getNetworkLevel());
 
 						this.geoinformation.addAdministrativeUnit(new AdministrativeUnit(district));
 						
@@ -358,7 +362,7 @@ public class DatabaseReader {
 			throws NoSuchAuthorityCodeException, FactoryException{
 
 		final CoordinateReferenceSystem fromCRS = CRS.decode(GlobalNames.WGS84, true);
-		final CoordinateReferenceSystem toCRS = CRS.decode(configuration.getCrs(), true);
+		final CoordinateReferenceSystem toCRS = CRS.decode(configuration.misc().getCoordinateSystem(), true);
 		
 		this.ct = TransformationFactory.getCoordinateTransformation(fromCRS.toString(),
 				toCRS.toString());
@@ -382,15 +386,15 @@ public class DatabaseReader {
 			// Read point geometries
 			readPointData(connection);
 			
-			if(!configuration.getActivityLocationsType().equals(ActivityLocations.landuse)){
+			if(!configuration.scenario().getActivityLocationsType().equals(ActivityLocationsType.LANDUSE)){
 				
-				if(configuration.getActivityLocationsType().equals(ActivityLocations.facilities)){
+				if(configuration.scenario().getActivityLocationsType().equals(ActivityLocationsType.FACILITIES)){
 					
 					new FacilitiesCreator().create(this, scenario, geoinformation, buildingList, minX, minY, maxX, maxY);
 
 				} else {
 					
-					MultithreadedModule module = new MultithreadedModule(configuration.getNumberOfThreads());
+					MultithreadedModule module = new MultithreadedModule(configuration.misc().getNumberOfThreads());
 					module.initThreads(BuildingThread.class.getName(), this);
 					for(Building b : this.buildingList){
 						module.handle(b);
@@ -464,7 +468,7 @@ public class DatabaseReader {
 		statement.close();
 		
 		//post process
-		MultithreadedModule module = new MultithreadedModule(configuration.getNumberOfThreads());
+		MultithreadedModule module = new MultithreadedModule(configuration.misc().getNumberOfThreads());
 		module.initThreads(DataProcessingAlgoThread.class.getName(), this, "buildings");
 		for(OsmPolygonDataset dataset : this.polygonData.get("buildings")){
 			module.handle(dataset);
@@ -519,7 +523,7 @@ public class DatabaseReader {
 		statement.close();
 		
 		//post process
-		MultithreadedModule module = new MultithreadedModule(configuration.getNumberOfThreads());
+		MultithreadedModule module = new MultithreadedModule(configuration.misc().getNumberOfThreads());
 		module.initThreads(DataProcessingAlgoThread.class.getName(), this, "amenities");
 		for(OsmPointDataset dataset : this.pointData){
 			module.handle(dataset);
