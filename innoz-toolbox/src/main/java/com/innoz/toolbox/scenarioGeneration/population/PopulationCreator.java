@@ -23,6 +23,7 @@ import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.CommuterDemandGenerator;
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.DemandGenerationAlgorithm;
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.SurveyBasedDemandGenerator;
+import com.innoz.toolbox.scenarioGeneration.population.algorithm.TracksDemandGenerator;
 import com.innoz.toolbox.utils.GlobalNames;
 
 /**
@@ -139,6 +140,9 @@ public class PopulationCreator {
 							break;
 							
 			case SURVEY:	className = SurveyBasedDemandGenerator.class.getName();
+							break;
+							
+			case TRACKS:	className = TracksDemandGenerator.class.getName();
 							break;
 							
 			default: 		break;

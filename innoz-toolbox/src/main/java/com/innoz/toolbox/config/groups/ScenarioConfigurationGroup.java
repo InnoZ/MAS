@@ -101,12 +101,6 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 		
 		this.parameterSets.get(set.groupName).put(key, set);
 		
-//		if(set.populationSource != null){
-//			this.parameterSets.get(set.groupName).put(set.populationSource.name(), set);
-//		} else {
-//			this.parameterSets.get(set.groupName).put(null, set);
-//		}
-		
 	}
 	
 	public Map<String, ConfigurationGroup> getAreaSets(){
