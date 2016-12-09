@@ -8,6 +8,7 @@ import org.geotools.referencing.CRS;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.matrices.Matrix;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -16,6 +17,7 @@ import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.groups.ConfigurationGroup;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.PopulationSource;
+import com.innoz.toolbox.io.database.CommuterDatabaseParser;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.CommuterDemandGenerator;
@@ -48,6 +50,7 @@ public class PopulationCreator {
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	private Distribution distribution;
 	private CoordinateTransformation transformation;
+	private Matrix od;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	/**
@@ -75,10 +78,13 @@ public class PopulationCreator {
 	 */
 	public void run(Configuration configuration, Scenario scenario) {
 
-		
 		try {
 			
 			Map<String, ConfigurationGroup> areaSets = configuration.scenario().getAreaSets();
+			
+			CommuterDatabaseParser parser = new CommuterDatabaseParser();
+			parser.run(configuration);
+			this.od = parser.getOD();
 			
 			for(String key : areaSets.keySet()){
 				
@@ -136,14 +142,15 @@ public class PopulationCreator {
 							break;
 							
 			default: 		break;
-		
+			
 		}
 		
 		if(className != null){
 			
 			((DemandGenerationAlgorithm)Class.forName(className).getConstructor(
-					Scenario.class, Geoinformation.class, CoordinateTransformation.class, Distribution.class).newInstance(
-					scenario, this.geoinformation, this.transformation, this.distribution)).run(configuration, ids);
+					Scenario.class, Geoinformation.class, CoordinateTransformation.class, Matrix.class, Distribution.class)
+					.newInstance(scenario, this.geoinformation, this.transformation, this.od, this.distribution))
+					.run(configuration, ids);
 			
 		}
 			

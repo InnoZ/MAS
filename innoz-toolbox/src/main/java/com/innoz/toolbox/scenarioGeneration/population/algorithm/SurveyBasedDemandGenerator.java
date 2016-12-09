@@ -25,6 +25,7 @@ import org.matsim.households.Household;
 import org.matsim.households.HouseholdImpl;
 import org.matsim.households.Income.IncomePeriod;
 import org.matsim.households.IncomeImpl;
+import org.matsim.matrices.Matrix;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
@@ -54,9 +55,9 @@ import com.vividsolutions.jts.geom.Geometry;
 public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
 	public SurveyBasedDemandGenerator(final Scenario scenario, final Geoinformation geoinformation,
-			final CoordinateTransformation transformation, final Distribution distribution) {
+			final CoordinateTransformation transformation, Matrix od, final Distribution distribution) {
 
-		super(scenario, geoinformation, transformation, distribution);
+		super(scenario, geoinformation, transformation, od, distribution);
 		
 	}
 

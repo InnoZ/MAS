@@ -4,12 +4,14 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.matsim.core.utils.collections.CollectionUtils;
+import org.matsim.matrices.Matrix;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.PsqlAdapter;
@@ -22,6 +24,7 @@ public class CommuterDatabaseParser {
 	private static final Logger log = Logger.getLogger(CommuterDatabaseParser.class);
 	
 	Set<CommuterDataElement> commuterData;
+	Matrix od;
 	
 	public void run(Configuration configuration){
 		
@@ -30,6 +33,7 @@ public class CommuterDatabaseParser {
 			log.info("Parsing commuter data");
 			
 			this.commuterData = new HashSet<CommuterDataElement> ();
+			this.od = new Matrix("", "");
 			
 			Connection connection = PsqlAdapter.createConnection(configuration, DatabaseConstants.SURVEYS_DB);
 		
@@ -40,7 +44,13 @@ public class CommuterDatabaseParser {
 				Map<String, ConfigurationGroup> areaSets = configuration.scenario().getAreaSets();
 				
 				Set<String> surveyAreaIds = CollectionUtils.stringToSet(((AreaSet)areaSets.get("survey")).getIds());
-				Set<String> vicinityIds = CollectionUtils.stringToSet(((AreaSet)areaSets.get(null)).getIds());
+				
+				ConfigurationGroup vicinity = (AreaSet)areaSets.get(null);
+				
+				Set<String> vicinityIds = Collections.emptySet();
+				if(vicinity != null){
+					vicinityIds = CollectionUtils.stringToSet((((AreaSet)vicinity).getIds()));
+				}
 
 				if(!vicinityIds.isEmpty()){
 				
@@ -117,7 +127,8 @@ public class CommuterDatabaseParser {
 				nTrainees = Integer.parseInt(nAzubis);
 				
 			}
-			
+		
+			this.od.createEntry(fromKey, toKey, n);
 			this.commuterData.add(new CommuterDataElement(fromKey, fromName, toKey, toName, n, pMale, nTrainees));
 			
 		}
@@ -148,6 +159,12 @@ public class CommuterDatabaseParser {
 	
 	public Set<CommuterDataElement> getCommuterRelations(){
 		return this.commuterData;
+	}
+	
+	public Matrix getOD(){
+		
+		return this.od;
+		
 	}
 	
 }

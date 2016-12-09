@@ -14,9 +14,10 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.population.PersonUtils;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.matrices.Entry;
+import org.matsim.matrices.Matrix;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.io.database.CommuterDatabaseParser;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
@@ -26,9 +27,9 @@ import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 
 	public CommuterDemandGenerator(final Scenario scenario, final Geoinformation geoinformation,
-			final CoordinateTransformation transformation, final Distribution distribution) {
+			final CoordinateTransformation transformation, final Matrix od, final Distribution distribution) {
 
-		super(scenario, geoinformation, transformation, distribution);
+		super(scenario, geoinformation, transformation, od, distribution);
 		
 	}
 
@@ -55,24 +56,21 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 	 */
 	private void createCommuterPopulation(Configuration configuration, String ids){
 		
-		CommuterDatabaseParser parser = new CommuterDatabaseParser();
-		parser.run(configuration);
-
 		Population population = scenario.getPopulation();
 		
 		Set<String> idSet = CollectionUtils.stringToSet(ids);
 		
 		int n = 0;
 		
-		for(CommuterDataElement entry : parser.getCommuterRelations()){
+		for(String id : idSet){
 			
-			if(idSet.contains(entry.getFromId())){
+			for(Entry e : this.od.getFromLocations().get(id)){
 				
-				int d = (int) (entry.getNumberOfCommuters() * configuration.scenario().getScaleFactor());
-
+				int d = (int) (e.getValue() * configuration.scenario().getScaleFactor());
+				
 				for(int i = n; i < n + d; i++){
 					
-					createOneCommuter(entry, population, i);
+					createOneCommuter(e.getFromLocation(), e.getToLocation(), population, i);
 					
 				}
 				
@@ -84,12 +82,15 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 		
 	}
 
+	void createOneCommuter(CommuterDataElement el, Population population, int n){
+
+		createOneCommuter(el.getFromId(), el.getToId(), population, n);
+		
+	}
+	
 	@SuppressWarnings("deprecation")
-	private void createOneCommuter(CommuterDataElement el, Population population, int n){
-
-		String homeId = el.getFromId();
-		String workId = el.getToId();
-
+	void createOneCommuter(String homeId, String workId, Population population, int n){
+		
 		if(this.geoinformation.getAdminUnit(homeId) == null || this.geoinformation.getAdminUnit(workId) == null){
 			
 			log.warn("Could not find geometry for home or work cell! Thus, no agent"

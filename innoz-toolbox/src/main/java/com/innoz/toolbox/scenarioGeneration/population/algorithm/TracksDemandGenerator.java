@@ -12,6 +12,7 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.misc.Time;
+import org.matsim.matrices.Matrix;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.io.database.TracksDatabaseReader;
@@ -24,9 +25,9 @@ import com.innoz.toolbox.utils.GlobalNames;
 public class TracksDemandGenerator extends DemandGenerationAlgorithm {
 
 	public TracksDemandGenerator(Scenario scenario, Geoinformation geoinformation,
-			CoordinateTransformation transformation, Distribution distribution) {
+			CoordinateTransformation transformation, final Matrix od, Distribution distribution) {
 		
-		super(scenario, geoinformation, transformation, distribution);
+		super(scenario, geoinformation, transformation, od, distribution);
 		
 	}
 
