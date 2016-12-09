@@ -83,6 +83,12 @@ public final class RecursiveStatsContainer {
 		return this.max;
 	}
 	
+	public List<Double> getEntries(){
+		
+		return this.entries;
+		
+	}
+	
 	public double getMedian() {
 
 		Collections.sort(this.entries);

@@ -1,5 +1,6 @@
 package com.innoz.toolbox.utils.misc;
 
+import java.awt.BasicStroke;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.sql.Connection;
@@ -11,9 +12,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.statistics.Regression;
+import org.jfree.data.xy.XYDataItem;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.matsim.core.utils.charts.XYLineChart;
+import org.matsim.core.utils.charts.XYScatterChart;
 import org.matsim.core.utils.io.IOUtils;
 
 import com.innoz.toolbox.config.PsqlAdapter;
@@ -43,15 +50,64 @@ public class RilCreateLeastSquares {
 		};
 		
 		int[] categories = new int[]{100,300,1000,5000,10000,15000,20000,50000,1000000};
+	
+		Map<String, String> station2Category = new HashMap<>();
+		Map<String, Integer> category2StationCount = new HashMap<>();
+		
+		ResultSet set = statement.executeQuery("SELECT fv,nv,fv_fremd,nv_fremd,station,ges,verkehrs15,typ_name from "
+				+ "daten_2016_regionstyp_final;");
+		
+		while(set.next()){
+			
+			int fv = set.getInt("fv");
+			int nv = set.getInt("nv");
+			int fvo = set.getInt("fv_fremd");
+			int nvo = set.getInt("nv_fremd");
+			
+			if(fv >= 0 && nv >= 0 && fvo >= 0 && nvo >= 0){
+				
+				float n = set.getFloat("ges");
+				String catType = null;
+				
+				for(int cat : categories){
+					
+					if(n <= cat){
+						catType = Integer.toString(cat);
+						break;
+					}
+					
+				}
+				
+				String type = set.getString("typ_name") + "_" + catType;
+				String station = set.getString("station");
+				
+				if(!type.contains("null")){
+					
+					station2Category.put(station, type);
+					
+					if(!category2StationCount.containsKey(type)){
+						category2StationCount.put(type, 0);
+					}
+					
+					int count = category2StationCount.get(type);
+					category2StationCount.put(type, count + 1);
+					
+					
+				}
+				
+			}
+			
+		}
 		
 		Map<String, XYSeries> avg = new HashMap<>();
 		Map<String, XYSeries> median = new HashMap<>();
+		Map<String, XYSeries> type2Plot = new HashMap<>();
 		
 		for(String table : tables){
 			
 			Map<String, RecursiveStatsContainer> type2Container = new HashMap<>();
 			
-			ResultSet result = statement.executeQuery("SELECT fv,nv,fv_fremd,nv_fremd,ges,verkehrs15,typ_name from " + table + ";");
+			ResultSet result = statement.executeQuery("SELECT station,fv,nv,fv_fremd,nv_fremd,ges,verkehrs15,typ_name from " + table + ";");
 			
 			int year = 0;
 			
@@ -67,25 +123,20 @@ public class RilCreateLeastSquares {
 					year = result.getInt("verkehrs15");
 
 					float n = result.getFloat("ges");
-					String catType = null;
+					String station = result.getString("station");
 					
-					for(int cat : categories){
+					if(station2Category.containsKey(station)){
 						
-						if(n <= cat){
-							catType = Integer.toString(cat);
-							break;
-						}
-						
-					}
-					
-					String type = result.getString("typ_name") + "_" + catType;
-					
-					if(!type.contains("null")){
+						String type = station2Category.get(station);
 
 						if(!type2Container.containsKey(type)){
 							type2Container.put(type, new RecursiveStatsContainer());
 						}
+						if(!type2Plot.containsKey(type)){
+							type2Plot.put(type, new XYSeries(""));
+						}
 						
+						type2Plot.get(type).add(year, n);
 						type2Container.get(type).handleNewEntry(n);
 						
 					}
@@ -107,31 +158,137 @@ public class RilCreateLeastSquares {
 				median.get(entry.getKey()).add(year, entry.getValue().getMedian());
 				
 			}
-
+			
+//			for(Entry<String, RecursiveStatsContainer> entry : type2Container.entrySet()){
+//
+//				BufferedWriter out = IOUtils.getAppendingBufferedWriter("/home/dhosse/01_Projects/GSP/types/" + entry.getKey() + ".csv");
+//
+//				for(Double e : entry.getValue().getEntries()){
+//					
+//					out.write(year + ";" + e.toString());
+//					out.newLine();
+//					
+//				}
+//				
+//				
+//				out.close();
+//				
+//			}
+			
 			result.close();
 			
 		}
 		
 		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/timeline.csv");
 		
-		out.write("type;median_a0;median_a1;avg_a0;avg_a1");
+		out.write("type;median_a0;median_a1;avg_a0;avg_a1;nStations");
 		
 		Set<String> keys = avg.keySet();
 		
 		for(String key : keys){
 			
-			double[] medianData = Regression.getOLSRegression(new XYSeriesCollection(median.get(key)), 0);
-			double[] avgData = Regression.getOLSRegression(new XYSeriesCollection(avg.get(key)), 0);
+			double[] medianData = Regression.getPolynomialRegression(new XYSeriesCollection(median.get(key)), 0, 3);
+			double[] avgData = Regression.getPolynomialRegression(new XYSeriesCollection(avg.get(key)), 0, 3);
 			
 			out.newLine();
-			out.write(key + ";" + medianData[0] + ";" + medianData[1] + ";" + avgData[0] + ";" + avgData[1]);
+			out.write(key + ";" + medianData[0] + ";" + medianData[1] + ";" + medianData[2] + ";" + medianData[3] + ";" 
+					+ avgData[0] + ";" + avgData[1] + ";" + avgData[2] + ";" + avgData[3] + ";" + category2StationCount.get(key));
 			
 		}
 		
 		out.close();
 		
+		for(Entry<String,XYSeries> entry : type2Plot.entrySet()){
+			
+			String[] s = entry.getKey().split("_");
+			String title = s[0] + ", " + getTitle(s[1]);
+			
+			XYScatterChart chart = new XYScatterChart(title, "Jahr", "Anzahl Reisende");
+
+			double[] medianData = Regression.getPolynomialRegression(new XYSeriesCollection(median.get(entry.getKey())), 0, 4);
+			double[] avgData = Regression.getPolynomialRegression(new XYSeriesCollection(avg.get(entry.getKey())), 0, 3);
+//			double[] medianData = Regression.getOLSRegression(new XYSeriesCollection(median.get(entry.getKey())), 0);
+//			double[] avgData = Regression.getOLSRegression(new XYSeriesCollection(avg.get(entry.getKey())), 0);
+
+			double[] medianX = new double[102];
+			double[] medianY = new double[102];
+			
+//			XYSeries medianXY = new XYSeries("");
+			
+			float f = 2006f;
+			int j = 2006;
+			
+			while(f < 2016.1){
+
+//				medianXY.add(f,medianData[0] + medianData[1] * f + medianData[2] * Math.pow(f, 2) +
+//						medianData[3] * Math.pow(f, 3));
+				medianX[j-2006] = f;
+				medianY[j-2006] = medianData[0] + medianData[1] * f + medianData[2] * Math.pow(f, 2) +
+						medianData[3] * Math.pow(f, 3) + medianData[4] * Math.pow(f, 4);
+				f+=0.1f;
+				j++;
+				
+			}
+
+			chart.addSeries("Trend", medianX, medianY);
+			((XYPlot)chart.getChart().getPlot()).setRenderer(0, new XYLineAndShapeRenderer(true,true));
+			
+			double[] x = new double[entry.getValue().getItems().size()];
+			double[] y = new double[entry.getValue().getItems().size()];
+			
+			int ii = 0;
+			
+			for(Object d : entry.getValue().getItems()){
+				
+				XYDataItem i = (XYDataItem)d;
+				
+				x[ii] = i.getXValue();
+				y[ii] = i.getYValue();
+				
+				ii++;
+					
+			}
+			
+			XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true,true);
+			renderer.setSeriesStroke(0, new BasicStroke(2.0f));
+			renderer.setSeriesStroke(1, new BasicStroke(0.0f));
+			((XYPlot)chart.getChart().getPlot()).setRenderer(renderer);
+			
+			chart.addSeries("Rohdaten", x, y);
+			((XYPlot)chart.getChart().getPlot()).setRenderer(1, new XYLineAndShapeRenderer(false,true));
+			
+			String outFile = "/home/dhosse/01_Projects/GSP/types/" + entry.getKey() + ".png";
+			chart.saveAsPng(outFile, 800, 600);
+			
+		}
+		
 		statement.close();
 		c.close();
+		
+	}
+	
+	private static String getTitle(String s){
+		
+		if(s.equals("100")){
+			
+			return "0 - 100";
+		} else if(s.equals("300")){
+			return "101 - 301";
+		} else if(s.equals("1000")){
+			return "301 - 1.000";
+		} else if(s.equals("5000")){
+			return "1.001 - 5.000";
+		} else if(s.equals("10000")){
+			return "5.001 - 10.000";
+		} else if(s.equals("15000")){
+			return "10.001 - 15.000";
+		} else if(s.equals("20000")){
+			return "15.001 - 20.000";
+		} else if(s.equals("50000")){
+			return "20.001 - 50.000";
+		} else{
+			return "> 50.001";
+		}
 		
 	}
 	
