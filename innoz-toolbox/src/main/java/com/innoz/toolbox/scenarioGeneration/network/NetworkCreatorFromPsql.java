@@ -491,7 +491,7 @@ public class NetworkCreatorFromPsql {
 
 					freespeed = resolveUnknownFreespeedTag(freespeedTag);
 					
-					if(!unknownTags.contains(freespeedTag)){
+					if(!unknownTags.contains(freespeedTag) && freespeed == 0){
 						
 						unknownTags.add(freespeedTag);
 						log.warn("Could not parse freespeed tag: " + freespeedTag + ". Ignoring it.");
@@ -658,6 +658,18 @@ public class NetworkCreatorFromPsql {
 		} else if("DE:motorway".equals(s) || "none".equals(s)){
 			
 			kmh = 130;
+			
+		} else if("walk".equals(s)){
+			
+			kmh = 5;
+			
+		} else if("5 mph".equals(s)){
+			
+			kmh = 5 * 1.609;
+			
+		} else if(s.contains(";")){
+			
+			kmh = Double.parseDouble(s.split(";")[0]);
 			
 		}
 		
