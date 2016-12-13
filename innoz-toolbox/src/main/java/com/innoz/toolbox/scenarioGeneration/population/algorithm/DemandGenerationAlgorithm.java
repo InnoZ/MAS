@@ -1,7 +1,9 @@
 package com.innoz.toolbox.scenarioGeneration.population.algorithm;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -13,7 +15,9 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.collections.CollectionUtils;
+import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.facilities.ActivityFacility;
 import org.matsim.matrices.Matrix;
 
@@ -21,6 +25,7 @@ import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.ZensusGrid.ZensusGridNode;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.ProxyFacility;
 import com.innoz.toolbox.scenarioGeneration.population.PopulationCreator;
@@ -108,13 +113,19 @@ public abstract class DemandGenerationAlgorithm {
 		
 		double p = random.nextDouble() * admin.getWeightForKey(activityType);
 		double accumulatedWeight = 0.;
+
+		if(activityType.equals(ActivityTypes.HOME)){
+			
+			return chooseActivityCoordAccordingToZensusGrid(admin);
+			
+		}
 		
 		for(Landuse g : admin.getLanduseGeometries().get(activityType)){
 			
 			accumulatedWeight += g.getWeight();
 			
 			if(p <= accumulatedWeight){
-
+				
 				// Shoot the location
 				return transformation.transform(GeometryUtils.shoot(g.getGeometry(), random));
 
@@ -122,6 +133,47 @@ public abstract class DemandGenerationAlgorithm {
 			
 		}
 		
+		return null;
+		
+	}
+	
+	Map<String, Tuple<List<ZensusGridNode>, Integer>> map = new HashMap<>();
+	
+	Coord chooseActivityCoordAccordingToZensusGrid(AdministrativeUnit admin) {
+		
+		if(!map.containsKey(admin.getId())) {
+			
+			List<ZensusGridNode> nodes = new ArrayList<>();
+			int weight = 0;
+			
+			for(ZensusGridNode node : PopulationCreator.grid.getNodes()){
+				
+				if(admin.getGeometry().contains(MGC.coord2Point(node.getCoord()))){
+					
+					nodes.add(node);
+					weight += node.getNumberOfInhabitants();
+					
+				}
+				
+			}
+			
+			map.put(admin.getId(), new Tuple<List<ZensusGridNode>, Integer>(nodes, weight));
+			
+		}
+		
+		Tuple<List<ZensusGridNode>, Integer> entry = map.get(admin.getId());
+		
+		double p = random.nextDouble() * entry.getSecond();
+		double accumulatedWeight = 0.0;
+		
+		for(ZensusGridNode node : entry.getFirst()){
+			
+			accumulatedWeight += node.getNumberOfInhabitants();
+			if(p <= accumulatedWeight){
+				return transformation.transform(node.getCoord());
+			}
+			
+		}
 		return null;
 		
 	}
@@ -163,6 +215,46 @@ public abstract class DemandGenerationAlgorithm {
 		return locateActivityInCell(null, activityType, mode, personTemplate);
 		
 	}
+	
+	AdministrativeUnit locateWorkActivity(){
+		
+		String fromId = this.currentHomeCell.getId().substring(0, 5);
+		
+		int weight = 0;
+		
+		for(org.matsim.matrices.Entry entry : this.od.getFromLocations().get(fromId)){
+			
+			weight += entry.getValue();
+			
+		}
+		
+		double p = this.random.nextDouble() * weight;
+		double accumulatedWeight = 0d;
+		
+		for(org.matsim.matrices.Entry entry : this.od.getFromLocations().get(fromId)){
+			
+			accumulatedWeight += entry.getValue();
+			if(p <= accumulatedWeight){
+
+				AdministrativeUnit unit = this.geoinformation.getAdminUnit(fromId).getData();
+				
+				if(unit.getGeometry() != null){
+					
+					return unit;
+					
+				} else {
+					
+					return this.geoinformation.getAdminUnit(fromId).getChildren().get(random.nextInt(this.geoinformation.getAdminUnit(fromId).getChildren().size())).getData();
+					
+				}
+				
+			}
+			
+		}
+		
+		return null;
+		
+	}
 
 	/**
 	 * 
@@ -182,6 +274,10 @@ public abstract class DemandGenerationAlgorithm {
 		
 		if(fromId == null){
 			fromId = this.currentHomeCell.getId();
+		}
+		
+		if(activityType.equals(ActivityTypes.WORK)){
+			return locateWorkActivity();
 		}
 		
 		if(activityType.split("_")[0].equals(ActivityTypes.EDUCATION) && this.currentHomeCell.getWeightForKey(ActivityTypes.EDUCATION) > 0){

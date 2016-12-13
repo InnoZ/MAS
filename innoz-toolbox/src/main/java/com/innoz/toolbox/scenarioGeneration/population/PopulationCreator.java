@@ -20,6 +20,7 @@ import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.Popula
 import com.innoz.toolbox.io.database.CommuterDatabaseParser;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.ZensusGrid;
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.CommuterDemandGenerator;
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.DemandGenerationAlgorithm;
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.SurveyBasedDemandGenerator;
@@ -46,6 +47,7 @@ public class PopulationCreator {
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	private final Geoinformation geoinformation;
 	private static final Logger log = Logger.getLogger(PopulationCreator.class);
+	public static ZensusGrid grid;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
@@ -80,6 +82,8 @@ public class PopulationCreator {
 	public void run(Configuration configuration, Scenario scenario) {
 
 		try {
+			
+			grid = new ZensusGrid(configuration, geoinformation);
 			
 			Map<String, ConfigurationGroup> areaSets = configuration.scenario().getAreaSets();
 			

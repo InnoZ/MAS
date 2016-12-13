@@ -36,6 +36,7 @@ import com.innoz.toolbox.io.database.DatabaseReader;
 import com.innoz.toolbox.scenarioGeneration.carsharing.CreateCarsharingVehicles;
 import com.innoz.toolbox.scenarioGeneration.config.InitialConfigCreator;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.ZensusGrid;
 import com.innoz.toolbox.scenarioGeneration.network.NetworkCreatorFromPsql;
 import com.innoz.toolbox.scenarioGeneration.population.PopulationCreator;
 import com.innoz.toolbox.utils.GlobalNames;
@@ -87,6 +88,8 @@ public class ScenarioGenerationController extends DefaultController {
 			nc.create(dbReader);
 
 //			CreateCarsharingVehicles.run(configuration, scenario);
+
+			ZensusGrid grid = new ZensusGrid(configuration, geoinformation);
 			
 			// Create a MATSim population
 			new PopulationCreator(geoinformation).run(configuration, scenario);

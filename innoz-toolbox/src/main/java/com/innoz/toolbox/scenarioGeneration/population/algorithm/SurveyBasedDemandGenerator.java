@@ -714,9 +714,9 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		// Initialize the activity type and the start and end time
 		SurveyPlanActivity act = (SurveyPlanActivity)mpe;
 		String type = act.getActType();
-//		if(type.equals(ActivityTypes.EDUCATION) && personTemplate.getAge() > 18){
-//			type = ActivityTypes.UNIVERSITY;
-//		}
+		if(type.equals(ActivityTypes.EDUCATION) && personTemplate.getAge() > 18){
+			type = ActivityTypes.UNIVERSITY;
+		}
 		double start = act.getStartTime();
 		double end = act.getEndTime();
 		
