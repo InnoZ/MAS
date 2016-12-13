@@ -99,7 +99,7 @@ public final class RecursiveStatsContainer {
 			
 		} else {
 			
-			return (this.entries.get((int)(this.numberOfEntries - 1) / 2)
+			return (this.entries.get((int)((this.numberOfEntries - 1)/2))
 					+ this.entries.get((int)this.numberOfEntries / 2)) / 2;
 			
 		}
