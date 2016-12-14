@@ -16,6 +16,8 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.PsqlAdapter;
+import com.innoz.toolbox.io.database.DatabaseConstants;
+import com.innoz.toolbox.utils.GlobalNames;
 
 public class ZensusGrid {
 
@@ -26,13 +28,13 @@ public class ZensusGrid {
 		
 		try {
 
-			CoordinateReferenceSystem from = CRS.decode("EPSG:3035", true);
-			CoordinateReferenceSystem to = CRS.decode("EPSG:4326", true);
+			CoordinateReferenceSystem from = CRS.decode(GlobalNames.ETRS89LAEA, true);
+			CoordinateReferenceSystem to = CRS.decode(GlobalNames.WGS84, true);
 			CoordinateTransformation trafo = TransformationFactory.getCoordinateTransformation(from.toString(), to.toString());
 
 			this.nodes = new ArrayList<>();
 			
-			Connection c = PsqlAdapter.createConnection(configuration, "geodata");
+			Connection c = PsqlAdapter.createConnection(configuration, DatabaseConstants.GEODATA_DB);
 			
 			Statement st = c.createStatement();
 			st.setFetchSize(100000);
