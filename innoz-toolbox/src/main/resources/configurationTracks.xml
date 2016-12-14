@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<!-- This is a template scenario generation configuration file used by the InnoZ  -->
+<configuration>
+
+	<!-- The basic settings -->
+	<scenario>
+		<areaSet k="surveyArea">
+			<adminUnit id="11000" numberOfHouseholds="44080" networkDetail="6" /> <!--44080-->
+		</areaSet>
+		<areaSet k="vicinity" >
+<!--			<adminUnit id="15090" numberOfHouseholds="0" networkDetail="4" />-->
+<!--			<adminUnit id="15083" numberOfHouseholds="0" networkDetail="4" />-->
+<!--			<adminUnit id="15003" numberOfHouseholds="0" networkDetail="4" />-->
+<!--			<adminUnit id="15089" numberOfHouseholds="0" networkDetail="4" />-->
+<!--			<adminUnit id="15082" numberOfHouseholds="0" networkDetail="4" />-->
+		</areaSet>	
+		<coordinateSystem v="EPSG:32632" />
+		<createTransit v="false" />
+		<populationSource v="tracks" />
+		<populationSourceVicinity v="commuter" />
+		<scaleFactor v="1.0" />
+		<outputDirectory v="/home/dhosse/scenarios/wurst/" />
+		<overwriteExistingFiles v="true"/>
+		<demandSource v="mid" />
+		<subpopulationsType v="none"/>
+	</scenario>
+
+	<numberOfThreads v="2" />
+
+	<surveyData>
+		<activityLocationsType v="facilities" />
+		<populationType v="households"/>
+		<vehiclesSource v="matsim" />
+		<onlyWorkingDays v="true"/>
+	</surveyData>
+
+	<database>
+		<localPort v="3200" />
+		<writeTables v="false" />
+	</database>
+
+</configuration>

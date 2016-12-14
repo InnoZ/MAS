@@ -1,14 +1,16 @@
 package com.innoz.toolbox.config;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.innoz.toolbox.config.Configuration.ActivityLocations;
-import com.innoz.toolbox.config.Configuration.DayType;
-import com.innoz.toolbox.config.Configuration.PopulationSource;
-import com.innoz.toolbox.config.Configuration.PopulationType;
-import com.innoz.toolbox.config.Configuration.VehicleSource;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.DayTypes;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.SurveyType;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.VehicleType;
 
 public class ConfigurationTest {
 
@@ -25,24 +27,25 @@ public class ConfigurationTest {
 		
 		assertTrue(configuration != null);
 		
-		assertNull("Survey area id(s) are not null!", configuration.surveyAreaIds);
-		assertNull("Vicinity id(s) are not null!", configuration.vicinityIds);
-		assertNull(configuration.dbNameSpace);
+		assertNull("There is at least one area set in a newly created configuration!",
+				configuration.scenario().getAreaSets());
 		
-		assertEquals(".", configuration.outputDirectory);
-		assertEquals(PopulationType.households, configuration.popType);
-		assertEquals(PopulationSource.survey, configuration.popSource);
-		assertEquals(PopulationSource.none, configuration.popSourceV);
-		assertEquals(VehicleSource.matsim, configuration.vehSource);
-		assertEquals(ActivityLocations.buildings, configuration.actLocs);
-		assertEquals(4711L, configuration.randomSeed);
-		assertEquals(1.0d, configuration.scaleFactor, 0.0d);
-		assertEquals(DayType.weekday, configuration.getUsedDayTypes());
+		assertEquals(".", configuration.misc().getOutputDirectory());
+		assertFalse(configuration.misc().isOverwritingExistingFiles());
 		
-		assertTrue(configuration.adminUnits.isEmpty());
-		assertFalse(configuration.writeDatabaseTables);
-		assertFalse(configuration.writeIntoDatahub);
-		assertFalse(configuration.overwriteExistingFiles);
+		assertEquals(ActivityLocationsType.BUILDINGS, configuration.scenario().getActivityLocationsType());
+		assertEquals(4711L, configuration.scenario().getRandomSeed());
+		assertEquals(1.0d, configuration.scenario().getScaleFactor(), 0.0d);
+		
+		assertEquals(SurveyType.MiD, configuration.surveyPopulation().getSurveyType());
+		assertEquals(DayTypes.weekday, configuration.surveyPopulation().getDayTypes());
+		assertEquals(VehicleType.DEFAULT, configuration.surveyPopulation().getVehicleType());
+		assertTrue(configuration.surveyPopulation().isUsingHouseholds());
+		
+		assertEquals(null, configuration.scenario().getAreaSets());
+
+		assertFalse(configuration.psql().isWritingIntoMobilityDatahub());
+		assertEquals(0, configuration.psql().getParameterSets().size());
 		
 	}
 	

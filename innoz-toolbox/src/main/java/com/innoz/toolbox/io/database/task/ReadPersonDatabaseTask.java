@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.innoz.toolbox.config.Configuration.DayType;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.DayTypes;
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.handler.DefaultHandler;
 import com.innoz.toolbox.io.database.handler.PersonAgeHandler;
@@ -28,9 +28,9 @@ import com.innoz.toolbox.utils.data.Tree.Node;
 
 public class ReadPersonDatabaseTask extends DatabaseTask {
 	
-	private final DayType dayType;
+	private final DayTypes dayType;
 
-	public ReadPersonDatabaseTask(SurveyConstants constants, Geoinformation geoinformation, Set<String> ids, DayType dayType) {
+	public ReadPersonDatabaseTask(SurveyConstants constants, Geoinformation geoinformation, Set<String> ids, DayTypes dayType) {
 		
 		super(constants, geoinformation, ids);
 		this.dayType = dayType;
@@ -56,13 +56,13 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 		ResultSet resultSet = null;
 		String q = null;
 		
-		String table = surveyType.equals("mid") ? "mid2008.persons_raw" : "srv2013.persons";
+		String table = surveyType.equalsIgnoreCase("mid") ? "mid2008.persons_raw" : "srv2013.persons";
 		
 		q = "select * from " + table;
 		
 //		if(container.getHouseholds() == null){
 			
-			if(surveyType.equals("mid")){
+			if(surveyType.equalsIgnoreCase("mid")){
 				
 				q +=  " where ";
 				
@@ -98,9 +98,9 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 			
 //		}
 		
-		if(dayType.equals(DayType.weekday)){
+		if(dayType.equals(DayTypes.weekday)){
 			q += " and " + SurveyConstants.dayOfTheWeek(surveyType) + " < 6";
-		} else if(dayType.equals(DayType.weekend)){
+		} else if(dayType.equals(DayTypes.weekend)){
 			q += " and " + SurveyConstants.dayOfTheWeek(surveyType) + " > 5";
 		}
 		

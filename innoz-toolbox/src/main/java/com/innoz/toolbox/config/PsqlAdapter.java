@@ -13,8 +13,8 @@ public class PsqlAdapter {
 		InstantiationException, IllegalAccessException, ClassNotFoundException{
 		
 		Class.forName(PSQL_DRIVER).newInstance();
-		return DriverManager.getConnection(PSQL_URL + configuration.getLocalPort() + "/" + dbName,
-				configuration.getDatabaseUsername(), configuration.getDatabasePassword());
+		return DriverManager.getConnection(PSQL_URL + configuration.psql().getPsqlPort() + "/" + dbName,
+				configuration.psql().getPsqlUser(), configuration.psql().getPsqlPassword());
 		
 	}
 	
@@ -22,7 +22,7 @@ public class PsqlAdapter {
 	InstantiationException, IllegalAccessException, ClassNotFoundException{
 		
 	Class.forName(PSQL_DRIVER).newInstance();
-	return DriverManager.getConnection(PSQL_URL + 3200 + "/" + dbName,
+	return DriverManager.getConnection(PSQL_URL + 5432 + "/" + dbName,
 			"postgres", "postgres");
 		
 	}

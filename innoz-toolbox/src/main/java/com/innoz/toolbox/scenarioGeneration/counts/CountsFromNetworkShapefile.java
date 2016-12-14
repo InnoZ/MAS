@@ -29,7 +29,7 @@ public class CountsFromNetworkShapefile {
 	public static void main(String args[]){
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		new MatsimNetworkReader(scenario.getNetwork()).readFile("/home/dhosse/osGtfs/network.xml.gz");
+		new MatsimNetworkReader(scenario.getNetwork()).readFile("/home/dhosse/scenarios/test/network.xml.gz");
 		new CountsFromNetworkShapefile().run(scenario, "/home/dhosse/02_Data/DTV_Osna/Straсennetz OsnabrБck DTV.shp",
 				"/home/dhosse/counts.xml.gz", TrafficGraph.mid.name());
 		
@@ -68,7 +68,7 @@ public class CountsFromNetworkShapefile {
 	
 	private Counts<Link> process(List<CountsLink> countsLinks, final Scenario scenario, String trafficGraphType){
 		
-		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation("EPSG:3044", "EPSG:32632");
+		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation("EPSG:3044", "EPSG:3263");
 		Set<Id<Link>> visitedLinkIds = new HashSet<>();
 		Counts<Link> counts = new Counts<Link>();
 		counts.setYear(2016);

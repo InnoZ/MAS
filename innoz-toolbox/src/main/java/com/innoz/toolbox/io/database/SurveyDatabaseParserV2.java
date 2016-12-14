@@ -7,10 +7,10 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.Configuration.PopulationType;
-import com.innoz.toolbox.config.Configuration.SurveyType;
-import com.innoz.toolbox.config.Configuration.VehicleSource;
 import com.innoz.toolbox.config.PsqlAdapter;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.SurveyType;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.VehicleType;
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.task.ConvertToPlansTask;
 import com.innoz.toolbox.io.database.task.HouseholdRemovalTask;
@@ -18,7 +18,7 @@ import com.innoz.toolbox.io.database.task.PersonRemovalTask;
 import com.innoz.toolbox.io.database.task.ReadHouseholdDatabaseTask;
 import com.innoz.toolbox.io.database.task.ReadPersonDatabaseTask;
 import com.innoz.toolbox.io.database.task.ReadVehicleDatabaseTask;
-import com.innoz.toolbox.io.database.task.ReadWayDatabaseTask;
+import com.innoz.toolbox.io.database.task.ReadTripsDatabaseTask;
 import com.innoz.toolbox.io.database.task.ResolveRoundTripsTask;
 import com.innoz.toolbox.io.database.task.SortStagesTask;
 import com.innoz.toolbox.io.database.task.TaskRunner;
@@ -30,7 +30,7 @@ import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContain
 
 public class SurveyDatabaseParserV2 {
 
-	private static final Logger log = Logger.getLogger(SurveyDatabaseParser.class);
+	private static final Logger log = Logger.getLogger(SurveyDatabaseParserV2.class);
 	
 	private SurveyConstants constants;
 	
@@ -55,15 +55,17 @@ public class SurveyDatabaseParserV2 {
 			// Instantiate a new postgreSQL driver and establish a connection to the mobility database
 			Connection connection = PsqlAdapter.createConnection(configuration, DatabaseConstants.SURVEYS_DB);
 		
+			SurveyPopulationConfigurationGroup group = configuration.surveyPopulation();
+			
 			if(connection != null){
 				
-				boolean isUsingHouseholds = configuration.getPopulationType().equals(PopulationType.households);
+				boolean isUsingHouseholds = group.isUsingHouseholds();
 				
 				if(isUsingHouseholds){
 					
 					log.info("Creating survey households...");
 					
-					new ReadHouseholdDatabaseTask(constants, geoinformation, ids).parse(connection, container, configuration.getSurveyType().name());
+					new ReadHouseholdDatabaseTask(constants, geoinformation, ids).parse(connection, container, group.getSurveyType().name());
 						
 					log.info("Read " + container.getHouseholds().size() + " households...");
 					
@@ -71,19 +73,19 @@ public class SurveyDatabaseParserV2 {
 				
 				log.info("Creating survey persons...");
 				
-				new ReadPersonDatabaseTask(constants, geoinformation, ids, configuration.getUsedDayTypes()).parse(connection, container, configuration.getSurveyType().name());
+				new ReadPersonDatabaseTask(constants, geoinformation, ids, configuration.surveyPopulation().getDayTypes()).parse(connection, container, group.getSurveyType().name());
 				
 				log.info("Read " + container.getPersons().size() + " persons...");
 				
-				log.info("Creating survey ways...");
+				log.info("Creating survey trips...");
 
-				new ReadWayDatabaseTask(constants, geoinformation, ids, configuration.getUsedDayTypes()).parse(connection, container, configuration.getSurveyType().name());
+				new ReadTripsDatabaseTask(constants, geoinformation, ids, configuration.surveyPopulation().getDayTypes()).parse(connection, container, configuration.surveyPopulation().getSurveyType().name());
 				
-				if(configuration.getVehicleSource().equals(VehicleSource.survey) && configuration.getSurveyType().equals(SurveyType.mid)){
+				if(group.getVehicleType().equals(VehicleType.SURVEY) && group.getSurveyType().equals(SurveyType.MiD)){
 				
 					log.info("Creating survey cars...");
 					
-					new ReadVehicleDatabaseTask(constants, geoinformation, ids).parse(connection, container, configuration.getSurveyType().name());
+					new ReadVehicleDatabaseTask(constants, geoinformation, ids).parse(connection, container, group.getSurveyType().name());
 					
 				}
 	

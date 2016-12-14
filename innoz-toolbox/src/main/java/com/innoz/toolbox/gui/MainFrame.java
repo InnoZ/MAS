@@ -44,6 +44,7 @@ public final class MainFrame {
 	private final RunnerActionListener listener;
 	private final ClassLoader classLoader = this.getClass().getClassLoader();
 	private MainPanel mainPanel;
+	private boolean connected = false;
 	
 	//Components
 	private Map<String, String> surveyArea;
@@ -157,11 +158,11 @@ public final class MainFrame {
 	
 	public void disableComponents(){
 		
-		for(Component component : mainPanel.getComponents()){
-			component.setEnabled(false);
-		}
-		
-		this.frame.repaint();
+//		for(Component component : mainPanel.getComponents()){
+//			component.setEnabled(false);
+//		}
+//		
+//		this.frame.repaint();
 		
 	}
 	
@@ -187,6 +188,14 @@ public final class MainFrame {
 	
 	public RunnerActionListener getRunnerActionListener(){
 		return this.listener;
+	}
+	
+	public boolean isConnected(){
+		return this.connected;
+	}
+	
+	public void alterIsConnected(boolean b){
+		this.connected = b;
 	}
 	
 }

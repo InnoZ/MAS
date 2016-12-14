@@ -142,16 +142,11 @@ public class Distribution {
 								
 								double distance = distances.getEntry(u1.getId(), u2.getId()).getValue();
 								double speed = Modes.getSpeedForMode(mode);
-								double weight = /*u2.getWeightForKey(key) +*/ u2.getLanduseGeometries().get(key).size();
-//								double avgDistance = parser.modeStats.get(mode).getMean();
+								double weight = u2.getLanduseGeometries().get(key).size();
 								double a = Math.exp((-6d / 3600d) * (distance / speed));
 								proba = weight * a;
 								
 							}
-							
-//							if((mode.equals(TransportMode.walk)) && !u1.equals(u2)){
-//								proba = Double.NEGATIVE_INFINITY;
-//							}
 							
 							transitionMatrices.get(key).get(mode).createEntry(u1.getId(), u2.getId(), proba);
 								

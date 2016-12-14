@@ -16,6 +16,7 @@ import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.facilities.ActivityFacility;
+import org.matsim.matrices.Matrix;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
@@ -68,14 +69,16 @@ public abstract class DemandGenerationAlgorithm {
 	AdministrativeUnit currentMainActCell;
 	Set<AdministrativeUnit> currentSearchSpace;
 	AdministrativeUnit lastActCell = null;
+	Matrix od;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	public DemandGenerationAlgorithm(final Scenario scenario, final Geoinformation geoinformation,
-			final CoordinateTransformation transformation, final Distribution distribution){
+			final CoordinateTransformation transformation, final Matrix od, final Distribution distribution){
 		
 		this.geoinformation = geoinformation;
 		this.transformation = transformation;
 		this.scenario = scenario;
+		this.od = od;
 		
 		// Initialize the disutilities for traveling from each cell to each other cell
 		// to eventually get a gravitation model.
@@ -302,6 +305,8 @@ public abstract class DemandGenerationAlgorithm {
 			}
 			
 		}
+		
+		if(result == null) return this.currentHomeCell;
 		
 		return result;
 		

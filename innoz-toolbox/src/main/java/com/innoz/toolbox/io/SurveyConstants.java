@@ -188,7 +188,7 @@ public final class SurveyConstants {
 		
 	}
 
-	public static String sortedWayId(String namespace){
+	public static String sortedTripId(String namespace){
 		
 		return SurveyConstant.WSID.getName(namespace);
 		
@@ -212,19 +212,19 @@ public final class SurveyConstants {
 		
 	}
 	
-	public static String wayDepartureDay(String namespace) {
+	public static String tripDepartureDay(String namespace) {
 		
 		return SurveyConstant.WDEPD.getName(namespace);
 		
 	}
 	
-	public static String wayDepartureHour(String namespace){
+	public static String tripDepartureHour(String namespace){
 		
 		return SurveyConstant.WDEPH.getName(namespace);
 		
 	}
 	
-	public static String wayDepartureMinute(String namespace){
+	public static String tripDepartureMinute(String namespace){
 		
 		return SurveyConstant.WDEPM.getName(namespace);
 		
@@ -236,55 +236,55 @@ public final class SurveyConstants {
 		
 	}
 	
-	public static String wayArrivalDay(String namespace) {
+	public static String tripArrivalDay(String namespace) {
 		
 		return SurveyConstant.WARRD.getName(namespace);
 		
 	}
 	
-	public static String wayArrivalHour(String namespace){
+	public static String tripArrivalHour(String namespace){
 		
 		return SurveyConstant.WARRH.getName(namespace);
 		
 	}
 	
-	public static String wayArrivalMinute(String namespace){
+	public static String tripArrivalMinute(String namespace){
 		
 		return SurveyConstant.WARRM.getName(namespace);
 		
 	}
 	
-	public static String wayTravelDistance(String namespace){
+	public static String tripTravelDistance(String namespace){
 		
 		return SurveyConstant.WTD.getName(namespace);
 		
 	}
 	
-	public static String wayTravelTime(String namespace){
+	public static String tripTravelTime(String namespace){
 		
 		return SurveyConstant.WTT.getName(namespace);
 		
 	}
 	
-	public static String wayMode(String namespace){
+	public static String tripMode(String namespace){
 	
 		return SurveyConstant.WMODE.getName(namespace);
 		
 	}
 	
-	public static String wayPurpose(String namespace){
+	public static String tripPurpose(String namespace){
 		
 		return SurveyConstant.WPUR.getName(namespace);
 		
 	}
 	
-	public static String waySource(String namespace){
+	public static String tripSource(String namespace){
 		
 		return SurveyConstant.WSOURCE.getName(namespace);
 		
 	}
 	
-	public static String waySink(String namespace){
+	public static String tripSink(String namespace){
 		
 		return SurveyConstant.WSINK.getName(namespace);
 		
@@ -302,7 +302,7 @@ public final class SurveyConstants {
 		
 	}
 	
-	public static String wayDetailedPurpose(String namespace){
+	public static String tripDetailedPurpose(String namespace){
 		
 		return SurveyConstant.WPURD.getName(namespace);
 		

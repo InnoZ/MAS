@@ -40,6 +40,7 @@ public class SshConnectionListener implements ActionListener{
 			try {
 				
 				established = SshConnector.connect(this.mainFrame.getConfiguration());
+				this.mainFrame.alterIsConnected(true);
 			
 			} catch (JSchException | IOException e1) {
 
@@ -81,6 +82,7 @@ public class SshConnectionListener implements ActionListener{
 				this.status.setText(GuiConstants.STATUS_DISCONNECTED);
 				this.button.setText(GuiConstants.CONNECT);
 				this.mainFrame.disableComponents();
+				this.mainFrame.alterIsConnected(false);
 				
 			}
 			

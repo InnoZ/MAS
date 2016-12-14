@@ -3,7 +3,7 @@ package com.innoz.toolbox.run.parallelization;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.innoz.toolbox.config.Configuration.ActivityLocations;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
 import com.innoz.toolbox.io.database.DatabaseReader;
 import com.innoz.toolbox.io.database.datasets.OsmDataset;
 import com.innoz.toolbox.io.database.datasets.OsmPointDataset;
@@ -90,7 +90,7 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 			
 			// Add the landuse geometry to the geoinformation if we have a valid activity option for it
 			
-			if(!reader.getConfiguration().getActivityLocationsType().equals(ActivityLocations.landuse)){
+			if(!reader.getConfiguration().scenario().getActivityLocationsType().equals(ActivityLocationsType.LANDUSE)){
 				
 					for(Building b : this.reader.getBuildingList()){
 
@@ -349,9 +349,6 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 		
 		if(actType != null){
 
-			// Add the landuse geometry to the geoinformation if we have a valid activity option for it
-//			this.reader.addGeometry(actType, new Building(dataset.getGeometry()));
-			
 			Building closest = this.reader.getBuildingsQuadTree().getClosest(dataset.getGeometry().getCentroid().getX(),
 					dataset.getGeometry().getCentroid().getY());
 			

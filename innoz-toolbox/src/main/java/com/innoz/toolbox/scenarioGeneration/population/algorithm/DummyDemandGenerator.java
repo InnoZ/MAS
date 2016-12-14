@@ -9,6 +9,7 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.matrices.Matrix;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
@@ -21,9 +22,9 @@ import com.innoz.toolbox.utils.data.Tree.Node;
 public class DummyDemandGenerator extends DemandGenerationAlgorithm {
 
 	public DummyDemandGenerator(final Scenario scenario, final Geoinformation geoinformation,
-			final CoordinateTransformation transformation, final Distribution distribution) {
+			final CoordinateTransformation transformation, final Matrix od , final Distribution distribution) {
 
-		super(scenario, geoinformation, transformation, distribution);
+		super(scenario, geoinformation, transformation, od, distribution);
 		
 	}
 

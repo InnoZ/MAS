@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.innoz.toolbox.config.Configuration.DayType;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.DayTypes;
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.handler.DefaultHandler;
 import com.innoz.toolbox.io.database.handler.LegDestinationHandler;
@@ -27,11 +27,12 @@ import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 
-public class ReadWayDatabaseTask extends DatabaseTask {
+public class ReadTripsDatabaseTask extends DatabaseTask {
 
-	private final DayType dayType;
+	private final DayTypes dayType;
 	
-	public ReadWayDatabaseTask(SurveyConstants constants, Geoinformation geoinformation, Set<String> ids, DayType dayType){
+	public ReadTripsDatabaseTask(SurveyConstants constants, Geoinformation geoinformation, Set<String> ids,
+			DayTypes dayType){
 		
 		super(constants, geoinformation, ids);
 		this.dayType = dayType;
@@ -58,15 +59,15 @@ public class ReadWayDatabaseTask extends DatabaseTask {
 		ResultSet resultSet = null;
 		String q = null;
 		
-		String table = surveyType.equals("mid") ? "mid2008.ways_raw" : "srv2013.ways";
+		String table = surveyType.equalsIgnoreCase("mid") ? "mid2008.trips_raw" : "srv2013.trips";
 		
 		q = "select * from " + table;
 		
-		if(dayType.equals(DayType.weekday)){
+		if(dayType.equals(DayTypes.weekday)){
 		
 			q += " where " + SurveyConstants.dayOfTheWeek(surveyType) + " < 6";
 
-		} else if(dayType.equals(DayType.weekend)){
+		} else if(dayType.equals(DayTypes.weekend)){
 			
 			q += " where " + SurveyConstants.dayOfTheWeek(surveyType) + " > 5";
 			
@@ -91,20 +92,20 @@ public class ReadWayDatabaseTask extends DatabaseTask {
 				
 				Map<String, String> attributes = new HashMap<>();
 				
-				attributes.put(SurveyConstants.sortedWayId(surveyType), resultSet.getString(SurveyConstants.sortedWayId(surveyType)));
-				attributes.put(SurveyConstants.waySource(surveyType), resultSet.getString(SurveyConstants.waySource(surveyType)));
-				attributes.put(SurveyConstants.waySink(surveyType), resultSet.getString(SurveyConstants.waySink(surveyType)));
-				attributes.put(SurveyConstants.wayPurpose(surveyType), resultSet.getString(SurveyConstants.wayPurpose(surveyType)));
-				attributes.put(SurveyConstants.wayDetailedPurpose(surveyType), resultSet.getString(SurveyConstants.wayDetailedPurpose(surveyType)));
-				attributes.put(SurveyConstants.wayTravelDistance(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.wayTravelDistance(surveyType))));
-				attributes.put(SurveyConstants.wayMode(surveyType), resultSet.getString(SurveyConstants.wayMode(surveyType)));
-				attributes.put(SurveyConstants.wayTravelTime(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.wayTravelTime(surveyType))));
-				attributes.put(SurveyConstants.wayDepartureHour(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.wayDepartureHour(surveyType))));
-				attributes.put(SurveyConstants.wayDepartureMinute(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.wayDepartureMinute(surveyType))));
-				attributes.put(SurveyConstants.wayDepartureDay(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.wayDepartureDay(surveyType))));
-				attributes.put(SurveyConstants.wayArrivalHour(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.wayArrivalHour(surveyType))));
-				attributes.put(SurveyConstants.wayArrivalMinute(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.wayArrivalMinute(surveyType))));
-				attributes.put(SurveyConstants.wayArrivalDay(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.wayArrivalDay(surveyType))));
+				attributes.put(SurveyConstants.sortedTripId(surveyType), resultSet.getString(SurveyConstants.sortedTripId(surveyType)));
+				attributes.put(SurveyConstants.tripSource(surveyType), resultSet.getString(SurveyConstants.tripSource(surveyType)));
+				attributes.put(SurveyConstants.tripSink(surveyType), resultSet.getString(SurveyConstants.tripSink(surveyType)));
+				attributes.put(SurveyConstants.tripPurpose(surveyType), resultSet.getString(SurveyConstants.tripPurpose(surveyType)));
+				attributes.put(SurveyConstants.tripDetailedPurpose(surveyType), resultSet.getString(SurveyConstants.tripDetailedPurpose(surveyType)));
+				attributes.put(SurveyConstants.tripTravelDistance(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.tripTravelDistance(surveyType))));
+				attributes.put(SurveyConstants.tripMode(surveyType), resultSet.getString(SurveyConstants.tripMode(surveyType)));
+				attributes.put(SurveyConstants.tripTravelTime(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.tripTravelTime(surveyType))));
+				attributes.put(SurveyConstants.tripDepartureHour(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.tripDepartureHour(surveyType))));
+				attributes.put(SurveyConstants.tripDepartureMinute(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.tripDepartureMinute(surveyType))));
+				attributes.put(SurveyConstants.tripDepartureDay(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.tripDepartureDay(surveyType))));
+				attributes.put(SurveyConstants.tripArrivalHour(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.tripArrivalHour(surveyType))));
+				attributes.put(SurveyConstants.tripArrivalMinute(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.tripArrivalMinute(surveyType))));
+				attributes.put(SurveyConstants.tripArrivalDay(surveyType), Double.toString(resultSet.getDouble(SurveyConstants.tripArrivalDay(surveyType))));
 				
 				int stichtag = resultSet.getInt(SurveyConstants.dayOfTheWeek(surveyType));
 				

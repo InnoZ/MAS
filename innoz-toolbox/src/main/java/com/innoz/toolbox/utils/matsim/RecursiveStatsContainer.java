@@ -1,5 +1,9 @@
 package com.innoz.toolbox.utils.matsim;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Provides arithmetic mean, standard deviation, and Min/Max.
  * 
@@ -13,8 +17,11 @@ public final class RecursiveStatsContainer {
 	private double min = Double.POSITIVE_INFINITY;
 	private double max = Double.NEGATIVE_INFINITY;
 	private double tempVar;
+	private List<Double> entries = new ArrayList<>();
 
 	public void handleNewEntry(double entry){
+		
+		entries.add(entry);
 		
 		if (entry < this.min) {
 			this.min = entry;
@@ -75,4 +82,28 @@ public final class RecursiveStatsContainer {
 	public double getMax(){
 		return this.max;
 	}
+	
+	public List<Double> getEntries(){
+		
+		return this.entries;
+		
+	}
+	
+	public double getMedian() {
+
+		Collections.sort(this.entries);
+		
+		if(this.numberOfEntries % 2 == 0){
+			
+			return this.entries.get((int)(this.numberOfEntries) / 2);
+			
+		} else {
+			
+			return (this.entries.get((int)(this.numberOfEntries - 1) / 2)
+					+ this.entries.get((int)this.numberOfEntries / 2)) / 2;
+			
+		}
+		
+	}
+	
 }

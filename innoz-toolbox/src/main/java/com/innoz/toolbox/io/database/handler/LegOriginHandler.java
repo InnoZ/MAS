@@ -12,7 +12,7 @@ public class LegOriginHandler implements DefaultHandler {
 		
 		SurveyStage stage = (SurveyStage)obj;
 		
-		String origin = attributes.get(SurveyConstants.waySource(surveyType));
+		String origin = attributes.get(SurveyConstants.tripSource(surveyType));
 		
 		if(origin.equals("1")){
 			stage.setOrigin("HOME");

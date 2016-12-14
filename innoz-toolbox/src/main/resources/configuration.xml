@@ -1,42 +1,64 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<!-- This is a template scenario generation configuration file used by the InnoZ  -->
 <configuration>
 
-	<!-- The basic settings -->
-	<scenario>
-		<areaSet k="surveyArea">
-			<adminUnit id="15086" numberOfHouseholds="44080" networkDetail="6" /> <!--44080-->
-		</areaSet>
-		<areaSet k="vicinity" >
-<!--			<adminUnit id="15090" numberOfHouseholds="0" networkDetail="4" />-->
-<!--			<adminUnit id="15083" numberOfHouseholds="0" networkDetail="4" />-->
-<!--			<adminUnit id="15003" numberOfHouseholds="0" networkDetail="4" />-->
-<!--			<adminUnit id="15089" numberOfHouseholds="0" networkDetail="4" />-->
-<!--			<adminUnit id="15082" numberOfHouseholds="0" networkDetail="4" />-->
-		</areaSet>	
-		<coordinateSystem v="EPSG:32632" />
-		<createTransit v="false" />
-		<populationSource v="survey" />
-		<populationSourceVicinity v="commuter" />
-		<scaleFactor v="1.0" />
-		<outputDirectory v="/home/dhosse/scenarios/burg/" />
-		<overwriteExistingFiles v="true"/>
-		<demandSource v="mid" />
-		<subpopulationsType v="none"/>
-	</scenario>
+	<group name="misc">
 
-	<numberOfThreads v="2" />
+		<!-- Switch to 'yes' to overwrite existing files in the output directory. Default: false. -->
+		<param name="overwriteExistingFiles" value ="false"/>
 
-	<surveyData>
-		<activityLocationsType v="facilities" />
-		<populationType v="households"/>
-		<vehiclesSource v="matsim" />
-		<onlyWorkingDays v="true"/>
-	</surveyData>
+		<!-- Number of threads that are executed at the same time. Default value is '1'. -->
+		<param name="numberOfThreads" value ="1"/>
 
-	<database>
-		<localPort v="3200" />
-		<writeTables v="false" />
-	</database>
+		<!-- The directory containing all output files of the scenario generation process. -->
+		<param name="outputDirectory" value ="."/>
+
+		<!-- The coordinate reference system that applies to the study area. -->
+		<param name="coordinateSystem" value ="EPSG:4326"/>
+
+	</group>
+
+	<group name="psql">
+
+		<param name="isWritingIntoDataHub" value ="false"/>
+
+		<param name="port" value ="3200"/>
+
+		<param name="dbUser" value ="postgres"/>
+
+		<param name="dbPassword" value ="postgres"/>
+
+	</group>
+
+	<group name="scenario">
+
+		<!-- The seed for the pseudo random number generator for the generation of the scenario. -->
+		<param name="randomSeed" value ="4711"/>
+
+		<!-- Possible values: BUILDINGS, FACILITIES, LANDUSE. -->
+		<param name="activityLocationsType" value ="BUILDINGS"/>
+
+		<!-- The year of the scenario. -->
+		<param name="year" value ="2016"/>
+
+		<!-- The scale factor for the amount of households / persons to be created and for the supply side to scale capacities. Any numeric value between 0 and 1. -->
+		<param name="scaleFactor" value ="1.0"/>
+
+	</group>
+
+	<group name="surveyPopulation">
+
+		<!-- The survey that provides data for the demand generation. Possible values: MiD, SrV, MOP. -->
+		<param name="surveyType" value ="MiD"/>
+
+		<!-- If 'true', households and their members will be taken from the survey. Else, the persons data is used. -->
+		<param name="useHouseholds" value ="true"/>
+
+		<!-- Defines if all days or only working days (Mo-Fr) should be used for generating plans. Possible values: weekday, weekend, all. Default: weekday. -->
+		<param name="dayTypes" value ="weekday"/>
+
+		<!-- Possible values: DEFAULT, SURVEY. -->
+		<param name="vehicleType" value ="DEFAULT"/>
+
+	</group>
 
 </configuration>
