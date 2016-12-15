@@ -291,8 +291,8 @@ public class DatabaseReader {
 		// Execute the query and store the returned valued inside a set.
 		String q = "select " + DatabaseConstants.BLAND + "," + DatabaseConstants.MUN_KEY + ", cca_2, ccn_3, "
 				+ DatabaseConstants.functions.st_astext.name() + "(geom), "
-				+ DatabaseConstants.functions.st_astext.name() + "(st_transform(st_buffer(st_transform("
-				+ DatabaseConstants.ATT_GEOM + ",32632),5000),4326)) as buffer from " + DatabaseConstants.schemata.gadm.name() + "." +
+				+ DatabaseConstants.functions.st_astext.name() + "(st_transform("
+				+ DatabaseConstants.ATT_GEOM + ",4326)) as buffer from " + DatabaseConstants.schemata.gadm.name() + "." +
 				DatabaseConstants.tables.districts.name() + " where" + builder.toString();
 		ResultSet set = statement.executeQuery(q);
 
