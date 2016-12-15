@@ -137,23 +137,7 @@ public class CommuterDatabaseParser {
 	
 	private String createChainedStatementFromSet(Set<String> set, String var){
 		
-		boolean isFirst = true;
-		StringBuilder result = new StringBuilder();
-		
-		for(String s : set){
-			
-			if(!isFirst){
-			
-				result.append(" or ");
-			
-			}
-			
-			result.append(var + " like '" + s + "%'");
-			isFirst = false;
-			
-		}
-		
-		return result.toString();
+		return new StringBuilder().append(var + " in (").append(CollectionUtils.setToString(set)).append(")").toString();
 		
 	}
 	
