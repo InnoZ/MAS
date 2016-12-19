@@ -659,7 +659,7 @@ public class NetworkCreatorFromPsql {
 			
 			kmh = 130;
 			
-		} else if("walk".equals(s)){
+		} else if("walk".equals(s) || "DE:living_street".equals(s)){
 			
 			kmh = 5;
 			
