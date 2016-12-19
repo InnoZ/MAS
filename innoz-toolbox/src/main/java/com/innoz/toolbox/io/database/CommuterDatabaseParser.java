@@ -18,6 +18,7 @@ import com.innoz.toolbox.config.PsqlAdapter;
 import com.innoz.toolbox.config.groups.ConfigurationGroup;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.scenarioGeneration.population.commuters.CommuterDataElement;
+import com.innoz.toolbox.utils.PsqlUtils;
 
 public class CommuterDatabaseParser {
 
@@ -137,7 +138,7 @@ public class CommuterDatabaseParser {
 	
 	private String createChainedStatementFromSet(Set<String> set, String var){
 		
-		return new StringBuilder().append(var + " in (").append(CollectionUtils.setToString(set)).append(")").toString();
+		return new StringBuilder().append(var + " in (").append(PsqlUtils.setToString(set)).append(")").toString();
 		
 	}
 	
