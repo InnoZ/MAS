@@ -14,7 +14,7 @@ public class TracksConfigurationGroup extends ConfigurationGroup {
 	public static final String ACT_THRESHOLD = "activityThreshold";
 
 	private String date;
-	private double activityThreshold = 15 * 3600;
+	private double activityThreshold = 15 * 60;
 	
 	public TracksConfigurationGroup() {
 		
