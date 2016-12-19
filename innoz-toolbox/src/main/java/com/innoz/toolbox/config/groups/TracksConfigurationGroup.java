@@ -10,7 +10,7 @@ public class TracksConfigurationGroup extends ConfigurationGroup {
 
 	final static String GROUP_NAME = "tracksPopulation";
 	
-	public static final String DATE = "DATE";
+	public static final String DATE = "date";
 	public static final String ACT_THRESHOLD = "activityThreshold";
 
 	private String date;

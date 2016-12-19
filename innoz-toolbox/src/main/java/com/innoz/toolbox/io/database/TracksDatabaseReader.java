@@ -11,6 +11,7 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.PsqlAdapter;
+import com.innoz.toolbox.config.groups.TracksConfigurationGroup;
 import com.innoz.toolbox.scenarioGeneration.population.tracks.Track;
 import com.innoz.toolbox.scenarioGeneration.population.tracks.TrackedPerson;
 import com.vividsolutions.jts.geom.Geometry;
@@ -34,12 +35,14 @@ public class TracksDatabaseReader {
 		
 		try {
 			
+			TracksConfigurationGroup config = this.configuration.tracks();
+			
 			WKTReader wkt = new WKTReader();
 			
 			Connection c = PsqlAdapter.createConnection(DatabaseConstants.TRACKS_DB);
 			
 			String sql = "SELECT user_id,id,started_at,finished_at,length,mode,st_astext(start_point) as start,"
-					+ "st_astext(end_point) as end FROM tracks_rsl where started_on='2016-05-25';";
+					+ "st_astext(end_point) as end FROM tracks_rsl where started_on='"+ config.getDate() + "';";
 			
 			Statement s = c.createStatement();
 			
