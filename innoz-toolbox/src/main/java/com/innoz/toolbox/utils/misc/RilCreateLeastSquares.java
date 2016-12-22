@@ -28,8 +28,8 @@ public class RilCreateLeastSquares {
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException,
 		ClassNotFoundException, SQLException, IOException {
 
-		compute();
-		computeAggregates();
+//		compute();
+//		computeAggregates();
 		computeStationwise();
 		
 	}
@@ -115,7 +115,7 @@ public class RilCreateLeastSquares {
 				int fvo = result.getInt("fv_fremd");
 				int nvo = result.getInt("nv_fremd");
 				
-				String state = result.getString("state");
+				String state = null;//result.getString("state");
 				
 				if(fv >= 0 && nv >= 0 && fvo >= 0 && nvo >= 0){
 					
@@ -185,19 +185,23 @@ public class RilCreateLeastSquares {
 			}
 			
 		}
-		
-		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/timeline.csv");
 
-		int order = 6;
+		int order = 10;
+		String stateOrAgg = "aggregated";
 		
+		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/types/" + stateOrAgg + "/order" + order + "/timeline.csv");
+
 		String t = "state;type";
 		for(int i = 0; i < order + 1; i++){
 			t += ";median_a" + Integer.toString(i);
 		}
+		
+		t+= ";median_r2";
+		
 		for(int i = 0; i < order + 1; i++){
 			t += ";avg_a" + Integer.toString(i);
 		}
-		t += ";nStations";
+		t += ";avg_r2;nStations";
 		
 		out.write(t);
 		
@@ -226,12 +230,12 @@ public class RilCreateLeastSquares {
 					out.newLine();
 					String line = key != null ? key : "";
 					line += ";" + entry.getKey();
-					for(int i = 0; i < medianData.length - 1; i++){
+					for(int i = 0; i < medianData.length; i++){
 						
 						line += ";" + medianData[i];
 						
 					}
-					for(int i = 0; i < avgData.length - 1; i++){
+					for(int i = 0; i < avgData.length; i++){
 						
 						line += ";" + avgData[i];
 						
@@ -253,7 +257,7 @@ public class RilCreateLeastSquares {
 						
 						for(int i = 0; i <= order; i++){
 							
-							medianY[j-2006] += avgData[i] * Math.pow(f, i);
+							medianY[j-2006] += medianData[i] * Math.pow(f, i);
 							
 						}
 						
@@ -289,7 +293,9 @@ public class RilCreateLeastSquares {
 					chart.addSeries("Rohdaten", x, y);
 					((XYPlot)chart.getChart().getPlot()).setRenderer(1, new XYLineAndShapeRenderer(false,true));
 					
-					String outFile = "/home/dhosse/01_Projects/GSP/types/" + key + "_" + entry.getKey() + ".png";
+					String state = key != null ? key+ "_" : "";
+					
+					String outFile = "/home/dhosse/01_Projects/GSP/types/" + stateOrAgg + "/order" + order + "/" + state + entry.getKey() + ".png";
 					chart.saveAsPng(outFile, 800, 600);
 					
 				}
@@ -373,20 +379,29 @@ public class RilCreateLeastSquares {
 
 		}
 		
-		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/stationwise.csv");
-		out.write("name;a0;a1");
+		int order = 8;
+		
+		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/types/stationwise_" + order + ".csv");
+		out.write("name");
+		for(int i = 0; i <= order; i++){
+			out.write(";a_" + i);
+		}
+		out.write(";r2");
 		
 		for(Entry<String, XYSeries> entry : stationData.entrySet()){
 			
 			XYSeries xy = entry.getValue();
 			
-			if(xy.getItems().size() >= 2){
+			if(xy.getItems().size() >= order+1){
 
-				double[] reg = Regression.getOLSRegression(new XYSeriesCollection(xy),0);
+				double[] reg = Regression.getPolynomialRegression(new XYSeriesCollection(xy), 0, order);
 				
 				out.newLine();
-							
-				out.write(entry.getKey() + ";" + reg[0] + ";" + reg[1]);
+				
+				out.write(entry.getKey());
+				for(int i = 0; i <= order+1; i++){
+					out.write(";" + reg[i]);
+				}
 				
 			}
 			
