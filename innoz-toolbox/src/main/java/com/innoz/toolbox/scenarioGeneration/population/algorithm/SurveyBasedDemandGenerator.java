@@ -674,7 +674,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
 	/**
 	 * 
-	 * Creates a MATSim leg from a survey way.
+	 * Creates a MATSim leg from a survey trip.
 	 * 
 	 * @param population The MATSim population
 	 * @param mpe The survey plan element (in this case: way)
@@ -683,15 +683,15 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	private Leg createLeg(Population population,
 			SurveyPlanElement mpe) {
 		
-		SurveyPlanTrip way = (SurveyPlanTrip)mpe;
-		String mode = way.getMainMode();
-		double departure = way.getStartTime();
-		double ttime = way.getEndTime() - departure;
+		SurveyPlanTrip trip = (SurveyPlanTrip)mpe;
+		String mode = trip.getMainMode();
+//		double departure = way.getStartTime();
+//		double ttime = way.getEndTime() - departure;
 		
 		Leg leg = population.getFactory().createLeg(mode);
-		leg.setTravelTime(ttime);
+//		leg.setTravelTime(ttime);
 
-		this.lastLeg = way;
+		this.lastLeg = trip;
 		
 		return leg;
 		
@@ -785,8 +785,9 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 		// Create a new activity
 		Activity activity = population.getFactory().createActivityFromCoord(type.split("_")[0], coord);
-		activity.setStartTime(start);
-		activity.setEndTime(end);
+//		activity.setStartTime(start);
+		activity.setMaximumDuration(end - start);
+//		activity.setEndTime(end);
 		if(this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
 			activity.setFacilityId(((ProxyFacility)this.geoinformation.getLanduseOfType(type)
 					.getClosest(coord.getX(), coord.getY())).get().getId());
@@ -797,7 +798,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			// Set the activity duration to at least 1/4 hour if it's been reported shorter to avoid
 			// extremely negative scores
 			activity.setMaximumDuration(900);
-			activity.setEndTime(start + 900);
+//			activity.setEndTime(start + 900);
 			
 		} else{
 				
