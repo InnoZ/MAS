@@ -6,12 +6,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import com.innoz.toolbox.config.PsqlAdapter;
 import com.innoz.toolbox.io.database.DatabaseConstants;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 

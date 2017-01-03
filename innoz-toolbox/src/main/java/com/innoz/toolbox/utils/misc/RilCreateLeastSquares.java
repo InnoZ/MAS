@@ -20,7 +20,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.matsim.core.utils.charts.XYScatterChart;
 import org.matsim.core.utils.io.IOUtils;
 
-import com.innoz.toolbox.config.PsqlAdapter;
+import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.utils.matsim.RecursiveStatsContainer;
 
 public class RilCreateLeastSquares {
