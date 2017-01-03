@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.matsim.core.utils.collections.QuadTree;
 
@@ -84,16 +85,10 @@ public class Geoinformation {
 	
 	public List<AdministrativeUnit> getAdminUnitsWithGeometry(){
 		
-		List<AdministrativeUnit> units = new ArrayList<>();
-		
-		List<Node<AdministrativeUnit>> nodes = this.getAdminUnits();
-		for(Node<AdministrativeUnit> node : nodes){
-			if(node.getData().getGeometry() != null){
-				units.add(node.getData());
-			}
-		}
-		
-		return units;
+		return this.getAdminUnits().stream()
+				.filter(p -> p.getData().getGeometry() != null)
+				.map(Node<AdministrativeUnit>::getData)
+				.collect(Collectors.toList());
 		
 	}
 	
@@ -111,18 +106,13 @@ public class Geoinformation {
 	 * @return The total weight of the landuse geometries inside the survey area.
 	 */
 	public double getTotalWeightForLanduseKey(String districtId, String key){
+
+		ArrayList<Double> doubleValues = new ArrayList<>();
 		
-		double weight = 0.;
+		this.adminUnitTree.get(districtId).getChildren().stream()
+			.forEach(p -> doubleValues.add(p.getData().getWeightForKey(key)));
 		
-		Node<AdministrativeUnit> node = this.adminUnitTree.get(districtId);
-		
-		for(Node<AdministrativeUnit> childNode : node.getChildren()){
-			
-			weight += childNode.getData().getWeightForKey(key);
-			
-		}
-		
-		return weight;
+		return doubleValues.stream().collect(Collectors.summingDouble(Double::doubleValue));
 		
 	}
 	
