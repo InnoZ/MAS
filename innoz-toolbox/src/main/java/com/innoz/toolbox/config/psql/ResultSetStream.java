@@ -30,12 +30,13 @@ public class ResultSetStream<T> {
 		long t0 = System.currentTimeMillis();
 		readStreaming();
 		long d1 = System.currentTimeMillis() - t0;
+
+		System.out.println("ResultSetStream -> " + d1 + " ms");
 		
 		t0 = System.currentTimeMillis();
 		read();
 		long d2 = System.currentTimeMillis() - t0;
 		
-		System.out.println("ResultSetStream -> " + d1 + " ms");
 		System.out.println("ResultSet       -> " + d2 + " ms");
 		
 	}
@@ -55,12 +56,6 @@ public class ResultSetStream<T> {
 					return null;
 				}})){
 			
-//			Iterator<AdministrativeUnit> it = stream.iterator();
-//			AdministrativeUnit next = null;
-//			while((next = it.next()) != null){
-//				System.out.println(next);
-//			}
-			
 			stream.filter(p -> p != null).limit(10000).forEach(p -> map.put(p.getId(), p));
 
 		}
@@ -79,7 +74,9 @@ public class ResultSetStream<T> {
 			
 			Map<String, AdministrativeUnit> map = new HashMap<>();
 			AdministrativeUnit u = new AdministrativeUnit(result.getString(DatabaseConstants.MUN_KEY));
-			map.put(u.getId(), u);
+			if(u != null) {
+				map.put(u.getId(), u);
+			}
 			
 		}
 		
