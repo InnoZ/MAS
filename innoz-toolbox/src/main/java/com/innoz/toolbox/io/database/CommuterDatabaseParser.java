@@ -16,7 +16,7 @@ import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.matrices.Matrix;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.PsqlAdapter;
+import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.config.groups.ConfigurationGroup;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.config.psql.ResultSetStream;

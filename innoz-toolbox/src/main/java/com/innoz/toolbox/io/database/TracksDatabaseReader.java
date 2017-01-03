@@ -10,7 +10,7 @@ import java.util.Map;
 import org.matsim.core.utils.geometry.geotools.MGC;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.PsqlAdapter;
+import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.scenarioGeneration.population.tracks.Track;
 import com.innoz.toolbox.scenarioGeneration.population.tracks.TrackedPerson;
 import com.vividsolutions.jts.geom.Geometry;
