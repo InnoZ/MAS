@@ -20,9 +20,19 @@ public class GeoinformationTest {
 		gi = new Geoinformation(ActivityLocationsType.BUILDINGS);
 
 		AdministrativeUnit unit1 = new AdministrativeUnit("01");
-		Coordinate[] coordinates = new Coordinate[]{new Coordinate(0d, 0d), new Coordinate(1d,0d),new Coordinate(1d,1d),new Coordinate(0d,1d),
-				new Coordinate(0d,0d)};
-		unit1.addLanduse("foo", new Building(new GeometryFactory().createPolygon(coordinates)));
+		
+		{
+			Coordinate[] coordinates = new Coordinate[]{new Coordinate(0d, 0d), new Coordinate(1d,0d),new Coordinate(1d,1d),new Coordinate(0d,1d),
+					new Coordinate(0d,0d)};
+			unit1.addLanduse("foo", new Building(new GeometryFactory().createPolygon(coordinates)));
+		}
+		
+		{
+			Coordinate[] coordinates = new Coordinate[]{new Coordinate(1d, 1d), new Coordinate(2d,1d),new Coordinate(2d,3d),new Coordinate(1d,3d),
+					new Coordinate(1d,1d)};
+			unit1.addLanduse("foo", new Building(new GeometryFactory().createPolygon(coordinates)));
+		}
+		
 		gi.addAdministrativeUnit(unit1);
 		
 	}
@@ -30,7 +40,7 @@ public class GeoinformationTest {
 	@Test
 	public void testLanduseWeightGetter() {
 
-		assertEquals("Wrong landuse weight returned!", 1d, gi.getTotalWeightForLanduseKey("0", "foo"),0d);
+		assertEquals("Wrong landuse weight returned!", 3d, gi.getTotalWeightForLanduseKey("0", "foo"),0d);
 		
 	}
 	
