@@ -88,14 +88,6 @@ public class SurveyPlan implements Weighted {
 		this.mainActId = i;
 	}
 	
-//	public List<Subtour> getSubtours(){
-//		return this.subtours;
-//	}
-//	
-//	public void setSubtours(List<Subtour> subtours){
-//		this.subtours = subtours;
-//	}
-	
 	public int getHomeIndex(){
 		return this.homeIndex;
 	}
