@@ -35,4 +35,8 @@ public class Building implements Landuse {
 		
 	}
 	
+	public void setWeight(double s) {
+		// stub
+	}
+	
 }
