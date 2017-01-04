@@ -12,6 +12,8 @@ public class SurveyHousehold implements SurveyObject, Weighted {
 	private double hhIncome;
 	private Double weight;
 	
+	int rtyp;
+	
 	private final List<String> memberIds;
 	private final List<String> vehicleIds;
 	
@@ -66,6 +68,14 @@ public class SurveyHousehold implements SurveyObject, Weighted {
 	
 	public List<String> getVehicleIds(){
 		return this.vehicleIds;
+	}
+	
+	public int getRegionType() {
+		return this.rtyp;
+	}
+	
+	public void setRegionType(int t) {
+		this.rtyp = t;
 	}
 
 	@Override
