@@ -38,4 +38,8 @@ public class ProxyFacility implements Landuse {
 		
 	}
 	
+	public void setWeight(double s) {
+		// stub
+	}
+	
 }
