@@ -3,7 +3,9 @@ package com.innoz.toolbox.scenarioGeneration.population.surveys;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SurveyHousehold implements SurveyObject {
+import com.innoz.toolbox.scenarioGeneration.utils.Weighted;
+
+public class SurveyHousehold implements SurveyObject, Weighted {
 	
 	private String id;
 	
@@ -66,11 +68,13 @@ public class SurveyHousehold implements SurveyObject {
 		return this.vehicleIds;
 	}
 
-	public Double getWeight() {
+	@Override
+	public double getWeight() {
 		return weight;
 	}
 
-	public void setWeight(Double weight) {
+	@Override
+	public void setWeight(double weight) {
 		this.weight = weight;
 	}
 	
