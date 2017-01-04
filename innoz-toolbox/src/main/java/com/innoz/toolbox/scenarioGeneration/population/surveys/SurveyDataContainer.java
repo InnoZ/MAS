@@ -60,19 +60,15 @@ public class SurveyDataContainer {
 	
 	public void addHousehold(SurveyHousehold household, int rtyp){
 		
-		if(household.getWeight() != null){
-			
-			this.households.put(household.getId(), household);
-			this.sumOfHouseholdWeights += household.getWeight();
-			
-			if(!this.regionType2Households.containsKey(rtyp)){
-				this.regionType2Households.put(rtyp, new HashSet<String>());
-			}
-			
-			this.regionType2Households.get(rtyp).add(household.getId());
-			
+		this.households.put(household.getId(), household);
+		this.sumOfHouseholdWeights += household.getWeight();
+		
+		if(!this.regionType2Households.containsKey(rtyp)){
+			this.regionType2Households.put(rtyp, new HashSet<String>());
 		}
 		
+		this.regionType2Households.get(rtyp).add(household.getId());
+			
 	}
 	
 	public void addPerson(SurveyPerson person){
