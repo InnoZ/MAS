@@ -31,6 +31,7 @@ import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPlanTrip;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.utils.GeometryUtils;
 import com.innoz.toolbox.utils.data.Tree.Node;
+import com.innoz.toolbox.utils.data.WeightedSelection;
 
 public abstract class DemandGenerationAlgorithm {
 
@@ -89,7 +90,7 @@ public abstract class DemandGenerationAlgorithm {
 	public abstract void run(final Configuration configuration, String ids);
 
 	AdministrativeUnit chooseAdminUnit(AdministrativeUnit district, String activityType){
-		
+
 		double r = random.nextDouble() * this.geoinformation.getTotalWeightForLanduseKey(district.getId(), activityType);
 		double r2 = 0.;
 		
@@ -119,45 +120,15 @@ public abstract class DemandGenerationAlgorithm {
 	
 	Coord chooseActivityCoordInAdminUnit(AdministrativeUnit admin, String activityType){
 		
-		double p = random.nextDouble() * admin.getWeightForKey(activityType);
-		double accumulatedWeight = 0.;
-		
-		for(Landuse g : admin.getLanduseGeometries().get(activityType)){
-			
-			accumulatedWeight += g.getWeight();
-			
-			if(p <= accumulatedWeight){
-
-				// Shoot the location
-				return transformation.transform(GeometryUtils.shoot(g.getGeometry(), random));
-
-			}
-			
-		}
-		
-		return null;
+		return transformation.transform(GeometryUtils.shoot(
+				((Landuse)WeightedSelection.choose(admin.getLanduseGeometries().get(activityType), this.random.nextDouble()))
+				.getGeometry(), this.random));
 		
 	}
 	
 	ActivityFacility chooseActivityFacilityInAdminUnit(AdministrativeUnit admin, String activityType){
 		
-		double p = random.nextDouble() * admin.getWeightForKey(activityType);
-		double accumulatedWeight = 0;
-		
-		for(Landuse g : admin.getLanduseGeometries().get(activityType)){
-			
-			accumulatedWeight += g.getWeight();
-			
-			if(p <= accumulatedWeight){
-
-				// Shoot the location
-				return ((ProxyFacility)g).get();
-
-			}
-			
-		}
-		
-		return null;
+		return ((ProxyFacility) WeightedSelection.choose(admin.getLanduseGeometries().get(activityType), this.random.nextDouble())).get();
 		
 	}
 	
