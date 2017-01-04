@@ -34,7 +34,8 @@ public class Building implements Landuse {
 		return this.geometry.getArea();
 		
 	}
-	
+
+	@Deprecated
 	public void setWeight(double s) {
 		// stub
 	}

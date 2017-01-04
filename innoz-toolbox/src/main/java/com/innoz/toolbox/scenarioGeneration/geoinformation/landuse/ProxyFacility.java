@@ -38,6 +38,7 @@ public class ProxyFacility implements Landuse {
 		
 	}
 	
+	@Deprecated
 	public void setWeight(double s) {
 		// stub
 	}
