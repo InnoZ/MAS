@@ -726,6 +726,92 @@ public class DatabaseReader {
 		
 	}
 	
+	/**
+	 * Imports detailed forecast of the population subdivided by sex and age groups
+	 * 
+	 * 
+	 * @param configuration The configuration for the scenario generation process.
+	 * @param surveyAreaIdsString The survey area id(s).
+	 * @param vicinityIdsString The vicinity area id(s).
+	 * @param scenario The MATSim scenario.
+	 */
+	public void readPopulationFromDatabase(Configuration configuration, Scenario scenario) {
+		
+		try {
+			
+			// Create a postgresql database connection
+			Connection connection = PsqlAdapter.createConnection(configuration, DatabaseConstants.POPULATIONFORECAST_DB);
+			
+			if(connection != null){
+
+				Log.info("Successfully connected with population database...");
+				
+				// If no administrative units were created, we are unable to proceed
+				// The process would probably finish, but no network or population would be created
+				// Size = 1 means, only the root element (basically the top level container) has been initialized
+				if(this.configuration.scenario().getAreaSets().isEmpty()){
+				
+					Log.error("No ids found");
+					throw new RuntimeException("Execution aborts...");
+					
+				}
+				
+				for(ConfigurationGroup cg : configuration.scenario().getAreaSets().values()){
+					
+					AreaSet entry = (AreaSet)cg;
+					
+					int year = configuration.scenario().getYear();
+					
+					for(String id : entry.getIds().split(",")){
+
+//						String id = uid.startsWith("0") ? uid.substring(1) : uid;
+						
+						Node<AdministrativeUnit> d = this.geoinformation.getAdminUnit(id);
+						
+						if(d != null){
+							
+							AdministrativeUnit unit = d.getData();
+							
+							// Execute the query and store the returned valued inside a set.
+							String q = "SELECT agegroup, year" + year
+									+ " FROM bbsrprognose.populationdata "
+									+ " WHERE gkz=" + id + " AND agegroup NOT LIKE '%z%' ";
+
+							Statement statement = connection.createStatement();
+							statement.setFetchSize(100);
+							ResultSet rs = statement.executeQuery(q);
+
+							// Create a map and put all the results
+							HashMap<String, Integer> populationByAgeGroup = new HashMap<String, Integer>();
+							while (rs.next()){
+								populationByAgeGroup.put(rs.getString("agegroup") , rs.getInt("year" + year));
+							}
+							rs.close();
+							
+							unit.setPopulationMap(populationByAgeGroup);;
+							
+						}
+						
+					}
+
+				}
+					
+			}
+			
+			// Close the connection when everything's done.
+			connection.close();
+			
+			Log.info("Done.");
+
+		} catch (SQLException | InstantiationException | IllegalAccessException | ClassNotFoundException | 
+				MismatchedDimensionException e) {
+
+			e.printStackTrace();
+			
+		}
+		
+	}
+	
 	public List<Building> getBuildingList(){
 		return buildingList;
 	}

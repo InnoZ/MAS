@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -241,79 +243,100 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		scenario.addScenarioElement(com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.PERSON_ATTRIBUTES,
 				personAttributes);
 		
-		// TODO this is not final and most likely won't work like that /dhosse, 05/16
-		
 		for(String s : ids.split(",")){
 
 			AdministrativeUnit d = this.geoinformation.getAdminUnit(s).getData();
 			
 			for(Entry<String, Integer> entry : d.getPopulationMap().entrySet()) {
-			
-				this.currentHomeCell = chooseAdminUnit(d, ActivityTypes.HOME);
 				
-				// Choose a template person (weighted, same method as above)
-				SurveyPerson template = null;
+//				gets sex and age boundaries of the current ageGroup as ageFrom and ageTo from the populationmap's key which contains all information in a string
+				String sex = entry.getKey().substring(entry.getKey().length()-1);
 				
-				double accumulatedWeight = 0.;
-				double rand = this.random.nextDouble() * container.getSumOfPersonWeights();
+				int ageFrom = Integer.parseInt(entry.getKey().substring(9, 10));
 				
-				for(String pId : container.getPersons().keySet()){
+				int x = Integer.parseInt(entry.getKey().substring(13, 14));
+				
+//				for ageGroup85to101 the String consists of 16 characters
+				if (entry.getKey().length()==16){
+					x = Integer.parseInt(entry.getKey().substring(13, 15));
+				}
+				
+				int ageTo = x;
+				
+//				method to summarize weights of current agegroup (entry)
+				List<SurveyPerson> personsInAgeGroup = new ArrayList<>();
+				container.getPersons().values().stream().filter(p -> p.getAge() >= ageFrom && p.getAge() < ageTo && p.getSex().equals(sex)).forEach(p -> 
+						personsInAgeGroup.add(p));
+				double weightOfPersonsInAgeGroup = personsInAgeGroup.stream().map(SurveyPerson::getWeight).collect(Collectors.summarizingDouble(Double::doubleValue)).getSum();
+				
+				for (SurveyPerson p : personsInAgeGroup){
 					
-					SurveyPerson p = container.getPersons().get(pId);
+					int personDuplicates;
+					if (weightOfPersonsInAgeGroup > 0) {
+//						defining how often a template should be used by multiplying the template's weight within it's agegroup with the scaled population
+						personDuplicates = (int)(entry.getValue() * configuration.scenario().getScaleFactor() * p.getWeight() / weightOfPersonsInAgeGroup);
+					} else if (personsInAgeGroup.size() != 0){
+//						otherwise if any persons exist -> forget the weights
+						personDuplicates = (int)(entry.getValue() * configuration.scenario().getScaleFactor() / personsInAgeGroup.size());
+					} else {
+//						third option: no person of this ageGroup will be created
+						personDuplicates = 0;
+					}
+
 					
-					if(p != null){
+					for (int ii = 0; ii < personDuplicates; ii++){
+					
+						SurveyPerson personTemplate = null;
 						
-						accumulatedWeight += p.getWeight();
-						if(accumulatedWeight >= rand){
+						// Choose a template person (weighted, same method as above)
+						if (p != null) {
 							
-							template = p;
-							break;
+							personTemplate = p;
+							
+						}
+						
+						this.currentHomeCell = chooseAdminUnit(d, ActivityTypes.HOME);
+						
+						// Set global home location for the entire household
+						Coord homeLocation = null;
+						ActivityFacility homeFacility = null;
+						
+						// Go through all residential areas of the home cell and randomly choose one of them
+						if(this.currentHomeCell.getLanduseGeometries().containsKey(ActivityTypes.HOME)){
+							
+							if (this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
+								
+								homeFacility = chooseActivityFacilityInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
+								homeLocation = transformation.transform(homeFacility.getCoord());
+								
+							} else {
+								
+								homeLocation = chooseActivityCoordInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
+								
+							}
+							
+						} else {
+						
+							// If no residential areas exist within the home cell, shoot a random coordinate
+							homeLocation = this.transformation.transform(GeometryUtils.shoot(
+									this.currentHomeCell.getGeometry(), this.random));
+							
+						}
+						
+						Person person = createPerson(configuration, personTemplate, population, personAttributes, this.random.nextDouble(),
+								population.getPersons().size(), homeLocation, homeFacility, container, 0.0);
+						
+						// If the resulting MATSim person is not null, add it
+						if(person != null){
+							
+							population.addPerson(person);
 							
 						}
 						
 					}
-					
+						
 				}
 				
-				// Set global home location for the entire household
-				Coord homeLocation = null;
-				ActivityFacility homeFacility = null;
-	
-				// Go through all residential areas of the home cell and randomly choose one of them
-				if(this.currentHomeCell.getLanduseGeometries().containsKey(ActivityTypes.HOME)){
-					
-					if(this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
-						
-						homeFacility = chooseActivityFacilityInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
-						homeLocation = transformation.transform(homeFacility.getCoord());
-						
-					} else {
-						
-						homeLocation = chooseActivityCoordInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
-						
-					}
-					
-				} else {
-				
-					// If no residential areas exist within the home cell, shoot a random coordinate
-					homeLocation = this.transformation.transform(GeometryUtils.shoot(
-							this.currentHomeCell.getGeometry(), this.random));
-					
-				}
-				
-				String personId = template.getId();
-				SurveyPerson templatePerson = container.getPersons().get(personId);
-				
-				Person person = createPerson(configuration, templatePerson, population, personAttributes, this.random.nextDouble(),
-						population.getPersons().size(), homeLocation, homeFacility, container, 0.0);
-				
-				// If the resulting MATSim person is not null, add it
-				if(person != null){
-					
-					population.addPerson(person);
-					
-				}
-	
 			}
 
 		}

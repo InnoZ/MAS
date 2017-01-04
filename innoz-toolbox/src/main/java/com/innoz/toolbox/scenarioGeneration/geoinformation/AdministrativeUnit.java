@@ -8,6 +8,14 @@ import java.util.Map;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
 import com.vividsolutions.jts.geom.Geometry;
 
+/**
+ * 
+ * Class to store information about the Administrative Unit (i.e. state, region type, land use dara) for further demand generation.
+ * 
+ * @author dhosse
+ *
+ */
+
 public class AdministrativeUnit {
 	
 	private String id;

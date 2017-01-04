@@ -26,6 +26,14 @@ import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContain
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 import com.innoz.toolbox.utils.data.Tree.Node;
 
+/**
+ * 
+ * Parses through specified survey to retrieve information about persons living in a given region type. 
+ * Creates maps of attributes from the ResultSet and assigns them to a person which is put into the SurveyDataContainer {@link com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer#addPerson(SurveyPerson)}.
+ * @author dhosse
+ *
+ */
+
 public class ReadPersonDatabaseTask extends DatabaseTask {
 	
 	private final DayTypes dayType;
