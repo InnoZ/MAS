@@ -8,6 +8,8 @@ public class SurveyHousehold extends SurveyObject implements Comparable<Double> 
 	private double hhIncome;
 	private Double weight;
 	
+	int rtyp;
+	
 	private final List<String> memberIds;
 	private final List<String> vehicleIds;
 	
@@ -52,6 +54,14 @@ public class SurveyHousehold extends SurveyObject implements Comparable<Double> 
 		
 		return this.vehicleIds;
 		
+	}
+	
+	public int getRegionType() {
+		return this.rtyp;
+	}
+	
+	public void setRegionType(int t) {
+		this.rtyp = t;
 	}
 
 	public Double getWeight() {
