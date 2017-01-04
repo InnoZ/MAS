@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.innoz.toolbox.io.database.handler.Logbook;
+import com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils;
+import com.innoz.toolbox.scenarioGeneration.utils.Weighted;
 
 /**
  * 
@@ -170,6 +172,7 @@ public class SurveyPerson extends SurveyObject implements Comparable<Double> {
 	 * 
 	 * @return The person's weight factor.
 	 */
+	@Override
 	public double getWeight() {
 		
 		return weight;
@@ -182,6 +185,7 @@ public class SurveyPerson extends SurveyObject implements Comparable<Double> {
 	 * 
 	 * @param weight The weight factor.
 	 */
+	@Override
 	public void setWeight(double weight) {
 		
 		this.weight = weight;
@@ -295,6 +299,12 @@ public class SurveyPerson extends SurveyObject implements Comparable<Double> {
 	public int compareTo(Double w) {
 
 		return Double.compare(this.weight, w);
+		
+	}
+	
+	public int getAgeGroup() {
+		
+		return PersonUtils.getAgeGroup(this.age);
 		
 	}
 	
