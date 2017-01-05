@@ -16,7 +16,7 @@ import org.matsim.core.utils.io.IOUtils;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.ConfigurationUtils;
-import com.innoz.toolbox.config.PsqlAdapter;
+import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.config.SshConnector;
 import com.jcraft.jsch.JSchException;
 
