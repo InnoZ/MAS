@@ -1,6 +1,7 @@
 package com.innoz.toolbox.scenarioGeneration.population.algorithm;
 
 import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,12 +35,14 @@ import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPlanTrip;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.utils.GeometryUtils;
 import com.innoz.toolbox.utils.data.Tree.Node;
+import com.innoz.toolbox.utils.data.WeightedSelection;
 
 public abstract class DemandGenerationAlgorithm {
 
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	final Random random = MatsimRandom.getLocalInstance();
 	final Geoinformation geoinformation;
+	Map<String, Tuple<List<ZensusGridNode>, Integer>> map = new HashMap<>();
 	
 	static final Logger log = Logger.getLogger(PopulationCreator.class);
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -81,7 +84,7 @@ public abstract class DemandGenerationAlgorithm {
 	public abstract void run(final Configuration configuration, String ids);
 
 	AdministrativeUnit chooseAdminUnit(AdministrativeUnit district, String activityType){
-		
+
 		double r = random.nextDouble() * this.geoinformation.getTotalWeightForLanduseKey(district.getId(), activityType);
 		double r2 = 0.;
 		
@@ -111,8 +114,15 @@ public abstract class DemandGenerationAlgorithm {
 	
 	Coord chooseActivityCoordInAdminUnit(AdministrativeUnit admin, String activityType){
 		
-		double p = random.nextDouble() * admin.getWeightForKey(activityType);
-		double accumulatedWeight = 0.;
+		return (PopulationCreator.grid != null && activityType.equals(ActivityTypes.HOME)) ?
+				chooseActivityCoordAccordingToZensusGrid(admin) : 
+				transformation.transform(GeometryUtils.shoot(
+				((Landuse)WeightedSelection.choose(admin.getLanduseGeometries().get(activityType), this.random.nextDouble()))
+				.getGeometry(), this.random));
+		
+	}
+	
+	Coord chooseActivityCoordAccordingToZensusGrid(AdministrativeUnit admin) {
 
 		if(activityType.equals(ActivityTypes.HOME)){
 			
@@ -120,9 +130,10 @@ public abstract class DemandGenerationAlgorithm {
 			
 		}
 		
-		for(Landuse g : admin.getLanduseGeometries().get(activityType)){
+		if(!map.containsKey(admin.getId())) {
 			
-			accumulatedWeight += g.getWeight();
+			List<ZensusGridNode> nodes = new ArrayList<>();
+			int weight = 0;
 			
 			if(p <= accumulatedWeight){
 				
@@ -131,9 +142,11 @@ public abstract class DemandGenerationAlgorithm {
 
 			}
 			
+			map.put(admin.getId(), new Tuple<List<ZensusGridNode>, Integer>(nodes, weight));
+			
 		}
 		
-		return null;
+		Tuple<List<ZensusGridNode>, Integer> entry = map.get(admin.getId());
 		
 	}
 	
@@ -180,23 +193,21 @@ public abstract class DemandGenerationAlgorithm {
 	
 	ActivityFacility chooseActivityFacilityInAdminUnit(AdministrativeUnit admin, String activityType){
 		
-		double p = random.nextDouble() * admin.getWeightForKey(activityType);
-		double accumulatedWeight = 0;
-		
-		for(Landuse g : admin.getLanduseGeometries().get(activityType)){
+		for(ZensusGridNode node : entry.getFirst()){
 			
-			accumulatedWeight += g.getWeight();
-			
+			accumulatedWeight += node.getNumberOfInhabitants();
 			if(p <= accumulatedWeight){
-
-				// Shoot the location
-				return ((ProxyFacility)g).get();
-
+				return transformation.transform(node.getCoord());
 			}
 			
 		}
-		
 		return null;
+		
+	}
+	
+	ActivityFacility chooseActivityFacilityInAdminUnit(AdministrativeUnit admin, String activityType){
+		
+		return ((ProxyFacility) WeightedSelection.choose(admin.getLanduseGeometries().get(activityType), this.random.nextDouble())).get();
 		
 	}
 	
