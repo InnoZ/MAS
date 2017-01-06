@@ -43,6 +43,7 @@ public abstract class DemandGenerationAlgorithm {
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	final Random random = MatsimRandom.getLocalInstance();
 	final Geoinformation geoinformation;
+	Map<String, Tuple<List<ZensusGridNode>, Integer>> map = new HashMap<>();
 	
 	//Comparator that sorts households by their weights
 	Comparator<SurveyHousehold> householdComparator = new Comparator<SurveyHousehold>() {
@@ -125,13 +126,13 @@ public abstract class DemandGenerationAlgorithm {
 	
 	Coord chooseActivityCoordInAdminUnit(AdministrativeUnit admin, String activityType){
 		
-		return transformation.transform(GeometryUtils.shoot(
+		return (PopulationCreator.grid != null && activityType.equals(ActivityTypes.HOME)) ?
+				chooseActivityCoordAccordingToZensusGrid(admin) : 
+				transformation.transform(GeometryUtils.shoot(
 				((Landuse)WeightedSelection.choose(admin.getLanduseGeometries().get(activityType), this.random.nextDouble()))
 				.getGeometry(), this.random));
 		
 	}
-	
-	Map<String, Tuple<List<ZensusGridNode>, Integer>> map = new HashMap<>();
 	
 	Coord chooseActivityCoordAccordingToZensusGrid(AdministrativeUnit admin) {
 		

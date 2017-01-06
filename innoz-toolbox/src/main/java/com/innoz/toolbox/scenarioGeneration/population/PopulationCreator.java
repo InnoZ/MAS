@@ -15,6 +15,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.groups.ConfigurationGroup;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.PopulationSource;
 import com.innoz.toolbox.io.database.CommuterDatabaseParser;
@@ -83,7 +84,11 @@ public class PopulationCreator {
 
 		try {
 			
-			grid = new ZensusGrid(configuration, geoinformation);
+			if(configuration.scenario().getActivityLocationsType().equals(ActivityLocationsType.GRID)) {
+				
+				grid = new ZensusGrid(configuration, geoinformation);
+				
+			}
 			
 			Map<String, ConfigurationGroup> areaSets = configuration.scenario().getAreaSets();
 			
