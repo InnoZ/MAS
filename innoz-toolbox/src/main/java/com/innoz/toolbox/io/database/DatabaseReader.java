@@ -7,8 +7,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.geotools.geometry.jts.JTS;
@@ -33,6 +35,7 @@ import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.config.groups.ConfigurationGroup;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.PopulationSource;
 import com.innoz.toolbox.io.database.datasets.OsmPointDataset;
 import com.innoz.toolbox.io.database.datasets.OsmPolygonDataset;
 import com.innoz.toolbox.run.parallelization.BuildingThread;
@@ -150,14 +153,16 @@ public class DatabaseReader {
 					
 				}
 				
+				Set<PopulationSource> populationAlgorithms = new HashSet<PopulationSource>(2);
+				
 				for(ConfigurationGroup cg : configuration.scenario().getAreaSets().values()){
 					
 					AreaSet entry = (AreaSet)cg;
 					
+					populationAlgorithms.add(entry.getPopulationSource());
+					
 					for(String id : entry.getIds().split(",")){
 
-//						String id = uid.startsWith("0") ? uid.substring(1) : uid;
-						
 						Node<AdministrativeUnit> d = this.geoinformation.getAdminUnit(id);
 						
 						if(d != null){
@@ -165,17 +170,6 @@ public class DatabaseReader {
 							AdministrativeUnit unit = d.getData();
 							
 							unit.setNumberOfHouseholds(entry.getNumberOfHouseholds());
-//							unit.setNumberOfInhabitants(entry.getNumberOfInhabitants());
-							
-//							for(Node<AdministrativeUnit> au : d.getChildren()){
-//								
-//								if(au.getData().getId().startsWith(id)){
-//									
-//									au.getData().setNumberOfHouseholds(entry.getNumberOfHouseholds());
-//									
-//								}
-//								
-//							}
 							
 						}
 						
@@ -183,9 +177,15 @@ public class DatabaseReader {
 
 				}
 				
-				// Otherwise, read in the OSM data
-				this.readOsmData(connection, configuration, scenario);
+				// We don't need landuse data if there is no population to be created or
+				// if the source is tracks.
+				if(populationAlgorithms.contains(PopulationSource.COMMUTER) ||
+						populationAlgorithms.contains(PopulationSource.SURVEY)){
 					
+					this.readOsmData(connection, configuration, scenario);
+					
+				}
+				
 			}
 			
 			// Close the connection when everything's done.
@@ -291,8 +291,8 @@ public class DatabaseReader {
 		// Execute the query and store the returned valued inside a set.
 		String q = "select " + DatabaseConstants.BLAND + "," + DatabaseConstants.MUN_KEY + ", cca_2, ccn_3, "
 				+ DatabaseConstants.functions.st_astext.name() + "(geom), "
-				+ DatabaseConstants.functions.st_astext.name() + "(st_transform(st_buffer(st_transform("
-				+ DatabaseConstants.ATT_GEOM + ",32632),5000),4326)) as buffer from " + DatabaseConstants.schemata.gadm.name() + "." +
+				+ DatabaseConstants.functions.st_astext.name() + "(st_transform("
+				+ DatabaseConstants.ATT_GEOM + ",4326)) as buffer from " + DatabaseConstants.schemata.gadm.name() + "." +
 				DatabaseConstants.tables.districts.name() + " where" + builder.toString();
 		ResultSet set = statement.executeQuery(q);
 

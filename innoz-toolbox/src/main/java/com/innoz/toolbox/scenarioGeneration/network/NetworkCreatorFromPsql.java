@@ -491,7 +491,7 @@ public class NetworkCreatorFromPsql {
 
 					freespeed = resolveUnknownFreespeedTag(freespeedTag);
 					
-					if(!unknownTags.contains(freespeedTag)){
+					if(!unknownTags.contains(freespeedTag) && freespeed == 0){
 						
 						unknownTags.add(freespeedTag);
 						log.warn("Could not parse freespeed tag: " + freespeedTag + ". Ignoring it.");
@@ -574,6 +574,12 @@ public class NetworkCreatorFromPsql {
 			
 			// Set the link's capacity and the resulting freespeed (if it's meant to be scaled)
 			double capacity = lanesPerDirection * laneCapacity * this.configuration.scenario().getScaleFactor();
+			
+			//MATSim seems to have problems with lane numbers smaller than 1
+			//This can be fixed here since we already took the reduced capacity into account
+			if(lanesPerDirection < 1d){
+				lanesPerDirection = 1d;
+			}
 			
 			if(this.scaleMaxSpeed){
 				
@@ -658,6 +664,18 @@ public class NetworkCreatorFromPsql {
 		} else if("DE:motorway".equals(s) || "none".equals(s)){
 			
 			kmh = 130;
+			
+		} else if("walk".equals(s) || "DE:living_street".equals(s)){
+			
+			kmh = 5;
+			
+		} else if("5 mph".equals(s)){
+			
+			kmh = 5 * 1.609;
+			
+		} else if(s.contains(";")){
+			
+			kmh = Double.parseDouble(s.split(";")[0]);
 			
 		}
 		

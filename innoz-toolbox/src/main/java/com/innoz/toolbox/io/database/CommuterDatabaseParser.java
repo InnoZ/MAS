@@ -21,6 +21,7 @@ import com.innoz.toolbox.config.groups.ConfigurationGroup;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.config.psql.ResultSetStream;
 import com.innoz.toolbox.scenarioGeneration.population.commuters.CommuterDataElement;
+import com.innoz.toolbox.utils.PsqlUtils;
 
 public class CommuterDatabaseParser {
 
@@ -132,23 +133,7 @@ public class CommuterDatabaseParser {
 	
 	private String createChainedStatementFromSet(Set<String> set, String var){
 		
-		boolean isFirst = true;
-		StringBuilder result = new StringBuilder();
-		
-		for(String s : set){
-			
-			if(!isFirst){
-			
-				result.append(" or ");
-			
-			}
-			
-			result.append(var + " like '" + s + "%'");
-			isFirst = false;
-			
-		}
-		
-		return result.toString();
+		return new StringBuilder().append(var + " in (").append(PsqlUtils.setToString(set)).append(")").toString();
 		
 	}
 	

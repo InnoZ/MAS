@@ -41,6 +41,9 @@ public class OsmKey2ActivityType {
 	public static final Set<String> education = CollectionUtils.stringToSet(
 		"college,school,university");
 	
+	public static final Set<String> higherEducation = CollectionUtils.stringToSet(
+			"college,university");
+	
 	//LEISURE
 	public static final Set<String> leisure = CollectionUtils.stringToSet(
 			"brothel,casino,community_centre,gambling,nightclub,planetarium,social_centre,"

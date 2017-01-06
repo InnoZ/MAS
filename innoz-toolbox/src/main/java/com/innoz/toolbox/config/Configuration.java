@@ -63,8 +63,9 @@ public final class Configuration {
 		this.scenario = new ScenarioConfigurationGroup();
 		this.groups.put("scenario", scenario);
 		this.surveyPopulation = new SurveyPopulationConfigurationGroup();
-		this.tracks = new TracksConfigurationGroup();
 		this.groups.put("surveyPopulation", surveyPopulation);
+		this.tracks = new TracksConfigurationGroup();
+		this.groups.put("tracksPopulation", tracks);
 	
 	}
 	

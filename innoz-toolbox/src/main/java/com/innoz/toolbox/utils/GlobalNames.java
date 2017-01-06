@@ -6,6 +6,7 @@ public final class GlobalNames {
 	public static final String WGS84 = "EPSG:4326";
 	public static final String UTM32N = "EPSG:32632";
 	public static final String UTM33N = "EPSG:32633";
+	public static final String ETRS89LAEA = "EPSG:3035";
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MISC STRINGS///////////////////////////////////////////////////////////////////////////

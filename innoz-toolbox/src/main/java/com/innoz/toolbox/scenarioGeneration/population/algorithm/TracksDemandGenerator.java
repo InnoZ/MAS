@@ -11,7 +11,6 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.matsim.core.utils.misc.Time;
 import org.matsim.matrices.Matrix;
 
 import com.innoz.toolbox.config.Configuration;
@@ -35,7 +34,7 @@ public class TracksDemandGenerator extends DemandGenerationAlgorithm {
 	public void run(Configuration configuration, String ids) {
 		
 		TracksDatabaseReader reader = new TracksDatabaseReader(configuration);
-		reader.parse();
+		reader.parse(this.geoinformation);
 		Map<String,TrackedPerson> persons = reader.getPersons();
 
 		CoordinateTransformation transform = TransformationFactory.getCoordinateTransformation(GlobalNames.WGS84,
@@ -55,15 +54,13 @@ public class TracksDemandGenerator extends DemandGenerationAlgorithm {
 					
 					Coord c = transform.transform(track.getStart());
 					Activity act = population.getFactory().createActivityFromCoord("sighting", c);
-					String time = track.getStartDateAndTime().substring(11);
-					act.setEndTime(Time.parseTime(time));
+					act.setEndTime(track.getStartTime());
 					plan.addActivity(act);
 					
 				} else {
 					
 					Activity act = (Activity) plan.getPlanElements().get(plan.getPlanElements().size() - 1);
-					String time = track.getStartDateAndTime().substring(11);
-					act.setEndTime(Time.parseTime(time));
+					act.setEndTime(track.getStartTime());
 					
 				}
 				
@@ -71,8 +68,7 @@ public class TracksDemandGenerator extends DemandGenerationAlgorithm {
 				
 				Coord c = transform.transform(track.getEnd());
 				Activity act = population.getFactory().createActivityFromCoord("sighting", c);
-				String time = track.getEndDateAndTime().substring(11);
-				act.setStartTime(Time.parseTime(time));
+				act.setStartTime(track.getEndTime());
 				plan.addActivity(act);
 				
 			}
