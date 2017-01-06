@@ -15,9 +15,6 @@ import java.util.Set;
  * "09" would store ids like "09180", "09178" etc. So, the childrens' ids always "extend" their predecessor's id. If a new node
  * is added and its id doesn't match any existing node's id, it is automatically a child of the root element.<br>
  * 
- * TODO So far, there is no possibility to add a new node between existing nodes (e.g. node "0355" between nodes "03" and
- * "0355134"), so you have to add the highest level nodes first.
- * 
  * @author dhosse
  *
  * @param <T> The data type this tree applies for.

@@ -7,6 +7,8 @@ import java.util.Map;
 
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.handler.Logbook;
+import com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils;
+import com.innoz.toolbox.scenarioGeneration.utils.Weighted;
 
 /**
  * 
@@ -17,7 +19,7 @@ import com.innoz.toolbox.io.database.handler.Logbook;
  * @author dhosse
  *
  */
-public class SurveyPerson implements SurveyObject {
+public class SurveyPerson implements SurveyObject, Weighted {
 
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	private String id;
@@ -59,16 +61,16 @@ public class SurveyPerson implements SurveyObject {
 	 * @param hasLicense Defines if the person is allowed to drive a car (prerequisite for 'car' mode).
 	 * @param isEmployed Defines if the person has a job or not.
 	 */
-	public SurveyPerson(String id, String sex, String age, String carAvailable, String hasLicense, String isEmployed, SurveyConstants constants){
+	SurveyPerson(String id, String sex, String age, String carAvailable, String hasLicense, String isEmployed, SurveyConstants constants){
 		
-		this(id, sex, age, carAvailable, hasLicense, isEmployed, constants, "2");
+		this(id, sex, age, carAvailable, hasLicense, isEmployed, "2");
 		
 	}
 	
-	public SurveyPerson(String id, String sex, String age, String carAvailable, String hasLicense, String isEmployed, SurveyConstants constants, String isCarsharingUser){
+	public SurveyPerson(String id, String sex, String age, String carAvailable, String hasLicense, String isEmployed, String isCarsharingUser){
 		
 		this.id = id;
-		this.sex = sex.equals(constants.getSexMale()) ? "m" : "f";
+		this.sex = sex.equals(SurveyConstants.getSexMale()) ? "m" : "f";
 		this.age = !age.equals("NaN") ? Integer.parseInt(age) : Integer.MIN_VALUE;
 		
 		if(carAvailable.equals("1") || carAvailable.equals("2")){
@@ -211,6 +213,7 @@ public class SurveyPerson implements SurveyObject {
 	 * 
 	 * @return The person's weight factor.
 	 */
+	@Override
 	public double getWeight() {
 		return weight;
 	}
@@ -221,6 +224,7 @@ public class SurveyPerson implements SurveyObject {
 	 * 
 	 * @param weight The weight factor.
 	 */
+	@Override
 	public void setWeight(double weight) {
 		this.weight = weight;
 	}
@@ -296,6 +300,12 @@ public class SurveyPerson implements SurveyObject {
 	
 	public void setMobile(boolean mobile){
 		this.isMobile = mobile;
+	}
+	
+	public int getAgeGroup() {
+		
+		return PersonUtils.getAgeGroup(this.age);
+		
 	}
 	
 }

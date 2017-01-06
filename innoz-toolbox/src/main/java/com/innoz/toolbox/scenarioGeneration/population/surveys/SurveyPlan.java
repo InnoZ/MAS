@@ -2,7 +2,9 @@ package com.innoz.toolbox.scenarioGeneration.population.surveys;
 
 import java.util.LinkedList;
 
-public class SurveyPlan {
+import com.innoz.toolbox.scenarioGeneration.utils.Weighted;
+
+public class SurveyPlan implements Weighted {
 
 	private LinkedList<SurveyPlanElement> planElements;
 	private int dayOfTheWeek;
@@ -16,14 +18,11 @@ public class SurveyPlan {
 	
 	boolean firstActEqualsLastAct = false;
 	
-//	private List<Subtour> subtours;
-	
 	private double longestLeg = 0.;
 	
 	public SurveyPlan(){
 		
 		this.planElements = new LinkedList<>();
-//		this.subtours = new ArrayList<Subtour>();
 		
 	}
 
@@ -45,9 +44,17 @@ public class SurveyPlan {
 		
 	}
 	
-	public double getWeigt(){
+	@Override
+	public double getWeight(){
 		
 		return this.weight;
+		
+	}
+	
+	@Override
+	public void setWeight(double d) {
+		
+		this.weight = d;
 		
 	}
 	
@@ -80,14 +87,6 @@ public class SurveyPlan {
 	public void setMainActId(int i){
 		this.mainActId = i;
 	}
-	
-//	public List<Subtour> getSubtours(){
-//		return this.subtours;
-//	}
-//	
-//	public void setSubtours(List<Subtour> subtours){
-//		this.subtours = subtours;
-//	}
 	
 	public int getHomeIndex(){
 		return this.homeIndex;

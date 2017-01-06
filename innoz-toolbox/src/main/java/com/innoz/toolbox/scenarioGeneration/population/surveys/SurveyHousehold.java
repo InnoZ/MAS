@@ -3,12 +3,16 @@ package com.innoz.toolbox.scenarioGeneration.population.surveys;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SurveyHousehold implements SurveyObject {
+import com.innoz.toolbox.scenarioGeneration.utils.Weighted;
+
+public class SurveyHousehold implements SurveyObject, Weighted {
 	
 	private String id;
 	
 	private double hhIncome;
 	private Double weight;
+	
+	int rtyp;
 	
 	private final List<String> memberIds;
 	private final List<String> vehicleIds;
@@ -65,12 +69,22 @@ public class SurveyHousehold implements SurveyObject {
 	public List<String> getVehicleIds(){
 		return this.vehicleIds;
 	}
+	
+	public int getRegionType() {
+		return this.rtyp;
+	}
+	
+	public void setRegionType(int t) {
+		this.rtyp = t;
+	}
 
-	public Double getWeight() {
+	@Override
+	public double getWeight() {
 		return weight;
 	}
 
-	public void setWeight(Double weight) {
+	@Override
+	public void setWeight(double weight) {
 		this.weight = weight;
 	}
 	

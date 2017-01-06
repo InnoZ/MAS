@@ -6,22 +6,18 @@ import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyHousehold;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
 
-public class HouseholdWeightHandler implements DefaultHandler {
+public class HouseholdRegionTypeHandler implements DefaultHandler {
 
 	@Override
 	public void handle(SurveyObject obj, Map<String, String> attributes, String surveyType) {
 
 		SurveyHousehold hh = (SurveyHousehold)obj;
 		
-		String w = attributes.get(SurveyConstants.householdWeight(surveyType));
+		String type = attributes.get(SurveyConstants.regionType(surveyType));
 		
-		if(w != null){
+		if(type != null) {
 			
-			hh.setWeight(Double.parseDouble(w));
-			
-		} else {
-			
-			hh.setWeight(-1);
+			hh.setRegionType(Integer.parseInt(type));
 			
 		}
 		
