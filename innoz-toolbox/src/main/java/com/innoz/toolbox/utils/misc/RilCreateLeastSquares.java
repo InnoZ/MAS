@@ -8,8 +8,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -21,6 +24,7 @@ import org.matsim.core.utils.charts.XYScatterChart;
 import org.matsim.core.utils.io.IOUtils;
 
 import com.innoz.toolbox.config.psql.PsqlAdapter;
+import com.innoz.toolbox.utils.math.PolynomialRegression;
 import com.innoz.toolbox.utils.matsim.RecursiveStatsContainer;
 
 public class RilCreateLeastSquares {
@@ -28,9 +32,9 @@ public class RilCreateLeastSquares {
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException,
 		ClassNotFoundException, SQLException, IOException {
 
-//		compute();
+		compute();
 //		computeAggregates();
-		computeStationwise();
+//		computeStationwise();
 		
 	}
 	
@@ -185,12 +189,12 @@ public class RilCreateLeastSquares {
 			}
 			
 		}
-
+		
 		int order = 10;
 		String stateOrAgg = "aggregated";
 		
-		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/types/" + stateOrAgg + "/order" + order + "/timeline.csv");
-
+		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/types/new/" + stateOrAgg + "/order" + order + "/timeline.csv");
+		
 		String t = "state;type";
 		for(int i = 0; i < order + 1; i++){
 			t += ";median_a" + Integer.toString(i);
@@ -214,7 +218,7 @@ public class RilCreateLeastSquares {
 				int nEntries = entry.getValue().getItems().size() / 11;
 
 				if(nEntries > 4){
-
+					
 					String[] s = entry.getKey().split("_");
 					String title = s[0] + ", " + getTitle(s[1]);
 					
@@ -222,26 +226,44 @@ public class RilCreateLeastSquares {
 					
 					XYScatterChart chart = new XYScatterChart(title, "Jahr", "Anzahl Reisende");
 
-					double[] medianData = Regression.getPolynomialRegression(new XYSeriesCollection(
-							median.get(key).get(entry.getKey())), 0, order);
-					double[] avgData = Regression.getPolynomialRegression(new XYSeriesCollection(
-							avg.get(key).get(entry.getKey())), 0, order);
+					double[] x = new double[11];
+					double[] yMedian = new double[11];
+					double[] yAvg = new double[11];
+					
+					for(int i = 0; i < 11; i++) {
+						
+						x[i] = median.get(key).get(entry.getKey()).getDataItem(i).getXValue() - 2006;
+						yMedian[i] = median.get(key).get(entry.getKey()).getDataItem(i).getYValue();
+						yAvg[i] = avg.get(key).get(entry.getKey()).getDataItem(i).getYValue();
+						
+					}
+					
+					PolynomialRegression median_reg = new PolynomialRegression(x, yMedian, order);
+					PolynomialRegression avg_reg = new PolynomialRegression(x, yAvg, order);
+					
+//					double[] medianData = Regression.getPolynomialRegression(new XYSeriesCollection(
+//							median.get(key).get(entry.getKey())), 0, order);
+//					double[] avgData = Regression.getPolynomialRegression(new XYSeriesCollection(
+//							avg.get(key).get(entry.getKey())), 0, order);
 
 					out.newLine();
 					String line = key != null ? key : "";
 					line += ";" + entry.getKey();
-					for(int i = 0; i < medianData.length; i++){
+					for(int i = 0; i < median_reg.degree()+1; i++){
 						
-						line += ";" + medianData[i];
-						
-					}
-					for(int i = 0; i < avgData.length; i++){
-						
-						line += ";" + avgData[i];
+						line += ";" + median_reg.beta(i);
 						
 					}
 					
-					line += ";" + nEntries;
+					line += ";" + median_reg.R2();
+					
+					for(int i = 0; i < avg_reg.degree()+1; i++){
+						
+						line += ";" + avg_reg.beta(i);
+						
+					}
+					
+					line += ";" + + avg_reg.R2() + ";" + nEntries;
 					
 					out.write(line);
 					
@@ -255,9 +277,9 @@ public class RilCreateLeastSquares {
 
 						medianX[j-2006] = f;
 						
-						for(int i = 0; i <= order; i++){
+						for(int i = 0; i < median_reg.degree()+1; i++) {
 							
-							medianY[j-2006] += medianData[i] * Math.pow(f, i);
+							medianY[j-2006] += avg_reg.beta(i) * Math.pow(f - 2006, i);
 							
 						}
 						
@@ -269,7 +291,7 @@ public class RilCreateLeastSquares {
 					chart.addSeries("Trend", medianX, medianY);
 					((XYPlot)chart.getChart().getPlot()).setRenderer(0, new XYLineAndShapeRenderer(true,true));
 					
-					double[] x = new double[entry.getValue().getItems().size()];
+					x = new double[entry.getValue().getItems().size()];
 					double[] y = new double[entry.getValue().getItems().size()];
 					
 					int ii = 0;
@@ -295,7 +317,7 @@ public class RilCreateLeastSquares {
 					
 					String state = key != null ? key+ "_" : "";
 					
-					String outFile = "/home/dhosse/01_Projects/GSP/types/" + stateOrAgg + "/order" + order + "/" + state + entry.getKey() + ".png";
+					String outFile = "/home/dhosse/01_Projects/GSP/types/new/" + stateOrAgg + "/order" + order + "/" + state + entry.getKey() + ".png";
 					chart.saveAsPng(outFile, 800, 600);
 					
 				}
@@ -348,7 +370,9 @@ public class RilCreateLeastSquares {
 				"daten_2014_regionstyp_final", "daten_2015_regionstyp_final", "daten_2016_regionstyp_final"
 		};
 		
-		Map<String, XYSeries> stationData = new HashMap<String, XYSeries>();
+		Map<String, XYSeries> stationData = new ConcurrentHashMap<String, XYSeries>();
+		
+		Set<String> stations2016 = new HashSet<>();
 		
 		for(String table : tables){
 		
@@ -360,11 +384,15 @@ public class RilCreateLeastSquares {
 				int nv = result.getInt("nv");
 				int fvo = result.getInt("fv_fremd");
 				int nvo = result.getInt("nv_fremd");
+				String name = result.getString("station");
+				int year = result.getInt("verkehrs15");
+				
+				if(year == 2016) {
+					stations2016.add(name);
+				}
 				
 				if(fv >= 0 && nv >= 0 && fvo >= 0 && nvo >= 0){
 
-					String name = result.getString("station");
-					int year = result.getInt("verkehrs15");
 					int n = result.getInt("ges");
 					
 					if(!stationData.containsKey(name)) stationData.put(name, new XYSeries(""));
@@ -381,30 +409,80 @@ public class RilCreateLeastSquares {
 		
 		int order = 8;
 		
-		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/types/stationwise_" + order + ".csv");
+		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/types/stationwise_noOrder.csv");
 		out.write("name");
-		for(int i = 0; i <= order; i++){
-			out.write(";a_" + i);
-		}
-		out.write(";r2");
+//		for(int i = 0; i <= 10; i++){
+//			out.write(";a_" + i);
+//		}
+		out.write(";r2;daten_2006;daten_2007;daten_2008;daten_2009;daten_2010;daten_2011;daten_2012;daten_2013;daten_2014;daten_2015;daten_2016;"
+				+ "formel_2006;formel_2007;formel_2008;formel_2009;formel_2010;formel_2011;formel_2012;formel_2013;formel_2014;formel_2015;"
+				+ "formel_2016");
 		
 		for(Entry<String, XYSeries> entry : stationData.entrySet()){
 			
 			XYSeries xy = entry.getValue();
-			
-			if(xy.getItems().size() >= order+1){
 
-				double[] reg = Regression.getPolynomialRegression(new XYSeriesCollection(xy), 0, order);
+//			if(xy.getItems().size() >= order+1){
+			
+			order = entry.getValue().getItemCount()-1;
+			
+			if(order < 1) continue;
+
+			double[] x = new double[order+1];
+			double[] y = new double[order+1];
+			
+			XYDataItem first = (XYDataItem)xy.getItems().get(0);
+			
+			for(int i = 0; i < order+1; i++) {
+				
+				XYDataItem item = (XYDataItem)xy.getItems().get(i);
+				x[i] = item.getXValue() - first.getXValue();
+				y[i] = item.getYValue();
+			}
+			
+			PolynomialRegression reg = new PolynomialRegression(x, y, order);
+//				double[] reg = Regression.getPolynomialRegression(new XYSeriesCollection(xy), 0, order);
 				
 				out.newLine();
 				
-				out.write(entry.getKey());
-				for(int i = 0; i <= order+1; i++){
-					out.write(";" + reg[i]);
+				out.write(entry.getKey() + ";" + reg.R2());
+//				for(int i = 0; i <= order+1; i++){
+//					out.write(";" + reg[i]);
+//				}
+				
+				int start = 2006;
+				StringBuilder dataStringBuilder = new StringBuilder();
+
+				for(Object o : entry.getValue().getItems()) {
+					
+					XYDataItem item = (XYDataItem)o;
+					
+					if(item.getXValue() == start) {
+						dataStringBuilder.append(";" + item.getYValue());
+					} else {
+						dataStringBuilder.append(";0");
+					}
+					start++;
+					
 				}
 				
-			}
+				for(int i = start; i <= 2016; i++) {
+					dataStringBuilder.append(";0");
+				}
+				
+				out.write(dataStringBuilder.toString());
+				
+				for(int i = 2006; i <= 2016; i++) {
+					
+					double v = reg.predict(i-2006);
+					out.write(";" + v);
+					
+				}
 			
+		}
+		
+		if(!stationData.keySet().containsAll(stations2016)) {
+			System.err.println("Not all stations that exist today are present in the output!");
 		}
 		
 		out.close();
