@@ -31,9 +31,9 @@ import org.opengis.referencing.FactoryException;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
+import com.innoz.toolbox.config.validation.ConfigurationValidator;
 import com.innoz.toolbox.io.BbsrDataReader;
 import com.innoz.toolbox.io.database.DatabaseReader;
-import com.innoz.toolbox.scenarioGeneration.carsharing.CreateCarsharingVehicles;
 import com.innoz.toolbox.scenarioGeneration.config.InitialConfigCreator;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.ZensusGrid;
@@ -57,6 +57,8 @@ public class ScenarioGenerationController extends DefaultController {
 			
 			double t0 = System.currentTimeMillis();
 			Logger.getLogger(org.matsim.matrices.Matrix.class).setLevel(Level.OFF);
+			
+			ConfigurationValidator.validate(this.configuration);
 			
 			// Dump scenario generation settings on the console and create the output directory
 			new File(configuration.misc().getOutputDirectory()).mkdirs();

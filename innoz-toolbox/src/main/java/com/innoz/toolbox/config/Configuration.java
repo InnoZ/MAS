@@ -1,10 +1,7 @@
 package com.innoz.toolbox.config;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.log4j.Logger;
 
 import com.innoz.toolbox.config.groups.ConfigurationGroup;
 import com.innoz.toolbox.config.groups.MiscConfigurationGroup;
@@ -22,12 +19,7 @@ import com.innoz.toolbox.config.groups.TracksConfigurationGroup;
  */
 public final class Configuration {
 	
-	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
-	private static final Logger log = Logger.getLogger(Configuration.class);
-	/////////////////////////////////////////////////////////////////////////////////////////
-	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
-	//CONFIGURABLE///////////////////////////////////////////////////////////////////////////
 	private MiscConfigurationGroup misc;
 	private PsqlConfigurationGroup psql;
 	private ScenarioConfigurationGroup scenario;
@@ -44,7 +36,7 @@ public final class Configuration {
 	 */
 	Configuration(String file){
 		
-		this();		
+		this();
 		this.load(file);
 		
 	}
@@ -78,64 +70,6 @@ public final class Configuration {
 	void load(String file){
 		
 		new ConfigurationReaderXml(this).read(file);
-		
-		validate();
-		
-	}
-	
-	/**
-	 * Validates the configuration. Only errors that may eventually cause exceptions are taken into account here.
-	 */
-	private void validate(){
-		
-		boolean validationError = false;
-
-		// Check if the output directory exists and has files in it.
-		File f = new File(this.misc.getOutputDirectory());
-		if(f.exists()){
-			
-			if(f.list().length > 0){
-				
-				log.warn("The output directory " + this.misc.getOutputDirectory() + " already exists and has files in it!");
-				
-				if(!this.misc.isOverwritingExistingFiles()){
-					
-					log.error("Since you disabled overwriting of existing files, you must either delete existing files or pick another"
-							+ " output directory!");
-					validationError = true;
-					
-				} else {
-					
-					log.warn("All existing files will be overwritten!");
-					
-				}
-				
-			}
-			
-		}
-		
-		int nProcessors = Runtime.getRuntime().availableProcessors();
-		int n = this.misc.getNumberOfThreads();
-		if(n > nProcessors){
-			
-			log.warn("Specified number of threads: " + n + ", but you have only " + nProcessors + " cores available...");
-			log.info("Thus, the programm will only use these " + nProcessors + " cores.");
-			this.misc.setNumberOfThreads(nProcessors);
-			
-		} else if(n == 0){
-			
-			log.warn("Specified number of threads: " + n + "!");
-			log.info("Thus, the programm will use all " + nProcessors + " cores.");
-			this.misc.setNumberOfThreads(nProcessors);
-			
-		}
-		
-		// If anything should cause the configuration to be invalid, abort!
-		if(validationError){
-			
-			throw new RuntimeException("Invalid configuration! Shutting down...");
-			
-		}
 		
 	}
 	
