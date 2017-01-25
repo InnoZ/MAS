@@ -60,8 +60,10 @@ public class RunnerActionListener implements ActionListener, Runnable {
 		areaSet.setIds(surveyArea);
 		areaSet.setIsSurveyArea(true);
 		areaSet.setNetworkLevel(6);
+		areaSet.setNumberOfHouseholds(Integer.parseInt(this.mainFrame.getSurveyAreaMap().get("09180")));
 		areaSet.setPopulationSource(PopulationSource.SURVEY);
-		this.mainFrame.getConfiguration().scenario().addAreaSet(areaSet);
+		
+		this.mainFrame.getConfiguration().scenario().addParameterSet(areaSet);
 		
 		StringBuilder vicinityIds = new StringBuilder();
 		
@@ -78,7 +80,9 @@ public class RunnerActionListener implements ActionListener, Runnable {
 		areaSet2.setIsSurveyArea(true);
 		areaSet2.setNetworkLevel(6);
 		areaSet2.setPopulationSource(PopulationSource.COMMUTER);
-		this.mainFrame.getConfiguration().scenario().addAreaSet(areaSet2);
+		if(vicinity != null) {
+			this.mainFrame.getConfiguration().scenario().addParameterSet(areaSet2);
+		}
 		
 		new ScenarioGenerationController(this.mainFrame.getConfiguration()).run();
 		
