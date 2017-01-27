@@ -48,11 +48,13 @@ public class RunnerActionListener implements ActionListener, Runnable {
 				this.mainFrame.getConfiguration().misc().setOutputDirectory(outputDir);
 				
 		StringBuilder surveyAreaIds = new StringBuilder();
+		int nHouseholds = 0;
 		
 		for(Entry<String, String> entry : this.mainFrame.getSurveyAreaMap().entrySet()){
 		
 			surveyAreaIds.append(entry.getKey() + ",");
-		
+			nHouseholds = Integer.parseInt(entry.getValue());
+			
 		}
 		
 		String surveyArea = surveyAreaIds.toString().length() > 0 ? surveyAreaIds.toString() : null;
@@ -60,10 +62,12 @@ public class RunnerActionListener implements ActionListener, Runnable {
 		areaSet.setIds(surveyArea);
 		areaSet.setIsSurveyArea(true);
 		areaSet.setNetworkLevel(6);
-		areaSet.setNumberOfHouseholds(Integer.parseInt(this.mainFrame.getSurveyAreaMap().get("09180")));
+		areaSet.setNumberOfHouseholds(nHouseholds);
 		areaSet.setPopulationSource(PopulationSource.SURVEY);
 		
 		this.mainFrame.getConfiguration().scenario().addParameterSet(areaSet);
+		
+		this.mainFrame.getConfiguration().misc().setCoordinateSystem("EPSG:32632");
 		
 		StringBuilder vicinityIds = new StringBuilder();
 		
