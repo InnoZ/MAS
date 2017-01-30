@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.innoz.toolbox.config.groups.ConfigurationGroup;
 import com.innoz.toolbox.config.groups.MiscConfigurationGroup;
+import com.innoz.toolbox.config.groups.NetworkConfigurationGroup;
 import com.innoz.toolbox.config.groups.PsqlConfigurationGroup;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup;
@@ -21,6 +22,7 @@ public final class Configuration {
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	private MiscConfigurationGroup misc;
+	private NetworkConfigurationGroup network;
 	private PsqlConfigurationGroup psql;
 	private ScenarioConfigurationGroup scenario;
 	private SurveyPopulationConfigurationGroup surveyPopulation;
@@ -34,7 +36,7 @@ public final class Configuration {
 	 * 
 	 * @param file Text file containing the configuration parameters.
 	 */
-	Configuration(String file){
+	Configuration(String file) {
 		
 		this();
 		this.load(file);
@@ -46,10 +48,12 @@ public final class Configuration {
 	 * Creates an empty (i.e. only default values) configuration.
 	 * 
 	 */
-	Configuration(){
+	Configuration() {
 		
 		this.misc = new MiscConfigurationGroup();
 		this.groups.put(this.misc.groupName, this.misc);
+		this.network = new NetworkConfigurationGroup();
+		this.groups.put("network", network);
 		this.psql = new PsqlConfigurationGroup();
 		this.groups.put(this.psql.groupName, this.psql);
 		this.scenario = new ScenarioConfigurationGroup();
@@ -67,43 +71,43 @@ public final class Configuration {
 	 * 
 	 * @param file The configuration file to load.
 	 */
-	void load(String file){
+	void load(String file) {
 		
 		new ConfigurationReaderXml(this).read(file);
 		
 	}
 	
-	public final MiscConfigurationGroup misc(){
-		
-		return this.misc;
+	public final NetworkConfigurationGroup network() {
+
+		return this.network;
 		
 	}
 	
-	public final PsqlConfigurationGroup psql(){
+	public final PsqlConfigurationGroup psql() {
 		
 		return this.psql;
 		
 	}
 	
-	public final ScenarioConfigurationGroup scenario(){
+	public final ScenarioConfigurationGroup scenario() {
 		
 		return this.scenario;
 		
 	}
 	
-	public final SurveyPopulationConfigurationGroup surveyPopulation(){
+	public final SurveyPopulationConfigurationGroup surveyPopulation() {
 		
 		return this.surveyPopulation;
 		
 	}
 	
-	public final TracksConfigurationGroup tracks(){
+	public final TracksConfigurationGroup tracks() {
 		
 		return this.tracks;
 		
 	}
 	
-	public final ConfigurationGroup getModule(String name){
+	public final ConfigurationGroup getModule(String name) {
 		
 		return this.groups.get(name);
 		
