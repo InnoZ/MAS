@@ -31,11 +31,11 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.config.groups.ConfigurationGroup;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.PopulationSource;
+import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.io.database.datasets.OsmPointDataset;
 import com.innoz.toolbox.io.database.datasets.OsmPolygonDataset;
 import com.innoz.toolbox.run.parallelization.BuildingThread;
@@ -145,7 +145,7 @@ public class DatabaseReader {
 				// If no administrative units were created, we are unable to proceed
 				// The process would probably finish, but no network or population would be created
 				// Size = 1 means, only the root element (basically the top level container) has been initialized
-				if(this.geoinformation.getNumberOfAdminUnits()/*getAdminUnits().size()*/ < 2){
+				if(this.geoinformation.getNumberOfAdminUnits() < 2 && this.configuration.scenario().getAreaSets() != null){
 				
 					Log.error("No administrative boundaries were created!");
 					Log.error("Maybe the ids you specified don't exist in the database.");
@@ -153,41 +153,45 @@ public class DatabaseReader {
 					
 				}
 				
-				Set<PopulationSource> populationAlgorithms = new HashSet<PopulationSource>(2);
-				
-				for(ConfigurationGroup cg : configuration.scenario().getAreaSets().values()){
-					
-					AreaSet entry = (AreaSet)cg;
-					
-					populationAlgorithms.add(entry.getPopulationSource());
-					
-					for(String id : entry.getIds().split(",")){
+				if(this.configuration.scenario().getAreaSets() != null) {
 
-						Node<AdministrativeUnit> d = this.geoinformation.getAdminUnit(id);
+					Set<PopulationSource> populationAlgorithms = new HashSet<PopulationSource>(2);
+					
+					for(ConfigurationGroup cg : configuration.scenario().getAreaSets().values()){
 						
-						if(d != null){
+						AreaSet entry = (AreaSet)cg;
+						
+						populationAlgorithms.add(entry.getPopulationSource());
+						
+						for(String id : entry.getIds().split(",")){
+
+							Node<AdministrativeUnit> d = this.geoinformation.getAdminUnit(id);
 							
-							AdministrativeUnit unit = d.getData();
-							
-							unit.setNumberOfHouseholds(entry.getNumberOfHouseholds());
+							if(d != null){
+								
+								AdministrativeUnit unit = d.getData();
+								
+								unit.setNumberOfHouseholds(entry.getNumberOfHouseholds());
+								
+							}
 							
 						}
+
+					}
+					
+					// We don't need landuse data if there is no population to be created or
+					// if the source is tracks.
+					if(populationAlgorithms.contains(PopulationSource.COMMUTER) ||
+							populationAlgorithms.contains(PopulationSource.SURVEY)){
+						
+						this.readOsmData(connection, configuration, scenario);
 						
 					}
-
-				}
-				
-				// We don't need landuse data if there is no population to be created or
-				// if the source is tracks.
-				if(populationAlgorithms.contains(PopulationSource.COMMUTER) ||
-						populationAlgorithms.contains(PopulationSource.SURVEY)){
-					
-					this.readOsmData(connection, configuration, scenario);
 					
 				}
-				
+					
 			}
-			
+				
 			// Close the connection when everything's done.
 			connection.close();
 			
@@ -231,31 +235,58 @@ public class DatabaseReader {
 		// A collection to temporarily store all geometries
 		List<Geometry> geometryCollection = new ArrayList<Geometry>();
 		
-		for(ConfigurationGroup cg : configuration.scenario().getAreaSets().values()){
+		if(configuration.scenario().getAreaSets() != null) {
+
+			for(ConfigurationGroup cg : configuration.scenario().getAreaSets().values()){
+				
+				AreaSet set = (AreaSet)cg;
+				getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, set);
 			
-			AreaSet set = (AreaSet)cg;
-			getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, set);
-		
-			if(set.isSurveyArea()){
-				
-				this.geoinformation.setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection)
-						.convexHull());
-				
-			} else{
-				
-				this.geoinformation.setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection)
-						.convexHull());
+				if(set.isSurveyArea()){
+					
+					this.geoinformation.setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection)
+							.convexHull());
+					
+				} else{
+					
+					this.geoinformation.setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection)
+							.convexHull());
+					
+				}
 				
 			}
 			
+		} else {
+			
+			geometryCollection.add(setSurveyAreaByBoundingBox(connection, configuration));
+			
 		}
-
+		
 		// Get the survey area by building the bounding box of all geometries 
 		this.geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection)
 				.convexHull());
 		
 		this.boundingBox = JTS.transform((Geometry) this.geoinformation.getCompleteGeometry()
 				.clone(), t).convexHull();
+		
+	}
+	
+	private Geometry setSurveyAreaByBoundingBox(Connection connection, Configuration configuration) {
+		
+		Coordinate[] coordinates = new Coordinate[]{
+				new Coordinate(11.9236,51.3621),
+				new Coordinate(12.0949,51.3621),
+				new Coordinate(12.0949,51.2273),
+				new Coordinate(11.9236,51.2273),
+				new Coordinate(11.9236,51.3621)
+				};
+
+		Geometry g = gFactory.createPolygon(coordinates);
+		
+		this.geoinformation.setSurveyAreaBoundingBox(g.getEnvelope());
+		this.geoinformation.setVicinityBoundingBox(g.getEnvelope());
+		
+		return g;
 		
 	}
 	
@@ -663,13 +694,15 @@ public class DatabaseReader {
 			Statement statement = connection.createStatement();
 			statement.setFetchSize(1000);
 			ResultSet result = statement.executeQuery("select " + DatabaseConstants.ATT_OSM_ID + ", " + DatabaseConstants.ATT_ACCESS + ", "
+					+ DatabaseConstants.ATT_RAILWAY + ", "
 					+ DatabaseConstants.ATT_HIGHWAY + ", " + DatabaseConstants.ATT_JUNCTION + ", " + DatabaseConstants.ATT_ONEWAY + ", "
 					+ DatabaseConstants.TAG_LANES + " ," + DatabaseConstants.TAG_MAXSPEED + ", "
 					+ DatabaseConstants.functions.st_astext.name() + "(" + DatabaseConstants.ATT_WAY + ") from "
-					+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_germany_line.name() + " where "
-					+ DatabaseConstants.ATT_HIGHWAY + " is not null and " + DatabaseConstants.functions.st_within.name() + "("
-					+ DatabaseConstants.ATT_WAY + "," + DatabaseConstants.functions.st_geomfromtext.name() + "('"
-					+ this.geoinformation.getCompleteGeometry().toString() + "',4326)) order by " + DatabaseConstants.ATT_OSM_ID + ";");
+					+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_germany_line.name() + " where ("
+					+ DatabaseConstants.ATT_RAILWAY + " is not null or "+ DatabaseConstants.ATT_HIGHWAY + " is not null) and "
+					+ DatabaseConstants.functions.st_within.name() + "(" + DatabaseConstants.ATT_WAY + ","
+					+ DatabaseConstants.functions.st_geomfromtext.name() + "('"	+ this.geoinformation.getCompleteGeometry().toString()
+					+ "',4326)) order by " + DatabaseConstants.ATT_OSM_ID + ";");
 			
 			while(result.next()){
 				
@@ -677,7 +710,10 @@ public class DatabaseReader {
 				WayEntry entry = new WayEntry();
 				entry.setOsmId(result.getString(DatabaseConstants.ATT_OSM_ID));
 				entry.setAccessTag(result.getString(DatabaseConstants.ATT_ACCESS));
-				entry.setHighwayTag(result.getString(DatabaseConstants.ATT_HIGHWAY));
+				String highway = result.getString(DatabaseConstants.ATT_HIGHWAY);
+				String railway = result.getString(DatabaseConstants.ATT_RAILWAY);
+				String type = highway != null ? highway : railway;
+				entry.setHighwayTag(type);
 				entry.setJunctionTag(result.getString(DatabaseConstants.ATT_JUNCTION));
 				entry.setLanesTag(result.getString(DatabaseConstants.TAG_LANES));
 				entry.setMaxspeedTag(result.getString(DatabaseConstants.TAG_MAXSPEED));
