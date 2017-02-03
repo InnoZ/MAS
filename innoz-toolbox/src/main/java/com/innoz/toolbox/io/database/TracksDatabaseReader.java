@@ -9,8 +9,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.geotools.referencing.CRS;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.misc.Time;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.NoSuchAuthorityCodeException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.psql.PsqlAdapter;
@@ -18,6 +24,7 @@ import com.innoz.toolbox.config.groups.TracksConfigurationGroup;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.tracks.Track;
 import com.innoz.toolbox.scenarioGeneration.population.tracks.TrackedPerson;
+import com.innoz.toolbox.utils.GlobalNames;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.ParseException;
@@ -35,7 +42,7 @@ public class TracksDatabaseReader {
 		
 	}
 	
-	public void parse(Geoinformation geoinformation){
+	public void parse(Geoinformation geoinformation) {
 		
 		try {
 			
@@ -46,14 +53,18 @@ public class TracksDatabaseReader {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			Date currentDate = sdf.parse(config.getDate());
 			
-			Connection c = PsqlAdapter.createConnection(DatabaseConstants.TRACKS_DB);
+			Connection c = PsqlAdapter.createConnection(this.configuration, DatabaseConstants.TRACKS_DB);
 			
 			String sql = "SELECT user_id,id,started_at,finished_at,length,mode,st_astext(start_point) as start,"
-					+ "st_astext(end_point) as end FROM tracks_rsl where started_on='"+ config.getDate() + "';";
+					+ "st_astext(end_point) as end FROM tracks_natur where started_on='"+ config.getDate() + "';";
 			
 			Statement s = c.createStatement();
 			
 			ResultSet result = s.executeQuery(sql);
+			
+			CoordinateReferenceSystem crsFrom = CRS.decode(GlobalNames.ETRS89LAEA, true);
+			CoordinateReferenceSystem crsTo = CRS.decode(GlobalNames.WGS84, true);
+			CoordinateTransformation transform = TransformationFactory.getCoordinateTransformation(crsFrom.toString(), crsTo.toString());
 			
 			while(result.next()){
 				
@@ -73,8 +84,8 @@ public class TracksDatabaseReader {
 				
 				if(start != null && end != null){
 					
-					Geometry startPoint = wkt.read(start);
-					Geometry endPoint = wkt.read(end);
+					Geometry startPoint = MGC.coord2Point(transform.transform(MGC.point2Coord((Point) wkt.read(start))));
+					Geometry endPoint = MGC.coord2Point(transform.transform(MGC.point2Coord((Point) wkt.read(end))));
 					
 					if(geoinformation.getCompleteGeometry().contains(startPoint) &&
 							geoinformation.getCompleteGeometry().contains(endPoint)){
@@ -86,9 +97,9 @@ public class TracksDatabaseReader {
 
 						Date startDate = sdf.parse(startedAt.substring(0, 11));
 						Date endDate = sdf.parse(finishedAt.substring(0, 11));
-						double startTime = Time.parseTime(startedAt.substring(11)) +
+						double startTime = Time.parseTime(startedAt.substring(11,19)) +
 								(startDate.getTime() - currentDate.getTime()) / 1000;
-						double endTime = Time.parseTime(finishedAt.substring(11)) +
+						double endTime = Time.parseTime(finishedAt.substring(11,19)) +
 								(endDate.getTime() - currentDate.getTime()) / 1000;
 						
 						Track t = new Track(id);
@@ -115,6 +126,12 @@ public class TracksDatabaseReader {
 			
 			e.printStackTrace();
 			
+		} catch (NoSuchAuthorityCodeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FactoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 	}
