@@ -23,15 +23,25 @@ import com.innoz.toolbox.io.DefaultXmlReader;
 public class GpxTrackReader extends DefaultXmlReader {
 
 	public static void main(String args[]) {
-		
-		GpxTrackReader r = new GpxTrackReader();
-		
-		r.read("/home/dhosse/01_Proposals/Leuna_Werke/WG__Daten_GPS-Tracker_InfraLeuna/export_2017-01-17 06-03.gpx");
-		
+
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		
+		run(scenario, "/home/dhosse/01_Proposals/Leuna_Werke/WG__Daten_GPS-Tracker_InfraLeuna/export_2017-01-17 06-03.gpx", 0);
+		run(scenario, "/home/dhosse/01_Proposals/Leuna_Werke/WG__Daten_GPS-Tracker_InfraLeuna/export_2017-01-17 06-15.gpx", 1);
+		run(scenario, "/home/dhosse/01_Proposals/Leuna_Werke/WG__Daten_GPS-Tracker_InfraLeuna/export_2017-01-17 11-23.gpx", 2);
+		
+		new PopulationWriter(scenario.getPopulation()).write("/home/dhosse/scenarios/Leuna_Werke/plan.xml.gz");
+		
+	}
+	
+	static void run(Scenario scenario, String gpxFile, int personNumber) {
+
+		GpxTrackReader r = new GpxTrackReader();
+		
+		r.read(gpxFile);
+		
 		PopulationFactory factory = scenario.getPopulation().getFactory();
-		Person p = factory.createPerson(Id.createPersonId(0));
+		Person p = factory.createPerson(Id.createPersonId(personNumber));
 		Plan plan = factory.createPlan();
 		
 		double last = 0;
@@ -53,8 +63,8 @@ public class GpxTrackReader extends DefaultXmlReader {
 				
 			} else {
 				
-				if(point.coord.equals(lastCoord)) {
-
+//				if(point.coord.equals(lastCoord)) {
+					
 					Activity act = factory.createActivityFromCoord("sighting", c);
 					act.setStartTime(last);
 					act.setEndTime(point.time);
@@ -63,7 +73,7 @@ public class GpxTrackReader extends DefaultXmlReader {
 					Leg leg = factory.createLeg("car");
 					plan.addLeg(leg);
 					
-				}
+//				}
 				
 			}
 			
@@ -76,8 +86,6 @@ public class GpxTrackReader extends DefaultXmlReader {
 		p.setSelectedPlan(plan);
 		
 		scenario.getPopulation().addPerson(p);
-		
-		new PopulationWriter(scenario.getPopulation()).write("/home/dhosse/01_Proposals/Leuna_Werke/plan.xml.gz");
 		
 	}
 	
