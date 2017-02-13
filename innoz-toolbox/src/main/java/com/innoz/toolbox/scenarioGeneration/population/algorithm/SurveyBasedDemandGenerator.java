@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -67,6 +68,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	public void run(Configuration configuration, String ids) {
 
 		createCompletePopulation(configuration, ids);
+		Logger.getLogger(org.matsim.matrices.Matrix.class).setLevel(Level.OFF);
 		
 	}
 	
@@ -249,40 +251,34 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			
 			for(Entry<String, Integer> entry : d.getPopulationMap().entrySet()) {
 				
+//				counts person created in this age group
+				int agegroupPersonsCreated = 0;
+				int agegroupPersonsToCreate = (int)(entry.getValue() * configuration.scenario().getScaleFactor());
+				
 //				gets sex and age boundaries of the current ageGroup as ageFrom and ageTo from the populationmap's key which contains all information in a string
-				String sex = entry.getKey().substring(entry.getKey().length()-1);
-				
-				int ageFrom = Integer.parseInt(entry.getKey().substring(9, 10));
-				
-				int x = Integer.parseInt(entry.getKey().substring(13, 14));
-				
+				String y = entry.getKey().substring(entry.getKey().length()-1);
+				if (y.equals("w")) {
+					y="f";
+				}
+				String sex = y;
+				int ageFrom = Integer.parseInt(entry.getKey().substring(8, 10));	
+				int x = Integer.parseInt(entry.getKey().substring(12, 14));	
 //				for ageGroup85to101 the String consists of 16 characters
 				if (entry.getKey().length()==16){
-					x = Integer.parseInt(entry.getKey().substring(13, 15));
-				}
-				
+					x = Integer.parseInt(entry.getKey().substring(12, 15));
+				}	
 				int ageTo = x;
 				
 //				method to summarize weights of current agegroup (entry)
-				List<SurveyPerson> personsInAgeGroup = new ArrayList<>();
+				List<SurveyPerson> surveyPersonsInAgeGroup = new ArrayList<>();
 				container.getPersons().values().stream().filter(p -> p.getAge() >= ageFrom && p.getAge() < ageTo && p.getSex().equals(sex)).forEach(p -> 
-						personsInAgeGroup.add(p));
-				double weightOfPersonsInAgeGroup = personsInAgeGroup.stream().map(SurveyPerson::getWeight).collect(Collectors.summarizingDouble(Double::doubleValue)).getSum();
+						surveyPersonsInAgeGroup.add(p));
+				double weightOfSurveyPersonsInAgeGroup = surveyPersonsInAgeGroup.stream().map(SurveyPerson::getWeight).collect(Collectors.summarizingDouble(Double::doubleValue)).getSum();
 				
-				for (SurveyPerson p : personsInAgeGroup){
-					
-					int personDuplicates;
-					if (weightOfPersonsInAgeGroup > 0) {
-//						defining how often a template should be used by multiplying the template's weight within it's agegroup with the scaled population
-						personDuplicates = (int)(entry.getValue() * configuration.scenario().getScaleFactor() * p.getWeight() / weightOfPersonsInAgeGroup);
-					} else if (personsInAgeGroup.size() != 0){
-//						otherwise if any persons exist -> forget the weights
-						personDuplicates = (int)(entry.getValue() * configuration.scenario().getScaleFactor() / personsInAgeGroup.size());
-					} else {
-//						third option: no person of this ageGroup will be created
-						personDuplicates = 0;
-					}
+				for (SurveyPerson p : surveyPersonsInAgeGroup){
 
+//						defining how often a template should be used by multiplying the template's weight within its agegroup with the scaled population
+						int personDuplicates = (int) Math.ceil(agegroupPersonsToCreate * (p.getWeight() / weightOfSurveyPersonsInAgeGroup));
 					
 					for (int ii = 0; ii < personDuplicates; ii++){
 					
@@ -331,14 +327,21 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 							
 							population.addPerson(person);
 							
+							agegroupPersonsCreated++;
+							
 						}
 						
 					}
+					
+//					ends creating persons if the required amount has been reached
+					if (agegroupPersonsCreated >= agegroupPersonsToCreate) break;
 						
 				}
 				
 			}
-
+			
+			log.info(population.getPersons().size() + " persons created..." );
+			
 		}
 		
 	}
@@ -405,11 +408,13 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		this.currentSearchSpace = null;
 		this.currentMainActFacility = null;
 		
-		// Create a new MATSim person and an empty plan
+//		// Create a new MATSim person and an empty plan
 		Person person = population.getFactory().createPerson(Id.createPersonId(this.currentHomeCell.getId() + "_" + personTemplate.getId() + "_" + i));
+		
 		Plan plan = population.getFactory().createPlan();
 		
 		// Set the person's attributes (sex, age, employed, license, car availability) according to what was reported in the survey
+		// no need for this anymore: ??
 		PersonUtils.setSex(person, personTemplate.getSex());
 		PersonUtils.setAge(person, personTemplate.getAge());
 		PersonUtils.setEmployed(person, personTemplate.isEmployed());
