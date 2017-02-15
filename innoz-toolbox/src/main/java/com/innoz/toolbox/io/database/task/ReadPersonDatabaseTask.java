@@ -83,16 +83,16 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 					
 					if(ids.contains(entry.getId().substring(0, 5))&&!knownRegionTypes.contains(entry.getRegionType())){
 					
-						cntOut++;
-						
-						q += SurveyConstants.regionType(surveyType) + " = " + entry.getRegionType();
-						knownRegionTypes.add(entry.getRegionType());
-
-						if(cntOut < ids.size()){
+						if(cntOut > 0){
 
 							q += " or ";
 							
 						}
+						
+						cntOut++;
+						
+						q += SurveyConstants.regionType(surveyType) + " = " + entry.getRegionType();
+						knownRegionTypes.add(entry.getRegionType());
 						
 					}
 					
@@ -136,7 +136,7 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 				attributes.put(SurveyConstants.personAge(surveyType), resultSet.getString(SurveyConstants.personAge(surveyType)));
 				attributes.put(SurveyConstants.personEmployment(surveyType), resultSet.getString(SurveyConstants.personEmployment(surveyType)));
 				attributes.put(SurveyConstants.mobile(surveyType), resultSet.getString(SurveyConstants.mobile(surveyType)));
-				
+								
 				SurveyPerson person = new SurveyPerson();
 				
 				for(DefaultHandler handler : this.handlers){
