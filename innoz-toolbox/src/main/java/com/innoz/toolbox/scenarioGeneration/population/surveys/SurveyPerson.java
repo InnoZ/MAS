@@ -26,6 +26,8 @@ public class SurveyPerson implements SurveyObject {
 	private int age;
 	private int personGroup;
 	private int lifePhase;
+	
+	private Integer regionType;
 
 	private double weight;
 	private double weightOfAllPlans = 0.;
@@ -296,6 +298,14 @@ public class SurveyPerson implements SurveyObject {
 	
 	public void setMobile(boolean mobile){
 		this.isMobile = mobile;
+	}
+
+	public Integer getRegionType() {
+		return regionType;
+	}
+
+	public void setRegionType(Integer regionType) {
+		this.regionType = regionType;
 	}
 	
 }

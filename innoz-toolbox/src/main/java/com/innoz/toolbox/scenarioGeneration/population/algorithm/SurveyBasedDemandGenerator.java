@@ -271,8 +271,13 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				
 //				method to summarize weights of current agegroup (entry)
 				List<SurveyPerson> surveyPersonsInAgeGroup = new ArrayList<>();
-				container.getPersons().values().stream().filter(p -> p.getAge() >= ageFrom && p.getAge() < ageTo && p.getSex().equals(sex)).forEach(p -> 
-						surveyPersonsInAgeGroup.add(p));
+				container.getPersons().values().stream().filter(p -> 
+				p.getAge() >= ageFrom && 
+				p.getAge() < ageTo && 
+				p.getSex().equals(sex) && 
+				p.getRegionType().equals(d.getRegionType()))
+				.forEach(p -> surveyPersonsInAgeGroup.add(p));
+				
 				double weightOfSurveyPersonsInAgeGroup = surveyPersonsInAgeGroup.stream().map(SurveyPerson::getWeight).collect(Collectors.summarizingDouble(Double::doubleValue)).getSum();
 				
 				for (SurveyPerson p : surveyPersonsInAgeGroup){

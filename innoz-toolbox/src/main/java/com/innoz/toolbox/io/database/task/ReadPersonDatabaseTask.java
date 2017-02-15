@@ -18,6 +18,7 @@ import com.innoz.toolbox.io.database.handler.PersonEmploymentHandler;
 import com.innoz.toolbox.io.database.handler.PersonIdHandler;
 import com.innoz.toolbox.io.database.handler.PersonIsMobileHandler;
 import com.innoz.toolbox.io.database.handler.PersonLicenseHandler;
+import com.innoz.toolbox.io.database.handler.PersonRegionTypeHandler;
 import com.innoz.toolbox.io.database.handler.PersonSexHandler;
 import com.innoz.toolbox.io.database.handler.PersonWeightHandler;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
@@ -52,6 +53,7 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 		this.handlers.add(new PersonSexHandler());
 		this.handlers.add(new PersonWeightHandler());
 		this.handlers.add(new PersonIsMobileHandler());
+		this.handlers.add(new PersonRegionTypeHandler());
 	
 	}
 
@@ -136,6 +138,7 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 				attributes.put(SurveyConstants.personAge(surveyType), resultSet.getString(SurveyConstants.personAge(surveyType)));
 				attributes.put(SurveyConstants.personEmployment(surveyType), resultSet.getString(SurveyConstants.personEmployment(surveyType)));
 				attributes.put(SurveyConstants.mobile(surveyType), resultSet.getString(SurveyConstants.mobile(surveyType)));
+				attributes.put(SurveyConstants.regionType(surveyType), resultSet.getString(SurveyConstants.regionType(surveyType))); 
 								
 				SurveyPerson person = new SurveyPerson();
 				
