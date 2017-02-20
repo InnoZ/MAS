@@ -24,6 +24,7 @@ import org.matsim.core.utils.charts.XYScatterChart;
 import org.matsim.core.utils.io.IOUtils;
 
 import com.innoz.toolbox.config.psql.PsqlAdapter;
+import com.innoz.toolbox.utils.io.AbstractCsvReader;
 import com.innoz.toolbox.utils.math.PolynomialRegression;
 import com.innoz.toolbox.utils.matsim.RecursiveStatsContainer;
 
@@ -119,7 +120,7 @@ public class RilCreateLeastSquares {
 				int fvo = result.getInt("fv_fremd");
 				int nvo = result.getInt("nv_fremd");
 				
-				String state = null;//result.getString("state");
+				String state = null;
 				
 				if(fv >= 0 && nv >= 0 && fvo >= 0 && nvo >= 0){
 					
@@ -134,10 +135,6 @@ public class RilCreateLeastSquares {
 
 						if(!type2Container.containsKey(state)){
 							type2Container.put(state, new HashMap<>());
-						}
-						
-						if(!type2Container.containsKey(type)){
-							type2Container.put(type, new HashMap<>());
 						}
 						
 						if(!type2Container.get(state).containsKey(type)){
@@ -190,7 +187,78 @@ public class RilCreateLeastSquares {
 			
 		}
 		
-		int order = 10;
+		Map<String, Map<String,RecursiveStatsContainer>> type2Container = new HashMap<>();
+		int year = 2030;
+		
+		AbstractCsvReader csv = new AbstractCsvReader("\t",true) {
+			
+			@Override
+			public void handleRow(String[] line) {
+
+				String state = null;
+				
+				String station = line[1];
+				double ges = Double.parseDouble(line[14]);
+				double factor = Double.parseDouble(line[18]);
+				double n = ges * (1 + factor);
+				
+				if(station2Category.containsKey(station)){
+					
+					String type = station2Category.get(station);
+
+					if(!type2Container.containsKey(state)){
+						type2Container.put(state, new HashMap<>());
+					}
+					
+					if(!type2Container.get(state).containsKey(type)){
+						type2Container.get(state).put(type, new RecursiveStatsContainer());
+					}
+					
+					if(!type2Plot.containsKey(state)){
+						type2Plot.put(state, new HashMap<>());
+					}
+					
+					if(!type2Plot.get(state).containsKey(type)){
+						type2Plot.get(state).put(type, new XYSeries(""));
+					}
+					
+					type2Plot.get(state).get(type).add(year, n);
+					type2Container.get(state).get(type).handleNewEntry(n);
+					
+				}
+				
+				for(String key : type2Container.keySet()){
+					
+					for(Entry<String, RecursiveStatsContainer> entry : type2Container.get(key).entrySet()){
+						
+						if(!avg.containsKey(key)){
+							
+							avg.put(key, new HashMap<>());
+							median.put(key, new HashMap<>());
+							
+						}
+						
+						if(!avg.get(key).containsKey(entry.getKey())){
+							
+							avg.get(key).put(entry.getKey(), new XYSeries(""));
+							median.get(key).put(entry.getKey(), new XYSeries(""));
+							
+						}
+						
+						avg.get(key).get(entry.getKey()).add(year, entry.getValue().getMean());
+						median.get(key).get(entry.getKey()).add(year, entry.getValue().getMedian());
+						
+					}
+					
+				}				
+				
+			}
+			
+		};
+		
+		csv.read("/home/dhosse/01_Projects/GSP/types/Änderungsraten_2013-zu-2030_fuer-InnoZ.csv");
+		
+		int order = 1;
 		String stateOrAgg = "aggregated";
 		
 		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/types/new/" + stateOrAgg + "/order" + order + "/timeline.csv");
@@ -215,7 +283,7 @@ public class RilCreateLeastSquares {
 			
 			for(Entry<String,XYSeries> entry : map.entrySet()){
 
-				int nEntries = entry.getValue().getItems().size() / 11;
+				int nEntries = entry.getValue().getItems().size() / 12;
 
 				if(nEntries > 4){
 					
@@ -226,11 +294,11 @@ public class RilCreateLeastSquares {
 					
 					XYScatterChart chart = new XYScatterChart(title, "Jahr", "Anzahl Reisende");
 
-					double[] x = new double[11];
-					double[] yMedian = new double[11];
-					double[] yAvg = new double[11];
+					double[] x = new double[12];
+					double[] yMedian = new double[12];
+					double[] yAvg = new double[12];
 					
-					for(int i = 0; i < 11; i++) {
+					for(int i = 0; i < 12; i++) {
 						
 						x[i] = median.get(key).get(entry.getKey()).getDataItem(i).getXValue() - 2006;
 						yMedian[i] = median.get(key).get(entry.getKey()).getDataItem(i).getYValue();
@@ -267,21 +335,17 @@ public class RilCreateLeastSquares {
 					
 					out.write(line);
 					
-					double[] medianX = new double[11];
-					double[] medianY = new double[11];
+					double[] medianX = new double[25];
+					double[] medianY = new double[25];
 					
 					float f = 2006f;
 					int j = 2006;
 					
-					while(f < 2017){
+					while(f < 2031){
 
 						medianX[j-2006] = f;
 						
-						for(int i = 0; i < median_reg.degree()+1; i++) {
-							
-							medianY[j-2006] += avg_reg.beta(i) * Math.pow(f - 2006, i);
-							
-						}
+						medianY[j-2006] = avg_reg.predict(f-2006);
 						
 						f += 1f;
 						j++;
@@ -373,6 +437,28 @@ public class RilCreateLeastSquares {
 		Map<String, XYSeries> stationData = new ConcurrentHashMap<String, XYSeries>();
 		
 		Set<String> stations2016 = new HashSet<>();
+
+		AbstractCsvReader csv = new AbstractCsvReader("\t",true) {
+			
+			@Override
+			public void handleRow(String[] line) {
+
+				String station = line[1];
+				double ges = Double.parseDouble(line[14]);
+				double factor = Double.parseDouble(line[18]);
+				double n = ges * (1 + factor);
+				
+				if(!stationData.containsKey(station)) {
+					stationData.put(station, new XYSeries(""));
+				}
+				
+				stationData.get(station).add(2030, n);
+				
+			}
+			
+		};
+		
+		csv.read("/home/dhosse/01_Projects/GSP/types/Änderungsraten_2013-zu-2030_fuer-InnoZ.csv");
 		
 		for(String table : tables){
 		
@@ -395,9 +481,11 @@ public class RilCreateLeastSquares {
 
 					int n = result.getInt("ges");
 					
-					if(!stationData.containsKey(name)) stationData.put(name, new XYSeries(""));
+//					if(!stationData.containsKey(name)) stationData.put(name, new XYSeries(""));
 					
-					stationData.get(name).add(year, n);
+					if(stationData.containsKey(name)){
+						stationData.get(name).add(year, n);
+					}
 					
 				}
 				
@@ -407,23 +495,24 @@ public class RilCreateLeastSquares {
 
 		}
 		
-		int order = 8;
+		int order = 1;
+		int endYear = 2030;
 		
 		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/types/stationwise_noOrder.csv");
 		out.write("name");
-//		for(int i = 0; i <= 10; i++){
-//			out.write(";a_" + i);
-//		}
-		out.write(";r2;daten_2006;daten_2007;daten_2008;daten_2009;daten_2010;daten_2011;daten_2012;daten_2013;daten_2014;daten_2015;daten_2016;"
-				+ "formel_2006;formel_2007;formel_2008;formel_2009;formel_2010;formel_2011;formel_2012;formel_2013;formel_2014;formel_2015;"
-				+ "formel_2016");
+		out.write(";r2;daten_2006;daten_2007;daten_2008;daten_2009;daten_2010;daten_2011;daten_2012;daten_2013;daten_2014;daten_2015;"
+				+ "daten_2016;daten2030");
+		for(int i = 2006; i < 2031; i++) {
+			out.write(";formel_" + Integer.toString(i));
+		}
+				
+				/*;formel_2006;formel_2007;formel_2008;formel_2009;formel_2010;formel_2011;formel_2012;formel_2013;"
+				+/ "formel_2014;formel_2015;formel_2016;formel_2030");*/
 		
 		for(Entry<String, XYSeries> entry : stationData.entrySet()){
 			
 			XYSeries xy = entry.getValue();
 
-//			if(xy.getItems().size() >= order+1){
-			
 			order = entry.getValue().getItemCount()-1;
 			
 			if(order < 1) continue;
@@ -441,14 +530,10 @@ public class RilCreateLeastSquares {
 			}
 			
 			PolynomialRegression reg = new PolynomialRegression(x, y, order);
-//				double[] reg = Regression.getPolynomialRegression(new XYSeriesCollection(xy), 0, order);
 				
 				out.newLine();
 				
 				out.write(entry.getKey() + ";" + reg.R2());
-//				for(int i = 0; i <= order+1; i++){
-//					out.write(";" + reg[i]);
-//				}
 				
 				int start = 2006;
 				StringBuilder dataStringBuilder = new StringBuilder();
@@ -463,21 +548,37 @@ public class RilCreateLeastSquares {
 						dataStringBuilder.append(";0");
 					}
 					start++;
+					if(start == 2017){
+						start = 2030;
+					}
 					
 				}
 				
-				for(int i = start; i <= 2016; i++) {
+				for(int i = start; i <= endYear; i++) {
 					dataStringBuilder.append(";0");
 				}
 				
 				out.write(dataStringBuilder.toString());
 				
-				for(int i = 2006; i <= 2016; i++) {
+				for(int i = 2006; i <= endYear; i++) {
 					
-					double v = reg.predict(i-2006);
-					out.write(";" + v);
+//					if(i < 2017 || i > 2029) {
+						double v = reg.predict(i-2006);
+						out.write(";" + v);
+//					}
 					
 				}
+				
+				
+//				System.out.print(entry.getKey() + ": ");
+//				
+//				for(int i = 0; i < reg.degree(); i++){
+//					
+//					System.out.print(reg.beta(i) + "\t");
+//					
+//				}
+//				
+//				System.out.println();
 			
 		}
 		
