@@ -81,7 +81,7 @@ public class RunnerActionListener implements ActionListener, Runnable {
 		
 		AreaSet areaSet2 = new AreaSet();
 		areaSet2.setIds(vicinity);
-		areaSet2.setIsSurveyArea(true);
+		areaSet2.setIsSurveyArea(false);
 		areaSet2.setNetworkLevel(6);
 		areaSet2.setPopulationSource(PopulationSource.COMMUTER);
 		if(vicinity != null) {
