@@ -48,11 +48,13 @@ public class RunnerActionListener implements ActionListener, Runnable {
 				this.mainFrame.getConfiguration().misc().setOutputDirectory(outputDir);
 				
 		StringBuilder surveyAreaIds = new StringBuilder();
+		int nHouseholds = 0;
 		
 		for(Entry<String, String> entry : this.mainFrame.getSurveyAreaMap().entrySet()){
 		
 			surveyAreaIds.append(entry.getKey() + ",");
-		
+			nHouseholds = Integer.parseInt(entry.getValue());
+			
 		}
 		
 		String surveyArea = surveyAreaIds.toString().length() > 0 ? surveyAreaIds.toString() : null;
@@ -60,8 +62,12 @@ public class RunnerActionListener implements ActionListener, Runnable {
 		areaSet.setIds(surveyArea);
 		areaSet.setIsSurveyArea(true);
 		areaSet.setNetworkLevel(6);
+		areaSet.setNumberOfHouseholds(nHouseholds);
 		areaSet.setPopulationSource(PopulationSource.SURVEY);
-		this.mainFrame.getConfiguration().scenario().addAreaSet(areaSet);
+		
+		this.mainFrame.getConfiguration().scenario().addParameterSet(areaSet);
+		
+		this.mainFrame.getConfiguration().misc().setCoordinateSystem("EPSG:32632");
 		
 		StringBuilder vicinityIds = new StringBuilder();
 		
@@ -75,10 +81,12 @@ public class RunnerActionListener implements ActionListener, Runnable {
 		
 		AreaSet areaSet2 = new AreaSet();
 		areaSet2.setIds(vicinity);
-		areaSet2.setIsSurveyArea(true);
+		areaSet2.setIsSurveyArea(false);
 		areaSet2.setNetworkLevel(6);
 		areaSet2.setPopulationSource(PopulationSource.COMMUTER);
-		this.mainFrame.getConfiguration().scenario().addAreaSet(areaSet2);
+		if(vicinity != null) {
+			this.mainFrame.getConfiguration().scenario().addParameterSet(areaSet2);
+		}
 		
 		new ScenarioGenerationController(this.mainFrame.getConfiguration()).run();
 		
