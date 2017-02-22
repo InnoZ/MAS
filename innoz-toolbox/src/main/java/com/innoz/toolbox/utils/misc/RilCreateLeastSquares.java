@@ -33,9 +33,9 @@ public class RilCreateLeastSquares {
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException,
 		ClassNotFoundException, SQLException, IOException {
 
-		compute();
+//		compute();
 //		computeAggregates();
-//		computeStationwise();
+		computeStationwise();
 		
 	}
 	
@@ -227,38 +227,40 @@ public class RilCreateLeastSquares {
 					
 				}
 				
-				for(String key : type2Container.keySet()){
-					
-					for(Entry<String, RecursiveStatsContainer> entry : type2Container.get(key).entrySet()){
-						
-						if(!avg.containsKey(key)){
-							
-							avg.put(key, new HashMap<>());
-							median.put(key, new HashMap<>());
-							
-						}
-						
-						if(!avg.get(key).containsKey(entry.getKey())){
-							
-							avg.get(key).put(entry.getKey(), new XYSeries(""));
-							median.get(key).put(entry.getKey(), new XYSeries(""));
-							
-						}
-						
-						avg.get(key).get(entry.getKey()).add(year, entry.getValue().getMean());
-						median.get(key).get(entry.getKey()).add(year, entry.getValue().getMedian());
-						
-					}
-					
-				}				
-				
 			}
 			
 		};
 		
 		csv.read("/home/dhosse/01_Projects/GSP/types/Änderungsraten_2013-zu-2030_fuer-InnoZ.csv");
 		
-		int order = 1;
+		for(String key : type2Container.keySet()){
+			
+			for(Entry<String, RecursiveStatsContainer> entry : type2Container.get(key).entrySet()){
+				
+				if(!avg.containsKey(key)){
+					
+					avg.put(key, new HashMap<>());
+					median.put(key, new HashMap<>());
+					
+				}
+				
+				if(!avg.get(key).containsKey(entry.getKey())){
+					
+					avg.get(key).put(entry.getKey(), new XYSeries(""));
+					median.get(key).put(entry.getKey(), new XYSeries(""));
+					
+				}
+				
+				avg.get(key).get(entry.getKey()).add(year, entry.getValue().getMean());
+				median.get(key).get(entry.getKey()).add(year, entry.getValue().getMedian());
+				
+				System.out.println(entry.getKey() + ": " + entry.getValue().getMedian());
+				
+			}
+			
+		}
+		
+		int order = 4;
 		String stateOrAgg = "aggregated";
 		
 		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/types/new/" + stateOrAgg + "/order" + order + "/timeline.csv");
@@ -283,7 +285,7 @@ public class RilCreateLeastSquares {
 			
 			for(Entry<String,XYSeries> entry : map.entrySet()){
 
-				int nEntries = entry.getValue().getItems().size() / 12;
+				int nEntries = entry.getValue().getItems().size() / 11;
 
 				if(nEntries > 4){
 					
@@ -294,11 +296,11 @@ public class RilCreateLeastSquares {
 					
 					XYScatterChart chart = new XYScatterChart(title, "Jahr", "Anzahl Reisende");
 
-					double[] x = new double[12];
-					double[] yMedian = new double[12];
-					double[] yAvg = new double[12];
+					double[] x = new double[11];
+					double[] yMedian = new double[11];
+					double[] yAvg = new double[11];
 					
-					for(int i = 0; i < 12; i++) {
+					for(int i = 0; i < 11; i++) {
 						
 						x[i] = median.get(key).get(entry.getKey()).getDataItem(i).getXValue() - 2006;
 						yMedian[i] = median.get(key).get(entry.getKey()).getDataItem(i).getYValue();
@@ -345,7 +347,7 @@ public class RilCreateLeastSquares {
 
 						medianX[j-2006] = f;
 						
-						medianY[j-2006] = avg_reg.predict(f-2006);
+						medianY[j-2006] = median_reg.predict(f-2006);
 						
 						f += 1f;
 						j++;
@@ -446,7 +448,7 @@ public class RilCreateLeastSquares {
 				String station = line[1];
 				double ges = Double.parseDouble(line[14]);
 				double factor = Double.parseDouble(line[18]);
-				double n = ges * (1 + factor);
+				double n = Math.ceil(ges * (1 + factor));
 				
 				if(!stationData.containsKey(station)) {
 					stationData.put(station, new XYSeries(""));
@@ -473,15 +475,13 @@ public class RilCreateLeastSquares {
 				String name = result.getString("station");
 				int year = result.getInt("verkehrs15");
 				
-				if(year == 2016) {
+				if(year == 2013) {
 					stations2016.add(name);
 				}
 				
 				if(fv >= 0 && nv >= 0 && fvo >= 0 && nvo >= 0){
 
 					int n = result.getInt("ges");
-					
-//					if(!stationData.containsKey(name)) stationData.put(name, new XYSeries(""));
 					
 					if(stationData.containsKey(name)){
 						stationData.get(name).add(year, n);
@@ -495,7 +495,7 @@ public class RilCreateLeastSquares {
 
 		}
 		
-		int order = 1;
+		int order = 4;
 		int endYear = 2030;
 		
 		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/types/stationwise_noOrder.csv");
@@ -506,23 +506,21 @@ public class RilCreateLeastSquares {
 			out.write(";formel_" + Integer.toString(i));
 		}
 				
-				/*;formel_2006;formel_2007;formel_2008;formel_2009;formel_2010;formel_2011;formel_2012;formel_2013;"
-				+/ "formel_2014;formel_2015;formel_2016;formel_2030");*/
-		
 		for(Entry<String, XYSeries> entry : stationData.entrySet()){
 			
 			XYSeries xy = entry.getValue();
 
-			order = entry.getValue().getItemCount()-1;
+			int nElements = entry.getValue().getItemCount() - 1;
+//			order = entry.getValue().getItemCount()-1;
 			
-			if(order < 1) continue;
+			if(nElements < 1 || nElements < order) continue;
 
-			double[] x = new double[order+1];
-			double[] y = new double[order+1];
+			double[] x = new double[nElements + 1];
+			double[] y = new double[nElements + 1];
 			
 			XYDataItem first = (XYDataItem)xy.getItems().get(0);
 			
-			for(int i = 0; i < order+1; i++) {
+			for(int i = 0; i < nElements + 1; i++) {
 				
 				XYDataItem item = (XYDataItem)xy.getItems().get(i);
 				x[i] = item.getXValue() - first.getXValue();
@@ -562,24 +560,14 @@ public class RilCreateLeastSquares {
 				
 				for(int i = 2006; i <= endYear; i++) {
 					
-//					if(i < 2017 || i > 2029) {
-						double v = reg.predict(i-2006);
-						out.write(";" + v);
-//					}
+					double v = reg.predict(i-2006);
+					out.write(";" + v);
 					
 				}
 				
+				out.flush();
 				
-//				System.out.print(entry.getKey() + ": ");
-//				
-//				for(int i = 0; i < reg.degree(); i++){
-//					
-//					System.out.print(reg.beta(i) + "\t");
-//					
-//				}
-//				
-//				System.out.println();
-			
+				
 		}
 		
 		if(!stationData.keySet().containsAll(stations2016)) {
