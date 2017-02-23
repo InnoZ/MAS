@@ -22,10 +22,11 @@ import com.innoz.toolbox.io.database.handler.LegOriginHandler;
 import com.innoz.toolbox.io.database.handler.LegPurposeHandler;
 import com.innoz.toolbox.io.database.handler.LegTravelTimeHandler;
 import com.innoz.toolbox.io.database.handler.Logbook;
-import com.innoz.toolbox.io.database.handler.SurveyStage;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
+import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
+import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyStage;
 
 public class ReadTripsDatabaseTask extends DatabaseTask {
 
@@ -109,7 +110,7 @@ public class ReadTripsDatabaseTask extends DatabaseTask {
 				
 				int stichtag = resultSet.getInt(SurveyConstants.dayOfTheWeek(surveyType));
 				
-				SurveyStage stage = new SurveyStage();
+				SurveyStage stage = (SurveyStage) SurveyObject.newInstance(SurveyStage.class);
 				
 				for(DefaultHandler handler : this.handlers){
 					

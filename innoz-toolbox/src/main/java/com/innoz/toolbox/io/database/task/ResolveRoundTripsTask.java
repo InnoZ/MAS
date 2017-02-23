@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.innoz.toolbox.io.database.handler.Logbook;
-import com.innoz.toolbox.io.database.handler.SurveyStage;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
+import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
+import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyStage;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 
 public class ResolveRoundTripsTask implements SurveyDataTask {
@@ -40,7 +41,7 @@ public class ResolveRoundTripsTask implements SurveyDataTask {
 							int duration = (int)(end - start);
 							double distance = Double.parseDouble(stage.getDistance());
 							
-							SurveyStage st2 = new SurveyStage();
+							SurveyStage st2 = (SurveyStage) SurveyObject.newInstance(SurveyStage.class);
 							st2.setDestination("HOME");
 							st2.setPurpose(stage.getPurpose());
 							st2.setDistance(Double.toString(distance / 2));

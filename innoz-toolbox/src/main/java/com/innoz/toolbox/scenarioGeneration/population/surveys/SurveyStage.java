@@ -1,8 +1,8 @@
-package com.innoz.toolbox.io.database.handler;
+package com.innoz.toolbox.scenarioGeneration.population.surveys;
 
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
 
-public class SurveyStage implements SurveyObject {
+public class SurveyStage extends SurveyObject {
 
 	private String index;
 	private String origin;
@@ -13,6 +13,10 @@ public class SurveyStage implements SurveyObject {
 	private String startTime;
 	private String endTime;
 	private String purpose;
+	
+	SurveyStage() {
+		super();
+	}
 	
 	public String getIndex(){
 		return index;

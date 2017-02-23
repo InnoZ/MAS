@@ -2,7 +2,7 @@ package com.innoz.toolbox.scenarioGeneration.population.surveys;
 
 import org.matsim.vehicles.EngineInformation.FuelType;
 
-public class SurveyVehicle implements SurveyObject {
+public class SurveyVehicle extends SurveyObject {
 
 	private String id;
 	private int kbaClass;

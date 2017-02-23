@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.handler.Logbook;
 
 /**
@@ -17,7 +16,7 @@ import com.innoz.toolbox.io.database.handler.Logbook;
  * @author dhosse
  *
  */
-public class SurveyPerson implements SurveyObject {
+public class SurveyPerson extends SurveyObject {
 
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	private String id;
@@ -44,52 +43,11 @@ public class SurveyPerson implements SurveyObject {
 	private boolean isMobile;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
-	public SurveyPerson(){
+	SurveyPerson(){
+		super();
 		this.day2logbook = new HashMap<Integer, Logbook>();
 		this.plans = new ArrayList<>();
 	};
-	
-	/**
-	 * 
-	 * Creates a new survey person object and assigns basic socio-demographic data to it.
-	 * 
-	 * @param id A unique identifier for this person. Normally the combination of the person's household id and its
-	 * number in the household.
-	 * @param sex The sex of the person (male / female).
-	 * @param age The person's age in years.
-	 * @param carAvailable Defines if the person has access to a private car (prerequisite for 'car' and 'ride' modes).
-	 * @param hasLicense Defines if the person is allowed to drive a car (prerequisite for 'car' mode).
-	 * @param isEmployed Defines if the person has a job or not.
-	 */
-	public SurveyPerson(String id, String sex, String age, String carAvailable, String hasLicense, String isEmployed, SurveyConstants constants){
-		
-		this(id, sex, age, carAvailable, hasLicense, isEmployed, constants, "2");
-		
-	}
-	
-	public SurveyPerson(String id, String sex, String age, String carAvailable, String hasLicense, String isEmployed, SurveyConstants constants, String isCarsharingUser){
-		
-		this.id = id;
-		this.sex = sex.equals(constants.getSexMale()) ? "m" : "f";
-		this.age = !age.equals("NaN") ? Integer.parseInt(age) : Integer.MIN_VALUE;
-		
-		if(carAvailable.equals("1") || carAvailable.equals("2")){
-			
-			this.carAvailable = true;
-			
-		} else{
-			
-			this.carAvailable = false;
-			
-		}
-		
-		this.hasLicense = hasLicense.equals("1") ? true : false;
-		this.isEmployed = isEmployed.equals("1") ? true : false;
-		this.carsharingUser = isCarsharingUser.equals("1") ? true : false;
-		
-		this.plans = new ArrayList<>();
-		
-	}
 	
 	public void setId(String id){
 		

@@ -6,6 +6,7 @@ import org.matsim.api.core.v01.TransportMode;
 
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
+import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyStage;
 
 public class LegModeHandler implements DefaultHandler {
 

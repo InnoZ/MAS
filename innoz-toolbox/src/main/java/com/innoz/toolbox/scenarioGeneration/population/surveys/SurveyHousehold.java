@@ -3,7 +3,7 @@ package com.innoz.toolbox.scenarioGeneration.population.surveys;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SurveyHousehold implements SurveyObject {
+public class SurveyHousehold extends SurveyObject {
 	
 	private String id;
 	
@@ -13,7 +13,7 @@ public class SurveyHousehold implements SurveyObject {
 	private final List<String> memberIds;
 	private final List<String> vehicleIds;
 	
-	public SurveyHousehold(){
+	SurveyHousehold(){
 		
 		this.memberIds = new ArrayList<String>();
 		this.vehicleIds = new ArrayList<String>();
