@@ -3,7 +3,7 @@ package com.innoz.toolbox.scenarioGeneration.population.surveys;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SurveyHousehold extends SurveyObject {
+public class SurveyHousehold extends SurveyObject implements Comparable<Double> {
 	
 	private double hhIncome;
 	private Double weight;
@@ -70,6 +70,13 @@ public class SurveyHousehold extends SurveyObject {
 	public String toString() {
 	
 		return "[hhid='" + this.id + "'],[weight='" + this.weight + "'],[income='" + this.hhIncome + "']";
+		
+	}
+
+	@Override
+	public int compareTo(Double w) {
+
+		return Double.compare(this.weight, w);
 		
 	}
 	

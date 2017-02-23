@@ -1,6 +1,5 @@
 package com.innoz.toolbox.scenarioGeneration.population.algorithm;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -25,7 +24,6 @@ import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.ProxyFacility;
 import com.innoz.toolbox.scenarioGeneration.population.PopulationCreator;
-import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyHousehold;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPlanTrip;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
@@ -37,17 +35,6 @@ public abstract class DemandGenerationAlgorithm {
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	final Random random = MatsimRandom.getLocalInstance();
 	final Geoinformation geoinformation;
-	
-	//Comparator that sorts households by their weights
-	Comparator<SurveyHousehold> householdComparator = new Comparator<SurveyHousehold>() {
-
-		@Override
-		public int compare(SurveyHousehold o1, SurveyHousehold o2) {
-			return Double.compare(o1.getWeight(), o2.getWeight());
-		
-		}
-		
-	};
 	
 	static final Logger log = Logger.getLogger(PopulationCreator.class);
 	/////////////////////////////////////////////////////////////////////////////////////////

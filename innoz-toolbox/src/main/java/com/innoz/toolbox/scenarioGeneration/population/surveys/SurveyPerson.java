@@ -17,7 +17,7 @@ import com.innoz.toolbox.io.database.handler.Logbook;
  * @author dhosse
  *
  */
-public class SurveyPerson extends SurveyObject {
+public class SurveyPerson extends SurveyObject implements Comparable<Double> {
 
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	private String sex;
@@ -288,6 +288,13 @@ public class SurveyPerson extends SurveyObject {
 	public String toString() {
 		
 		return "[id='" + this.id + "']";
+		
+	}
+
+	@Override
+	public int compareTo(Double w) {
+
+		return Double.compare(this.weight, w);
 		
 	}
 	

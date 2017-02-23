@@ -1,7 +1,6 @@
 package com.innoz.toolbox.scenarioGeneration.population.algorithm;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -119,7 +118,6 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		// Sort the households by their weight (according to the survey data)
 		List<SurveyHousehold> households = new ArrayList<>();
 		households.addAll(container.getHouseholds().values());
-		Collections.sort(households, this.householdComparator);
 		
 		// Choose a home cell for the household
 		// Initialize a pseudo-random number and iterate over all administrative units.
