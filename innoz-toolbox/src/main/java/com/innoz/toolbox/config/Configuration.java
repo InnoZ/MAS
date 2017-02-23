@@ -57,14 +57,15 @@ public final class Configuration {
 	Configuration(){
 		
 		this.misc = new MiscConfigurationGroup();
-		this.groups.put("misc", misc);
+		this.groups.put(this.misc.groupName, this.misc);
 		this.psql = new PsqlConfigurationGroup();
-		this.groups.put("psql", psql);
+		this.groups.put(this.psql.groupName, this.psql);
 		this.scenario = new ScenarioConfigurationGroup();
-		this.groups.put("scenario", scenario);
+		this.groups.put(this.scenario.groupName, this.scenario);
 		this.surveyPopulation = new SurveyPopulationConfigurationGroup();
+		this.groups.put(this.surveyPopulation.groupName, this.surveyPopulation);
 		this.tracks = new TracksConfigurationGroup();
-		this.groups.put("surveyPopulation", surveyPopulation);
+		this.groups.put(this.tracks.groupName, this.tracks);
 	
 	}
 	
