@@ -5,52 +5,38 @@ import java.util.List;
 
 public class SurveyHousehold extends SurveyObject {
 	
-	private String id;
-	
 	private double hhIncome;
 	private Double weight;
 	
 	private final List<String> memberIds;
 	private final List<String> vehicleIds;
 	
-	SurveyHousehold(){
+	SurveyHousehold() {
 		
 		this.memberIds = new ArrayList<String>();
 		this.vehicleIds = new ArrayList<String>();
 
 	}
 
-	public String getId(){
-		
-		return this.id;
-		
-	}
-	
-	public void setId(String id){
-		
-		this.id = id;
-		
-	}
-	
-	public int getNPersons(){
+	public int getNPersons() {
 		
 		return this.memberIds.size();
 		
 	}
 	
-	public double getNCars(){
+	public double getNCars() {
 		
 		return this.vehicleIds.size();
 		
 	}
 	
-	public double getIncome(){
+	public double getIncome() {
 		
 		return this.hhIncome;
 		
 	}
 	
-	public void setIncome(double income){
+	public void setIncome(double income) {
 		
 		this.hhIncome = income;
 		
@@ -62,16 +48,29 @@ public class SurveyHousehold extends SurveyObject {
 		
 	}
 	
-	public List<String> getVehicleIds(){
+	public List<String> getVehicleIds() {
+		
 		return this.vehicleIds;
+		
 	}
 
 	public Double getWeight() {
+		
 		return weight;
+		
 	}
 
 	public void setWeight(Double weight) {
+		
 		this.weight = weight;
+	
+	}
+
+	@Override
+	public String toString() {
+	
+		return "[hhid='" + this.id + "'],[weight='" + this.weight + "'],[income='" + this.hhIncome + "']";
+		
 	}
 	
 }

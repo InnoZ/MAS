@@ -15,7 +15,7 @@ public class SurveyStage extends SurveyObject {
 	private String purpose;
 	
 	SurveyStage() {
-		super();
+
 	}
 	
 	public String getIndex(){

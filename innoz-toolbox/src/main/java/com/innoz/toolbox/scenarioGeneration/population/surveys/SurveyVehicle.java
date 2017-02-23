@@ -4,35 +4,26 @@ import org.matsim.vehicles.EngineInformation.FuelType;
 
 public class SurveyVehicle extends SurveyObject {
 
-	private String id;
 	private int kbaClass;
 	private FuelType fuelType;
 	
-	public SurveyVehicle(){};
+	SurveyVehicle() {
+		
+	}
 
-	public SurveyVehicle(String id){
+	public void setKbaClass(int clazz) {
 		
-		this.id = id;
-		
-	}
-	
-	public void setId(String id){
-		this.id = id;
-	}
-	
-	public String getId(){
-		return this.id;
-	}
-	
-	public void setKbaClass(int clazz){
 		this.kbaClass = clazz;
+		
 	}
 	
-	public int getKbaClass(){
+	public int getKbaClass() {
+		
 		return this.kbaClass;
+		
 	}
 	
-	public void setFuelType(int t){
+	public void setFuelType(int t) {
 		
 		switch(t){
 		
@@ -49,8 +40,10 @@ public class SurveyVehicle extends SurveyObject {
 	
 	}
 	
-	public FuelType getFuelType(){
+	public FuelType getFuelType() {
+		
 		return this.fuelType;
+		
 	}
 
 	public void setFuelType(String string) {

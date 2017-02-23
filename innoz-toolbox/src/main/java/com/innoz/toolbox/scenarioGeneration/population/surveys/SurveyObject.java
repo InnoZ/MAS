@@ -2,6 +2,8 @@ package com.innoz.toolbox.scenarioGeneration.population.surveys;
 
 public abstract class SurveyObject {
 
+	String id;
+	
 	//just to hide the constructor
 	SurveyObject(){};
 	
@@ -18,6 +20,18 @@ public abstract class SurveyObject {
 		}
 		
 		return null;
+		
+	}
+	
+	public String getId() {
+		
+		return this.id;
+		
+	}
+	
+	public void setId(String id) {
+		
+		this.id = id;
 		
 	}
 	
