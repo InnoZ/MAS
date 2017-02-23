@@ -18,6 +18,7 @@ import com.innoz.toolbox.io.database.handler.PersonEmploymentHandler;
 import com.innoz.toolbox.io.database.handler.PersonIdHandler;
 import com.innoz.toolbox.io.database.handler.PersonIsMobileHandler;
 import com.innoz.toolbox.io.database.handler.PersonLicenseHandler;
+import com.innoz.toolbox.io.database.handler.PersonRegionTypeHandler;
 import com.innoz.toolbox.io.database.handler.PersonSexHandler;
 import com.innoz.toolbox.io.database.handler.PersonWeightHandler;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
@@ -25,6 +26,14 @@ import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 import com.innoz.toolbox.utils.data.Tree.Node;
+
+/**
+ * 
+ * Parses through specified survey to retrieve information about persons living in a given region type. 
+ * Creates maps of attributes from the ResultSet and assigns them to a person which is put into the SurveyDataContainer {@link com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer#addPerson(SurveyPerson)}.
+ * @author dhosse
+ *
+ */
 
 public class ReadPersonDatabaseTask extends DatabaseTask {
 	
@@ -44,6 +53,7 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 		this.handlers.add(new PersonSexHandler());
 		this.handlers.add(new PersonWeightHandler());
 		this.handlers.add(new PersonIsMobileHandler());
+		this.handlers.add(new PersonRegionTypeHandler());
 	
 	}
 
@@ -75,16 +85,16 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 					
 					if(ids.contains(entry.getId().substring(0, 5))&&!knownRegionTypes.contains(entry.getRegionType())){
 					
-						cntOut++;
-						
-						q += SurveyConstants.regionType(surveyType) + " = " + entry.getRegionType();
-						knownRegionTypes.add(entry.getRegionType());
-
-						if(cntOut < ids.size()){
+						if(cntOut > 0){
 
 							q += " or ";
 							
 						}
+						
+						cntOut++;
+						
+						q += SurveyConstants.regionType(surveyType) + " = " + entry.getRegionType();
+						knownRegionTypes.add(entry.getRegionType());
 						
 					}
 					
@@ -128,7 +138,8 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 				attributes.put(SurveyConstants.personAge(surveyType), resultSet.getString(SurveyConstants.personAge(surveyType)));
 				attributes.put(SurveyConstants.personEmployment(surveyType), resultSet.getString(SurveyConstants.personEmployment(surveyType)));
 				attributes.put(SurveyConstants.mobile(surveyType), resultSet.getString(SurveyConstants.mobile(surveyType)));
-				
+				attributes.put(SurveyConstants.regionType(surveyType), resultSet.getString(SurveyConstants.regionType(surveyType))); 
+								
 				SurveyPerson person = new SurveyPerson();
 				
 				for(DefaultHandler handler : this.handlers){

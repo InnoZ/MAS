@@ -40,7 +40,7 @@ public class CSVtoPostgreSQL {
     	  sql =	"CREATE TABLE " +  tableName + "("
     	  		+ "Land		integer,"
     	  		+ "GKZ		integer,"
-    	  		+ "Name		char(50)";
+    	  		+ "Name		varchar(50)";
     	  if (tableName.contains("Z")){
     		  sql = sql + ", Raumkategorie int";
     	  }
