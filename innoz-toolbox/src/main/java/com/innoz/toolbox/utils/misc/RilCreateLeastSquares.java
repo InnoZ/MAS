@@ -16,33 +16,44 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.statistics.Regression;
 import org.jfree.data.xy.XYDataItem;
 import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 import org.matsim.core.utils.charts.XYScatterChart;
 import org.matsim.core.utils.io.IOUtils;
 
 import com.innoz.toolbox.config.psql.PsqlAdapter;
+import com.innoz.toolbox.utils.PsqlUtils;
 import com.innoz.toolbox.utils.io.AbstractCsvReader;
 import com.innoz.toolbox.utils.math.PolynomialRegression;
 import com.innoz.toolbox.utils.matsim.RecursiveStatsContainer;
 
 public class RilCreateLeastSquares {
 
+	static final String RIL_DATABASE = "ril";
+	static final int[] CATEGORIES = new int[]{100,300,1000,5000,10000,15000,20000,50000,1000000};
+
+	static final String FV = "fv";
+	static final String NV = "nv";
+	static final String FVO = "fv_fremd";
+	static final String NVO = "nv_fremd";
+	static final String GES = "ges";
+	static final String STATION = "station";
+	static final String V15 = "verkehrs15";
+	static final String TYP = "typ_name";
+	static final String STATE= "state";
+	
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException,
 		ClassNotFoundException, SQLException, IOException {
 
 //		compute();
-//		computeAggregates();
 		computeStationwise();
 		
 	}
-	
+
 	private static void compute() throws InstantiationException, IllegalAccessException, ClassNotFoundException,
 		SQLException, IOException {
 		
-		Connection c = PsqlAdapter.createConnection("ril");
+		Connection c = PsqlAdapter.createConnection(RIL_DATABASE);
 		Statement statement = c.createStatement();
 		
 		String[] tables = new String[]{"daten_2006_regionstyp_final", "daten_2007_regionstyp_final",
@@ -51,27 +62,25 @@ public class RilCreateLeastSquares {
 				"daten_2014_regionstyp_final", "daten_2015_regionstyp_final", "daten_2016_regionstyp_final"
 		};
 		
-		int[] categories = new int[]{100,300,1000,5000,10000,15000,20000,50000,1000000};
-		
 		Map<String, String> station2Category = new HashMap<>();
 		Map<String, Integer> category2StationCount = new HashMap<>();
 		
-		ResultSet set = statement.executeQuery("SELECT state,fv,nv,fv_fremd,nv_fremd,station,ges,verkehrs15,typ_name from "
-				+ "daten_2016_regionstyp_final;");
+		ResultSet set = statement.executeQuery(PsqlUtils.createSelectStatement("fv,nv,fv_fremd,nv_fremd,station,ges,verkehrs15,typ_name",
+				"daten_2016_regionstyp_final"));
 		
 		while(set.next()){
 			
-			int fv = set.getInt("fv");
-			int nv = set.getInt("nv");
-			int fvo = set.getInt("fv_fremd");
-			int nvo = set.getInt("nv_fremd");
+			int fv = set.getInt(FV);
+			int nv = set.getInt(NV);
+			int fvo = set.getInt(FVO);
+			int nvo = set.getInt(FVO);
 			
 			if(fv >= 0 && nv >= 0 && fvo >= 0 && nvo >= 0){
 				
-				float n = set.getFloat("ges");
+				float n = set.getFloat(GES);
 				String catType = null;
 				
-				for(int cat : categories){
+				for(int cat : CATEGORIES){
 					
 					if(n <= cat){
 						catType = Integer.toString(cat);
@@ -80,8 +89,8 @@ public class RilCreateLeastSquares {
 					
 				}
 				
-				String type = set.getString("typ_name") + "_" + catType;
-				String station = set.getString("station");
+				String type = set.getString(TYP) + "_" + catType;
+				String station = set.getString(STATION);
 				
 				if(!type.contains("null")){
 					
@@ -109,16 +118,17 @@ public class RilCreateLeastSquares {
 			
 			Map<String, Map<String,RecursiveStatsContainer>> type2Container = new HashMap<>();
 			
-			ResultSet result = statement.executeQuery("SELECT state,station,fv,nv,fv_fremd,nv_fremd,ges,verkehrs15,typ_name from " + table + ";");
+			ResultSet result = statement.executeQuery(
+					PsqlUtils.createSelectStatement("state,station,fv,nv,nv_fremd,ges,verkehrs15,typ_name", table));
 			
 			int year = 0;
 			
 			while(result.next()){
 				
-				int fv = result.getInt("fv");
-				int nv = result.getInt("nv");
-				int fvo = result.getInt("fv_fremd");
-				int nvo = result.getInt("nv_fremd");
+				int fv = result.getInt(FV);
+				int nv = result.getInt(NV);
+				int fvo = result.getInt(FVO);
+				int nvo = result.getInt(NVO);
 				
 				String state = null;
 				
@@ -427,7 +437,7 @@ public class RilCreateLeastSquares {
 	private static void computeStationwise() throws InstantiationException, IllegalAccessException,
 		ClassNotFoundException, SQLException, IOException {
 		
-		Connection c = PsqlAdapter.createConnection("ril");
+		Connection c = PsqlAdapter.createConnection(RIL_DATABASE);
 		Statement statement = c.createStatement();
 		
 		String[] tables = new String[]{"daten_2006_regionstyp_final", "daten_2007_regionstyp_final",
@@ -464,7 +474,8 @@ public class RilCreateLeastSquares {
 		
 		for(String table : tables){
 		
-			ResultSet result = statement.executeQuery("SELECT station,fv,nv,fv_fremd,nv_fremd,ges,verkehrs15 from " + table + ";");
+			ResultSet result = statement.executeQuery(
+					PsqlUtils.createSelectStatement("station,fv,nv,fv_fremd,nv_fremd,ges,verkehrs15", table));
 			
 			while(result.next()){
 				
@@ -579,71 +590,6 @@ public class RilCreateLeastSquares {
 		statement.close();
 		c.close();
 		
-	}
-
-	private static void computeAggregates()
-			throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException, IOException {
-		
-		Connection c = PsqlAdapter.createConnection("ril");
-		
-		Statement statement = c.createStatement();
-
-		String[] tables = new String[]{"daten_eng_verfl_0_to_100", "daten_eng_verfl_10001_to_15000",
-				"daten_eng_verfl_1001_to_5000", "daten_eng_verfl_101_to_300", "daten_eng_verfl_15001_to_20000",
-				"daten_eng_verfl_20001_to_50000", "daten_eng_verfl_301_to_1000", "daten_eng_verfl_50000_to_1000000",
-				"daten_eng_verfl_5001_to_10000", "daten_ergaenz_0_to_100", "daten_ergaenz_10001_to_15000",
-				"daten_ergaenz_1001_to_5000", "daten_ergaenz_101_to_300", "daten_ergaenz_15001_to_20000",
-				"daten_ergaenz_20001_to_50000", "daten_ergaenz_301_to_1000", "daten_ergaenz_50000_to_1000000",
-				"daten_ergaenz_5001_to_10000", "daten_gem_aus_gros_0_to_100", "daten_gem_aus_gros_10001_to_15000",
-				"daten_gem_aus_gros_1001_to_5000", "daten_gem_aus_gros_101_to_300", "daten_gem_aus_gros_15001_to_20000",
-				"daten_gem_aus_gros_20001_to_50000", "daten_gem_aus_gros_301_to_1000", "daten_gem_aus_gros_50000_to_1000000",
-				"daten_gem_aus_gros_5001_to_10000", "daten_weit_verfl_0_to_100", "daten_weit_verfl_10001_to_15000",
-				"daten_weit_verfl_1001_to_5000", "daten_weit_verfl_101_to_300", "daten_weit_verfl_15001_to_20000",
-				"daten_weit_verfl_20001_to_50000", "daten_weit_verfl_301_to_1000", "daten_weit_verfl_50000_to_1000000",
-				"daten_weit_verfl_5001_to_10000", "daten_zentrum_0_to_100", "daten_zentrum_10001_to_15000",
-				"daten_zentrum_1001_to_5000", "daten_zentrum_101_to_300", "daten_zentrum_15001_to_20000",
-				"daten_zentrum_20001_to_50000", "daten_zentrum_301_to_1000", "daten_zentrum_50000_to_1000000",
-				"daten_zentrum_5001_to_10000"};
-
-		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/aggregates.csv");
-		out.write("category;median_a0;median_a1;avg_a0;avg_a1;Anzahl Datenpunkte");
-		
-		for(String table : tables){
-			
-			ResultSet result = statement.executeQuery("SELECT * FROM " + table + ";");
-			XYSeries medianSeries = new XYSeries("");
-			XYSeries avgSeries = new XYSeries("");
-			
-			int nDatapoints = 0;
-
-			while(result.next()){
-				
-				int year = result.getInt("year");
-				float median = result.getFloat("median_ges");
-				float avg = result.getFloat("avg_ges");
-				nDatapoints = result.getInt("count");
-				
-				medianSeries.add(year, median);
-				avgSeries.add(year, avg);
-				
-			}
-			
-			result.close();
-			
-			XYSeriesCollection medianData = new XYSeriesCollection(medianSeries);
-			XYSeriesCollection avgData = new XYSeriesCollection(avgSeries);
-			double[] median_as = Regression.getOLSRegression(medianData, 0);
-			double[] avg_as = Regression.getOLSRegression(avgData, 0);
-			
-			out.newLine();
-			out.write(table + ";" + median_as[0] + ";" + median_as[1] + ";" + avg_as[0] + ";" + avg_as[1] + ";" + nDatapoints);
-			
-		}
-		
-		out.close();
-		
-		statement.close();
-		c.close();
 	}
 
 }
