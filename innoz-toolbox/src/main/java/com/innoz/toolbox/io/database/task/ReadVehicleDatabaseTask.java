@@ -16,6 +16,7 @@ import com.innoz.toolbox.io.database.handler.VehicleIdHandler;
 import com.innoz.toolbox.io.database.handler.VehicleKbaSegmentHandler;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
+import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyVehicle;
 
 public class ReadVehicleDatabaseTask extends DatabaseTask {
@@ -62,15 +63,15 @@ public class ReadVehicleDatabaseTask extends DatabaseTask {
 				attributes.put(SurveyConstants.vehicleSegmentKBA(surveyType), Integer.toString(resultSet.getInt(
 						SurveyConstants.vehicleSegmentKBA(surveyType))));
 				
-				SurveyVehicle vehicle = new SurveyVehicle();
+				SurveyVehicle vehicle = (SurveyVehicle) SurveyObject.newInstance(SurveyVehicle.class);
 				
-				for(DefaultHandler handler : this.handlers){
+				for(DefaultHandler handler : this.handlers) {
 					
 					handler.handle(vehicle, attributes, surveyType);
 					
 				}
 
-				if(vehicle.getFuelType() != null){
+				if(vehicle.getFuelType() != null) {
 
 					container.getHouseholds().get(hhId).getVehicleIds().add(vehicle.getId());
 					container.getVehicles().put(vehicle.getId(), vehicle);

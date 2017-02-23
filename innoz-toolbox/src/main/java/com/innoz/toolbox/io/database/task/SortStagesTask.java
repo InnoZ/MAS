@@ -5,9 +5,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import com.innoz.toolbox.io.database.handler.Logbook;
-import com.innoz.toolbox.io.database.handler.SurveyStage;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
+import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyStage;
 
 public class SortStagesTask implements DataContainerTask {
 

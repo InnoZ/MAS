@@ -7,13 +7,13 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.utils.misc.Time;
 
 import com.innoz.toolbox.io.database.handler.Logbook;
-import com.innoz.toolbox.io.database.handler.SurveyStage;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPlan;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPlanActivity;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPlanElement;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPlanTrip;
+import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyStage;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 
 public class ConvertToPlansTask implements SurveyDataTask {
