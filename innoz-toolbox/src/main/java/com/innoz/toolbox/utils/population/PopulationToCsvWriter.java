@@ -1,4 +1,4 @@
-package com.innoz.toolbox.utils;
+package com.innoz.toolbox.utils.population;
 
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
@@ -14,14 +14,15 @@ public class PopulationToCsvWriter {
 	
 	/**
 	 * 
-	 * Utilities in terms of geometries.
+	 * Writes all agents into a csv file, currently containing the fields:
+	 * personID;age;sex;hasLicense;car_avail;employed;actCount;
 	 * 
-	 * @author dhosse
+	 * @author bmoehring
 	 *
 	 */
 
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
-	private static final Logger log = Logger.getLogger(GeometryUtils.class);
+	private static final Logger log = Logger.getLogger(PopulationToCsvWriter.class);
 	private static final String SPACE = " ";
 	private static final String TRIPLE_SPACE = "   ";
 	private static final String TAB = "\t";
@@ -47,7 +48,7 @@ public class PopulationToCsvWriter {
 			String line = "personID;"
 					+ "age;"
 					+ "sex;"
-					+ "license;"
+					+ "hasLicense;"
 					+ "car_avail;"
 					+ "employed;"
 					+ "actcount; \n";
