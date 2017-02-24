@@ -1,13 +1,11 @@
 package com.innoz.toolbox.config;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 import com.innoz.toolbox.config.groups.ConfigurationGroup;
 import com.innoz.toolbox.config.groups.MiscConfigurationGroup;
+import com.innoz.toolbox.config.groups.NetworkConfigurationGroup;
 import com.innoz.toolbox.config.groups.PsqlConfigurationGroup;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup;
@@ -22,13 +20,9 @@ import com.innoz.toolbox.config.groups.TracksConfigurationGroup;
  */
 public final class Configuration {
 	
-	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
-	private static final Logger log = Logger.getLogger(Configuration.class);
-	/////////////////////////////////////////////////////////////////////////////////////////
-	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
-	//CONFIGURABLE///////////////////////////////////////////////////////////////////////////
 	private MiscConfigurationGroup misc;
+	private NetworkConfigurationGroup network;
 	private PsqlConfigurationGroup psql;
 	private ScenarioConfigurationGroup scenario;
 	private SurveyPopulationConfigurationGroup surveyPopulation;
@@ -42,9 +36,9 @@ public final class Configuration {
 	 * 
 	 * @param file Text file containing the configuration parameters.
 	 */
-	Configuration(String file){
+	Configuration(String file) {
 		
-		this();		
+		this();
 		this.load(file);
 		
 	}
@@ -54,10 +48,12 @@ public final class Configuration {
 	 * Creates an empty (i.e. only default values) configuration.
 	 * 
 	 */
-	Configuration(){
+	Configuration() {
 		
 		this.misc = new MiscConfigurationGroup();
 		this.groups.put(this.misc.groupName, this.misc);
+		this.network = new NetworkConfigurationGroup();
+		this.groups.put("network", network);
 		this.psql = new PsqlConfigurationGroup();
 		this.groups.put(this.psql.groupName, this.psql);
 		this.scenario = new ScenarioConfigurationGroup();
@@ -75,101 +71,49 @@ public final class Configuration {
 	 * 
 	 * @param file The configuration file to load.
 	 */
-	void load(String file){
+	void load(String file) {
 		
 		new ConfigurationReaderXml(this).read(file);
 		
-		validate();
-		
 	}
 	
-	/**
-	 * Validates the configuration. Only errors that may eventually cause exceptions are taken into account here.
-	 */
-	private void validate(){
-		
-		boolean validationError = false;
-
-		// Check if the output directory exists and has files in it.
-		File f = new File(this.misc.getOutputDirectory());
-		if(f.exists()){
-			
-			if(f.list().length > 0){
-				
-				log.warn("The output directory " + this.misc.getOutputDirectory() + " already exists and has files in it!");
-				
-				if(!this.misc.isOverwritingExistingFiles()){
-					
-					log.error("Since you disabled overwriting of existing files, you must either delete existing files or pick another"
-							+ " output directory!");
-					validationError = true;
-					
-				} else {
-					
-					log.warn("All existing files will be overwritten!");
-					
-				}
-				
-			}
-			
-		}
-		
-		int nProcessors = Runtime.getRuntime().availableProcessors();
-		int n = this.misc.getNumberOfThreads();
-		if(n > nProcessors){
-			
-			log.warn("Specified number of threads: " + n + ", but you have only " + nProcessors + " cores available...");
-			log.info("Thus, the programm will only use these " + nProcessors + " cores.");
-			this.misc.setNumberOfThreads(nProcessors);
-			
-		} else if(n == 0){
-			
-			log.warn("Specified number of threads: " + n + "!");
-			log.info("Thus, the programm will use all " + nProcessors + " cores.");
-			this.misc.setNumberOfThreads(nProcessors);
-			
-		}
-		
-		// If anything should cause the configuration to be invalid, abort!
-		if(validationError){
-			
-			throw new RuntimeException("Invalid configuration! Shutting down...");
-			
-		}
-		
-	}
-	
-	public final MiscConfigurationGroup misc(){
+	public final MiscConfigurationGroup misc() {
 		
 		return this.misc;
 		
 	}
 	
-	public final PsqlConfigurationGroup psql(){
+	public final NetworkConfigurationGroup network() {
+
+		return this.network;
+		
+	}
+	
+	public final PsqlConfigurationGroup psql() {
 		
 		return this.psql;
 		
 	}
 	
-	public final ScenarioConfigurationGroup scenario(){
+	public final ScenarioConfigurationGroup scenario() {
 		
 		return this.scenario;
 		
 	}
 	
-	public final SurveyPopulationConfigurationGroup surveyPopulation(){
+	public final SurveyPopulationConfigurationGroup surveyPopulation() {
 		
 		return this.surveyPopulation;
 		
 	}
 	
-	public final TracksConfigurationGroup tracks(){
+	public final TracksConfigurationGroup tracks() {
 		
 		return this.tracks;
 		
 	}
 	
-	public final ConfigurationGroup getModule(String name){
+	public final ConfigurationGroup getModule(String name) {
 		
 		return this.groups.get(name);
 		

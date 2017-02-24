@@ -29,6 +29,9 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 
 import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.config.groups.ConfigurationGroup;
+import com.innoz.toolbox.config.groups.NetworkConfigurationGroup;
+import com.innoz.toolbox.config.groups.NetworkConfigurationGroup.HighwayDefaults;
 import com.innoz.toolbox.io.database.DatabaseReader;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 
@@ -112,38 +115,13 @@ public class NetworkCreatorFromPsql {
 		this.transformation = TransformationFactory.getCoordinateTransformation(
 				from.toString(), to.toString());
 		this.configuration = configuration;
+
+		NetworkConfigurationGroup net = configuration.network();
+		this.cleanNetwork = net.cleanNetwork();
+		this.simplifyNetwork = net.isSimplifyNetwork();
+		this.scaleMaxSpeed = net.scaleMaxSpeed();
 		
 	};
-	
-	/**
-	 * 
-	 * Setter for the network simplification variable.
-	 * 
-	 * @param b true / false
-	 */
-	public void setSimplifyNetwork(boolean b){
-		this.simplifyNetwork = b;
-	}
-	
-	/**
-	 * 
-	 * Setter for the network cleaning variable.
-	 * 
-	 * @param b true / false
-	 */
-	public void setCleanNetwork(boolean b){
-		this.cleanNetwork = b;
-	}
-
-	/**
-	 * 
-	 * Setter for the scale maximum speed variable.
-	 * 
-	 * @param b true / false
-	 */
-	public void setScaleMaxSpeed(boolean b){
-		this.scaleMaxSpeed = b;
-	}
 	
 	/**
 	 * 
@@ -158,6 +136,13 @@ public class NetworkCreatorFromPsql {
 	 */
 	public void create(DatabaseReader dbReader) throws InstantiationException, IllegalAccessException, ClassNotFoundException,
 		SQLException, ParseException{
+		
+		for(ConfigurationGroup c : this.configuration.network().getHighwayDefaults().values()) {
+			
+			HighwayDefaults def = (HighwayDefaults) c;
+			this.highwayDefaults.put(def.getHighwayType(), def);
+			
+		}
 		
 		// If highway defaults have been specified, use them. Else fall back to default values.
 		if(this.highwayDefaults.size() < 1){
@@ -226,7 +211,7 @@ public class NetworkCreatorFromPsql {
 	public void setHighwayDefaults(final int hierarchyLevel, final String highwayType, final double lanesPerDirection, final double freespeed,
 			final double freespeedFactor, final double laneCapacity_vehPerHour, final boolean oneway, String modes){
 		
-		this.highwayDefaults.put(highwayType, new HighwayDefaults(hierarchyLevel, freespeed, freespeedFactor, lanesPerDirection,
+		this.highwayDefaults.put(highwayType, new HighwayDefaults(hierarchyLevel, highwayType, freespeed, freespeedFactor, lanesPerDirection,
 				laneCapacity_vehPerHour, oneway, modes));
 		
 	}
@@ -333,7 +318,7 @@ public class NetworkCreatorFromPsql {
 					boolean inSurveyArea = this.bufferedArea.contains(MGC.coord2Point(node.getCoord()));
 					int hierarchyLevel = inSurveyArea ? this.levelOfDetail : this.levelOfDetail - 2;
 				
-					if(this.highwayDefaults.get(entry.getHighwayTag()).hierarchyLevel <= hierarchyLevel){
+					if(this.highwayDefaults.get(entry.getHighwayTag()).getHierarchyLevel() <= hierarchyLevel){
 						
 						node.setUsed(true);
 						
@@ -470,13 +455,13 @@ public class NetworkCreatorFromPsql {
 		if(defaults != null){
 
 			//set all values to default
-			double freespeed = defaults.freespeed;
-			double freespeedFactor = defaults.freespeedFactor;
-			double lanesPerDirection = defaults.lanesPerDirection;
-			double laneCapacity = defaults.laneCapacity;
-			boolean oneway = defaults.oneway;
+			double freespeed = defaults.getFreespeed();
+			double freespeedFactor = defaults.getFreespeedFactor();
+			double lanesPerDirection = defaults.getLanesPerDirection();
+			double laneCapacity = defaults.getLaneCapacity();
+			boolean oneway = defaults.isOneway();
 			boolean onewayReverse = false;
-			Set<String> modes = CollectionUtils.stringToSet(defaults.modes);
+			Set<String> modes = CollectionUtils.stringToSet(defaults.getModes());
 
 			// Handle the freespeed tag
 			String freespeedTag = entry.getMaxspeedTag();
@@ -491,7 +476,7 @@ public class NetworkCreatorFromPsql {
 
 					freespeed = resolveUnknownFreespeedTag(freespeedTag);
 					
-					if(!unknownTags.contains(freespeedTag)){
+					if(!unknownTags.contains(freespeedTag) && freespeed == 0){
 						
 						unknownTags.add(freespeedTag);
 						log.warn("Could not parse freespeed tag: " + freespeedTag + ". Ignoring it.");
@@ -574,6 +559,12 @@ public class NetworkCreatorFromPsql {
 			
 			// Set the link's capacity and the resulting freespeed (if it's meant to be scaled)
 			double capacity = lanesPerDirection * laneCapacity * this.configuration.scenario().getScaleFactor();
+			
+			//MATSim seems to have problems with lane numbers smaller than 1
+			//This can be fixed here since we already took the reduced capacity into account
+			if(lanesPerDirection < 1d){
+				lanesPerDirection = 1d;
+			}
 			
 			if(this.scaleMaxSpeed){
 				
@@ -659,6 +650,18 @@ public class NetworkCreatorFromPsql {
 			
 			kmh = 130;
 			
+		} else if("walk".equals(s) || "DE:living_street".equals(s)){
+			
+			kmh = 5;
+			
+		} else if("5 mph".equals(s)){
+			
+			kmh = 5 * 1.609;
+			
+		} else if(s.contains(";")){
+			
+			kmh = Double.parseDouble(s.split(";")[0]);
+			
 		}
 		
 		return kmh / 3.6;
@@ -681,34 +684,4 @@ public class NetworkCreatorFromPsql {
 		return this.transformation;
 	}
 
-	/**
-	 * 
-	 * Stores default values for link characteristics.
-	 * 
-	 * @author dhosse
-	 *
-	 */
-	static class HighwayDefaults{
-		
-		int hierarchyLevel;
-		double freespeed;
-		double freespeedFactor;
-		double lanesPerDirection;
-		double laneCapacity;
-		boolean oneway;
-		String modes;
-		
-		HighwayDefaults(int hierarchyLevel, double freespeed, double freespeedFactor, double lanesPerDirection, double laneCapacity, 
-				boolean oneway, String modes){
-			this.hierarchyLevel = hierarchyLevel;
-			this.freespeed = freespeed;
-			this.freespeedFactor = freespeedFactor;
-			this.lanesPerDirection = lanesPerDirection;
-			this.laneCapacity = laneCapacity;
-			this.oneway = oneway;
-			this.modes = modes;
-		}
-		
-	}
-	
 }

@@ -1,23 +1,27 @@
 package com.innoz.toolbox.io.database;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.matrices.Matrix;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.PsqlAdapter;
+import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.config.groups.ConfigurationGroup;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
+import com.innoz.toolbox.config.psql.ResultSetStream;
 import com.innoz.toolbox.scenarioGeneration.population.commuters.CommuterDataElement;
+import com.innoz.toolbox.utils.PsqlUtils;
 
 public class CommuterDatabaseParser {
 
@@ -93,43 +97,35 @@ public class CommuterDatabaseParser {
 			
 		}
 		
-		Statement statement = connection.createStatement();
-		ResultSet results = statement.executeQuery(q);
+		PreparedStatement statement = connection.prepareStatement(q);
 		
-		while(results.next()){
-			
-			String fromKey = results.getString("home_id");
-			String fromName = results.getString("home_name");
-			String toKey = table.equals("2015_internal") ? fromKey : results.getString("work_id");
-			String toName = table.equals("2015_internal") ? fromName : results.getString("work_name");
-			String amount = results.getString("amount");
-			String nMale = table.equals("2015_internal") ? "0" : results.getString("men");
-			String nAzubis = table.equals("2015_internal") ? "0" : results.getString("azubis");
-			
-			int n = 0;
-			int nTrainees = 0;
-			double pMale = 0.0d;
-			
-			if(amount != null){
-				
-				n = Integer.parseInt(amount);
-				
-				if(nMale != null){
+		try(Stream<CommuterDataElement> stream = new ResultSetStream<CommuterDataElement>().getStream(statement,
+				(ResultSet results) -> { try {
 					
-					pMale = (double)(Double.parseDouble(nMale)/n);
+					String fromId = results.getString("home_id");
+					String fromName = results.getString("home_name");
+					String toId = table.equals("2015_internal") ? fromId : results.getString("work_id");
+					String toName = table.equals("2015_internal") ? fromName : results.getString("work_name");
+					
+					return new CommuterDataElement(fromId, fromName, toId, toName, results.getInt("amount"));
+					
+				} catch (Exception e){
+					
+					return null;
 					
 				}
-				
-			}
+					
+				})){
 			
-			if(nAzubis != null){
+			Iterator<CommuterDataElement> elements = stream.iterator();
+			
+			CommuterDataElement next = null;
+			while((next = elements.next()) != null){
 				
-				nTrainees = Integer.parseInt(nAzubis);
+				this.commuterData.add(next);
+				this.od.createEntry(next.getFromId(), next.getToId(), next.getNumberOfCommuters());
 				
 			}
-		
-			this.od.createEntry(fromKey, toKey, n);
-			this.commuterData.add(new CommuterDataElement(fromKey, fromName, toKey, toName, n, pMale, nTrainees));
 			
 		}
 		
@@ -137,23 +133,7 @@ public class CommuterDatabaseParser {
 	
 	private String createChainedStatementFromSet(Set<String> set, String var){
 		
-		boolean isFirst = true;
-		StringBuilder result = new StringBuilder();
-		
-		for(String s : set){
-			
-			if(!isFirst){
-			
-				result.append(" or ");
-			
-			}
-			
-			result.append(var + " like '" + s + "%'");
-			isFirst = false;
-			
-		}
-		
-		return result.toString();
+		return new StringBuilder().append(var + " in (").append(PsqlUtils.setToString(set)).append(")").toString();
 		
 	}
 	

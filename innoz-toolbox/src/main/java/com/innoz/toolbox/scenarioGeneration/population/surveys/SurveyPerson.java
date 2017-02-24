@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.innoz.toolbox.io.database.handler.Logbook;
+import com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils;
+import com.innoz.toolbox.scenarioGeneration.utils.Weighted;
 
 /**
  * 
@@ -17,7 +19,7 @@ import com.innoz.toolbox.io.database.handler.Logbook;
  * @author dhosse
  *
  */
-public class SurveyPerson extends SurveyObject implements Comparable<Double> {
+public class SurveyPerson extends SurveyObject implements Weighted, Comparable<Double> {
 
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	private String sex;
@@ -47,11 +49,27 @@ public class SurveyPerson extends SurveyObject implements Comparable<Double> {
 		
 		this.day2logbook = new HashMap<Integer, Logbook>();
 		this.plans = new ArrayList<>();
+
+	};
+	
+	public void setId(String id){
+		
+		this.id = id;
 		
 	}
 	
+	/**
+	 * 
+	 * Getter for the person's identifier.
+	 * 
+	 * @return The person's identifier.
+	 */
+	public String getId() {
+		return id;
+	}
+
 	public void setSex(String sex) {
-		
+
 		this.sex = sex;
 		
 	}
@@ -170,6 +188,7 @@ public class SurveyPerson extends SurveyObject implements Comparable<Double> {
 	 * 
 	 * @return The person's weight factor.
 	 */
+	@Override
 	public double getWeight() {
 		
 		return weight;
@@ -182,6 +201,7 @@ public class SurveyPerson extends SurveyObject implements Comparable<Double> {
 	 * 
 	 * @param weight The weight factor.
 	 */
+	@Override
 	public void setWeight(double weight) {
 		
 		this.weight = weight;
@@ -246,7 +266,7 @@ public class SurveyPerson extends SurveyObject implements Comparable<Double> {
 	
 		if(this.weightOfAllPlans == 0) {
 			
-			this.weightOfAllPlans = this.plans.stream().collect(Collectors.summarizingDouble(SurveyPlan::getWeigt)).getSum();
+			this.weightOfAllPlans = this.plans.stream().collect(Collectors.summarizingDouble(SurveyPlan::getWeight)).getSum();
 			
 		}
 		
@@ -283,7 +303,7 @@ public class SurveyPerson extends SurveyObject implements Comparable<Double> {
 		this.regionType = regionType;
 		
 	}
-	
+
 	@Override
 	public String toString() {
 		
@@ -295,6 +315,12 @@ public class SurveyPerson extends SurveyObject implements Comparable<Double> {
 	public int compareTo(Double w) {
 
 		return Double.compare(this.weight, w);
+		
+	}
+	
+	public int getAgeGroup() {
+		
+		return PersonUtils.getAgeGroup(this.age);
 		
 	}
 	

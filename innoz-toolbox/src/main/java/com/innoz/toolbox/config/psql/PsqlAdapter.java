@@ -1,8 +1,10 @@
-package com.innoz.toolbox.config;
+package com.innoz.toolbox.config.psql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
+import com.innoz.toolbox.config.Configuration;
 
 public class PsqlAdapter {
 	

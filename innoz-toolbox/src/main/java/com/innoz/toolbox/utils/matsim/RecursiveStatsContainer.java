@@ -99,8 +99,27 @@ public final class RecursiveStatsContainer {
 			
 		} else {
 			
-			return (this.entries.get((int)(this.numberOfEntries - 1) / 2)
+			return (this.entries.get((int)((this.numberOfEntries - 1)/2))
 					+ this.entries.get((int)this.numberOfEntries / 2)) / 2;
+			
+		}
+		
+	}
+	
+	public double getQuartile(int n){
+		
+		Collections.sort(this.entries);
+		
+		if(n == 4) return this.max;
+		
+		if(this.numberOfEntries % 2 == 0){
+			
+			return this.entries.get((int)(n * this.numberOfEntries) / 4);
+			
+		} else {
+		
+			return (this.entries.get((int)(n*(this.numberOfEntries - 1)/4))
+					+ this.entries.get((int)(n * this.numberOfEntries) / 4)) / 2;
 			
 		}
 		

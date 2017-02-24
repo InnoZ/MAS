@@ -49,6 +49,7 @@ public final class DatabaseConstants {
 	public static final String ATT_ONEWAY = "oneway";
 	public static final String ATT_OSM_ID = "osm_id";
 	public static final String ATT_PARTS = "parts";
+	public static final String ATT_RAILWAY = "railway";
 	public static final String ATT_SHOP = "shop";
 	public static final String ATT_TAGS = "tags";
 	public static final String ATT_WAY = "way";

@@ -1,10 +1,8 @@
 package com.innoz.toolbox.run.controller;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.sql.SQLException;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -27,19 +25,18 @@ import org.matsim.facilities.FacilitiesWriter;
 import org.matsim.households.HouseholdsWriterV10;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.matsim.vehicles.VehicleWriterV1;
-import org.opengis.referencing.FactoryException;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
+import com.innoz.toolbox.config.validation.ConfigurationValidator;
 import com.innoz.toolbox.io.BbsrDataReader;
 import com.innoz.toolbox.io.database.DatabaseReader;
-import com.innoz.toolbox.scenarioGeneration.carsharing.CreateCarsharingVehicles;
 import com.innoz.toolbox.scenarioGeneration.config.InitialConfigCreator;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.ZensusGrid;
 import com.innoz.toolbox.scenarioGeneration.network.NetworkCreatorFromPsql;
 import com.innoz.toolbox.scenarioGeneration.population.PopulationCreator;
 import com.innoz.toolbox.utils.GlobalNames;
-import com.vividsolutions.jts.io.ParseException;
 
 public class ScenarioGenerationController extends DefaultController {
 
@@ -56,6 +53,8 @@ public class ScenarioGenerationController extends DefaultController {
 			
 			double t0 = System.currentTimeMillis();
 			Logger.getLogger(org.matsim.matrices.Matrix.class).setLevel(Level.OFF);
+			
+			ConfigurationValidator.validate(this.configuration);
 			
 			// Dump scenario generation settings on the console and create the output directory
 			new File(configuration.misc().getOutputDirectory()).mkdirs();
@@ -81,15 +80,18 @@ public class ScenarioGenerationController extends DefaultController {
 			// Create a MATSim network from OpenStreetMap data
 			NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(),
 						geoinformation,	configuration);
-			nc.setSimplifyNetwork(true);
-			nc.setCleanNetwork(true);
-			nc.setScaleMaxSpeed(true);
 			nc.create(dbReader);
 
 //			CreateCarsharingVehicles.run(configuration, scenario);
+
+			if(configuration.scenario().getAreaSets() != null) {
 			
-			// Create a MATSim population
-			new PopulationCreator(geoinformation).run(configuration, scenario);
+				ZensusGrid grid = new ZensusGrid(configuration, geoinformation);
+				
+				// Create a MATSim population
+				new PopulationCreator(geoinformation).run(configuration, scenario);
+				
+			}
 			
 			// Create an initial MATSim config file and write it into the output directory
 			Config config = InitialConfigCreator.create(configuration);
@@ -132,10 +134,12 @@ public class ScenarioGenerationController extends DefaultController {
 			
 			log.info("Total execution time: " + Time.writeTime((t1 - t0) / 1000));
 		
-		} catch (FactoryException | InstantiationException | IllegalAccessException | ClassNotFoundException |
-				SQLException | ParseException | IOException e) {
+		} catch (Exception e) {
+			
 			e.printStackTrace();
+			log.error("There were exceptions during scenario generation. No output was created!");
 			return;
+		
 		}
 
 		log.info("> Scenario generation complete. All files have been written to "

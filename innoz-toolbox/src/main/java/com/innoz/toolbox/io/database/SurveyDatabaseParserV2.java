@@ -7,7 +7,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.PsqlAdapter;
+import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.SurveyType;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.VehicleType;
