@@ -19,7 +19,7 @@ import com.innoz.toolbox.scenarioGeneration.utils.Weighted;
  * @author dhosse
  *
  */
-public class SurveyPerson extends SurveyObject implements Comparable<Double> {
+public class SurveyPerson extends SurveyObject implements Weighted, Comparable<Double> {
 
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
 	private String sex;
@@ -49,11 +49,27 @@ public class SurveyPerson extends SurveyObject implements Comparable<Double> {
 		
 		this.day2logbook = new HashMap<Integer, Logbook>();
 		this.plans = new ArrayList<>();
+
+	};
+	
+	public void setId(String id){
+		
+		this.id = id;
 		
 	}
 	
+	/**
+	 * 
+	 * Getter for the person's identifier.
+	 * 
+	 * @return The person's identifier.
+	 */
+	public String getId() {
+		return id;
+	}
+
 	public void setSex(String sex) {
-		
+
 		this.sex = sex;
 		
 	}
@@ -250,7 +266,7 @@ public class SurveyPerson extends SurveyObject implements Comparable<Double> {
 	
 		if(this.weightOfAllPlans == 0) {
 			
-			this.weightOfAllPlans = this.plans.stream().collect(Collectors.summarizingDouble(SurveyPlan::getWeigt)).getSum();
+			this.weightOfAllPlans = this.plans.stream().collect(Collectors.summarizingDouble(SurveyPlan::getWeight)).getSum();
 			
 		}
 		
@@ -287,7 +303,7 @@ public class SurveyPerson extends SurveyObject implements Comparable<Double> {
 		this.regionType = regionType;
 		
 	}
-	
+
 	@Override
 	public String toString() {
 		

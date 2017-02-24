@@ -77,6 +77,12 @@ public final class Configuration {
 		
 	}
 	
+	public final MiscConfigurationGroup misc() {
+		
+		return this.misc;
+		
+	}
+	
 	public final NetworkConfigurationGroup network() {
 
 		return this.network;

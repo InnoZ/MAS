@@ -3,7 +3,9 @@ package com.innoz.toolbox.scenarioGeneration.population.surveys;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SurveyHousehold extends SurveyObject implements Comparable<Double> {
+import com.innoz.toolbox.scenarioGeneration.utils.Weighted;
+
+public class SurveyHousehold extends SurveyObject implements Weighted, Comparable<Double> {
 	
 	private double hhIncome;
 	private Double weight;
@@ -63,17 +65,19 @@ public class SurveyHousehold extends SurveyObject implements Comparable<Double> 
 	public void setRegionType(int t) {
 		this.rtyp = t;
 	}
-
-	public Double getWeight() {
+	
+	@Override
+	public double getWeight() {
 		
-		return weight;
+		return this.weight;
 		
 	}
 
-	public void setWeight(Double weight) {
+	@Override
+	public void setWeight(double w) {
+
+		this.weight = w;
 		
-		this.weight = weight;
-	
 	}
 
 	@Override

@@ -33,7 +33,7 @@ public class HouseholdRemovalTask implements DataContainerTask {
 				hhToRemove.add(hh.getId());
 			}
 			
-			if(hh.getWeight() == null)
+			if(hh.getWeight() < 0)
 				hhToRemove.add(hh.getId());
 			
 		}

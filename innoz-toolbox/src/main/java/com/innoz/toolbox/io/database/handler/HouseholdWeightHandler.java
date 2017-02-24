@@ -21,7 +21,7 @@ public class HouseholdWeightHandler implements DefaultHandler {
 			
 		} else {
 			
-			hh.setWeight(null);
+			hh.setWeight(-1);
 			
 		}
 		

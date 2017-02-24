@@ -1,7 +1,6 @@
 package com.innoz.toolbox.scenarioGeneration.population.algorithm;
 
 import java.util.ArrayList;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -123,36 +122,6 @@ public abstract class DemandGenerationAlgorithm {
 	}
 	
 	Coord chooseActivityCoordAccordingToZensusGrid(AdministrativeUnit admin) {
-
-		if(activityType.equals(ActivityTypes.HOME)){
-			
-			return chooseActivityCoordAccordingToZensusGrid(admin);
-			
-		}
-		
-		if(!map.containsKey(admin.getId())) {
-			
-			List<ZensusGridNode> nodes = new ArrayList<>();
-			int weight = 0;
-			
-			if(p <= accumulatedWeight){
-				
-				// Shoot the location
-				return transformation.transform(GeometryUtils.shoot(g.getGeometry(), random));
-
-			}
-			
-			map.put(admin.getId(), new Tuple<List<ZensusGridNode>, Integer>(nodes, weight));
-			
-		}
-		
-		Tuple<List<ZensusGridNode>, Integer> entry = map.get(admin.getId());
-		
-	}
-	
-	Map<String, Tuple<List<ZensusGridNode>, Integer>> map = new HashMap<>();
-	
-	Coord chooseActivityCoordAccordingToZensusGrid(AdministrativeUnit admin) {
 		
 		if(!map.containsKey(admin.getId())) {
 			
@@ -172,26 +141,14 @@ public abstract class DemandGenerationAlgorithm {
 			
 			map.put(admin.getId(), new Tuple<List<ZensusGridNode>, Integer>(nodes, weight));
 			
+			map.put(admin.getId(), new Tuple<List<ZensusGridNode>, Integer>(nodes, weight));
+			
 		}
 		
 		Tuple<List<ZensusGridNode>, Integer> entry = map.get(admin.getId());
 		
 		double p = random.nextDouble() * entry.getSecond();
 		double accumulatedWeight = 0.0;
-		
-		for(ZensusGridNode node : entry.getFirst()){
-			
-			accumulatedWeight += node.getNumberOfInhabitants();
-			if(p <= accumulatedWeight){
-				return transformation.transform(node.getCoord());
-			}
-			
-		}
-		return null;
-		
-	}
-	
-	ActivityFacility chooseActivityFacilityInAdminUnit(AdministrativeUnit admin, String activityType){
 		
 		for(ZensusGridNode node : entry.getFirst()){
 			

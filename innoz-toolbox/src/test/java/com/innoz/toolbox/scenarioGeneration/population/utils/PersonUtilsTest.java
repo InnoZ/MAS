@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import com.aol.cyclops.data.collections.extensions.standard.ListX;
 import com.aol.cyclops.data.collections.extensions.standard.MapX;
+import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 
 public class PersonUtilsTest {
@@ -18,16 +19,16 @@ public class PersonUtilsTest {
 	@Before
 	public void setup() {
 		
-		SurveyPerson p1 = new SurveyPerson();
+		SurveyPerson p1 = (SurveyPerson) SurveyObject.newInstance(SurveyPerson.class);
 		p1.setAge(20);
 		p1.setWeight(1);
-		SurveyPerson p2 = new SurveyPerson();
+		SurveyPerson p2 = (SurveyPerson) SurveyObject.newInstance(SurveyPerson.class);
 		p2.setAge(15);
 		p2.setWeight(0.5);
-		SurveyPerson p3 = new SurveyPerson();
+		SurveyPerson p3 = (SurveyPerson) SurveyObject.newInstance(SurveyPerson.class);
 		p3.setAge(41);
 		p3.setWeight(1);
-		SurveyPerson p4 = new SurveyPerson();
+		SurveyPerson p4 = (SurveyPerson) SurveyObject.newInstance(SurveyPerson.class);
 		p4.setAge(12);
 		p4.setWeight(0.5);
 		

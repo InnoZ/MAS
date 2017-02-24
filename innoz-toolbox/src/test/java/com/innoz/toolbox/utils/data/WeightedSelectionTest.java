@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.aol.cyclops.data.collections.extensions.standard.ListX;
+import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 
 public class WeightedSelectionTest {
@@ -15,16 +16,16 @@ public class WeightedSelectionTest {
 	@Before
 	public void setup() {
 		
-		SurveyPerson p1 = new SurveyPerson();
+		SurveyPerson p1 = (SurveyPerson) SurveyObject.newInstance(SurveyPerson.class);
 		p1.setId("1");
 		p1.setWeight(1);
-		SurveyPerson p2 = new SurveyPerson();
+		SurveyPerson p2 = (SurveyPerson) SurveyObject.newInstance(SurveyPerson.class);
 		p2.setId("2");
 		p2.setWeight(0.5);
-		SurveyPerson p3 = new SurveyPerson();
+		SurveyPerson p3 = (SurveyPerson) SurveyObject.newInstance(SurveyPerson.class);
 		p3.setId("3");
 		p3.setWeight(1);
-		SurveyPerson p4 = new SurveyPerson();
+		SurveyPerson p4 = (SurveyPerson) SurveyObject.newInstance(SurveyPerson.class);
 		p4.setId("4");
 		p4.setWeight(0.5);
 		
