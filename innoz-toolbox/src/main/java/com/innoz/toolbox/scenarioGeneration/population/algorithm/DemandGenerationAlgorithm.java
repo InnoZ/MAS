@@ -1,8 +1,9 @@
 package com.innoz.toolbox.scenarioGeneration.population.algorithm;
 
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -14,7 +15,9 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.collections.CollectionUtils;
+import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.facilities.ActivityFacility;
 import org.matsim.matrices.Matrix;
 
@@ -22,32 +25,23 @@ import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.ZensusGrid.ZensusGridNode;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.ProxyFacility;
 import com.innoz.toolbox.scenarioGeneration.population.PopulationCreator;
-import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyHousehold;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPlanTrip;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.utils.GeometryUtils;
 import com.innoz.toolbox.utils.data.Tree.Node;
+import com.innoz.toolbox.utils.data.WeightedSelection;
 
 public abstract class DemandGenerationAlgorithm {
 
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	final Random random = MatsimRandom.getLocalInstance();
 	final Geoinformation geoinformation;
-	
-	//Comparator that sorts households by their weights
-	Comparator<SurveyHousehold> householdComparator = new Comparator<SurveyHousehold>() {
-
-		@Override
-		public int compare(SurveyHousehold o1, SurveyHousehold o2) {
-			return Double.compare(o1.getWeight(), o2.getWeight());
-		
-		}
-		
-	};
+	Map<String, Tuple<List<ZensusGridNode>, Integer>> map = new HashMap<>();
 	
 	static final Logger log = Logger.getLogger(PopulationCreator.class);
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -89,7 +83,7 @@ public abstract class DemandGenerationAlgorithm {
 	public abstract void run(final Configuration configuration, String ids);
 
 	AdministrativeUnit chooseAdminUnit(AdministrativeUnit district, String activityType){
-		
+
 		double r = random.nextDouble() * this.geoinformation.getTotalWeightForLanduseKey(district.getId(), activityType);
 		double r2 = 0.;
 		
@@ -119,45 +113,58 @@ public abstract class DemandGenerationAlgorithm {
 	
 	Coord chooseActivityCoordInAdminUnit(AdministrativeUnit admin, String activityType){
 		
-		double p = random.nextDouble() * admin.getWeightForKey(activityType);
-		double accumulatedWeight = 0.;
+		return (PopulationCreator.grid != null && activityType.equals(ActivityTypes.HOME)) ?
+				chooseActivityCoordAccordingToZensusGrid(admin) : 
+				transformation.transform(GeometryUtils.shoot(
+				((Landuse)WeightedSelection.choose(admin.getLanduseGeometries().get(activityType), this.random.nextDouble()))
+				.getGeometry(), this.random));
 		
-		for(Landuse g : admin.getLanduseGeometries().get(activityType)){
+	}
+	
+	Coord chooseActivityCoordAccordingToZensusGrid(AdministrativeUnit admin) {
+		
+		if(!map.containsKey(admin.getId())) {
 			
-			accumulatedWeight += g.getWeight();
+			List<ZensusGridNode> nodes = new ArrayList<>();
+			int weight = 0;
 			
-			if(p <= accumulatedWeight){
-
-				// Shoot the location
-				return transformation.transform(GeometryUtils.shoot(g.getGeometry(), random));
-
+			for(ZensusGridNode node : PopulationCreator.grid.getNodes()){
+				
+				if(admin.getGeometry().contains(MGC.coord2Point(node.getCoord()))){
+					
+					nodes.add(node);
+					weight += node.getNumberOfInhabitants();
+					
+				}
+				
 			}
+			
+			map.put(admin.getId(), new Tuple<List<ZensusGridNode>, Integer>(nodes, weight));
+			
+			map.put(admin.getId(), new Tuple<List<ZensusGridNode>, Integer>(nodes, weight));
 			
 		}
 		
+		Tuple<List<ZensusGridNode>, Integer> entry = map.get(admin.getId());
+		
+		double p = random.nextDouble() * entry.getSecond();
+		double accumulatedWeight = 0.0;
+		
+		for(ZensusGridNode node : entry.getFirst()){
+			
+			accumulatedWeight += node.getNumberOfInhabitants();
+			if(p <= accumulatedWeight){
+				return transformation.transform(node.getCoord());
+			}
+			
+		}
 		return null;
 		
 	}
 	
 	ActivityFacility chooseActivityFacilityInAdminUnit(AdministrativeUnit admin, String activityType){
 		
-		double p = random.nextDouble() * admin.getWeightForKey(activityType);
-		double accumulatedWeight = 0;
-		
-		for(Landuse g : admin.getLanduseGeometries().get(activityType)){
-			
-			accumulatedWeight += g.getWeight();
-			
-			if(p <= accumulatedWeight){
-
-				// Shoot the location
-				return ((ProxyFacility)g).get();
-
-			}
-			
-		}
-		
-		return null;
+		return ((ProxyFacility) WeightedSelection.choose(admin.getLanduseGeometries().get(activityType), this.random.nextDouble())).get();
 		
 	}
 	
@@ -174,6 +181,46 @@ public abstract class DemandGenerationAlgorithm {
 	AdministrativeUnit locateActivityInCell(String activityType, String mode, SurveyPerson personTemplate){
 		
 		return locateActivityInCell(null, activityType, mode, personTemplate);
+		
+	}
+	
+	AdministrativeUnit locateWorkActivity(){
+		
+		String fromId = this.currentHomeCell.getId().substring(0, 5);
+		
+		int weight = 0;
+		
+		for(org.matsim.matrices.Entry entry : this.od.getFromLocations().get(fromId)){
+			
+			weight += entry.getValue();
+			
+		}
+		
+		double p = this.random.nextDouble() * weight;
+		double accumulatedWeight = 0d;
+		
+		for(org.matsim.matrices.Entry entry : this.od.getFromLocations().get(fromId)){
+			
+			accumulatedWeight += entry.getValue();
+			if(p <= accumulatedWeight){
+
+				AdministrativeUnit unit = this.geoinformation.getAdminUnit(fromId).getData();
+				
+				if(unit.getGeometry() != null){
+					
+					return unit;
+					
+				} else {
+					
+					return this.geoinformation.getAdminUnit(fromId).getChildren().get(random.nextInt(this.geoinformation.getAdminUnit(fromId).getChildren().size())).getData();
+					
+				}
+				
+			}
+			
+		}
+		
+		return null;
 		
 	}
 
@@ -195,6 +242,10 @@ public abstract class DemandGenerationAlgorithm {
 		
 		if(fromId == null){
 			fromId = this.currentHomeCell.getId();
+		}
+		
+		if(activityType.equals(ActivityTypes.WORK)){
+			return locateWorkActivity();
 		}
 		
 		if(activityType.split("_")[0].equals(ActivityTypes.EDUCATION) && this.currentHomeCell.getWeightForKey(ActivityTypes.EDUCATION) > 0){

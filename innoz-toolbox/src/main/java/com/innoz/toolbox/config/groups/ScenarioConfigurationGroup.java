@@ -24,6 +24,7 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 	public enum ActivityLocationsType{
 		BUILDINGS,
 		FACILITIES,
+		GRID,
 		LANDUSE
 	};
 	
@@ -114,7 +115,7 @@ public class ScenarioConfigurationGroup extends ConfigurationGroup {
 		
 		Map<String, String> map = new HashMap<>();
 		
-		map.put(ACT_LOCATIONS_TYPE, "Possible values: BUILDINGS, FACILITIES, LANDUSE.");
+		map.put(ACT_LOCATIONS_TYPE, "Possible values: BUILDINGS, FACILITIES, GRID, LANDUSE.");
 		map.put(RANDOM_SEED, "The seed for the pseudo random number generator for the generation of the scenario.");
 		map.put(SCALE_FACTOR, "The scale factor for the amount of households / persons to be created and for the supply"
 				+ " side to scale capacities. Any numeric value between 0 and 1.");

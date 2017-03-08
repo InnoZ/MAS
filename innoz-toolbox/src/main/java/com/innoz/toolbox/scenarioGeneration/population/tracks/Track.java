@@ -1,12 +1,16 @@
 package com.innoz.toolbox.scenarioGeneration.population.tracks;
 
+import java.util.Date;
+
 import org.matsim.api.core.v01.Coord;
 
 public class Track {
 
 	private final String id;
-	private String startedAt;
-	private String finishedAt;
+	private Date startDate;
+	private Date endDate;
+	private double startTime;
+	private double endTime;
 	private Coord start;
 	private Coord end;
 	private double length;
@@ -21,30 +25,6 @@ public class Track {
 	public String getId(){
 		
 		return this.id;
-		
-	}
-	
-	public String getStartDateAndTime(){
-		
-		return this.startedAt;
-		
-	}
-	
-	public void setStartDateAndTime(String s){
-		
-		this.startedAt = s;
-		
-	}
-	
-	public String getEndDateAndTime(){
-		
-		return this.finishedAt;
-		
-	}
-	
-	public void setEndDateAndTime(String s){
-		
-		this.finishedAt = s;
 		
 	}
 	
@@ -93,6 +73,54 @@ public class Track {
 	public void setMode(String m){
 		
 		this.mode = m;
+		
+	}
+	
+	public Date getStartDate(){
+		
+		return this.startDate;
+		
+	}
+	
+	public void setStartDate(Date date){
+		
+		this.startDate = date;
+		
+	}
+	
+	public Date getEndDate(){
+		
+		return this.endDate;
+		
+	}
+	
+	public void setEndDate(Date date){
+		
+		this.endDate = date;
+		
+	}
+	
+	public double getStartTime(){
+		
+		return this.startTime;
+		
+	}
+	
+	public void setStartTime(double t){
+		
+		this.startTime = t;
+		
+	}
+	
+	public double getEndTime(){
+		
+		return this.endTime;
+		
+	}
+	
+	public void setEndTime(double t){
+		
+		this.endTime = t;
 		
 	}
 	

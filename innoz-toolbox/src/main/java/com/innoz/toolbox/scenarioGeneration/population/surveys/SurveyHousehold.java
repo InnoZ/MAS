@@ -3,54 +3,44 @@ package com.innoz.toolbox.scenarioGeneration.population.surveys;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SurveyHousehold implements SurveyObject {
-	
-	private String id;
+import com.innoz.toolbox.scenarioGeneration.utils.Weighted;
+
+public class SurveyHousehold extends SurveyObject implements Weighted, Comparable<Double> {
 	
 	private double hhIncome;
 	private Double weight;
 	
+	int rtyp;
+	
 	private final List<String> memberIds;
 	private final List<String> vehicleIds;
 	
-	public SurveyHousehold(){
+	SurveyHousehold() {
 		
 		this.memberIds = new ArrayList<String>();
 		this.vehicleIds = new ArrayList<String>();
 
 	}
 
-	public String getId(){
-		
-		return this.id;
-		
-	}
-	
-	public void setId(String id){
-		
-		this.id = id;
-		
-	}
-	
-	public int getNPersons(){
+	public int getNPersons() {
 		
 		return this.memberIds.size();
 		
 	}
 	
-	public double getNCars(){
+	public double getNCars() {
 		
 		return this.vehicleIds.size();
 		
 	}
 	
-	public double getIncome(){
+	public double getIncome() {
 		
 		return this.hhIncome;
 		
 	}
 	
-	public void setIncome(double income){
+	public void setIncome(double income) {
 		
 		this.hhIncome = income;
 		
@@ -62,16 +52,46 @@ public class SurveyHousehold implements SurveyObject {
 		
 	}
 	
-	public List<String> getVehicleIds(){
+	public List<String> getVehicleIds() {
+		
 		return this.vehicleIds;
+		
+	}
+	
+	public int getRegionType() {
+		return this.rtyp;
+	}
+	
+	public void setRegionType(int t) {
+		this.rtyp = t;
+	}
+	
+	@Override
+	public double getWeight() {
+		
+		return this.weight;
+		
 	}
 
-	public Double getWeight() {
-		return weight;
+	@Override
+	public void setWeight(double w) {
+
+		this.weight = w;
+		
 	}
 
-	public void setWeight(Double weight) {
-		this.weight = weight;
+	@Override
+	public String toString() {
+	
+		return "[hhid='" + this.id + "'],[weight='" + this.weight + "'],[income='" + this.hhIncome + "']";
+		
+	}
+
+	@Override
+	public int compareTo(Double w) {
+
+		return Double.compare(this.weight, w);
+		
 	}
 	
 }

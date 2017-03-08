@@ -18,7 +18,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.ConfigurationUtils;
-import com.innoz.toolbox.config.PsqlAdapter;
+import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.config.SshConnector;
 import com.innoz.toolbox.io.database.DatabaseConstants;
 import com.innoz.toolbox.utils.TextUtils;

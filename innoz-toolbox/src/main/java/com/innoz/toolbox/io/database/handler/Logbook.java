@@ -3,6 +3,8 @@ package com.innoz.toolbox.io.database.handler;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyStage;
+
 public class Logbook {
 
 	private List<SurveyStage> stages = new ArrayList<>();

@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.handler.Logbook;
+import com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils;
+import com.innoz.toolbox.scenarioGeneration.utils.Weighted;
 
 /**
  * 
@@ -17,10 +19,9 @@ import com.innoz.toolbox.io.database.handler.Logbook;
  * @author dhosse
  *
  */
-public class SurveyPerson implements SurveyObject {
+public class SurveyPerson extends SurveyObject implements Weighted, Comparable<Double> {
 
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
-	private String id;
 	private String sex;
 	
 	private int age;
@@ -44,52 +45,12 @@ public class SurveyPerson implements SurveyObject {
 	private boolean isMobile;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
-	public SurveyPerson(){
+	SurveyPerson() {
+		
 		this.day2logbook = new HashMap<Integer, Logbook>();
 		this.plans = new ArrayList<>();
+
 	};
-	
-	/**
-	 * 
-	 * Creates a new survey person object and assigns basic socio-demographic data to it.
-	 * 
-	 * @param id A unique identifier for this person. Normally the combination of the person's household id and its
-	 * number in the household.
-	 * @param sex The sex of the person (male / female).
-	 * @param age The person's age in years.
-	 * @param carAvailable Defines if the person has access to a private car (prerequisite for 'car' and 'ride' modes).
-	 * @param hasLicense Defines if the person is allowed to drive a car (prerequisite for 'car' mode).
-	 * @param isEmployed Defines if the person has a job or not.
-	 */
-	public SurveyPerson(String id, String sex, String age, String carAvailable, String hasLicense, String isEmployed, SurveyConstants constants){
-		
-		this(id, sex, age, carAvailable, hasLicense, isEmployed, constants, "2");
-		
-	}
-	
-	public SurveyPerson(String id, String sex, String age, String carAvailable, String hasLicense, String isEmployed, SurveyConstants constants, String isCarsharingUser){
-		
-		this.id = id;
-		this.sex = sex.equals(constants.getSexMale()) ? "m" : "f";
-		this.age = !age.equals("NaN") ? Integer.parseInt(age) : Integer.MIN_VALUE;
-		
-		if(carAvailable.equals("1") || carAvailable.equals("2")){
-			
-			this.carAvailable = true;
-			
-		} else{
-			
-			this.carAvailable = false;
-			
-		}
-		
-		this.hasLicense = hasLicense.equals("1") ? true : false;
-		this.isEmployed = isEmployed.equals("1") ? true : false;
-		this.carsharingUser = isCarsharingUser.equals("1") ? true : false;
-		
-		this.plans = new ArrayList<>();
-		
-	}
 	
 	public void setId(String id){
 		
@@ -107,8 +68,10 @@ public class SurveyPerson implements SurveyObject {
 		return id;
 	}
 
-	public void setSex(String sex){
+	public void setSex(String sex) {
+
 		this.sex = sex;
+		
 	}
 	
 	/**
@@ -118,11 +81,15 @@ public class SurveyPerson implements SurveyObject {
 	 * @return The person's sex.
 	 */
 	public String getSex() {
+		
 		return sex;
+		
 	}
 
-	public void setAge(int age){
+	public void setAge(int age) {
+		
 		this.age = age;
+	
 	}
 	
 	/**
@@ -173,8 +140,10 @@ public class SurveyPerson implements SurveyObject {
 	 * 
 	 * @param b Boolean value that represents the possession of a driving license for this person.
 	 */
-	public void setHasLicense(boolean b){
+	public void setHasLicense(boolean b) {
+		
 		this.hasLicense = b;
+		
 	}
 	
 	/**
@@ -184,17 +153,21 @@ public class SurveyPerson implements SurveyObject {
 	 * @return {@code true} if the person is employed, {@code false} otherwise.
 	 */
 	public boolean isEmployed() {
+		
 		return isEmployed;
+		
 	}
 	
-	public void setEmployed(boolean b){
+	public void setEmployed(boolean b) {
 		
 		this.isEmployed = b;
 		
 	}
 	
-	public boolean isCarsharingUser(){
+	public boolean isCarsharingUser() {
+		
 		return this.carsharingUser;
+		
 	}
 
 	/**
@@ -204,7 +177,9 @@ public class SurveyPerson implements SurveyObject {
 	 * @return A collection of all the plans the survey person reported.
 	 */
 	public List<SurveyPlan> getPlans() {
+		
 		return plans;
+		
 	}
 
 	/**
@@ -213,8 +188,11 @@ public class SurveyPerson implements SurveyObject {
 	 * 
 	 * @return The person's weight factor.
 	 */
+	@Override
 	public double getWeight() {
+		
 		return weight;
+		
 	}
 
 	/**
@@ -223,8 +201,11 @@ public class SurveyPerson implements SurveyObject {
 	 * 
 	 * @param weight The weight factor.
 	 */
+	@Override
 	public void setWeight(double weight) {
+		
 		this.weight = weight;
+		
 	}
 
 	/**
@@ -234,7 +215,9 @@ public class SurveyPerson implements SurveyObject {
 	 * @return The person group.
 	 */
 	public int getPersonGroup() {
+		
 		return personGroup;
+		
 	}
 
 	/**
@@ -244,7 +227,9 @@ public class SurveyPerson implements SurveyObject {
 	 * @param personGroup Integer representation of the person group.
 	 */
 	public void setPersonGroup(int personGroup) {
+	
 		this.personGroup = personGroup;
+		
 	}
 
 	/**
@@ -254,7 +239,9 @@ public class SurveyPerson implements SurveyObject {
 	 * @return The person's life phase.
 	 */
 	public int getLifePhase() {
+	
 		return lifePhase;
+		
 	}
 
 	/**
@@ -264,7 +251,9 @@ public class SurveyPerson implements SurveyObject {
 	 * @param lifePhase Integer representation of the life phase.
 	 */
 	public void setLifePhase(int lifePhase) {
+		
 		this.lifePhase = lifePhase;
+		
 	}
 	
 	/**
@@ -273,39 +262,66 @@ public class SurveyPerson implements SurveyObject {
 	 * 
 	 * @return The sum of the person's plans' weight factors.
 	 */
-	public double getWeightOfAllPlans(){
+	public double getWeightOfAllPlans() {
+	
+		if(this.weightOfAllPlans == 0) {
+			
+			this.weightOfAllPlans = this.plans.stream().collect(Collectors.summarizingDouble(SurveyPlan::getWeight)).getSum();
+			
+		}
+		
 		return this.weightOfAllPlans;
+		
 	}
 	
-	/**
-	 * 
-	 * Increments the total weight of all plans of this person. Both positive and negative values can be handled.
-	 * Negative values imply that a plan has been removed from the plan collection.
-	 * 
-	 * @param v The additional weight.
-	 */
-	public void incrementPlansWeight(double v){
-		this.weightOfAllPlans += v;
-	}
-	
-	public Map<Integer,Logbook> getLogbook(){
+	public Map<Integer,Logbook> getLogbook() {
+		
 		return this.day2logbook;
+		
 	}
 	
-	public boolean isMobile(){
+	public boolean isMobile() {
+		
 		return this.isMobile;
+		
 	}
 	
-	public void setMobile(boolean mobile){
+	public void setMobile(boolean mobile) {
+		
 		this.isMobile = mobile;
+		
 	}
 
 	public Integer getRegionType() {
+		
 		return regionType;
+		
 	}
 
 	public void setRegionType(Integer regionType) {
+	
 		this.regionType = regionType;
+		
+	}
+
+	@Override
+	public String toString() {
+		
+		return "[id='" + this.id + "']";
+		
+	}
+
+	@Override
+	public int compareTo(Double w) {
+
+		return Double.compare(this.weight, w);
+		
+	}
+	
+	public int getAgeGroup() {
+		
+		return PersonUtils.getAgeGroup(this.age);
+		
 	}
 	
 }

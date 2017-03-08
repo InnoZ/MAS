@@ -24,6 +24,7 @@ import com.innoz.toolbox.io.database.handler.PersonWeightHandler;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
+import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 import com.innoz.toolbox.utils.data.Tree.Node;
 
@@ -140,7 +141,7 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 				attributes.put(SurveyConstants.mobile(surveyType), resultSet.getString(SurveyConstants.mobile(surveyType)));
 				attributes.put(SurveyConstants.regionType(surveyType), resultSet.getString(SurveyConstants.regionType(surveyType))); 
 								
-				SurveyPerson person = new SurveyPerson();
+				SurveyPerson person = (SurveyPerson) SurveyObject.newInstance(SurveyPerson.class);
 				
 				for(DefaultHandler handler : this.handlers){
 					

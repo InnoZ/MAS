@@ -433,6 +433,30 @@ public class GeometryUtils {
 	}
 	
 	/**
+	 *
+	 * Note: This only returns reasonable results if you are using a metric coordinate system (because of the deviation param).
+	 * 
+	 * @param center
+	 * @param maxDeviation
+	 * @param random
+	 * @return
+	 */
+	public static Coord shoot(Coord center, double maxDeviation, Random random){
+		
+		Coordinate[] coordinates = new Coordinate[]{
+				new Coordinate(center.getX() - maxDeviation, center.getY() - maxDeviation),
+				new Coordinate(center.getX() + maxDeviation, center.getY() - maxDeviation),
+				new Coordinate(center.getX() + maxDeviation, center.getY() + maxDeviation),
+				new Coordinate(center.getX() - maxDeviation, center.getY() + maxDeviation),
+				new Coordinate(center.getX() - maxDeviation, center.getY() - maxDeviation)};
+		
+		Geometry geometry = new GeometryFactory().createPolygon(coordinates);
+		
+		return shoot(geometry, random);
+		
+	}
+	
+	/**
 	 * 
 	 * Merges a given administrative boundaries shapefile and a region type csv file into a result
 	 * csv file. The classification is based on BBSR.</br>

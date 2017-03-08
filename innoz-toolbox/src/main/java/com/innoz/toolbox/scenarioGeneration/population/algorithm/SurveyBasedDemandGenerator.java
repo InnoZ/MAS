@@ -1,7 +1,6 @@
 package com.innoz.toolbox.scenarioGeneration.population.algorithm;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -53,6 +52,7 @@ import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.scenarioGeneration.vehicles.VehicleTypes;
 import com.innoz.toolbox.utils.GeometryUtils;
 import com.innoz.toolbox.utils.data.Tree.Node;
+import com.innoz.toolbox.utils.data.WeightedSelection;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
@@ -119,7 +119,6 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		// Sort the households by their weight (according to the survey data)
 		List<SurveyHousehold> households = new ArrayList<>();
 		households.addAll(container.getHouseholds().values());
-		Collections.sort(households, this.householdComparator);
 		
 		// Choose a home cell for the household
 		// Initialize a pseudo-random number and iterate over all administrative units.
@@ -136,28 +135,9 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				int rtyp = this.currentHomeCell.getRegionType();
 				
 				// Choose a template household (weighted, same method as above)
-				SurveyHousehold template = null;
-				
-				double accumulatedWeight = 0.;
-				double rand = this.random.nextDouble() * container.getWeightForHouseholdsInRegionType(rtyp);
-				
-				for(String hhId : container.getHouseholdsForRegionType(rtyp)){
-					
-					SurveyHousehold hh = container.getHouseholds().get(hhId);
-					
-					if(hh != null){
-						
-						accumulatedWeight += hh.getWeight();
-						if(accumulatedWeight >= rand){
-							
-							template = hh;
-							break;
-							
-						}
-						
-					}
-					
-				}
+				List<SurveyHousehold> hhInRegion = new ArrayList<>();
+				households.stream().filter(p -> container.getHouseholdsForRegionType(rtyp).contains(p.getId())).forEach(e -> hhInRegion.add(e));
+				SurveyHousehold template = (SurveyHousehold) WeightedSelection.choose(hhInRegion, this.random.nextDouble());
 				
 				// Create a MATSim household
 				Household household = new HouseholdImpl(Id.create(this.currentHomeCell.getId() + "_" + i,
@@ -467,21 +447,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			} else {
 
 				// Otherwise, randomly draw a plan from the collection
-				double planRandom = personalRandom * personTemplate.getWeightOfAllPlans();
-				double accumulatedWeight = 0.;
-				
-				for(SurveyPlan p : personTemplate.getPlans()){
-					
-					accumulatedWeight += p.getWeigt();
-					
-					if(planRandom <= accumulatedWeight){
-					
-						planTemplate = p;
-						break;
-					
-					}
-					
-				}
+				planTemplate = (SurveyPlan) WeightedSelection.choose(personTemplate.getPlans(), personalRandom);
 				
 			}
 			
@@ -676,7 +642,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
 	/**
 	 * 
-	 * Creates a MATSim leg from a survey way.
+	 * Creates a MATSim leg from a survey trip.
 	 * 
 	 * @param population The MATSim population
 	 * @param mpe The survey plan element (in this case: way)
@@ -685,15 +651,15 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	private Leg createLeg(Population population,
 			SurveyPlanElement mpe) {
 		
-		SurveyPlanTrip way = (SurveyPlanTrip)mpe;
-		String mode = way.getMainMode();
-		double departure = way.getStartTime();
-		double ttime = way.getEndTime() - departure;
+		SurveyPlanTrip trip = (SurveyPlanTrip)mpe;
+		String mode = trip.getMainMode();
+//		double departure = way.getStartTime();
+//		double ttime = way.getEndTime() - departure;
 		
 		Leg leg = population.getFactory().createLeg(mode);
-		leg.setTravelTime(ttime);
+//		leg.setTravelTime(ttime);
 
-		this.lastLeg = way;
+		this.lastLeg = trip;
 		
 		return leg;
 		
@@ -716,9 +682,9 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		// Initialize the activity type and the start and end time
 		SurveyPlanActivity act = (SurveyPlanActivity)mpe;
 		String type = act.getActType();
-//		if(type.equals(ActivityTypes.EDUCATION) && personTemplate.getAge() > 18){
-//			type = ActivityTypes.UNIVERSITY;
-//		}
+		if(type.equals(ActivityTypes.EDUCATION) && personTemplate.getAge() > 18){
+			type = ActivityTypes.UNIVERSITY;
+		}
 		double start = act.getStartTime();
 		double end = act.getEndTime();
 		
@@ -787,8 +753,9 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 		// Create a new activity
 		Activity activity = population.getFactory().createActivityFromCoord(type.split("_")[0], coord);
-		activity.setStartTime(start);
-		activity.setEndTime(end);
+//		activity.setStartTime(start);
+		activity.setMaximumDuration(end - start);
+//		activity.setEndTime(end);
 		if(this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
 			activity.setFacilityId(((ProxyFacility)this.geoinformation.getLanduseOfType(type)
 					.getClosest(coord.getX(), coord.getY())).get().getId());
@@ -799,7 +766,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			// Set the activity duration to at least 1/4 hour if it's been reported shorter to avoid
 			// extremely negative scores
 			activity.setMaximumDuration(900);
-			activity.setEndTime(start + 900);
+//			activity.setEndTime(start + 900);
 			
 		} else{
 				
@@ -867,25 +834,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			
 			if(!closest.isEmpty()){
 				
-				double w = 0;
-				for(Landuse g : closest){
-					w += g.getWeight();
-				}
-				
-				double shootingRandom = this.random.nextDouble() * w;
-				double accumulatedWeight = 0.0d;
-				Geometry area = null;
-				
-				for(Landuse g : closest){
-					
-					accumulatedWeight += g.getWeight();
-					if(shootingRandom <= accumulatedWeight){
-						area = g.getGeometry();
-						break;
-					}
-					
-				}
-				
+				Geometry area = ((Landuse)WeightedSelection.choose(closest, this.random.nextDouble())).getGeometry();
 				
 				return this.transformation.transform(GeometryUtils.shoot(area, this.random));
 				
@@ -904,19 +853,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			
 			if(!closest.isEmpty()){
 				
-				double shootingRandom = this.random.nextDouble() * au.getWeightForKey(actType);
-				double accumulatedWeight = 0.0d;
-				Geometry area = null;
-				
-				for(Landuse g : closest){
-					
-					accumulatedWeight += g.getWeight();
-					if(shootingRandom <= accumulatedWeight){
-						area = g.getGeometry();
-						break;
-					}
-					
-				}
+				Geometry area = ((Landuse)WeightedSelection.choose(closest, this.random.nextDouble())).getGeometry();
 				
 				return this.transformation.transform(GeometryUtils.shoot(area, this.random));
 				

@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
+import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyStage;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 
 public class LegPurposeHandler implements DefaultHandler {

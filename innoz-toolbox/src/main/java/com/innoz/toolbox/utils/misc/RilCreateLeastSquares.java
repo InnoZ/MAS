@@ -7,40 +7,318 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.statistics.Regression;
-import org.jfree.data.xy.XYDataItem;
 import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
-import org.matsim.core.utils.charts.XYLineChart;
 import org.matsim.core.utils.charts.XYScatterChart;
 import org.matsim.core.utils.io.IOUtils;
 
-import com.innoz.toolbox.config.PsqlAdapter;
+import com.innoz.toolbox.config.psql.PsqlAdapter;
+import com.innoz.toolbox.utils.PsqlUtils;
+import com.innoz.toolbox.utils.io.AbstractCsvReader;
+import com.innoz.toolbox.utils.math.regression.ExpTrendLine;
+import com.innoz.toolbox.utils.math.regression.LogTrendLine;
+import com.innoz.toolbox.utils.math.regression.PolyTrendLine;
+import com.innoz.toolbox.utils.math.regression.PowerTrendLine;
+import com.innoz.toolbox.utils.math.regression.TrendLine;
 import com.innoz.toolbox.utils.matsim.RecursiveStatsContainer;
 
 public class RilCreateLeastSquares {
 
-	public static void main(String[] args) throws InstantiationException, IllegalAccessException,
-		ClassNotFoundException, SQLException, IOException {
+	static final String RIL_DATABASE = "ril";
+	static final int[] CATEGORIES = new int[]{100,300,1000,5000,10000,15000,20000,50000,1000000};
 
-		compute();
-		computeAggregates();
-		computeStationwise();
+	static final int index2030 = 11;
+	
+	static final String FV = "fv";
+	static final String NV = "nv";
+	static final String FVO = "fv_fremd";
+	static final String NVO = "nv_fremd";
+	static final String GES = "ges";
+	static final String STATION = "station";
+	static final String YEAR = "verkehrs15";
+	static final String TYP = "typ_name";
+	static final String STATE= "state";
+	
+	enum RegMethod {
+		
+		Exp,
+		Linear,
+		Log,
+		Poly,
+		Power
 		
 	}
 	
-	private static void compute() throws InstantiationException, IllegalAccessException, ClassNotFoundException,
-		SQLException, IOException {
+	static double[] xValues() {
 		
-		Connection c = PsqlAdapter.createConnection("ril");
+		return Arrays.copyOf(new double[]{2006.0,2007.0,2008.0,2009.0,2010.0,2011.0,2012.0,2013.0,2014.0,2015.0,2016.0,2030.0}, 12);
+		
+	}
+	
+	public static void main(String[] args) throws InstantiationException, IllegalAccessException,
+		ClassNotFoundException, SQLException, IOException {
+		
+		computeAggregates(RegMethod.Power);
+		computeStationwise(RegMethod.Power);
+		
+	}
+	
+	private static void computeStationwise(RegMethod m) throws InstantiationException, IllegalAccessException,
+		ClassNotFoundException, SQLException, IOException {
+		
+		Connection c = PsqlAdapter.createConnection(RIL_DATABASE);
+		Statement statement = c.createStatement();
+		
+		String[] tables = new String[]{
+				
+				"daten_2006_regionstyp_final", "daten_2007_regionstyp_final",
+				"daten_2008_regionstyp_final", "daten_2009_regionstyp_final", "daten_2010_regionstyp_final",
+				"daten_2011_regionstyp_final", "daten_2012_regionstyp_final", "daten_2013_regionstyp_final",
+				"daten_2014_regionstyp_final", "daten_2015_regionstyp_final", "daten_2016_regionstyp_final"
+		
+		};
+
+		Map<String, double[]> stationData = new HashMap<>();
+		double[] x = xValues();
+		
+		Set<String> stations2016 = new HashSet<>();
+
+		AbstractCsvReader csv = new AbstractCsvReader("\t",true) {
+			
+			@Override
+			public void handleRow(String[] line) {
+
+				String station = line[1];
+				double ges = Double.parseDouble(line[14]);
+				double factor = Double.parseDouble(line[18]);
+				double n = Math.ceil(ges * (1 + factor));
+				
+				if(!stationData.containsKey(station)) {
+					stationData.put(station, new double[x.length]);
+				}
+				
+				stationData.get(station)[index2030] = n;
+				
+			}
+			
+		};
+		
+		csv.read("/home/dhosse/01_Projects/GSP/Änderungsraten_2013-zu-2030_V2_fuer-InnoZ.csv");
+		
+		for(String table : tables){
+		
+			ResultSet result = statement.executeQuery(
+					PsqlUtils.createSelectStatement("station,fv,nv,fv_fremd,nv_fremd,ges,verkehrs15", table));
+			
+			while(result.next()){
+				
+				int fv = result.getInt("fv");
+				int nv = result.getInt("nv");
+				int fvo = result.getInt("fv_fremd");
+				int nvo = result.getInt("nv_fremd");
+				String name = result.getString("station");
+				int year = result.getInt("verkehrs15");
+				
+				if(year == 2013) {
+					stations2016.add(name);
+				}
+				
+				if(fv >= 0 && nv >= 0 && fvo >= 0 && nvo >= 0){
+
+					int n = result.getInt("ges");
+					
+					if(stationData.containsKey(name)){
+						stationData.get(name)[year-2006] = (double) n;
+					}
+					
+				}
+				
+			}
+			
+			result.close();
+
+		}
+		
+		statement.close();
+		c.close();
+		
+		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/charts/trends.csv");
+		out.write("station;2027;2028;2029;2030;2031;2032;r2");
+		out.flush();
+		
+		for(Entry<String, double[]> entry : stationData.entrySet()) {
+			
+			String name = entry.getKey();
+			double[] y = entry.getValue();
+			
+			Set<Integer> indicesToRemove = new HashSet<>();
+			
+			for(int i = 0; i < x.length; i++) {
+				
+				if(y[i] == 0) {
+					
+					indicesToRemove.add(i);
+					
+				}
+				
+			}
+			
+			double[] xValues = new double[x.length-indicesToRemove.size()];
+			double[] yValues = new double[y.length-indicesToRemove.size()];
+			
+			int j = 0;
+			
+			for(int i = 0; i < x.length; i++) {
+				
+				if(y[i] != 0) {
+					
+					xValues[j] = x[i];
+					yValues[j] = y[i];
+					
+				} else j--;
+				
+				j++;
+				
+			}
+			
+			if(xValues.length > 2) {
+
+				TrendLine t = getRegressionMethod(m);
+				t.setValues(yValues, xValues);
+				
+				appendDataToCsv(out, name, t);
+				
+			}
+			
+		}
+		
+		out.flush();
+		out.close();
+		
+	}
+	
+	private static TrendLine getRegressionMethod(RegMethod m) {
+		
+		try {
+		
+			if(m.equals(RegMethod.Exp)) {
+			
+			
+				return ExpTrendLine.class.newInstance();
+
+			} else if(m.equals(RegMethod.Linear)) {
+				
+				return PolyTrendLine.class.newInstance();
+				
+			} else if(m.equals(RegMethod.Log)) {
+				
+				return LogTrendLine.class.newInstance();
+				
+			} else if(m.equals(RegMethod.Power)) {
+				
+				return PowerTrendLine.class.newInstance();
+				
+			}
+		
+		} catch (InstantiationException | IllegalAccessException e) {
+			
+			e.printStackTrace();
+			
+		}
+		
+		return null;
+		
+	}
+	
+	private static void appendDataToCsv(BufferedWriter writer, String name, TrendLine t) throws IOException {
+
+		writer.newLine();
+		
+		writer.write(name);
+		
+		for(int i = 2027; i < 2033; i++) {
+			
+			writer.write(";" + t.predict(i));
+			
+		}
+		
+		writer.write(";" + t.getRSquare());
+		
+		writer.flush();
+		
+	}
+	
+	private static void saveDataAsPng(TrendLine t, double[] xData, double[] yData, String filename) {
+		
+		double[] x = createXData();
+		double[] y = new double[27];
+		
+		for(int i = 2006; i < 2033; i++) {
+			
+			y[i-2006] = 0;
+			
+		}
+		
+		for(int i = 0; i < yData.length-1; i++) {
+			
+			y[i] = yData[i];
+			
+		}
+		
+		y[24] = yData[yData.length-1];
+		
+		double[] medianY = new double[27];
+		
+		for(int i = 2006; i < 2033; i++) {
+			
+			medianY[i-2006] = t.predict(i);
+		}
+		
+		XYScatterChart chart = new XYScatterChart("", "Jahr", "Anzahl Reisende");
+		chart.addSeries("Trend", x, medianY);
+		((XYPlot)chart.getChart().getPlot()).setRenderer(0, new XYLineAndShapeRenderer(true,true));
+		
+		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true,true);
+		renderer.setSeriesStroke(0, new BasicStroke(2.0f));
+		renderer.setSeriesStroke(1, new BasicStroke(0.0f));
+		((XYPlot)chart.getChart().getPlot()).setRenderer(renderer);
+		
+		chart.addSeries("Rohdaten", x, y);
+		((XYPlot)chart.getChart().getPlot()).setRenderer(1, new XYLineAndShapeRenderer(false,true));
+		
+		String outFile = filename;
+		chart.saveAsPng(outFile, 800, 600);
+		
+	}
+	
+	private static double[] createXData() {
+		
+		double[] x = new double[27];
+		
+		for(int i = 2006; i < 2033; i++) {
+			
+			x[i-2006] = i;
+			
+		}
+		
+		return x;
+		
+	}
+	
+	private static void computeAggregates(RegMethod m) throws InstantiationException, IllegalAccessException, ClassNotFoundException,
+	SQLException, IOException {
+	
+		Connection c = PsqlAdapter.createConnection(RIL_DATABASE);
 		Statement statement = c.createStatement();
 		
 		String[] tables = new String[]{"daten_2006_regionstyp_final", "daten_2007_regionstyp_final",
@@ -49,27 +327,25 @@ public class RilCreateLeastSquares {
 				"daten_2014_regionstyp_final", "daten_2015_regionstyp_final", "daten_2016_regionstyp_final"
 		};
 		
-		int[] categories = new int[]{100,300,1000,5000,10000,15000,20000,50000,1000000};
-	
 		Map<String, String> station2Category = new HashMap<>();
-		Map<String, Integer> category2StationCount = new HashMap<>();
+		Map<String, List<String>> category2Station = new HashMap<>();
 		
-		ResultSet set = statement.executeQuery("SELECT fv,nv,fv_fremd,nv_fremd,station,ges,verkehrs15,typ_name from "
-				+ "daten_2016_regionstyp_final;");
+		ResultSet set = statement.executeQuery(PsqlUtils.createSelectStatement("fv,nv,fv_fremd,nv_fremd,station,ges,verkehrs15,typ_name",
+				"daten_2016_regionstyp_final"));
 		
 		while(set.next()){
 			
-			int fv = set.getInt("fv");
-			int nv = set.getInt("nv");
-			int fvo = set.getInt("fv_fremd");
-			int nvo = set.getInt("nv_fremd");
+			int fv = set.getInt(FV);
+			int nv = set.getInt(NV);
+			int fvo = set.getInt(FVO);
+			int nvo = set.getInt(FVO);
 			
 			if(fv >= 0 && nv >= 0 && fvo >= 0 && nvo >= 0){
 				
-				float n = set.getFloat("ges");
+				float n = set.getFloat(GES);
 				String catType = null;
 				
-				for(int cat : categories){
+				for(int cat : CATEGORIES){
 					
 					if(n <= cat){
 						catType = Integer.toString(cat);
@@ -78,19 +354,18 @@ public class RilCreateLeastSquares {
 					
 				}
 				
-				String type = set.getString("typ_name") + "_" + catType;
-				String station = set.getString("station");
+				String type = set.getString(TYP) + "_" + catType;
+				String station = set.getString(STATION);
 				
 				if(!type.contains("null")){
 					
 					station2Category.put(station, type);
 					
-					if(!category2StationCount.containsKey(type)){
-						category2StationCount.put(type, 0);
+					if(!category2Station.containsKey(type)){
+						category2Station.put(type, new ArrayList<String>());
 					}
 					
-					int count = category2StationCount.get(type);
-					category2StationCount.put(type, count + 1);
+					category2Station.get(type).add(station);
 					
 					
 				}
@@ -99,45 +374,75 @@ public class RilCreateLeastSquares {
 			
 		}
 		
-		Map<String, XYSeries> avg = new HashMap<>();
-		Map<String, XYSeries> median = new HashMap<>();
-		Map<String, XYSeries> type2Plot = new HashMap<>();
+		BufferedWriter writer = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/charts/category2stations.csv");
+		
+		writer.write("category;station_name");
+		
+		for(String category : category2Station.keySet()) {
+			
+			for(String stationName : category2Station.get(category)) {
+				
+				writer.newLine();
+				writer.write(category + ";" + stationName);
+				writer.flush();
+				
+			}
+			
+		}
+		
+		writer.close();
+		
+		Map<String, Map<String,XYSeries>> avg = new HashMap<>();
+		Map<String, Map<String,XYSeries>> median = new HashMap<>();
+		Map<String, Map<String,XYSeries>> type2Plot = new HashMap<>();
 		
 		for(String table : tables){
 			
-			Map<String, RecursiveStatsContainer> type2Container = new HashMap<>();
+			Map<String, Map<String,RecursiveStatsContainer>> type2Container = new HashMap<>();
 			
-			ResultSet result = statement.executeQuery("SELECT station,fv,nv,fv_fremd,nv_fremd,ges,verkehrs15,typ_name from " + table + ";");
+			ResultSet result = statement.executeQuery(
+					PsqlUtils.createSelectStatement("state,station,fv,nv,fv_fremd,nv_fremd,ges,verkehrs15,typ_name", table));
 			
 			int year = 0;
 			
 			while(result.next()){
 				
-				int fv = result.getInt("fv");
-				int nv = result.getInt("nv");
-				int fvo = result.getInt("fv_fremd");
-				int nvo = result.getInt("nv_fremd");
+				int fv = result.getInt(FV);
+				int nv = result.getInt(NV);
+				int fvo = result.getInt(FVO);
+				int nvo = result.getInt(NVO);
+				
+				String state = null;
 				
 				if(fv >= 0 && nv >= 0 && fvo >= 0 && nvo >= 0){
 					
 					year = result.getInt("verkehrs15");
-
+	
 					float n = result.getFloat("ges");
 					String station = result.getString("station");
 					
 					if(station2Category.containsKey(station)){
 						
 						String type = station2Category.get(station);
-
-						if(!type2Container.containsKey(type)){
-							type2Container.put(type, new RecursiveStatsContainer());
-						}
-						if(!type2Plot.containsKey(type)){
-							type2Plot.put(type, new XYSeries(""));
+	
+						if(!type2Container.containsKey(state)){
+							type2Container.put(state, new HashMap<>());
 						}
 						
-						type2Plot.get(type).add(year, n);
-						type2Container.get(type).handleNewEntry(n);
+						if(!type2Container.get(state).containsKey(type)){
+							type2Container.get(state).put(type, new RecursiveStatsContainer());
+						}
+						
+						if(!type2Plot.containsKey(state)){
+							type2Plot.put(state, new HashMap<>());
+						}
+						
+						if(!type2Plot.get(state).containsKey(type)){
+							type2Plot.get(state).put(type, new XYSeries(""));
+						}
+						
+						type2Plot.get(state).get(type).add(year, n);
+						type2Container.get(state).get(type).handleNewEntry(n);
 						
 					}
 					
@@ -145,285 +450,188 @@ public class RilCreateLeastSquares {
 				
 			}
 			
-			for(Entry<String, RecursiveStatsContainer> entry : type2Container.entrySet()){
+			result.close();
+			
+			for(String key : type2Container.keySet()){
 				
-				if(!avg.containsKey(entry.getKey())){
+				for(Entry<String, RecursiveStatsContainer> entry : type2Container.get(key).entrySet()){
 					
-					avg.put(entry.getKey(), new XYSeries(""));
-					median.put(entry.getKey(), new XYSeries(""));
+					if(!avg.containsKey(key)){
+						
+						avg.put(key, new HashMap<>());
+						median.put(key, new HashMap<>());
+						
+					}
+					
+					if(!avg.get(key).containsKey(entry.getKey())){
+						
+						avg.get(key).put(entry.getKey(), new XYSeries(""));
+						median.get(key).put(entry.getKey(), new XYSeries(""));
+						
+					}
+					
+					avg.get(key).get(entry.getKey()).add(year, entry.getValue().getMean());
+					median.get(key).get(entry.getKey()).add(year, entry.getValue().getMedian());
 					
 				}
 				
-				avg.get(entry.getKey()).add(year, entry.getValue().getMean());
-				median.get(entry.getKey()).add(year, entry.getValue().getMedian());
-				
 			}
-			
-//			for(Entry<String, RecursiveStatsContainer> entry : type2Container.entrySet()){
-//
-//				BufferedWriter out = IOUtils.getAppendingBufferedWriter("/home/dhosse/01_Projects/GSP/types/" + entry.getKey() + ".csv");
-//
-//				for(Double e : entry.getValue().getEntries()){
-//					
-//					out.write(year + ";" + e.toString());
-//					out.newLine();
-//					
-//				}
-//				
-//				
-//				out.close();
-//				
-//			}
-			
-			result.close();
 			
 		}
 		
-		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/timeline.csv");
+		Map<String, Map<String,RecursiveStatsContainer>> type2Container = new HashMap<>();
+		int year = 2030;
 		
-		out.write("type;median_a0;median_a1;avg_a0;avg_a1;nStations");
-		
-		Set<String> keys = avg.keySet();
-		
-		for(String key : keys){
+		AbstractCsvReader csv = new AbstractCsvReader("\t",true) {
 			
-			double[] medianData = Regression.getPolynomialRegression(new XYSeriesCollection(median.get(key)), 0, 3);
-			double[] avgData = Regression.getPolynomialRegression(new XYSeriesCollection(avg.get(key)), 0, 3);
-			
-			out.newLine();
-			out.write(key + ";" + medianData[0] + ";" + medianData[1] + ";" + medianData[2] + ";" + medianData[3] + ";" 
-					+ avgData[0] + ";" + avgData[1] + ";" + avgData[2] + ";" + avgData[3] + ";" + category2StationCount.get(key));
-			
-		}
-		
-		out.close();
-		
-		for(Entry<String,XYSeries> entry : type2Plot.entrySet()){
-			
-			String[] s = entry.getKey().split("_");
-			String title = s[0] + ", " + getTitle(s[1]);
-			
-			XYScatterChart chart = new XYScatterChart(title, "Jahr", "Anzahl Reisende");
-
-			double[] medianData = Regression.getPolynomialRegression(new XYSeriesCollection(median.get(entry.getKey())), 0, 4);
-			double[] avgData = Regression.getPolynomialRegression(new XYSeriesCollection(avg.get(entry.getKey())), 0, 3);
-//			double[] medianData = Regression.getOLSRegression(new XYSeriesCollection(median.get(entry.getKey())), 0);
-//			double[] avgData = Regression.getOLSRegression(new XYSeriesCollection(avg.get(entry.getKey())), 0);
-
-			double[] medianX = new double[102];
-			double[] medianY = new double[102];
-			
-//			XYSeries medianXY = new XYSeries("");
-			
-			float f = 2006f;
-			int j = 2006;
-			
-			while(f < 2016.1){
-
-//				medianXY.add(f,medianData[0] + medianData[1] * f + medianData[2] * Math.pow(f, 2) +
-//						medianData[3] * Math.pow(f, 3));
-				medianX[j-2006] = f;
-				medianY[j-2006] = medianData[0] + medianData[1] * f + medianData[2] * Math.pow(f, 2) +
-						medianData[3] * Math.pow(f, 3) + medianData[4] * Math.pow(f, 4);
-				f+=0.1f;
-				j++;
+			@Override
+			public void handleRow(String[] line) {
+	
+				String state = null;
 				
-			}
-
-			chart.addSeries("Trend", medianX, medianY);
-			((XYPlot)chart.getChart().getPlot()).setRenderer(0, new XYLineAndShapeRenderer(true,true));
-			
-			double[] x = new double[entry.getValue().getItems().size()];
-			double[] y = new double[entry.getValue().getItems().size()];
-			
-			int ii = 0;
-			
-			for(Object d : entry.getValue().getItems()){
+				String station = line[1];
+				double ges = Double.parseDouble(line[14]);
+				double factor = Double.parseDouble(line[18]);
+				double n = ges * (1 + factor);
 				
-				XYDataItem i = (XYDataItem)d;
-				
-				x[ii] = i.getXValue();
-				y[ii] = i.getYValue();
-				
-				ii++;
+				if(station2Category.containsKey(station)){
 					
+					String type = station2Category.get(station);
+	
+					if(!type2Container.containsKey(state)){
+						type2Container.put(state, new HashMap<>());
+					}
+					
+					if(!type2Container.get(state).containsKey(type)){
+						type2Container.get(state).put(type, new RecursiveStatsContainer());
+					}
+					
+					if(!type2Plot.containsKey(state)){
+						type2Plot.put(state, new HashMap<>());
+					}
+					
+					if(!type2Plot.get(state).containsKey(type)){
+						type2Plot.get(state).put(type, new XYSeries(""));
+					}
+					
+					type2Plot.get(state).get(type).add(year, n);
+					type2Container.get(state).get(type).handleNewEntry(n);
+					
+				}
+				
 			}
 			
-			XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true,true);
-			renderer.setSeriesStroke(0, new BasicStroke(2.0f));
-			renderer.setSeriesStroke(1, new BasicStroke(0.0f));
-			((XYPlot)chart.getChart().getPlot()).setRenderer(renderer);
-			
-			chart.addSeries("Rohdaten", x, y);
-			((XYPlot)chart.getChart().getPlot()).setRenderer(1, new XYLineAndShapeRenderer(false,true));
-			
-			String outFile = "/home/dhosse/01_Projects/GSP/types/" + entry.getKey() + ".png";
-			chart.saveAsPng(outFile, 800, 600);
-			
-		}
-		
-		statement.close();
-		c.close();
-		
-	}
-	
-	private static String getTitle(String s){
-		
-		if(s.equals("100")){
-			
-			return "0 - 100";
-		} else if(s.equals("300")){
-			return "101 - 301";
-		} else if(s.equals("1000")){
-			return "301 - 1.000";
-		} else if(s.equals("5000")){
-			return "1.001 - 5.000";
-		} else if(s.equals("10000")){
-			return "5.001 - 10.000";
-		} else if(s.equals("15000")){
-			return "10.001 - 15.000";
-		} else if(s.equals("20000")){
-			return "15.001 - 20.000";
-		} else if(s.equals("50000")){
-			return "20.001 - 50.000";
-		} else{
-			return "> 50.001";
-		}
-		
-	}
-	
-	private static void computeStationwise() throws InstantiationException, IllegalAccessException,
-		ClassNotFoundException, SQLException, IOException {
-		
-		Connection c = PsqlAdapter.createConnection("ril");
-		Statement statement = c.createStatement();
-		
-		String[] tables = new String[]{"daten_2006_regionstyp_final", "daten_2007_regionstyp_final",
-				"daten_2008_regionstyp_final", "daten_2009_regionstyp_final", "daten_2010_regionstyp_final",
-				"daten_2011_regionstyp_final", "daten_2012_regionstyp_final", "daten_2013_regionstyp_final",
-				"daten_2014_regionstyp_final", "daten_2015_regionstyp_final", "daten_2016_regionstyp_final"
 		};
 		
-		Map<String, XYSeries> stationData = new HashMap<String, XYSeries>();
+		csv.read("/home/dhosse/01_Projects/GSP/Änderungsraten_2013-zu-2030_V2_fuer-InnoZ.csv");
 		
-		for(String table : tables){
-		
-			ResultSet result = statement.executeQuery("SELECT station,fv,nv,fv_fremd,nv_fremd,ges,verkehrs15 from " + table + ";");
+		for(String key : type2Container.keySet()){
 			
-			while(result.next()){
+			for(Entry<String, RecursiveStatsContainer> entry : type2Container.get(key).entrySet()){
 				
-				int fv = result.getInt("fv");
-				int nv = result.getInt("nv");
-				int fvo = result.getInt("fv_fremd");
-				int nvo = result.getInt("nv_fremd");
-				
-				if(fv >= 0 && nv >= 0 && fvo >= 0 && nvo >= 0){
-
-					String name = result.getString("station");
-					int year = result.getInt("verkehrs15");
-					int n = result.getInt("ges");
+				if(!avg.containsKey(key)){
 					
-					if(!stationData.containsKey(name)) stationData.put(name, new XYSeries(""));
-					
-					stationData.get(name).add(year, n);
+					avg.put(key, new HashMap<>());
+					median.put(key, new HashMap<>());
 					
 				}
 				
+				if(!avg.get(key).containsKey(entry.getKey())){
+					
+					avg.get(key).put(entry.getKey(), new XYSeries(""));
+					median.get(key).put(entry.getKey(), new XYSeries(""));
+					
+				}
+				
+				avg.get(key).get(entry.getKey()).add(year, entry.getValue().getMean());
+				median.get(key).get(entry.getKey()).add(year, entry.getValue().getMedian());
+				
 			}
 			
-			result.close();
-
 		}
 		
-		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/stationwise.csv");
-		out.write("name;a0;a1");
+		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/charts/timeline.csv");
 		
-		for(Entry<String, XYSeries> entry : stationData.entrySet()){
+		String t = "state;type";
+		for(int i = 2027; i < 2033; i++){
+			t += ";" + Integer.toString(i);
+		}
+		
+		t+= ";r2;nStations";
+		
+		out.write(t);
+		
+		for(Entry<String, Map<String, XYSeries>> entry : avg.entrySet()) {
 			
-			XYSeries xy = entry.getValue();
+			String key = entry.getKey();
 			
-			if(xy.getItems().size() >= 2){
-
-				double[] reg = Regression.getOLSRegression(new XYSeriesCollection(xy),0);
+			for(Entry<String, XYSeries> entry2 : entry.getValue().entrySet()) {
+				
+				int nEntries = entry2.getValue().getItemCount();
+				
+				double[] x = new double[nEntries];
+				double[] y = new double[nEntries];
+				Set<Integer> indicesToRemove = new HashSet<>();
+				
+				for(int i = 0; i < nEntries; i++) {
+					
+					x[i] = (double)entry2.getValue().getX(i);
+					y[i] = (double)entry2.getValue().getY(i);
+					
+					if(y[i] == 0) {
+						
+						indicesToRemove.add(i);
+						
+					}
+					
+				}
+				
+				double[] xValues = new double[x.length-indicesToRemove.size()];
+				double[] yValues = new double[y.length-indicesToRemove.size()];
+				
+				int j = 0;
+				
+				for(int i = 0; i < x.length; i++) {
+					
+					if(y[i] != 0) {
+						
+						xValues[j] = x[i];
+						yValues[j] = y[i];
+						
+					} else j--;
+					
+					j++;
+					
+				}
+				
+				TrendLine trend = getRegressionMethod(m);
+				trend.setValues(yValues, xValues);
 				
 				out.newLine();
-							
-				out.write(entry.getKey() + ";" + reg[0] + ";" + reg[1]);
+				String line = key != null ? key : "";
+				line += ";" + entry2.getKey();
+				for(int i = 2027; i < 2033; i++){
+					
+					line += ";" + trend.predict(i);
+					
+				}
+				
+				line += ";" + trend.getRSquare() + ";" + category2Station.get(entry2.getKey()).size();
+				
+				out.write(line);
+				out.flush();
+			
+				saveDataAsPng(trend, xValues, yValues, "/home/dhosse/01_Projects/GSP/charts/" + entry2.getKey() + ".png");
 				
 			}
-			
+		
 		}
 		
 		out.close();
 		
 		statement.close();
 		c.close();
-		
-	}
-
-	private static void computeAggregates()
-			throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException, IOException {
-		
-		Connection c = PsqlAdapter.createConnection("ril");
-		
-		Statement statement = c.createStatement();
-
-		String[] tables = new String[]{"daten_eng_verfl_0_to_100", "daten_eng_verfl_10001_to_15000",
-				"daten_eng_verfl_1001_to_5000", "daten_eng_verfl_101_to_300", "daten_eng_verfl_15001_to_20000",
-				"daten_eng_verfl_20001_to_50000", "daten_eng_verfl_301_to_1000", "daten_eng_verfl_50000_to_1000000",
-				"daten_eng_verfl_5001_to_10000", "daten_ergaenz_0_to_100", "daten_ergaenz_10001_to_15000",
-				"daten_ergaenz_1001_to_5000", "daten_ergaenz_101_to_300", "daten_ergaenz_15001_to_20000",
-				"daten_ergaenz_20001_to_50000", "daten_ergaenz_301_to_1000", "daten_ergaenz_50000_to_1000000",
-				"daten_ergaenz_5001_to_10000", "daten_gem_aus_gros_0_to_100", "daten_gem_aus_gros_10001_to_15000",
-				"daten_gem_aus_gros_1001_to_5000", "daten_gem_aus_gros_101_to_300", "daten_gem_aus_gros_15001_to_20000",
-				"daten_gem_aus_gros_20001_to_50000", "daten_gem_aus_gros_301_to_1000", "daten_gem_aus_gros_50000_to_1000000",
-				"daten_gem_aus_gros_5001_to_10000", "daten_weit_verfl_0_to_100", "daten_weit_verfl_10001_to_15000",
-				"daten_weit_verfl_1001_to_5000", "daten_weit_verfl_101_to_300", "daten_weit_verfl_15001_to_20000",
-				"daten_weit_verfl_20001_to_50000", "daten_weit_verfl_301_to_1000", "daten_weit_verfl_50000_to_1000000",
-				"daten_weit_verfl_5001_to_10000", "daten_zentrum_0_to_100", "daten_zentrum_10001_to_15000",
-				"daten_zentrum_1001_to_5000", "daten_zentrum_101_to_300", "daten_zentrum_15001_to_20000",
-				"daten_zentrum_20001_to_50000", "daten_zentrum_301_to_1000", "daten_zentrum_50000_to_1000000",
-				"daten_zentrum_5001_to_10000"};
-
-		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/aggregates.csv");
-		out.write("category;median_a0;median_a1;avg_a0;avg_a1;Anzahl Datenpunkte");
-		
-		for(String table : tables){
-			
-			ResultSet result = statement.executeQuery("SELECT * FROM " + table + ";");
-			XYSeries medianSeries = new XYSeries("");
-			XYSeries avgSeries = new XYSeries("");
-			
-			int nDatapoints = 0;
-
-			while(result.next()){
-				
-				int year = result.getInt("year");
-				float median = result.getFloat("median_ges");
-				float avg = result.getFloat("avg_ges");
-				nDatapoints = result.getInt("count");
-				
-				medianSeries.add(year, median);
-				avgSeries.add(year, avg);
-				
-			}
-			
-			result.close();
-			
-			XYSeriesCollection medianData = new XYSeriesCollection(medianSeries);
-			XYSeriesCollection avgData = new XYSeriesCollection(avgSeries);
-			double[] median_as = Regression.getOLSRegression(medianData, 0);
-			double[] avg_as = Regression.getOLSRegression(avgData, 0);
-			
-			out.newLine();
-			out.write(table + ";" + median_as[0] + ";" + median_as[1] + ";" + avg_as[0] + ";" + avg_as[1] + ";" + nDatapoints);
-			
-		}
-		
-		out.close();
-		
-		statement.close();
-		c.close();
+	
 	}
 
 }

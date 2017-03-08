@@ -13,11 +13,13 @@ import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.handler.DefaultHandler;
 import com.innoz.toolbox.io.database.handler.HouseholdIdHandler;
 import com.innoz.toolbox.io.database.handler.HouseholdIncomeHandler;
+import com.innoz.toolbox.io.database.handler.HouseholdRegionTypeHandler;
 import com.innoz.toolbox.io.database.handler.HouseholdWeightHandler;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyHousehold;
+import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
 import com.innoz.toolbox.utils.data.Tree.Node;
 
 public class ReadHouseholdDatabaseTask extends DatabaseTask {
@@ -30,6 +32,7 @@ public class ReadHouseholdDatabaseTask extends DatabaseTask {
 		this.handlers.add(new HouseholdIdHandler());
 		this.handlers.add(new HouseholdIncomeHandler());
 		this.handlers.add(new HouseholdWeightHandler());
+		this.handlers.add(new HouseholdRegionTypeHandler());
 		
 	}
 	
@@ -89,9 +92,9 @@ public class ReadHouseholdDatabaseTask extends DatabaseTask {
 					resultSet.getString(SurveyConstants.householdIncomePerMonth(surveyType)));
 			attributes.put(SurveyConstants.householdWeight(surveyType),
 					Double.toString(resultSet.getDouble(SurveyConstants.householdWeight(surveyType))));
-			int rtyp = resultSet.getInt(SurveyConstants.regionType(surveyType));
+			attributes.put(SurveyConstants.regionType(surveyType), resultSet.getString(SurveyConstants.regionType(surveyType)));
 			
-			SurveyHousehold hh = new SurveyHousehold();
+			SurveyHousehold hh = (SurveyHousehold) SurveyObject.newInstance(SurveyHousehold.class);
 			
 			for(DefaultHandler handler : this.handlers){
 				
@@ -99,7 +102,7 @@ public class ReadHouseholdDatabaseTask extends DatabaseTask {
 				
 			}
 			
-			container.addHousehold(hh, rtyp);
+			container.addHousehold(hh);
 			
 		}
 		

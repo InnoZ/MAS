@@ -1,22 +1,15 @@
 package com.innoz.toolbox.config;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 import com.innoz.toolbox.config.groups.ConfigurationGroup;
 import com.innoz.toolbox.config.groups.ConfigurationNames;
+import com.innoz.toolbox.io.DefaultXmlReader;
 
-public class ConfigurationReaderXml extends DefaultHandler {
+public class ConfigurationReaderXml extends DefaultXmlReader {
 	
 	private final Configuration configuration;
 
@@ -25,24 +18,6 @@ public class ConfigurationReaderXml extends DefaultHandler {
 	ConfigurationReaderXml(final Configuration configuration){
 		
 		this.configuration = configuration;
-		
-	}
-	
-	void read(String file){
-		
-		File inputFile = new File(file);
-		SAXParserFactory saxFactory = SAXParserFactory.newInstance();
-		
-		try {
-		
-			SAXParser parser = saxFactory.newSAXParser();
-			parser.parse(inputFile, this);
-		
-		} catch (ParserConfigurationException | SAXException | IOException e) {
-		
-			e.printStackTrace();
-			
-		}
 		
 	}
 	

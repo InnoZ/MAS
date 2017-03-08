@@ -35,6 +35,7 @@ public class ConfigurationWriterHandler {
 	public void writeConfiguration(final Configuration configuration, final BufferedWriter out) throws IOException{
 		
 		writeConfigurationGroup(configuration.misc(), out, true);
+		writeConfigurationGroup(configuration.network(), out, true);
 		writeConfigurationGroup(configuration.psql(), out, true);
 		writeConfigurationGroup(configuration.scenario(), out, true);
 		writeConfigurationGroup(configuration.surveyPopulation(), out, true);

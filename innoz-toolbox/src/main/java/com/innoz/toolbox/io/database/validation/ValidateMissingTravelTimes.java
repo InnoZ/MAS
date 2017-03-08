@@ -1,7 +1,7 @@
 package com.innoz.toolbox.io.database.validation;
 
 import com.innoz.toolbox.io.database.handler.Logbook;
-import com.innoz.toolbox.io.database.handler.SurveyStage;
+import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyStage;
 
 public class ValidateMissingTravelTimes implements Validator {
 
