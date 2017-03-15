@@ -3,6 +3,7 @@ package com.innoz.toolbox.utils.misc;
 import java.awt.BasicStroke;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -73,8 +74,8 @@ public class RilCreateLeastSquares {
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException,
 		ClassNotFoundException, SQLException, IOException {
 		
-		computeAggregates(RegMethod.Power);
-		computeStationwise(RegMethod.Power);
+		computeAggregates(RegMethod.Poly);
+		computeStationwise(RegMethod.Poly);
 		
 	}
 	
@@ -202,6 +203,12 @@ public class RilCreateLeastSquares {
 			
 			if(xValues.length > 2) {
 
+				if(m.equals(RegMethod.Poly) && xValues.length < 10) {
+					
+					continue;
+					
+				}
+				
 				TrendLine t = getRegressionMethod(m);
 				t.setValues(yValues, xValues);
 				
@@ -249,7 +256,6 @@ public class RilCreateLeastSquares {
 		
 			if(m.equals(RegMethod.Exp)) {
 			
-			
 				return ExpTrendLine.class.newInstance();
 
 			} else if(m.equals(RegMethod.Linear)) {
@@ -264,9 +270,13 @@ public class RilCreateLeastSquares {
 				
 				return PowerTrendLine.class.newInstance();
 				
+			} else if(m.equals(RegMethod.Poly)) {
+				
+				return new PolyTrendLine(4);
+				
 			}
 		
-		} catch (InstantiationException | IllegalAccessException e) {
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException e) {
 			
 			e.printStackTrace();
 			
@@ -284,7 +294,7 @@ public class RilCreateLeastSquares {
 		
 		for(int i = 2027; i < 2033; i++) {
 			
-			writer.write(";" + t.predict(i));
+			writer.write(";" + Math.ceil(t.predict(i)));
 			
 		}
 		
@@ -410,7 +420,7 @@ public class RilCreateLeastSquares {
 			
 		}
 		
-		BufferedWriter writer = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/charts/category2stations.csv");
+		BufferedWriter writer = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/Documentation/category2stations.csv");
 		
 		writer.write("category;station_name");
 		
@@ -586,7 +596,7 @@ public class RilCreateLeastSquares {
 			
 		}
 		
-		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/charts/timeline.csv");
+		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/Documentation/timeline_" + m.name() + ".csv");
 		
 		String t = "state;type";
 		for(int i = 2027; i < 2033; i++){
