@@ -16,10 +16,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
+import org.jfree.util.Log;
 import org.matsim.core.utils.charts.XYScatterChart;
+import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.io.IOUtils;
 
 import com.innoz.toolbox.config.psql.PsqlAdapter;
@@ -34,6 +37,8 @@ import com.innoz.toolbox.utils.matsim.RecursiveStatsContainer;
 
 public class RilCreateLeastSquares {
 
+	private static final Logger log = Logger.getLogger(RilCreateLeastSquares.class);
+	
 	static final String RIL_DATABASE = "ril";
 	static final int[] CATEGORIES = new int[]{100,300,1000,5000,10000,15000,20000,50000,1000000};
 
@@ -115,6 +120,8 @@ public class RilCreateLeastSquares {
 		
 		csv.read("/home/dhosse/01_Projects/GSP/Änderungsraten_2013-zu-2030_V2_fuer-InnoZ.csv");
 		
+		log.info("Read " + stationData.size() + " stations");
+		
 		for(String table : tables){
 		
 			ResultSet result = statement.executeQuery(
@@ -152,7 +159,9 @@ public class RilCreateLeastSquares {
 		statement.close();
 		c.close();
 		
-		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/charts/trends.csv");
+		Set<String> newStations = new HashSet<>();
+		
+		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/Documentation/trends_" + m.name() + ".csv");
 		out.write("station;2027;2028;2029;2030;2031;2032;r2");
 		out.flush();
 		
@@ -198,12 +207,39 @@ public class RilCreateLeastSquares {
 				
 				appendDataToCsv(out, name, t);
 				
+			} else {
+				
+				newStations.add(name);
+				
 			}
 			
 		}
 		
 		out.flush();
 		out.close();
+		
+		BufferedWriter out2 = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/Documentation/newStations.csv");
+		out2.write("station");
+		for(String name : newStations) {
+			out2.newLine();
+			out2.write(name);
+		}
+		out2.flush();
+		out2.close();
+		
+	}
+	
+	private static String doubleArrayToString(double[] array) {
+		
+		StringBuffer b = new StringBuffer();
+		
+		for(double d : array) {
+			
+			b.append(Double.toString(d));
+			
+		}
+		
+		return b.toString();
 		
 	}
 	
