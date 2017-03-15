@@ -1,11 +1,18 @@
 package com.innoz.toolbox.utils.math.regression;
 
 public class ExpTrendLine extends OLSTrendLine {
-    @Override
+    
+	@Override
     protected double[] xVector(double x) {
+    	
         return new double[]{1,x};
+        
     }
 
     @Override
-    protected boolean logY() {return true;}
+    protected boolean logY() {
+    	
+    	return true;
+    
+    }
 }
