@@ -74,8 +74,8 @@ public class RilCreateLeastSquares {
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException,
 		ClassNotFoundException, SQLException, IOException {
 		
-		computeAggregates(RegMethod.Poly);
-		computeStationwise(RegMethod.Poly);
+		computeAggregates(RegMethod.Power);
+		computeStationwise(RegMethod.Power);
 		
 	}
 	
@@ -104,7 +104,7 @@ public class RilCreateLeastSquares {
 			@Override
 			public void handleRow(String[] line) {
 
-				String station = line[1];
+				String station = line[0];
 				double ges = Double.parseDouble(line[14]);
 				double factor = Double.parseDouble(line[18]);
 				double n = Math.ceil(ges * (1 + factor));
@@ -126,7 +126,7 @@ public class RilCreateLeastSquares {
 		for(String table : tables){
 		
 			ResultSet result = statement.executeQuery(
-					PsqlUtils.createSelectStatement("station,fv,nv,fv_fremd,nv_fremd,ges,verkehrs15", table));
+					PsqlUtils.createSelectStatement("nr,station,fv,nv,fv_fremd,nv_fremd,ges,verkehrs15", table));
 			
 			while(result.next()){
 				
@@ -134,19 +134,22 @@ public class RilCreateLeastSquares {
 				int nv = result.getInt("nv");
 				int fvo = result.getInt("fv_fremd");
 				int nvo = result.getInt("nv_fremd");
+				String id = Integer.toString(result.getInt("nr"));
 				String name = result.getString("station");
 				int year = result.getInt("verkehrs15");
 				
 				if(year == 2013) {
-					stations2016.add(name);
+					stations2016.add(id);
 				}
 				
 				if(fv >= 0 && nv >= 0 && fvo >= 0 && nvo >= 0){
 
 					int n = result.getInt("ges");
 					
-					if(stationData.containsKey(name)){
-						stationData.get(name)[year-2006] = (double) n;
+					if(stationData.containsKey(id)){
+						stationData.get(id)[year-2006] = (double) n;
+					} else {
+						log.error("Station " + name + " (" + id + ") has no counterpart!");
 					}
 					
 				}
