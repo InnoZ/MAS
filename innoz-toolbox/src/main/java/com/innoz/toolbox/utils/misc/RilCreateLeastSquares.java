@@ -3,7 +3,6 @@ package com.innoz.toolbox.utils.misc;
 import java.awt.BasicStroke;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,9 +20,7 @@ import org.apache.log4j.Logger;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
-import org.jfree.util.Log;
 import org.matsim.core.utils.charts.XYScatterChart;
-import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.io.IOUtils;
 
 import com.innoz.toolbox.config.psql.PsqlAdapter;
@@ -82,22 +79,22 @@ public class RilCreateLeastSquares {
 	private static void computeStationwise(RegMethod m) throws InstantiationException, IllegalAccessException,
 		ClassNotFoundException, SQLException, IOException {
 		
-		Connection c = PsqlAdapter.createConnection(RIL_DATABASE);
-		Statement statement = c.createStatement();
-		
-		String[] tables = new String[]{
-				
-				"daten_2006_regionstyp_final", "daten_2007_regionstyp_final",
-				"daten_2008_regionstyp_final", "daten_2009_regionstyp_final", "daten_2010_regionstyp_final",
-				"daten_2011_regionstyp_final", "daten_2012_regionstyp_final", "daten_2013_regionstyp_final",
-				"daten_2014_regionstyp_final", "daten_2015_regionstyp_final", "daten_2016_regionstyp_final"
-		
-		};
+//		Connection c = PsqlAdapter.createConnection(RIL_DATABASE);
+//		Statement statement = c.createStatement();
+//		
+//		String[] tables = new String[]{
+//				
+//				"daten_2006_regionstyp_final", "daten_2007_regionstyp_final",
+//				"daten_2008_regionstyp_final", "daten_2009_regionstyp_final", "daten_2010_regionstyp_final",
+//				"daten_2011_regionstyp_final", "daten_2012_regionstyp_final", "daten_2013_regionstyp_final",
+//				"daten_2014_regionstyp_final", "daten_2015_regionstyp_final", "daten_2016_regionstyp_final"
+//		
+//		};
 
 		Map<String, double[]> stationData = new HashMap<>();
 		double[] x = xValues();
 		
-		Set<String> stations2016 = new HashSet<>();
+		Map<String, Station> stations2016 = new HashMap<>();
 
 		AbstractCsvReader csv = new AbstractCsvReader("\t",true) {
 			
@@ -105,12 +102,17 @@ public class RilCreateLeastSquares {
 			public void handleRow(String[] line) {
 
 				String station = line[0];
+				String name = line[1];
 				double ges = Double.parseDouble(line[14]);
 				double factor = Double.parseDouble(line[18]);
 				double n = Math.ceil(ges * (1 + factor));
 				
 				if(!stationData.containsKey(station)) {
 					stationData.put(station, new double[x.length]);
+					Station s = new Station();
+					s.name = name;
+					s.id = station;
+					stations2016.put(station, s);
 				}
 				
 				stationData.get(station)[index2030] = n;
@@ -123,55 +125,105 @@ public class RilCreateLeastSquares {
 		
 		log.info("Read " + stationData.size() + " stations");
 		
-		for(String table : tables){
+		String path = "/home/dhosse/01_Projects/GSP/Daten/20_Stationsdaten/for_import/";
 		
-			ResultSet result = statement.executeQuery(
-					PsqlUtils.createSelectStatement("nr,station,fv,nv,fv_fremd,nv_fremd,ges,verkehrs15", table));
+		String[] files = {"Verkehrsdaten_2006_utf8.csv","Verkehrsdaten_2007_utf8.csv","Verkehrsdaten_2008_utf8.csv","Verkehrsdaten_2009_utf8.csv",
+				"Verkehrsdaten_2010_utf8.csv","Verkehrsdaten_2011_utf8.csv","Verkehrsdaten_2012_utf8.csv","Verkehrsdaten_2013_utf8.csv",
+				"Verkehrsdaten_2014_utf8.csv","Verkehrsdaten_2015_utf8.csv","Verkehrsdaten_2016_utf8.csv"};
+		
+		int p = 0;
+		
+		for(String s : files){
 			
-			while(result.next()){
+			int year = p;
+			
+			AbstractCsvReader reader = new AbstractCsvReader(";",true) {
 				
-				int fv = result.getInt("fv");
-				int nv = result.getInt("nv");
-				int fvo = result.getInt("fv_fremd");
-				int nvo = result.getInt("nv_fremd");
-				String id = Integer.toString(result.getInt("nr"));
-				String name = result.getString("station");
-				int year = result.getInt("verkehrs15");
-				
-				if(year == 2013) {
-					stations2016.add(id);
-				}
-				
-				if(fv >= 0 && nv >= 0 && fvo >= 0 && nvo >= 0){
-
-					int n = result.getInt("ges");
+				@Override
+				public void handleRow(String[] line) {
 					
+					String id = line[0];
+					String name = line[1];
+					double n = Double.parseDouble(line[14]);
+
 					if(stationData.containsKey(id)){
-						stationData.get(id)[year-2006] = (double) n;
+						
+						stationData.get(id)[year] = n;
+						
+						if(year == files.length - 1) {
+							
+							stations2016.get(id).type = setType(n);
+							
+						}
+						
 					} else {
+						
 						log.error("Station " + name + " (" + id + ") has no counterpart!");
+						
 					}
 					
 				}
 				
-			}
+			};
 			
-			result.close();
-
+			reader.read(path + s);
+			
+			p++;
+			
 		}
 		
-		statement.close();
-		c.close();
+//		for(String table : tables){
+//		
+//			ResultSet result = statement.executeQuery(
+//					PsqlUtils.createSelectStatement("nr,station,fv,nv,fv_fremd,nv_fremd,ges,verkehrs15", table));
+//			
+//			while(result.next()){
+//				
+//				int fv = result.getInt("fv");
+//				int nv = result.getInt("nv");
+//				int fvo = result.getInt("fv_fremd");
+//				int nvo = result.getInt("nv_fremd");
+//				String id = Integer.toString(result.getInt("nr"));
+//				String name = result.getString("station");
+//				int year = result.getInt("verkehrs15");
+//				
+//				if(year == 2013) {
+//					stations2016.add(id);
+//				}
+//				
+//				if(fv >= 0 && nv >= 0 && fvo >= 0 && nvo >= 0){
+//
+//					int n = result.getInt("ges");
+//					
+//					if(stationData.containsKey(id)){
+//						stationData.get(id)[year-2006] = (double) n;
+//					} else {
+//						log.error("Station " + name + " (" + id + ") has no counterpart!");
+//					}
+//					
+//				}
+//				
+//			}
+//			
+//			result.close();
+//
+//		}
+//		
+//		statement.close();
+//		c.close();
 		
 		Set<String> newStations = new HashSet<>();
 		
 		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/Documentation/trends_" + m.name() + ".csv");
-		out.write("station;2027;2028;2029;2030;2031;2032;r2");
+		out.write("station;name;cluster;2016;2027;2028;2029;2030;2031;2032;r2");
 		out.flush();
 		
 		for(Entry<String, double[]> entry : stationData.entrySet()) {
 			
-			String name = entry.getKey();
+			String id= entry.getKey();
+			String name = stations2016.get(id).name;
+			String cluster = stations2016.get(id).type;
+			
 			double[] y = entry.getValue();
 			
 			Set<Integer> indicesToRemove = new HashSet<>();
@@ -215,7 +267,7 @@ public class RilCreateLeastSquares {
 				TrendLine t = getRegressionMethod(m);
 				t.setValues(yValues, xValues);
 				
-				appendDataToCsv(out, name, t);
+				appendDataToCsv(out, id, name, cluster, y[y.length-1], t);
 				
 			} else {
 				
@@ -239,7 +291,7 @@ public class RilCreateLeastSquares {
 		
 	}
 	
-	private static String doubleArrayToString(double[] array) {
+	static String doubleArrayToString(double[] array) {
 		
 		StringBuffer b = new StringBuffer();
 		
@@ -250,6 +302,44 @@ public class RilCreateLeastSquares {
 		}
 		
 		return b.toString();
+		
+	}
+	
+	private static String setType(double nPassengers) {
+		
+		if(nPassengers <= 100) {
+			
+			return "unter 100";
+			
+		} else if(nPassengers <= 300) {
+			
+			return "101 - 300";
+			
+		} else if(nPassengers <= 1001) {
+			
+			return "301 - 1.000";
+			
+		} else if(nPassengers <= 5000) {
+			
+			return "1.001 - 5.000";
+			
+		} else if(nPassengers <= 15000) {
+			
+			return "5.001 - 15.000";
+			
+		} else if(nPassengers <= 20000) {
+			
+			return "15.001 - 20.000";
+			
+		} else if(nPassengers <= 50000) {
+			
+			return "20.001 - 50.000";
+			
+		} else {
+			
+			return "50.000 und mehr";
+			
+		}
 		
 	}
 	
@@ -289,11 +379,11 @@ public class RilCreateLeastSquares {
 		
 	}
 	
-	private static void appendDataToCsv(BufferedWriter writer, String name, TrendLine t) throws IOException {
+	private static void appendDataToCsv(BufferedWriter writer, String id, String name, String type, double n2016, TrendLine t) throws IOException {
 
 		writer.newLine();
 		
-		writer.write(name);
+		writer.write(id + ";" + name + ";" + type + ";" + n2016);
 		
 		for(int i = 2027; i < 2033; i++) {
 			
@@ -681,6 +771,14 @@ public class RilCreateLeastSquares {
 		statement.close();
 		c.close();
 	
+	}
+	
+	static class Station {
+		
+		String id;
+		String name;
+		String type;
+		
 	}
 
 }
