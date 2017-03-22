@@ -23,7 +23,7 @@ public class PersonUtils {
 	public static final String ATT_LICENSE = "hasLicense";
 	public static final String ATT_MOBTYPE = "mobilityType";
 	
-	static final Integer[] ageGroups = new Integer[]{5,10,18,25,35,45,55,65,75,85,120};
+	static final Integer[] ageGroups = new Integer[]{4,9,17,24,34,44,54,64,74,84,120};
 
 	private PersonUtils(){};
 	
