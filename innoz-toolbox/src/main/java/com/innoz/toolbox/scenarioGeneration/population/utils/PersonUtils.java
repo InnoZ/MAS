@@ -21,11 +21,8 @@ public class PersonUtils {
 	public static final String ATT_EMPLOYED = "isEmployed";
 	public static final String ATT_CAR_AVAIL = "carAvail";
 	public static final String ATT_LICENSE = "hasLicense";
-	public static final String ATT_MOBTYPE = "mobilityType";
 	
-	static final Integer[] ageGroups = new Integer[]{4,9,17,24,34,44,54,64,74,84,120};
-
-	private PersonUtils(){};
+	static final Integer[] ageGroups = new Integer[]{0,5,10,18,25,35,45,55,65,75,85};
 	
 	public static int getAgeGroup(int age) {
 		
