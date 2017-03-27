@@ -15,6 +15,7 @@ import com.innoz.toolbox.io.database.handler.DefaultHandler;
 import com.innoz.toolbox.io.database.handler.PersonAgeHandler;
 import com.innoz.toolbox.io.database.handler.PersonCarAvailabilityHandler;
 import com.innoz.toolbox.io.database.handler.PersonEmploymentHandler;
+import com.innoz.toolbox.io.database.handler.PersonGroupHandler;
 import com.innoz.toolbox.io.database.handler.PersonIdHandler;
 import com.innoz.toolbox.io.database.handler.PersonIsMobileHandler;
 import com.innoz.toolbox.io.database.handler.PersonLicenseHandler;
@@ -55,6 +56,7 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 		this.handlers.add(new PersonWeightHandler());
 		this.handlers.add(new PersonIsMobileHandler());
 		this.handlers.add(new PersonRegionTypeHandler());
+		this.handlers.add(new PersonGroupHandler());
 	
 	}
 
@@ -139,7 +141,8 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 				attributes.put(SurveyConstants.personAge(surveyType), resultSet.getString(SurveyConstants.personAge(surveyType)));
 				attributes.put(SurveyConstants.personEmployment(surveyType), resultSet.getString(SurveyConstants.personEmployment(surveyType)));
 				attributes.put(SurveyConstants.mobile(surveyType), resultSet.getString(SurveyConstants.mobile(surveyType)));
-				attributes.put(SurveyConstants.regionType(surveyType), resultSet.getString(SurveyConstants.regionType(surveyType))); 
+				attributes.put(SurveyConstants.regionType(surveyType), resultSet.getString(SurveyConstants.regionType(surveyType)));
+				attributes.put(SurveyConstants.personGroup(surveyType), resultSet.getString(SurveyConstants.personGroup(surveyType)));
 								
 				SurveyPerson person = (SurveyPerson) SurveyObject.newInstance(SurveyPerson.class);
 				
