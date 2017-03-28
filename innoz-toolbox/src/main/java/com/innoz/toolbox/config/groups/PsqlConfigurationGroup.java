@@ -17,7 +17,7 @@ public class PsqlConfigurationGroup extends ConfigurationGroup {
 	
 	private String dbUser = "postgres";
 	private String dbPassword = "postgres";
-	private int localPort = 3200;
+	private int localPort = 5432;
 	private boolean writeIntoDataHub = false;
 	
 	public PsqlConfigurationGroup() {
