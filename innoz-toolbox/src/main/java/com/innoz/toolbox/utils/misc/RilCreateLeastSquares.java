@@ -79,18 +79,6 @@ public class RilCreateLeastSquares {
 	private static void computeStationwise(RegMethod m) throws InstantiationException, IllegalAccessException,
 		ClassNotFoundException, SQLException, IOException {
 		
-//		Connection c = PsqlAdapter.createConnection(RIL_DATABASE);
-//		Statement statement = c.createStatement();
-//		
-//		String[] tables = new String[]{
-//				
-//				"daten_2006_regionstyp_final", "daten_2007_regionstyp_final",
-//				"daten_2008_regionstyp_final", "daten_2009_regionstyp_final", "daten_2010_regionstyp_final",
-//				"daten_2011_regionstyp_final", "daten_2012_regionstyp_final", "daten_2013_regionstyp_final",
-//				"daten_2014_regionstyp_final", "daten_2015_regionstyp_final", "daten_2016_regionstyp_final"
-//		
-//		};
-
 		Map<String, double[]> stationData = new HashMap<>();
 		double[] x = xValues();
 		
@@ -143,22 +131,35 @@ public class RilCreateLeastSquares {
 				public void handleRow(String[] line) {
 					
 					String id = line[0];
-					String name = line[1];
+//					String name = line[1];
+					String sbnNr = line[2];
+					String sbn = line[3];
+					String rbNr = line[4];
+					String rb = line[5];
+					String blNr = line[6];
+					String bl = line[7];
+					String katVs = line[8];
+					String katSe = line[9];
 					double n = Double.parseDouble(line[14]);
 
 					if(stationData.containsKey(id)){
 						
 						stationData.get(id)[year] = n;
 						
-						if(year == files.length - 1) {
-							
-							stations2016.get(id).type = setType(n);
-							
-						}
+						Station station = stations2016.get(id);
+						station.type = setType(n);
+						station.sbn = sbn;
+						station.sbnNr = sbnNr;
+						station.rb = rb;
+						station.rbNr = rbNr;
+						station.bl = bl;
+						station.blNr = blNr;
+						station.katSe = katSe;
+						station.katVs = katVs;
 						
 					} else {
 						
-						log.error("Station " + name + " (" + id + ") has no counterpart!");
+//						log.error("Station " + name + " (" + id + ") has no counterpart!");
 						
 					}
 					
@@ -172,57 +173,63 @@ public class RilCreateLeastSquares {
 			
 		}
 		
-//		for(String table : tables){
-//		
-//			ResultSet result = statement.executeQuery(
-//					PsqlUtils.createSelectStatement("nr,station,fv,nv,fv_fremd,nv_fremd,ges,verkehrs15", table));
-//			
-//			while(result.next()){
-//				
-//				int fv = result.getInt("fv");
-//				int nv = result.getInt("nv");
-//				int fvo = result.getInt("fv_fremd");
-//				int nvo = result.getInt("nv_fremd");
-//				String id = Integer.toString(result.getInt("nr"));
-//				String name = result.getString("station");
-//				int year = result.getInt("verkehrs15");
-//				
-//				if(year == 2013) {
-//					stations2016.add(id);
-//				}
-//				
-//				if(fv >= 0 && nv >= 0 && fvo >= 0 && nvo >= 0){
-//
-//					int n = result.getInt("ges");
-//					
-//					if(stationData.containsKey(id)){
-//						stationData.get(id)[year-2006] = (double) n;
-//					} else {
-//						log.error("Station " + name + " (" + id + ") has no counterpart!");
-//					}
-//					
-//				}
-//				
-//			}
-//			
-//			result.close();
-//
-//		}
-//		
-//		statement.close();
-//		c.close();
+		Connection c = PsqlAdapter.createConnection(RIL_DATABASE);
+		Statement statement = c.createStatement();
+		
+		String[] tables = new String[]{"daten_2006_regionstyp_final", "daten_2007_regionstyp_final", "daten_2008_regionstyp_final"
+				, "daten_2009_regionstyp_final", "daten_2010_regionstyp_final", "daten_2011_regionstyp_final", "daten_2012_regionstyp_final"
+				, "daten_2013_regionstyp_final", "daten_2014_regionstyp_final", "daten_2015_regionstyp_final"
+				, "daten_2016_regionstyp_final"};
+		
+		for(String s : tables) {
+			
+			ResultSet result = statement.executeQuery(
+					PsqlUtils.createSelectStatement("nr,station,typ_name", s));
+			
+			while(result.next()){
+
+				String id = Integer.toString(result.getInt("nr"));
+				String regionType = result.getString("typ_name");
+				String stationName = result.getString("station");
+				
+				Station station = stations2016.get(id);
+				
+				if(station != null && station.name.equals(stationName)) {
+					
+					station.regionType = regionType;
+					
+				}
+				
+			}
+			
+			result.close();
+			
+		}
+		
+		statement.close();
+		c.close();
 		
 		Set<String> newStations = new HashSet<>();
 		
 		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/Documentation/trends_" + m.name() + ".csv");
-		out.write("station;name;cluster;2016;2027;2028;2029;2030;2031;2032;r2");
+		out.write("Bhf Nr;Bahnhof;Sbn Nr;Sbn;Rb Nr;Rb;Bl Nr;Bundesland;Kat Vs;Kat Se;Cluster;Reisende 2006;Reisende 2007;Reisende 2008;"
+				+ "Reisende 2009;Reisende 2010;Reisende 2011;Reisende2012;Reisende 2013;Reisende 2014;Reisende 2015;Reisende 2016;Prognose 2027;"
+				+ "Prognose 2028;Prognose 2029;Prognose 2030;Prognose 2031;Prognose 2032;Bestimmtheitsmaß Prognose");
+//		out.write("station;name;cluster;2016;2027;2028;2029;2030;2031;2032;r2");
 		out.flush();
 		
 		for(Entry<String, double[]> entry : stationData.entrySet()) {
+
+			String id = entry.getKey();
 			
-			String id= entry.getKey();
-			String name = stations2016.get(id).name;
-			String cluster = stations2016.get(id).type;
+			Station station = stations2016.get(id);
+			
+			String name = station.name;
+			
+			String regionType = station.regionType != null ? station.regionType : "_";
+			String type = station.type != null ? station.type : setType(entry.getValue()[index2030]);
+			
+			String cluster = regionType + "," + type;
 			
 			double[] y = entry.getValue();
 			
@@ -250,6 +257,38 @@ public class RilCreateLeastSquares {
 					xValues[j] = x[i];
 					yValues[j] = y[i];
 					
+					if(yValues[j] < 0) {
+						
+						// The least value has to be '1' to avoid NaNs during trend line generation
+						
+						if(j > 0) {
+						
+							double yBefore = y[j-1];
+							
+							if(j < y.length - 1) {
+								
+								double yAfter = y[j+1];
+								
+								if(yBefore > 0 && yAfter > 0) {
+
+									yValues[j] = (yBefore + yAfter) / 2;
+									
+								}
+								
+							} else {
+								
+								yValues[j] = yBefore;
+								
+							}
+							
+						} else {
+							
+							yValues[j] = 1;
+							
+						}
+						
+					}
+					
 				} else j--;
 				
 				j++;
@@ -267,7 +306,7 @@ public class RilCreateLeastSquares {
 				TrendLine t = getRegressionMethod(m);
 				t.setValues(yValues, xValues);
 				
-				appendDataToCsv(out, id, name, cluster, y[y.length-1], t);
+				appendDataToCsv(out, station, cluster, y, t);
 				
 			} else {
 				
@@ -309,35 +348,35 @@ public class RilCreateLeastSquares {
 		
 		if(nPassengers <= 100) {
 			
-			return "unter 100";
+			return "unter 100 Fahrgäste";
 			
 		} else if(nPassengers <= 300) {
 			
-			return "101 - 300";
+			return "101 - 300 Fahrgäste";
 			
 		} else if(nPassengers <= 1001) {
 			
-			return "301 - 1.000";
+			return "301 - 1.000 Fahrgäste";
 			
 		} else if(nPassengers <= 5000) {
 			
-			return "1.001 - 5.000";
+			return "1.001 - 5.000 Fahrgäste";
 			
 		} else if(nPassengers <= 15000) {
 			
-			return "5.001 - 15.000";
+			return "5.001 - 15.000 Fahrgäste";
 			
 		} else if(nPassengers <= 20000) {
 			
-			return "15.001 - 20.000";
+			return "15.001 - 20.000 Fahrgäste";
 			
 		} else if(nPassengers <= 50000) {
 			
-			return "20.001 - 50.000";
+			return "20.001 - 50.000 Fahrgäste";
 			
 		} else {
 			
-			return "50.000 und mehr";
+			return "50.000 und mehr Fahrgäste";
 			
 		}
 		
@@ -379,11 +418,22 @@ public class RilCreateLeastSquares {
 		
 	}
 	
-	private static void appendDataToCsv(BufferedWriter writer, String id, String name, String type, double n2016, TrendLine t) throws IOException {
+	private static void appendDataToCsv(BufferedWriter writer, Station station, String type, double[] yValues, TrendLine t) throws IOException {
 
+//		out.write("Bhf Nr;Bahnhof;Sbn Nr;Sbn;Rb Nr;Rb;Bl Nr;Bundesland;Kat Vs;Kat Se;Reisende 2006;Reisende 2007;Reisende 2008;Reisende 2009;"
+//				+ "Reisende 2010;Reisende 2011;Reisende2012;Reisende 2013;Reisende 2014;Reisende 2015;Reisende 2016;Prognose 2027;Prognose 2028;"
+//				+ "Prognose 2029;Prognose 2030;Prognose 2031;Prognose 2032;Bestimmtheitsmaß Prognose");
+		
 		writer.newLine();
 		
-		writer.write(id + ";" + name + ";" + type + ";" + n2016);
+		writer.write(station.id + ";" + station.name + ";" + station.sbnNr + ";" + station.sbn + ";" + station.rbNr + ";" + station.rb + ";"
+				+ station.blNr + ";" + station.bl + ";" + station.katVs + ";" + station.katSe + ";" + type);
+		
+		for(int i = 0; i < 11; i++) {
+			
+			writer.write(";" + yValues[i]);
+			
+		}
 		
 		for(int i = 2027; i < 2033; i++) {
 			
@@ -775,9 +825,18 @@ public class RilCreateLeastSquares {
 	
 	static class Station {
 		
-		String id;
-		String name;
-		String type;
+		String id = "";
+		String name = "";
+		String sbnNr = "";
+		String sbn = "";
+		String rbNr = "";
+		String rb = "";
+		String blNr = "";
+		String bl = "";
+		String katVs = "";
+		String katSe = "";
+		String type = "";
+		String regionType = "";
 		
 	}
 
