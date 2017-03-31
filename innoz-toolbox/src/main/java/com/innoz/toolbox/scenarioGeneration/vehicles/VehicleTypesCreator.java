@@ -11,6 +11,8 @@ import org.matsim.vehicles.Vehicles;
 import org.matsim.vehicles.VehiclesFactory;
 
 public class VehicleTypesCreator {
+
+	private VehicleTypesCreator(){};
 	
 	public static void createOsCarsharingVehicleTypes(Scenario scenario){
 		

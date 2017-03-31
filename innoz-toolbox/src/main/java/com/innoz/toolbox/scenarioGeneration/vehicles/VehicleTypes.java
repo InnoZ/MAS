@@ -11,6 +11,8 @@ import org.matsim.vehicles.VehicleUtils;
 
 public final class VehicleTypes {
 
+	private VehicleTypes(){};
+	
 	/**
 	 * 
 	 * Returns a vehicle type that represents a KBA vehicle class. See {@link http://www.kba.de} for more information.

@@ -10,6 +10,8 @@ public class PsqlAdapter {
 	
 	static final String PSQL_DRIVER = "org.postgresql.Driver";
 	static final String PSQL_URL = "jdbc:postgresql://localhost:";
+	
+	private PsqlAdapter(){};
 
 	public static Connection createConnection(final Configuration configuration, String dbName) throws SQLException,
 		InstantiationException, IllegalAccessException, ClassNotFoundException{

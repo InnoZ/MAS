@@ -18,6 +18,8 @@ public class OsVehicleTypes {
 
 	public final Map<Id<VehicleType>, VehicleType> vehicleTypes = new HashMap<>();
 	
+	private OsVehicleTypes(){};
+	
 	public VehicleType get(String vType){
 		
 		if(vehicleTypes.isEmpty()){

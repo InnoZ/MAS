@@ -30,6 +30,8 @@ import jline.console.completer.FileNameCompleter;
  */
 public class Runner {
 
+	private Runner(){};
+	
 	public static void main(String args[]) throws IOException {
 		
 		// Create an empty configuration

@@ -22,6 +22,8 @@ import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
  */
 public class InitialConfigCreator {
 	
+	private InitialConfigCreator(){};
+	
 	public static Config create(final Configuration configuration){
 		
 		// Create a new MATSim configuration

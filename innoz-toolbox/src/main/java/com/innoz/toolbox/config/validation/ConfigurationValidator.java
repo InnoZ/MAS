@@ -10,6 +10,8 @@ import com.innoz.toolbox.run.parallelization.MultithreadedModule;
 public class ConfigurationValidator {
 
 	private final static Logger log = Logger.getLogger(MultithreadedModule.class);
+
+	private ConfigurationValidator(){};
 	
 	public static void validate(final Configuration configuration) {
 		

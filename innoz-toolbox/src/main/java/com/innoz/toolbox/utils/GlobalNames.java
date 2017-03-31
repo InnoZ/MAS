@@ -2,6 +2,8 @@ package com.innoz.toolbox.utils;
 
 public final class GlobalNames {
 
+	private GlobalNames(){};
+	
 	//GEOGRAPHIC FIELDS//////////////////////////////////////////////////////////////////////
 	public static final String WGS84 = "EPSG:4326";
 	public static final String UTM32N = "EPSG:32632";

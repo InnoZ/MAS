@@ -22,10 +22,6 @@ public class PopulationToCsvWriter {
 
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	private static final Logger log = Logger.getLogger(GeometryUtils.class);
-	private static final String SPACE = " ";
-	private static final String TRIPLE_SPACE = "   ";
-	private static final String TAB = "\t";
-	private static final String END = "END";
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	// No instance!

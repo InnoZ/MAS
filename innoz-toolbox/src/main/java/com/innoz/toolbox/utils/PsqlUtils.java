@@ -7,6 +7,8 @@ import org.matsim.core.utils.collections.CollectionUtils;
 
 public class PsqlUtils {
 
+	private PsqlUtils(){};
+	
 	public static String setToString(Set<String> set) {
 		
 		StringBuilder builder = new StringBuilder();

@@ -35,6 +35,8 @@ public class Modes {
 	public static final double v_bike = 11/3.6;
 	public static final double v_pt = 20/3.6;
 	
+	private Modes(){};
+	
 	public static double getDistanceTravelledForModeAndTravelTime(String mode, double time){
 		
 		if(mode.equals(TransportMode.car)){

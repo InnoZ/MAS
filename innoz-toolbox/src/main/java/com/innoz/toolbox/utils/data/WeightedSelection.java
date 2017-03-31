@@ -7,6 +7,8 @@ import com.innoz.toolbox.scenarioGeneration.utils.Weighted;
 
 public class WeightedSelection {
 
+	private WeightedSelection(){};
+	
 	/**
 	 *
 	 * Weighted random choice method. The objects in the list must implement the {@link Weighted} interface in order to make this work.

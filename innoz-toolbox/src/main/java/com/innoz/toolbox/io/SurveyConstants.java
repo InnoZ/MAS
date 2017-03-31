@@ -80,6 +80,14 @@ public final class SurveyConstants {
 
 	private final static String PSEX_MALE = "1";
 	
+	private static final SurveyConstants instance = new SurveyConstants();
+	
+	private SurveyConstants(){};
+	
+	public static SurveyConstants getInstance() {
+		return instance;
+	}
+	
 	public static String dayOfTheWeek(String namespace){
 		
 		return SurveyConstant.WTAG.getName(namespace);

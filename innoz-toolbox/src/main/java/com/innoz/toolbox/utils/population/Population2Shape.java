@@ -13,6 +13,8 @@ import com.innoz.toolbox.utils.PopulationToCsvWriter;
 
 public class Population2Shape {
 
+	private Population2Shape(){};
+	
 	public static void main(String[] args) {
 		
 		final Logger log = Logger.getLogger(Population2Shape.class);

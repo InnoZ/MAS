@@ -47,5 +47,7 @@ public class ActivityTypes {
 	
 	//interactions
 	public static final String ROUND_TRIP_INTERACTION = "round-trip interaction";
+
+	private ActivityTypes(){};
 	
 }

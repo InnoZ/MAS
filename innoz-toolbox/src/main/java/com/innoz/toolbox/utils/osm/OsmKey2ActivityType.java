@@ -5,8 +5,10 @@ import java.util.Set;
 import org.matsim.core.utils.collections.CollectionUtils;
 
 
-public class OsmKey2ActivityType {
+public final class OsmKey2ActivityType {
 
+	private OsmKey2ActivityType(){};
+	
 	public static final Set<String> landuseKeys = CollectionUtils.stringToSet(
 			"residential, commercial, industrial, leisure, retail");
 	
