@@ -2,6 +2,8 @@ package com.innoz.toolbox.gui;
 
 public final class GuiConstants {
 	
+	private GuiConstants(){};
+	
 	public static final String BACKGROUND_IMAGE = "background.png";
 	public static final String CHOOSE = "Choose";
 	public static final String CHOOSE_OUTPUT = "Choose output directory";

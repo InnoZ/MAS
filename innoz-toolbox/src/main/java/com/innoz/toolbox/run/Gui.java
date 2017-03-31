@@ -4,7 +4,16 @@ import com.innoz.toolbox.gui.MainFrame;
 
 import java.awt.EventQueue;
 
-public class Gui {
+/**
+ * 
+ * Entry point for the graphical user interface of the scenario generation tool.
+ * 
+ * @author dhosse
+ *
+ */
+public final class Gui {
+	
+	private Gui(){};
 
 	public static void main(String args[]) {
 
@@ -13,7 +22,7 @@ public class Gui {
 			@Override
 			public void run() {
 				
-				new MainFrame();
+				MainFrame.getInstance();
 				
 			}
 			

@@ -50,7 +50,9 @@ public final class MainFrame {
 	private Map<String, String> surveyArea;
 	private Map<String, String> vicinity;
 	
-	public MainFrame() {
+	private static final MainFrame instance = new MainFrame();
+	
+	private MainFrame() {
 
 		this.configuration = ConfigurationUtils.createConfiguration();
 		this.listener = new RunnerActionListener(this);
@@ -108,6 +110,12 @@ public final class MainFrame {
 		this.frame.pack();
 		this.frame.setLocationRelativeTo(null);
 		this.frame.setVisible(true);
+		
+	}
+	
+	public static final MainFrame getInstance() {
+		
+		return MainFrame.instance;
 		
 	}
 	
