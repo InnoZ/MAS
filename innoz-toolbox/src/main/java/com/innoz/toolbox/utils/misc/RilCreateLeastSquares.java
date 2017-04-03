@@ -236,8 +236,8 @@ public class RilCreateLeastSquares {
 			
 			if(s.ags != null && !s.ags.isEmpty()) {
 
-				ResultSet set2 = stmt.executeQuery("SELECT ags,typ_bez FROM bbsr_region_types WHERE ags LIKE '" + s.ags + "%' OR (gem_name LIKE '" + name + "' AND ags "
-						+ "LIKE '" + s.ags.substring(0, 2) + "%');");
+				ResultSet set2 = stmt.executeQuery("SELECT ags,typ_bez FROM bbsr_region_types WHERE ags LIKE '" + s.ags + "%' OR (gem_name"
+						+ " LIKE '" + name + "' AND ags LIKE '" + s.ags.substring(0, 2) + "%');");
 				
 				while(set2.next()) {
 					
@@ -291,73 +291,58 @@ public class RilCreateLeastSquares {
 				
 			}
 			
-			double[] xValues = new double[x.length - indicesToRemove.size()];
-			double[] yValues = new double[y.length - indicesToRemove.size()];
-			
-			int j = 0;
-			
-			// TODO check e.g. Leuna Werke Süd
-			if(station.name.equals("Poelchaustraße")) {
-				System.out.println();
-			}
+			Map<Double, Double> values = new TreeMap<>();
+			Map<Double, Double> origValues = new TreeMap<>();
 			
 			for(int i = 0; i < x.length; i++) {
 				
-				if(y[i] != 0) {
+				origValues.put(x[i], y[i]);
+				if(y[i] < 0) {
+					origValues.put(x[i], 0d);
+				}
+				
+				if(y[i] > 0) {
 					
-					xValues[j] = x[i];
-					yValues[j] = y[i];
+					values.put(x[i], y[i]);
 					
-					if(yValues[j] <= 0) {
+				} else {
+					
+					if(x[i] == 2030) {
 						
-						// The least value has to be '1' to avoid NaNs during trend line generation
-						
-						if(j > 0) {
-						
-							double yBefore = y[j-1];
-							
-							if(j < y.length - 1) {
-								
-								double yAfter = y[j+1];
-								
-								if(yBefore > 0 && yAfter > 0) {
-
-									yValues[j] = (yBefore + yAfter) / 2;
-									
-								}
-								
-							} else {
-								
-								yValues[j] = 1;
-								
-							}
-							
-						} else {
-							
-							yValues[j] = 1;
-							
-						}
+						values.put(2030d, 1d);
 						
 					}
 					
-				} else j--;
-				
-				j++;
+				}
 				
 			}
 			
-			if(xValues.length > 2) {
+			if(values.size() > 2) {
 
-				if(m.equals(RegMethod.Poly) && xValues.length < 10) {
+				if(m.equals(RegMethod.Poly) && values.size() < 10) {
 					
 					continue;
 					
 				}
 				
 				TrendLine t = getRegressionMethod(m);
+				
+				double[] xValues = new double[values.size()];
+				double[] yValues = new double[values.size()];
+				
+				int i = 0;
+				
+				for(Entry<Double, Double> valEntry : values.entrySet()) {
+					
+					xValues[i] = valEntry.getKey();
+					yValues[i] = valEntry.getValue();
+					i++;
+					
+				}
+				
 				t.setValues(yValues, xValues);
 				
-				appendDataToCsv(out, station, cluster, y, t);
+				appendDataToCsv(out, station, cluster, origValues, t);
 				
 			}
 			
@@ -456,22 +441,49 @@ public class RilCreateLeastSquares {
 		
 	}
 	
-	private static void appendDataToCsv(BufferedWriter writer, Station station, String type, double[] yValues, TrendLine t) throws IOException {
+	private static void appendDataToCsv(BufferedWriter writer, Station station, String type, Map<Double,Double> values, TrendLine t)
+			throws IOException {
 
 		writer.newLine();
 		
 		writer.write(station.id + ";" + station.name + ";" + station.sbnNr + ";" + station.sbn + ";" + station.rbNr + ";" + station.rb + ";"
 				+ station.blNr + ";" + station.bl + ";" + station.katVs + ";" + station.katSe + ";" + type);
 		
-		for(int i = 0; i < 11; i++) {
+		for(int i = 2006; i < 2017; i++) {
 			
-			writer.write(";" + yValues[i]);
+			Double d = new Double(i);
+			
+			if(values.get(d) != null) {
+
+				writer.write(";" + values.get(new Double(i)));
+
+			} else {
+				
+				writer.write(";0");
+				
+			}
 			
 		}
 		
 		for(int i = 2027; i < 2033; i++) {
-			
-			writer.write(";" + Math.ceil(t.predict(i)));
+
+			if(i >= 2030) {
+				
+				if(values.get(2030d) == 0d) {
+					
+					writer.write(";0");
+					
+				} else {
+					
+					writer.write(";" + Math.ceil(t.predict(i)));
+					
+				}
+				
+			} else {
+
+				writer.write(";" + Math.ceil(t.predict(i)));
+				
+			}
 			
 		}
 		
@@ -485,7 +497,7 @@ public class RilCreateLeastSquares {
 	
 		Map<String, TreeMap<Integer, RecursiveStatsContainer>> cluster2Passengers = new HashMap<>();
 		
-		AbstractCsvReader reader = new AbstractCsvReader("\t", true) {
+		AbstractCsvReader reader = new AbstractCsvReader(";", true) {
 			
 			@Override
 			public void handleRow(String[] line) {
@@ -532,7 +544,7 @@ public class RilCreateLeastSquares {
 			
 		};
 		
-		reader.read("/home/dhosse/01_Projects/GSP/Documentation/Trendprognose_final.csv");
+		reader.read("/home/dhosse/01_Projects/GSP/Documentation/trends_Power.csv");
 		
 		writeAvgOutput(cluster2Passengers);
 		writeMedianOutput(cluster2Passengers);
