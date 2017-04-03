@@ -279,17 +279,7 @@ public class RilCreateLeastSquares {
 			
 			double[] y = entry.getValue();
 			
-			Set<Integer> indicesToRemove = new HashSet<>();
 			
-			for(int i = 0; i < x.length; i++) {
-				
-				if(y[i] == 0 && i < index2030) {
-					
-					indicesToRemove.add(i);
-					
-				}
-				
-			}
 			
 			Map<Double, Double> values = new TreeMap<>();
 			Map<Double, Double> origValues = new TreeMap<>();
@@ -626,6 +616,8 @@ public class RilCreateLeastSquares {
 		String type = "";
 		String regionType = "";
 		String ags = "";
+		
+		private Station(){};
 		
 	}
 
