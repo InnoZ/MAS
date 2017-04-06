@@ -4,9 +4,12 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
+import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
+import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup;
@@ -29,25 +32,76 @@ public class RunMatsim {
 		
 		//
 		MobilityAttitudeConfigGroup ma = new MobilityAttitudeConfigGroup();
-		ma.setSubpopulationAttribute("subpopulation");
+		ma.setSubpopulationAttribute("mobilityAttitude");
 		ma.setScaleFactor(1d);
 		
 		{
 			MobilityAttitudeModeParams pars = new MobilityAttitudeModeParams();
-			pars.setAttitudeGroup("test");
-			pars.setOffsetForMode(TransportMode.car, 1.0);
-			pars.setOffsetForMode(TransportMode.walk, 2);
-			ma.getModeParams().put(pars.getAttitudeGroup(), pars);
-		}
-		{
-			MobilityAttitudeModeParams pars = new MobilityAttitudeModeParams();
-			pars.setAttitudeGroup(null);
-			pars.setOffsetForMode(TransportMode.car, -1000.0);
+			pars.setAttitudeGroup("convBike");
+			pars.setOffsetForMode(TransportMode.car, -1.0);
 			ma.getModeParams().put(pars.getAttitudeGroup(), pars);
 		}
 		
+//		{
+//			MobilityAttitudeModeParams pars = new MobilityAttitudeModeParams();
+//			pars.setAttitudeGroup(null);
+//			ma.getModeParams().put(pars.getAttitudeGroup(), pars);
+//		}
+		
 		config.addModule(ma);
+		
 		//
+		
+//		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
+//		
+//		{
+//			StrategySettings stratSets = new StrategySettings();
+//			stratSets.setDisableAfter(-1);
+//			stratSets.setStrategyName(DefaultSelector.ChangeExpBeta.name());
+//			stratSets.setSubpopulation("convBike");
+//			stratSets.setWeight(1.0);
+//			config.strategy().addStrategySettings(stratSets);
+//		}
+		{
+			StrategySettings stratSets = new StrategySettings();
+			stratSets.setDisableAfter(-1);
+			stratSets.setStrategyName(DefaultSelector.ChangeExpBeta.name());
+			stratSets.setSubpopulation(null);
+			stratSets.setWeight(1.0);
+			config.strategy().addStrategySettings(stratSets);
+		}
+//		{
+//			StrategySettings stratSets = new StrategySettings();
+//			stratSets.setDisableAfter(-1);
+//			stratSets.setStrategyName(DefaultStrategy.ReRoute.name());
+//			stratSets.setSubpopulation(null);
+//			stratSets.setWeight(0.1);
+//			config.strategy().addStrategySettings(stratSets);
+//		}
+//		{
+//			StrategySettings stratSets = new StrategySettings();
+//			stratSets.setDisableAfter(-1);
+//			stratSets.setStrategyName(DefaultStrategy.SubtourModeChoice.name());
+//			stratSets.setSubpopulation("convBike");
+//			stratSets.setWeight(0.2);
+//			config.strategy().addStrategySettings(stratSets);
+//		}
+		{
+			StrategySettings stratSets = new StrategySettings();
+			stratSets.setDisableAfter(-1);
+			stratSets.setStrategyName(DefaultStrategy.SubtourModeChoice.name());
+			stratSets.setSubpopulation(null);
+			stratSets.setWeight(0.2);
+			config.strategy().addStrategySettings(stratSets);
+		}
+//		{
+//			StrategySettings stratSets = new StrategySettings();
+//			stratSets.setDisableAfter(-1);
+//			stratSets.setStrategyName(DefaultStrategy.TimeAllocationMutator_ReRoute.name());
+//			stratSets.setSubpopulation(null);
+//			stratSets.setWeight(0.1);
+//			config.strategy().addStrategySettings(stratSets);
+//		}
 		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		config.controler().setOutputDirectory("/home/dhosse/scenarios/test/output/");
