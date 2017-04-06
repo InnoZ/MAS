@@ -104,9 +104,8 @@ public class ScenarioGenerationController extends DefaultController {
 			new PopulationWriter(scenario.getPopulation()).write(configuration.misc()
 					.getOutputDirectory() + "plans.xml.gz");
 				
-			new ObjectAttributesXmlWriter(scenario.getPopulation().
-					getPersonAttributes()).writeFile(configuration.misc().getOutputDirectory()
-							+ "personAttributes.xml.gz");
+			new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes()).writeFile(configuration.misc()
+					.getOutputDirectory() + "personAttributes.xml.gz");
 					
 			new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration.misc()
 					.getOutputDirectory() + "households.xml.gz");
