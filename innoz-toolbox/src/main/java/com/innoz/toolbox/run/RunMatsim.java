@@ -13,6 +13,7 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.Default
 import org.matsim.core.scenario.ScenarioUtils;
 
 import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup;
+import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup.MobilityAttitudeModeParameterSet;
 import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup.MobilityAttitudeModeParams;
 import com.innoz.toolbox.matsim.scoring.MobilityAttitudeScoringFunctionFactory;
 
@@ -36,21 +37,24 @@ public class RunMatsim {
 		ma.setScaleFactor(1d);
 		
 		{
-			MobilityAttitudeModeParams pars = new MobilityAttitudeModeParams();
+			MobilityAttitudeModeParameterSet pars = new MobilityAttitudeModeParameterSet();
 			pars.setAttitudeGroup("convBike");
-			pars.setOffsetForMode(TransportMode.car, -1.0);
-			ma.getModeParams().put(pars.getAttitudeGroup(), pars);
+			MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
+			params.setMode(TransportMode.car);
+			params.setOffset(-1.0);
+			pars.addModeParams(params);
+			ma.addModeParams(pars);
 		}
 		
-//		{
-//			MobilityAttitudeModeParams pars = new MobilityAttitudeModeParams();
-//			pars.setAttitudeGroup(null);
-//			ma.getModeParams().put(pars.getAttitudeGroup(), pars);
-//		}
+		{
+			MobilityAttitudeModeParameterSet pars = new MobilityAttitudeModeParameterSet();
+			pars.setAttitudeGroup(null);
+			ma.addModeParams(pars);
+		}
 		
 		config.addModule(ma);
 		
-		//
+		
 		
 //		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
 //		

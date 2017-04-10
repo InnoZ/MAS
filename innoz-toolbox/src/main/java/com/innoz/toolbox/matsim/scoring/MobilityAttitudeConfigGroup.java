@@ -9,6 +9,13 @@ import org.matsim.core.config.ReflectiveConfigGroup;
 import org.matsim.core.config.ReflectiveConfigGroup.StringGetter;
 import org.matsim.core.config.ReflectiveConfigGroup.StringSetter;
 
+/**
+ * 
+ * MATSim extension for InnoZ mobility attitude groups (Mobilitätstypen).
+ * 
+ * @author dhosse
+ *
+ */
 public class MobilityAttitudeConfigGroup extends ConfigGroup {
 
 	public static final String GROUP_NAME = "mobilityAttitude";
@@ -16,7 +23,7 @@ public class MobilityAttitudeConfigGroup extends ConfigGroup {
 	public static final String SCALE_FACTOR = "scaleFactor";
 	public static final String SUBPOPULATION_ATTRIBUTE = "subpopulationAttribute";
 	
-	private Map<String, MobilityAttitudeModeParams> modeParams;
+	private Map<String, MobilityAttitudeModeParameterSet> groupParams;
 	private double scaleFactor = 1;
 	private String subpopulationAttribute;
 	
@@ -24,19 +31,31 @@ public class MobilityAttitudeConfigGroup extends ConfigGroup {
 
 		super(GROUP_NAME);
 		
-		this.modeParams = new HashMap<String, MobilityAttitudeModeParams>();
+		this.addParam(SCALE_FACTOR, Double.toString(this.scaleFactor));
+		this.addParam(SUBPOPULATION_ATTRIBUTE, this.subpopulationAttribute);
+		
+		this.groupParams = new HashMap<String, MobilityAttitudeModeParameterSet>();
 		
 	}
 	
-	public Map<String,MobilityAttitudeModeParams> getModeParams() {
-		return this.modeParams;
+	public Map<String,MobilityAttitudeModeParameterSet> getModeParams() {
+		
+		return this.groupParams;
+		
 	}
 	
-	public MobilityAttitudeModeParams getParamsForGroup(String group) {
+	public void addModeParams(MobilityAttitudeModeParameterSet params) {
 		
-		if(this.modeParams.containsKey(group)) {
+		this.groupParams.put(params.getAttitudeGroup(), params);
+		super.addParameterSet(params);
+		
+	}
+	
+	public MobilityAttitudeModeParameterSet getParamsForGroup(String group) {
+		
+		if(this.groupParams.containsKey(group)) {
 			
-			return this.modeParams.get(group);
+			return this.groupParams.get(group);
 			
 		}
 		
@@ -64,19 +83,19 @@ public class MobilityAttitudeConfigGroup extends ConfigGroup {
 		this.subpopulationAttribute = subpopulationAttribute;
 	}
 
-	public static class MobilityAttitudeModeParams extends ReflectiveConfigGroup implements MatsimParameters {
+	public static class MobilityAttitudeModeParameterSet extends ReflectiveConfigGroup implements MatsimParameters {
 
-		public static final String SET_NAME = "mobilityAttitudeModeParams";
+		public static final String SET_NAME = "mobilityAttitudeModeParameterSet";
 		
 		public static final String ATTITUDE_GROUP = "attitudeGroup";
 		
 		private String attitudeGroup;
-		private Map<String, Double> offsetsPerMode;
+		private Map<String, MobilityAttitudeModeParams> modeParams;
 		
-		public MobilityAttitudeModeParams() {
+		public MobilityAttitudeModeParameterSet() {
 		
 			super(SET_NAME);
-			this.offsetsPerMode = new HashMap<String, Double>();
+			this.modeParams = new HashMap<>();
 
 		}
 
@@ -96,9 +115,9 @@ public class MobilityAttitudeConfigGroup extends ConfigGroup {
 		
 		public double getOffsetForMode(String mode) {
 
-			if(this.offsetsPerMode.containsKey(mode)) {
+			if(this.modeParams.containsKey(mode)) {
 				
-				return this.offsetsPerMode.get(mode);
+				return this.modeParams.get(mode).getOffset();
 				
 			}
 			
@@ -106,11 +125,50 @@ public class MobilityAttitudeConfigGroup extends ConfigGroup {
 			
 		}
 		
-		public void setOffsetForMode(String mode, double offset) {
+		public void addModeParams(MobilityAttitudeModeParams params) {
 			
-			this.offsetsPerMode.put(mode, offset);
+			this.modeParams.put(params.getMode(), params);
+			super.addParameterSet(params);
 			
 		}
+		
+	}
+	
+	public static class MobilityAttitudeModeParams extends ReflectiveConfigGroup implements MatsimParameters {
+
+		public static final String SET_TYPE = "mobilityAttitudeModeParams";
+		
+		public static final String MODE = "mode";
+		public static final String OFFSET = "offset";
+		
+		private String mode;
+		private double offset;
+		
+		public MobilityAttitudeModeParams() {
+			super(SET_TYPE);
+		}
+
+		@StringGetter(MODE)
+		public String getMode() {
+			return mode;
+		}
+
+		@StringSetter(MODE)
+		public void setMode(String mode) {
+			this.mode = mode;
+		}
+
+		@StringGetter(OFFSET)
+		public double getOffset() {
+			return offset;
+		}
+
+		@StringSetter(OFFSET)
+		public void setOffset(double offset) {
+			this.offset = offset;
+		}
+		
+		
 		
 	}
 	
