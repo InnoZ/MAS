@@ -15,7 +15,7 @@ import org.matsim.core.scoring.functions.ModeUtilityParameters;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.pt.PtConstants;
 
-import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup.MobilityAttitudeModeParams;
+import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup.MobilityAttitudeModeParameterSet;
 
 public class MobilityAttitudeLegScoring implements org.matsim.core.scoring.SumScoringFunction.LegScoring,
 	org.matsim.core.scoring.SumScoringFunction.ArbitraryEventScoring {
@@ -29,11 +29,11 @@ public class MobilityAttitudeLegScoring implements org.matsim.core.scoring.SumSc
 	private boolean currentLegIsPtLeg = false;
 	private double lastActivityEndTime = Time.UNDEFINED_TIME ;
 	
-	private MobilityAttitudeModeParams attitudeParams;
+	private MobilityAttitudeModeParameterSet attitudeParams;
 	
 	private static int ccc=0 ;
 	
-	public MobilityAttitudeLegScoring(CharyparNagelScoringParameters params, MobilityAttitudeModeParams attitudeParams,
+	public MobilityAttitudeLegScoring(CharyparNagelScoringParameters params, MobilityAttitudeModeParameterSet attitudeParams,
 	        Network network) {
 		
 		this.params = params;

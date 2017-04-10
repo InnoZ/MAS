@@ -28,6 +28,7 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.Default
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.CollectionUtils;
 
+import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup.MobilityAttitudeModeParameterSet;
 import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup.MobilityAttitudeModeParams;
 
 public class MobilityAttitudeScoringTest {
@@ -81,15 +82,21 @@ public class MobilityAttitudeScoringTest {
 		MobilityAttitudeConfigGroup macg = new MobilityAttitudeConfigGroup();
 		macg.setSubpopulationAttribute("mobilityAttitude");
 		{
-			MobilityAttitudeModeParams pars = new MobilityAttitudeModeParams();
+			MobilityAttitudeModeParameterSet pars = new MobilityAttitudeModeParameterSet();
 			pars.setAttitudeGroup("carAffine");
-			pars.setOffsetForMode(TransportMode.car, 100.0);
+			MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
+			params.setMode(TransportMode.car);
+			params.setOffset(100d);
+			pars.addModeParams(params);
 			macg.getModeParams().put(pars.getAttitudeGroup(), pars);
 		}
 		{
-			MobilityAttitudeModeParams pars = new MobilityAttitudeModeParams();
+			MobilityAttitudeModeParameterSet pars = new MobilityAttitudeModeParameterSet();
 			pars.setAttitudeGroup("bikeAffine");
-			pars.setOffsetForMode(TransportMode.bike, 100.0);
+			MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
+			params.setMode(TransportMode.bike);
+			params.setOffset(100d);
+			pars.addModeParams(params);
 			macg.getModeParams().put(pars.getAttitudeGroup(), pars);
 		}
 		config.addModule(macg);
