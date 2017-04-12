@@ -14,7 +14,7 @@ public class BbsrDataReader {
 
 	private Map<String, Integer> key2Type = new HashMap<String, Integer>();
 
-	public void read(final Geoinformation geoinformation, InputStreamReader in){
+	public void read(InputStreamReader in){
 		
 		AbstractCsvReader reader = new AbstractCsvReader(";", true) {
 			
@@ -43,11 +43,11 @@ public class BbsrDataReader {
 		
 		reader.read(in);
 
-		process(geoinformation);
+		process();
 		
 	}
 	
-	public void read(final Geoinformation geoinformation, String file){
+	public void read(String file){
 		
 		AbstractCsvReader reader = new AbstractCsvReader(";", true) {
 			
@@ -76,13 +76,13 @@ public class BbsrDataReader {
 		
 		reader.read(file);
 		
-		process(geoinformation);
+		process();
 		
 	}
 	
-	private void process(Geoinformation geoinformation){
+	private void process(){
 		
-		for(Node<AdministrativeUnit> node : geoinformation.getAdminUnits()){
+		for(Node<AdministrativeUnit> node : Geoinformation.getInstance().getAdminUnits()){
 			
 			AdministrativeUnit unit = node.getData();
 			String key = unit.getId();
@@ -94,21 +94,21 @@ public class BbsrDataReader {
 			
 			unit.setRegionType(regionType);
 			
-			if(!geoinformation.getRegionTypes().containsKey(unit.getRegionType())){
+			if(!Geoinformation.getInstance().getRegionTypes().containsKey(unit.getRegionType())){
 				
-				geoinformation.getRegionTypes().put(unit.getRegionType(), new HashSet<Integer>());
+				Geoinformation.getInstance().getRegionTypes().put(unit.getRegionType(), new HashSet<Integer>());
 				
 			}
 			
-			geoinformation.getRegionTypes().get(unit.getRegionType()).add(this.key2Type.get(subKey));
+			Geoinformation.getInstance().getRegionTypes().get(unit.getRegionType()).add(this.key2Type.get(subKey));
 			
 		}
 		
 	}
 	
-	public void read(final Geoinformation geoinformation){
+	public void read(){
 		
-		this.read(geoinformation, "../../../ressources/regionstypen.csv");
+		this.read("../../../ressources/regionstypen.csv");
 		
 	}
 	

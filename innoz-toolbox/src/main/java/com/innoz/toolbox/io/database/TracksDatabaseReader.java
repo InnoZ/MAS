@@ -42,7 +42,7 @@ public class TracksDatabaseReader {
 		
 	}
 	
-	public void parse(Geoinformation geoinformation) {
+	public void parse() {
 		
 		try {
 			
@@ -87,8 +87,8 @@ public class TracksDatabaseReader {
 					Geometry startPoint = MGC.coord2Point(transform.transform(MGC.point2Coord((Point) wkt.read(start))));
 					Geometry endPoint = MGC.coord2Point(transform.transform(MGC.point2Coord((Point) wkt.read(end))));
 					
-					if(geoinformation.getCompleteGeometry().contains(startPoint) &&
-							geoinformation.getCompleteGeometry().contains(endPoint)){
+					if(Geoinformation.getInstance().getCompleteGeometry().contains(startPoint) &&
+							Geoinformation.getInstance().getCompleteGeometry().contains(endPoint)){
 
 						String mode = result.getString("mode").replace("Mode::", "").toLowerCase();
 						int length = result.getInt("length");

@@ -40,7 +40,6 @@ public abstract class DemandGenerationAlgorithm {
 
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	final Random random = MatsimRandom.getLocalInstance();
-	final Geoinformation geoinformation;
 	Map<String, Tuple<List<ZensusGridNode>, Integer>> map = new HashMap<>();
 	
 	static final Logger log = Logger.getLogger(PopulationCreator.class);
@@ -66,10 +65,9 @@ public abstract class DemandGenerationAlgorithm {
 	Matrix od;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
-	public DemandGenerationAlgorithm(final Scenario scenario, final Geoinformation geoinformation,
-			final CoordinateTransformation transformation, final Matrix od, final Distribution distribution){
+	public DemandGenerationAlgorithm(final Scenario scenario, final CoordinateTransformation transformation, final Matrix od,
+			final Distribution distribution){
 		
-		this.geoinformation = geoinformation;
 		this.transformation = transformation;
 		this.scenario = scenario;
 		this.od = od;
@@ -84,10 +82,10 @@ public abstract class DemandGenerationAlgorithm {
 
 	AdministrativeUnit chooseAdminUnit(AdministrativeUnit district, String activityType){
 
-		double r = random.nextDouble() * this.geoinformation.getTotalWeightForLanduseKey(district.getId(), activityType);
+		double r = random.nextDouble() * Geoinformation.getInstance().getTotalWeightForLanduseKey(district.getId(), activityType);
 		double r2 = 0.;
 		
-		for(Node<AdministrativeUnit> node : geoinformation.getAdminUnit(district.getId()).getChildren()){
+		for(Node<AdministrativeUnit> node : Geoinformation.getInstance().getAdminUnit(district.getId()).getChildren()){
 			
 			AdministrativeUnit admin = node.getData();
 			
@@ -204,7 +202,7 @@ public abstract class DemandGenerationAlgorithm {
 			accumulatedWeight += entry.getValue();
 			if(p <= accumulatedWeight){
 
-				AdministrativeUnit unit = this.geoinformation.getAdminUnit(fromId).getData();
+				AdministrativeUnit unit = Geoinformation.getInstance().getAdminUnit(fromId).getData();
 				
 				if(unit.getGeometry() != null){
 					
@@ -212,7 +210,8 @@ public abstract class DemandGenerationAlgorithm {
 					
 				} else {
 					
-					return this.geoinformation.getAdminUnit(fromId).getChildren().get(random.nextInt(this.geoinformation.getAdminUnit(fromId).getChildren().size())).getData();
+					return Geoinformation.getInstance().getAdminUnit(fromId).getChildren().get(
+							random.nextInt(Geoinformation.getInstance().getAdminUnit(fromId).getChildren().size())).getData();
 					
 				}
 				
@@ -305,7 +304,7 @@ public abstract class DemandGenerationAlgorithm {
 		if(adminUnits == null){
 			
 			adminUnits = new HashSet<AdministrativeUnit>();
-			adminUnits.addAll(this.geoinformation.getAdminUnitsWithGeometry());
+			adminUnits.addAll(Geoinformation.getInstance().getAdminUnitsWithGeometry());
 			
 		}
 		
@@ -348,9 +347,9 @@ public abstract class DemandGenerationAlgorithm {
 			
 			accumulatedWeight += entry.getValue();
 			if(r <= accumulatedWeight){
-				result = this.geoinformation.getAdminUnit(entry.getKey()).getData();
+				result = Geoinformation.getInstance().getAdminUnit(entry.getKey()).getData();
 				if(result == null){
-					result = this.geoinformation.getAdminUnit(entry.getKey()).getData();
+					result = Geoinformation.getInstance().getAdminUnit(entry.getKey()).getData();
 				}
 				break;
 			}

@@ -16,17 +16,15 @@ import org.matsim.matrices.Matrix;
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.io.database.TracksDatabaseReader;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.tracks.Track;
 import com.innoz.toolbox.scenarioGeneration.population.tracks.TrackedPerson;
 import com.innoz.toolbox.utils.GlobalNames;
 
 public class TracksDemandGenerator extends DemandGenerationAlgorithm {
 
-	public TracksDemandGenerator(Scenario scenario, Geoinformation geoinformation,
-			CoordinateTransformation transformation, final Matrix od, Distribution distribution) {
+	public TracksDemandGenerator(Scenario scenario, CoordinateTransformation transformation, final Matrix od, Distribution distribution) {
 		
-		super(scenario, geoinformation, transformation, od, distribution);
+		super(scenario, transformation, od, distribution);
 		
 	}
 
@@ -34,7 +32,7 @@ public class TracksDemandGenerator extends DemandGenerationAlgorithm {
 	public void run(Configuration configuration, String ids) {
 		
 		TracksDatabaseReader reader = new TracksDatabaseReader(configuration);
-		reader.parse(this.geoinformation);
+		reader.parse();
 		Map<String,TrackedPerson> persons = reader.getPersons();
 
 		CoordinateTransformation transform = TransformationFactory.getCoordinateTransformation(GlobalNames.WGS84,

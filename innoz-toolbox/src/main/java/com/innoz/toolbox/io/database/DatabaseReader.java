@@ -72,7 +72,6 @@ public class DatabaseReader {
 	private static final Logger log = Logger.getLogger(DatabaseReader.class);
 	private final GeometryFactory gFactory;
 	private final WKTReader wktReader;
-	private final Geoinformation geoinformation;
 	/////////////////////////////////////////////////////////////////////////////////////////
 
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
@@ -94,29 +93,48 @@ public class DatabaseReader {
 	private List<Geometry> bufferedAreasForNetworkGeneration = new ArrayList<>();
 	private Geometry buffer;
 	/////////////////////////////////////////////////////////////////////////////////////////
+	
+	private static DatabaseReader instance;
 
-	/**
-	 * 
-	 * Constructor.
-	 * 
-	 * @param geoinformation The geoinformation container.
-	 */
-	public DatabaseReader(final Configuration configuration, final Geoinformation geoinformation){
+	public static void init(final Configuration configuration) {
+		
+		instance = new DatabaseReader(configuration);
+		
+	}
+	
+	public static DatabaseReader getInstance() {
+		
+		return instance;
+		
+	}
+	
+	private DatabaseReader(final Configuration configuration) {
 		
 		// Initialize all final fields
 		this.gFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.maximumPreciseValue));
 		this.wktReader = new WKTReader();
-		this.geoinformation = geoinformation;
 		this.configuration = configuration;
 		
 	}
 	
+//	/**
+//	 * 
+//	 * Constructor.
+//	 * 
+//	 * @param geoinformation The geoinformation container.
+//	 */
+//	public DatabaseReader(final Configuration configuration, final Geoinformation geoinformation){
+//		
+//		// Initialize all final fields
+//		this.gFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.maximumPreciseValue));
+//		this.wktReader = new WKTReader();
+//		Geoinformation.getInstance() = geoinformation;
+//		this.configuration = configuration;
+//		
+//	}
+	
 	public Configuration getConfiguration(){
 		return this.configuration;
-	}
-	
-	Geoinformation getGeoinformation(){
-		return this.geoinformation;
 	}
 	
 	/**
@@ -128,7 +146,7 @@ public class DatabaseReader {
 	 * @param vicinityIdsString The vicinity area id(s).
 	 * @param scenario The MATSim scenario.
 	 */
-	public void readGeodataFromDatabase(Configuration configuration, Scenario scenario) {
+	public void readGeodataFromDatabase(Scenario scenario) {
 		
 		try {
 			
@@ -145,7 +163,7 @@ public class DatabaseReader {
 				// If no administrative units were created, we are unable to proceed
 				// The process would probably finish, but no network or population would be created
 				// Size = 1 means, only the root element (basically the top level container) has been initialized
-				if(this.geoinformation.getNumberOfAdminUnits() < 2 && this.configuration.scenario().getAreaSets() != null){
+				if(Geoinformation.getInstance().getNumberOfAdminUnits() < 2 && this.configuration.scenario().getAreaSets() != null){
 				
 					Log.error("No administrative boundaries were created!");
 					Log.error("Maybe the ids you specified don't exist in the database.");
@@ -165,7 +183,7 @@ public class DatabaseReader {
 						
 						for(String id : entry.getIds().split(",")){
 
-							Node<AdministrativeUnit> d = this.geoinformation.getAdminUnit(id);
+							Node<AdministrativeUnit> d = Geoinformation.getInstance().getAdminUnit(id);
 							
 							if(d != null){
 								
@@ -244,12 +262,12 @@ public class DatabaseReader {
 			
 				if(set.isSurveyArea()){
 					
-					this.geoinformation.setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection)
+					Geoinformation.getInstance().setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection)
 							.convexHull());
 					
 				} else{
 					
-					this.geoinformation.setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection)
+					Geoinformation.getInstance().setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection)
 							.convexHull());
 					
 				}
@@ -263,10 +281,10 @@ public class DatabaseReader {
 		}
 		
 		// Get the survey area by building the bounding box of all geometries 
-		this.geoinformation.setCompleteGeometry(gFactory.buildGeometry(geometryCollection)
+		Geoinformation.getInstance().setCompleteGeometry(gFactory.buildGeometry(geometryCollection)
 				.convexHull());
 		
-		this.boundingBox = JTS.transform((Geometry) this.geoinformation.getCompleteGeometry()
+		this.boundingBox = JTS.transform((Geometry) Geoinformation.getInstance().getCompleteGeometry()
 				.clone(), t).convexHull();
 		
 	}
@@ -283,8 +301,8 @@ public class DatabaseReader {
 
 		Geometry g = gFactory.createPolygon(coordinates);
 		
-		this.geoinformation.setSurveyAreaBoundingBox(g.getEnvelope());
-		this.geoinformation.setVicinityBoundingBox(g.getEnvelope());
+		Geoinformation.getInstance().setSurveyAreaBoundingBox(g.getEnvelope());
+		Geoinformation.getInstance().setVicinityBoundingBox(g.getEnvelope());
 		
 		return g;
 		
@@ -357,11 +375,11 @@ public class DatabaseReader {
 						
 						au.setNetworkDetail(areaSet.getNetworkLevel());
 
-						this.geoinformation.addAdministrativeUnit(new AdministrativeUnit(district));
+						Geoinformation.getInstance().addAdministrativeUnit(new AdministrativeUnit(district));
 						
 					}
 					
-					this.geoinformation.addAdministrativeUnit(au);
+					Geoinformation.getInstance().addAdministrativeUnit(au);
 					
 					// Store all geometries inside a collection to get the survey area geometry in
 					// the end
@@ -402,7 +420,7 @@ public class DatabaseReader {
 		
 		try {
 
-			for(Coordinate coord : this.geoinformation.getCompleteGeometry().getCoordinates()){
+			for(Coordinate coord : Geoinformation.getInstance().getCompleteGeometry().getCoordinates()){
 				if(coord.x < minX) minX = coord.x;
 				if(coord.x > maxX) maxX = coord.x;
 				if(coord.y < minY) minY = coord.y;
@@ -421,7 +439,7 @@ public class DatabaseReader {
 				
 				if(configuration.scenario().getActivityLocationsType().equals(ActivityLocationsType.FACILITIES)){
 					
-					new FacilitiesCreator().create(this, scenario, geoinformation, buildingList, minX, minY, maxX, maxY);
+					new FacilitiesCreator().create(this, scenario, buildingList, minX, minY, maxX, maxY);
 
 				} else {
 					
@@ -462,7 +480,7 @@ public class DatabaseReader {
 				.name() + "." + DatabaseConstants.tables.osm_germany_polygon.name() + " where "
 				+ DatabaseConstants.functions.st_within.name() + "(" + DatabaseConstants.ATT_WAY
 				+ ", " + DatabaseConstants.functions.st_geomfromtext.name() + "('"
-				+ this.geoinformation.getCompleteGeometry().toString() + "', 4326)) and ("
+				+ Geoinformation.getInstance().getCompleteGeometry().toString() + "', 4326)) and ("
 				+ DatabaseConstants.ATT_LANDUSE + " is not null" + " or " + DatabaseConstants
 				.ATT_AMENITY + " is not null or " + DatabaseConstants.ATT_LEISURE + " is not null"
 				+ " or " + DatabaseConstants.ATT_SHOP + " is not null or " 
@@ -535,7 +553,7 @@ public class DatabaseReader {
 				+ "), "	+ DatabaseConstants.ATT_AMENITY + ", " + DatabaseConstants.ATT_LEISURE + ", " + DatabaseConstants.ATT_SHOP + " from "
 				+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_germany_point.name() + " where "
 				+ DatabaseConstants.functions.st_within + "(" + DatabaseConstants.ATT_WAY + "," + DatabaseConstants.functions.st_geomfromtext.name()
-				+ "('" + this.geoinformation.getCompleteGeometry().toString() + "',4326)) and (" + DatabaseConstants.ATT_AMENITY
+				+ "('" + Geoinformation.getInstance().getCompleteGeometry().toString() + "',4326)) and (" + DatabaseConstants.ATT_AMENITY
 				+ " is not null or " + DatabaseConstants.ATT_LEISURE + " is not null or " + DatabaseConstants.ATT_SHOP + " is not null)");
 		
 		while(set.next()){
@@ -572,7 +590,7 @@ public class DatabaseReader {
 	 */
 	public void addGeometry(String landuse, Landuse g){
 		
-		synchronized(this.geoinformation){
+		synchronized(Geoinformation.getInstance()){
 		
 		if(!resultSet){
 			
@@ -599,7 +617,7 @@ public class DatabaseReader {
 			// Check if the geometry is valid (e.g. not intersecting itself)
 			if(geometry.isValid()){
 
-				for(AdministrativeUnit au : this.geoinformation.getAdminUnitsWithGeometry()){
+				for(AdministrativeUnit au : Geoinformation.getInstance().getAdminUnitsWithGeometry()){
 
 					// Add the landuse geometry to the administrative unit containing it or skip it if it's outside of the survey area
 					if(au.getGeometry().contains(geometry) || au.getGeometry().touches(geometry) || au.getGeometry().intersects(geometry)){
@@ -610,15 +628,15 @@ public class DatabaseReader {
 						}
 						
 						// If we don't have a quad tree for this activity type already, create a new one
-						if(this.geoinformation.getLanduseOfType(landuse) == null){
+						if(Geoinformation.getInstance().getLanduseOfType(landuse) == null){
 							
-							this.geoinformation.createQuadTreeForActType(landuse, new double[]{minX,minY,maxX,maxY});
+							Geoinformation.getInstance().createQuadTreeForActType(landuse, new double[]{minX,minY,maxX,maxY});
 							
 						}
 						
-						if(this.geoinformation.getLanduseOfType(ActivityTypes.WORK) == null){
+						if(Geoinformation.getInstance().getLanduseOfType(ActivityTypes.WORK) == null){
 							
-							this.geoinformation.createQuadTreeForActType(ActivityTypes.WORK, new double[]{minX,minY,maxX,maxY});
+							Geoinformation.getInstance().createQuadTreeForActType(ActivityTypes.WORK, new double[]{minX,minY,maxX,maxY});
 							
 						}
 						
@@ -628,9 +646,9 @@ public class DatabaseReader {
 						// Add the landuse geometry's centroid as new quad tree entry
 						if(this.boundingBox.contains(MGC.coord2Point(c))){
 							
-							this.geoinformation.getLanduseOfType(landuse).put(c.getX(), c.getY(), g);
+							Geoinformation.getInstance().getLanduseOfType(landuse).put(c.getX(), c.getY(), g);
 							if(!landuse.equals(ActivityTypes.LEISURE) && !landuse.equals(ActivityTypes.HOME)){
-								this.geoinformation.getLanduseOfType(ActivityTypes.WORK).put(c.getX(), c.getY(), g);
+								Geoinformation.getInstance().getLanduseOfType(ActivityTypes.WORK).put(c.getX(), c.getY(), g);
 							}
 							
 						}
@@ -701,7 +719,7 @@ public class DatabaseReader {
 					+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_germany_line.name() + " where ("
 					+ DatabaseConstants.ATT_RAILWAY + " is not null or "+ DatabaseConstants.ATT_HIGHWAY + " is not null) and "
 					+ DatabaseConstants.functions.st_within.name() + "(" + DatabaseConstants.ATT_WAY + ","
-					+ DatabaseConstants.functions.st_geomfromtext.name() + "('"	+ this.geoinformation.getCompleteGeometry().toString()
+					+ DatabaseConstants.functions.st_geomfromtext.name() + "('"	+ Geoinformation.getInstance().getCompleteGeometry().toString()
 					+ "',4326)) order by " + DatabaseConstants.ATT_OSM_ID + ";");
 			
 			while(result.next()){
@@ -771,7 +789,7 @@ public class DatabaseReader {
 	 * @param vicinityIdsString The vicinity area id(s).
 	 * @param scenario The MATSim scenario.
 	 */
-	public void readPopulationFromDatabase(Configuration configuration, Scenario scenario) {
+	public void readPopulationFromDatabase(Scenario scenario) {
 		
 		try {
 			
@@ -802,7 +820,7 @@ public class DatabaseReader {
 
 //						String id = uid.startsWith("0") ? uid.substring(1) : uid;
 						
-						Node<AdministrativeUnit> d = this.geoinformation.getAdminUnit(id);
+						Node<AdministrativeUnit> d = Geoinformation.getInstance().getAdminUnit(id);
 						
 						if(d != null){
 							

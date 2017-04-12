@@ -49,7 +49,21 @@ public class Geoinformation {
 	protected Geometry catchmentAreaPt;
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
-	public Geoinformation(ActivityLocationsType type){
+	private static Geoinformation instance;
+	
+	public static void init(ActivityLocationsType type) {
+		
+		instance = new Geoinformation(type);
+		
+	}
+	
+	public static Geoinformation getInstance() {
+		
+		return instance; 
+		
+	}
+	
+	private Geoinformation(ActivityLocationsType type){
 		
 		// Initialize the tree with the highest level admin unit (Germany)
 		this.adminUnitTree = new Tree<AdministrativeUnit>(new AdministrativeUnit("0"));
