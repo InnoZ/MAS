@@ -13,7 +13,6 @@ import org.matsim.facilities.ActivityOptionImpl;
 import org.matsim.facilities.OpeningTimeImpl;
 
 import com.innoz.toolbox.io.database.DatabaseReader;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Building;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.ProxyFacility;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
@@ -21,7 +20,7 @@ import com.innoz.toolbox.utils.GlobalNames;
 
 public class FacilitiesCreator {
 
-	public void create(final DatabaseReader reader, final Scenario scenario, final Geoinformation geoinformation,
+	public void create(final DatabaseReader reader, final Scenario scenario,
 			List<Building> buildingList, double minX, double minY, double maxX, double maxY){
 		
 		ActivityFacilitiesFactory factory = scenario.getActivityFacilities().getFactory();

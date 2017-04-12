@@ -12,12 +12,10 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 
 public class GeoinformationTest {
 
-	Geoinformation gi;
-	
 	@Before
 	public void setup() {
-		
-		gi = new Geoinformation(ActivityLocationsType.BUILDINGS);
+
+		Geoinformation.init(ActivityLocationsType.BUILDINGS);
 
 		AdministrativeUnit unit1 = new AdministrativeUnit("01");
 		
@@ -33,14 +31,14 @@ public class GeoinformationTest {
 			unit1.addLanduse("foo", new Building(new GeometryFactory().createPolygon(coordinates)));
 		}
 		
-		gi.addAdministrativeUnit(unit1);
+		Geoinformation.getInstance().addAdministrativeUnit(unit1);
 		
 	}
 	
 	@Test
 	public void testLanduseWeightGetter() {
 
-		assertEquals("Wrong landuse weight returned!", 3d, gi.getTotalWeightForLanduseKey("0", "foo"),0d);
+		assertEquals("Wrong landuse weight returned!", 3d, Geoinformation.getInstance().getTotalWeightForLanduseKey("0", "foo"),0d);
 		
 	}
 	

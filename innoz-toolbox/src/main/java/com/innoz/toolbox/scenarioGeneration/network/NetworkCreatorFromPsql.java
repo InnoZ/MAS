@@ -24,16 +24,14 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.io.ParseException;
-
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.groups.ConfigurationGroup;
 import com.innoz.toolbox.config.groups.NetworkConfigurationGroup;
 import com.innoz.toolbox.config.groups.NetworkConfigurationGroup.HighwayDefaults;
 import com.innoz.toolbox.io.database.DatabaseReader;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.io.ParseException;
 
 /**
  * 
@@ -51,7 +49,6 @@ public class NetworkCreatorFromPsql {
 	private final Network network;
 	private final CoordinateTransformation transformation;
 	private final Configuration configuration;
-	private final Geoinformation geoinformation;
 	
 	public static final String MOTORWAY = "motorway";
 	public static final String MOTORWAY_LINK = "motorway_link";
@@ -104,11 +101,10 @@ public class NetworkCreatorFromPsql {
 	 * @throws FactoryException 
 	 * @throws NoSuchAuthorityCodeException 
 	 */
-	public NetworkCreatorFromPsql(final Network network, final Geoinformation geoinformation, Configuration configuration)
+	public NetworkCreatorFromPsql(final Network network, Configuration configuration)
 			throws NoSuchAuthorityCodeException, FactoryException{
 		
 		this.network = network;
-		this.geoinformation = geoinformation;
 		
 		CoordinateReferenceSystem from = CRS.decode("EPSG:4326", true);
 		CoordinateReferenceSystem to = CRS.decode(configuration.misc().getCoordinateSystem(), true);
@@ -134,7 +130,7 @@ public class NetworkCreatorFromPsql {
 	 * @throws SQLException
 	 * @throws ParseException
 	 */
-	public void create(DatabaseReader dbReader) throws InstantiationException, IllegalAccessException, ClassNotFoundException,
+	public void create() throws InstantiationException, IllegalAccessException, ClassNotFoundException,
 		SQLException, ParseException{
 		
 		for(ConfigurationGroup c : this.configuration.network().getHighwayDefaults().values()) {
@@ -152,8 +148,8 @@ public class NetworkCreatorFromPsql {
 		}
 		
 		// Convert the way entries into a MATSim network
-		dbReader.readOsmRoads(this.configuration, ways, nodes);
-		this.bufferedArea = dbReader.getBufferedArea();
+		DatabaseReader.getInstance().readOsmRoads(this.configuration, ways, nodes);
+		this.bufferedArea = DatabaseReader.getInstance().getBufferedArea();
 		processEntries();
 		
 		// Clean the network to avoid dead ends during simulation (clustered network)
@@ -189,11 +185,11 @@ public class NetworkCreatorFromPsql {
 	 * @throws SQLException
 	 * @throws ParseException
 	 */
-	public void create(DatabaseReader dbReader, int levelOfDetail) throws InstantiationException, IllegalAccessException,
+	public void create(int levelOfDetail) throws InstantiationException, IllegalAccessException,
 		ClassNotFoundException, SQLException, ParseException{
 		
 		this.levelOfDetail = levelOfDetail;
-		this.create(dbReader);
+		this.create();
 		
 	}
 	
@@ -674,10 +670,6 @@ public class NetworkCreatorFromPsql {
 	
 	public GeometryFactory getGeomFactory(){
 		return this.gf;
-	}
-	
-	public Geoinformation getGeoinformation(){
-		return this.geoinformation;
 	}
 	
 	public CoordinateTransformation getTransformation(){

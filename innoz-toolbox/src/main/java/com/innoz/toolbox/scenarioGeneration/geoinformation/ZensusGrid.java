@@ -24,7 +24,7 @@ public class ZensusGrid {
 	private List<ZensusGridNode> nodes;
 	private int allInhabitants = 0;
 	
-	public ZensusGrid(Configuration configuration, Geoinformation geoinformation) {
+	public ZensusGrid(Configuration configuration) {
 		
 		try {
 
@@ -40,7 +40,7 @@ public class ZensusGrid {
 			st.setFetchSize(100000);
 			
 			String query = "SELECT * from zensus2011.gitter_100m where einwohner > - 1 and st_contains(st_geomfromtext('" +
-					geoinformation.getCompleteGeometry().toString() +
+					Geoinformation.getInstance().getCompleteGeometry().toString() +
 					"',4326), st_transform(st_setsrid(st_makepoint(x_mp_100m,y_mp_100m),3035),4326));";
 			
 			ResultSet result = st.executeQuery(query);

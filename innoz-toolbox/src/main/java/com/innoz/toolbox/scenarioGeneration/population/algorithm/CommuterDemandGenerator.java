@@ -26,10 +26,10 @@ import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 
 public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 
-	public CommuterDemandGenerator(final Scenario scenario, final Geoinformation geoinformation,
-			final CoordinateTransformation transformation, final Matrix od, final Distribution distribution) {
+	public CommuterDemandGenerator(final Scenario scenario, final CoordinateTransformation transformation, final Matrix od,
+			final Distribution distribution) {
 
-		super(scenario, geoinformation, transformation, od, distribution);
+		super(scenario, transformation, od, distribution);
 		
 	}
 
@@ -91,7 +91,7 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 	@SuppressWarnings("deprecation")
 	void createOneCommuter(String homeId, String workId, Population population, int n){
 		
-		if(this.geoinformation.getAdminUnit(homeId) == null || this.geoinformation.getAdminUnit(workId) == null){
+		if(Geoinformation.getInstance().getAdminUnit(homeId) == null || Geoinformation.getInstance().getAdminUnit(workId) == null){
 			
 			log.warn("Could not find geometry for home or work cell! Thus, no agent"
 					+ "was created.");
@@ -100,11 +100,11 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 			
 		}
 		
-		AdministrativeUnit homeDistrict = this.geoinformation.getAdminUnit(homeId).getData();
+		AdministrativeUnit homeDistrict = Geoinformation.getInstance().getAdminUnit(homeId).getData();
 		AdministrativeUnit home = this.chooseAdminUnit(homeDistrict, ActivityTypes.HOME);
 		Coord homeLocation = this.chooseActivityCoordInAdminUnit(home, ActivityTypes.HOME);
 		
-		AdministrativeUnit workDistrict = this.geoinformation.getAdminUnit(workId).getData();
+		AdministrativeUnit workDistrict = Geoinformation.getInstance().getAdminUnit(workId).getData();
 		AdministrativeUnit work = chooseAdminUnit(workDistrict, ActivityTypes.WORK);
 		Coord workLocation = chooseActivityCoordInAdminUnit(work, ActivityTypes.WORK);
 		
