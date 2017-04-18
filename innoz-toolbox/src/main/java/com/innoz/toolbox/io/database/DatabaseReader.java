@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.geotools.geometry.jts.JTS;
@@ -19,6 +21,7 @@ import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.gbl.Gbl;
+import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -170,6 +173,8 @@ public class DatabaseReader {
 					throw new RuntimeException("Execution aborts...");
 					
 				}
+				
+				// TODO read bbsr data from database
 				
 				if(this.configuration.scenario().getAreaSets() != null) {
 
@@ -393,6 +398,32 @@ public class DatabaseReader {
 		
 		// Close the result set and the statement
 		set.close();
+		statement.close();
+		
+	}
+	
+	private void readBbsrData(Connection connection, Configuration configuration) throws SQLException {
+		
+		// Create a new statement to execute the sql query
+		Statement statement = connection.createStatement();
+		
+		String ids = CollectionUtils.setToString(Stream.of(configuration.scenario().getAreaSets().values()).
+				filter(c -> c instanceof AreaSet).map(c -> (AreaSet) c).map(AreaSet::getIds).collect(Collectors.toSet()));
+		
+		String sql = "SELECT ags, typ from bbsr_region_types WHERE ags IN (" + ids + ");";
+		
+		ResultSet result = statement.executeQuery(sql);
+		
+		while(result.next()) {
+			
+			String ags = result.getString("ags");
+			int typ = result.getInt("typ");
+			
+			Geoinformation.getInstance().getAdminUnit(ags).getData().setRegionType(typ);
+			
+		}
+		
+		result.close();
 		statement.close();
 		
 	}
