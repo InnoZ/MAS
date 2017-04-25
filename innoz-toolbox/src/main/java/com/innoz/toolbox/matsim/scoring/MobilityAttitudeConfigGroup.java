@@ -121,7 +121,7 @@ public class MobilityAttitudeConfigGroup extends ConfigGroup {
 				
 			}
 			
-			return 1d;
+			return 0d;
 			
 		}
 		
