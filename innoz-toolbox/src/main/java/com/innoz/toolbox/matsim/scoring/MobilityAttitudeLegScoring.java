@@ -28,13 +28,14 @@ public class MobilityAttitudeLegScoring implements org.matsim.core.scoring.SumSc
 	private boolean nextStartPtLegIsFirstOfTrip = true ;
 	private boolean currentLegIsPtLeg = false;
 	private double lastActivityEndTime = Time.UNDEFINED_TIME ;
+	private double scaleFactor;
 	
 	private MobilityAttitudeModeParameterSet attitudeParams;
 	
 	private static int ccc=0 ;
 	
 	public MobilityAttitudeLegScoring(CharyparNagelScoringParameters params, MobilityAttitudeModeParameterSet attitudeParams,
-	        Network network) {
+	        Network network, double scaleFactor) {
 		
 		this.params = params;
 		this.network = network;
@@ -42,6 +43,7 @@ public class MobilityAttitudeLegScoring implements org.matsim.core.scoring.SumSc
 		this.nextStartPtLegIsFirstOfTrip = true ;
 		this.currentLegIsPtLeg = false;
 		this.attitudeParams = attitudeParams;
+		this.scaleFactor = scaleFactor;
 		
 	}
 
@@ -153,11 +155,13 @@ public class MobilityAttitudeLegScoring implements org.matsim.core.scoring.SumSc
 		}
 		
 		tmpScore += modeParams.constant;
-		
-		double offset = this.attitudeParams.getOffsetForMode(leg.getMode());
+
+		// This is the only modification of the original code
+		double offset = this.attitudeParams.getOffsetForMode(leg.getMode()) * this.scaleFactor;
 		
 		tmpScore += offset;
-
+		// end of modification
+		
 		return tmpScore;
 		
 	}
