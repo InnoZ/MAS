@@ -65,7 +65,6 @@ public class MobilityAttitudeConfigGroup extends ConfigGroup {
 	
 	@StringSetter(SCALE_FACTOR)
 	public void setScaleFactor(double f) {
-		this.scaleFactor = f;
 		this.addParam(SCALE_FACTOR, Double.toString(f));
 	}
 	
@@ -76,12 +75,11 @@ public class MobilityAttitudeConfigGroup extends ConfigGroup {
 	
 	@StringGetter(SUBPOPULATION_ATTRIBUTE)
 	public String getSubpopulationAttribute() {
-		return subpopulationAttribute;
+		return this.getParams().get(SUBPOPULATION_ATTRIBUTE);
 	}
 
 	@StringSetter(SUBPOPULATION_ATTRIBUTE)
 	public void setSubpopulationAttribute(String subpopulationAttribute) {
-		this.subpopulationAttribute = subpopulationAttribute;
 		this.addParam(SUBPOPULATION_ATTRIBUTE, subpopulationAttribute);
 	}
 
