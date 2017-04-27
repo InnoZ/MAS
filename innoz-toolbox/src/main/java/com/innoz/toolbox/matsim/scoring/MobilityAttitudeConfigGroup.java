@@ -66,6 +66,7 @@ public class MobilityAttitudeConfigGroup extends ConfigGroup {
 	@StringSetter(SCALE_FACTOR)
 	public void setScaleFactor(double f) {
 		this.scaleFactor = f;
+		this.addParam(SCALE_FACTOR, Double.toString(f));
 	}
 	
 	@StringGetter(SCALE_FACTOR)
@@ -81,6 +82,7 @@ public class MobilityAttitudeConfigGroup extends ConfigGroup {
 	@StringSetter(SUBPOPULATION_ATTRIBUTE)
 	public void setSubpopulationAttribute(String subpopulationAttribute) {
 		this.subpopulationAttribute = subpopulationAttribute;
+		this.addParam(SUBPOPULATION_ATTRIBUTE, subpopulationAttribute);
 	}
 
 	public static class MobilityAttitudeModeParameterSet extends ReflectiveConfigGroup implements MatsimParameters {
