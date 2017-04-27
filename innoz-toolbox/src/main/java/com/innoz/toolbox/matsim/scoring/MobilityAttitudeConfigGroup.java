@@ -70,7 +70,7 @@ public class MobilityAttitudeConfigGroup extends ConfigGroup {
 	
 	@StringGetter(SCALE_FACTOR)
 	public double getScaleFactor() {
-		return this.scaleFactor;
+		return Double.parseDouble(this.getParams().get(SCALE_FACTOR));
 	}
 	
 	@StringGetter(SUBPOPULATION_ATTRIBUTE)
