@@ -34,6 +34,8 @@ import org.postgis.Point;
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.io.database.DatabaseConstants;
+import com.innoz.toolbox.io.database.DatabaseConstants.DatabaseTable;
+import com.innoz.toolbox.utils.PsqlUtils;
 
 /**
  * 
@@ -160,6 +162,11 @@ public class MatsimPsqlAdapter {
 		
 	}
 	
+	/**
+	 * 
+	 * @param network
+	 * @param tablespace
+	 */
 	public static void network2Table(final Network network, final String tablespace) {
 		
 		try {
@@ -202,6 +209,12 @@ public class MatsimPsqlAdapter {
 		
 	}
 	
+	/**
+	 * 
+	 * @param nodes
+	 * @param tablespace
+	 * @throws SQLException
+	 */
 	private static void writeNodesTable(final Collection<? extends Node> nodes, String tablespace) throws SQLException {
 		
 		PreparedStatement stmt = connection.prepareStatement("INSERT INTO " + tablespace + ".nodes (id, x_coord, y_coord) VALUES(?, ?, ?);");
@@ -220,6 +233,12 @@ public class MatsimPsqlAdapter {
 		
 	}
 	
+	/**
+	 * 
+	 * @param links
+	 * @param tablespace
+	 * @throws SQLException
+	 */
 	private static void writeLinksTable(final Collection<? extends Link> links, String tablespace) throws SQLException {
 
 		PreparedStatement stmt = connection.prepareStatement("INSERT INTO " + tablespace + ".links (id, from_node_id, to_node_id, length,"
@@ -247,6 +266,11 @@ public class MatsimPsqlAdapter {
 		
 	}
 	
+	/**
+	 * 
+	 * @param population
+	 * @param tablespace
+	 */
 	public static void plans2Table(final Population population, final String tablespace) {
 		
 		try {
@@ -292,6 +316,12 @@ public class MatsimPsqlAdapter {
 		
 	}
 	
+	/**
+	 * 
+	 * @param population
+	 * @param tablespace
+	 * @throws SQLException
+	 */
 	private static void writePersonsTable(final Population population, String tablespace) throws SQLException {
 		
 		PreparedStatement stmt = connection.prepareStatement("INSERT INTO " + tablespace +
@@ -324,6 +354,12 @@ public class MatsimPsqlAdapter {
 		
 	}
 	
+	/**
+	 * 
+	 * @param population
+	 * @param tablespace
+	 * @throws SQLException
+	 */
 	private static void writePlansTable(final Population population, String tablespace) throws SQLException {
 		
 		PreparedStatement stmt = connection.prepareStatement("INSERT INTO " + tablespace + ".plans (person_id, element_index, selected, act_type,"
@@ -377,19 +413,31 @@ public class MatsimPsqlAdapter {
 		
 	}
 	
+	/**
+	 * 
+	 * @param coord
+	 * @return
+	 */
 	private static String createWKT(Coord coord) {
 		
 		return "POINT(" + Double.toString(coord.getX()) + " " + Double.toString(coord.getY()) + ")";
 		
 	}
 	
+	/**
+	 * 
+	 * @param population
+	 * @param tablespace
+	 */
 	private static void createPopulationFromTable(final Population population, final String tablespace) {
 		
 		try {
-		
+			
+			DatabaseTable table = DatabaseConstants.getDatabaseTable(DatabaseConstants.PLANS_TABLE);
+			
 			Statement statement = connection.createStatement();
 			
-			ResultSet results = statement.executeQuery("SELECT * from " + tablespace + ".persons;");
+			ResultSet results = statement.executeQuery("SELECT * from " + tablespace + "." + table.getTableName() + ";");
 			
 			PopulationFactory factory = population.getFactory();
 			ObjectAttributes personAttributes = population.getPersonAttributes();
@@ -421,7 +469,10 @@ public class MatsimPsqlAdapter {
 			
 			results.close();
 			
-			results = statement.executeQuery("SELECT * FROM " + tablespace + ".plans ORDER BY person_id, element_index;");
+			String sql = new PsqlUtils.PsqlStringBuilder(PsqlUtils.processes.SELECT.name(), tablespace, "plans")
+				.orderClause("person_id, element_index").build();
+			
+			results = statement.executeQuery(sql);
 			
 			Plan plan = null;
 			Id<Person> lastPersonId = null;
@@ -450,7 +501,7 @@ public class MatsimPsqlAdapter {
 						}
 						
 					}
-				
+					
 					String actType = results.getString("act_type");
 					
 					if(actType != null) {

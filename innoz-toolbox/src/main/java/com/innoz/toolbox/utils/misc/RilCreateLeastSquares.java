@@ -469,8 +469,10 @@ public class RilCreateLeastSquares {
 		Map<String, String> station2Category = new HashMap<>();
 		Map<String, List<String>> category2Station = new HashMap<>();
 		
-		ResultSet set = statement.executeQuery(PsqlUtils.createSelectStatement("fv,nv,fv_fremd,nv_fremd,station,ges,verkehrs15,typ_name",
-				"daten_2016_regionstyp_final"));
+		String sql = new PsqlUtils.PsqlStringBuilder("SELECT", "public", "daten_2016_regionstyp_final")
+				.variables("fv,nv,fv_fremd,nv_fremd,station,ges,verkehrs15,typ_name").build();
+		
+		ResultSet set = statement.executeQuery(sql);
 		
 		while(set.next()){
 			
@@ -539,8 +541,10 @@ public class RilCreateLeastSquares {
 			
 			Map<String, Map<String,RecursiveStatsContainer>> type2Container = new HashMap<>();
 			
-			ResultSet result = statement.executeQuery(
-					PsqlUtils.createSelectStatement("state,station,fv,nv,fv_fremd,nv_fremd,ges,verkehrs15,typ_name", table));
+			String sql2 = new PsqlUtils.PsqlStringBuilder("SELECT", "public", table)
+					.variables("state,station,fv,nv,fv_fremd,nv_fremd,ges,verkehrs15,typ_name").build();
+			
+			ResultSet result = statement.executeQuery(sql2);
 			
 			int year = 0;
 			
