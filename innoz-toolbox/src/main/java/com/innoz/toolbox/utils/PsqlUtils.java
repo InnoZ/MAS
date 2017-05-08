@@ -1,13 +1,15 @@
 package com.innoz.toolbox.utils;
 
-import java.util.HashSet;
 import java.util.Set;
-
-import org.matsim.core.utils.collections.CollectionUtils;
 
 public class PsqlUtils {
 
 	private PsqlUtils(){};
+	
+	public static enum processes {
+		INSERT,
+		SELECT
+	}
 	
 	public static String setToString(Set<String> set) {
 		
@@ -23,40 +25,54 @@ public class PsqlUtils {
 		
 	}
 	
-	public static String createSelectStatement(Set<String> variables, String tableName) {
+	public static class PsqlStringBuilder {
+
+		// Defines the process being called (i.e. SELECT, INSERT etc.)
+		private String process;
+		// Variables (comma-separated string)
+		private String variables = "";
+		private String schemaname;
+		private String tablename;
+		private String whereClauses = "";
+		private String orderClauses = "";
 		
-		return createSelectStatement(CollectionUtils.setToString(variables), tableName);
+		public PsqlStringBuilder(String process, String schemaname, String tablename) {
+			
+			this.process = process;
+			this.schemaname = schemaname;
+			this.tablename = tablename;
+			
+		}
 		
-	}
-	
-	/**
-	 * Builds a String object representing a PotsgreSQL SELECT statement.
-	 * 
-	 * @param variables Comma-separated String of the variables to select from the table. 
-	 * @param tableName
-	 * @return
-	 */
-	public static String createSelectStatement(String variables, String tableName) {
+		public PsqlStringBuilder variables(String v) {
+			
+			this.variables = v;
+			return this;
+			
+		}
 		
-		return new StringBuilder("SELECT ")
-				.append(variables).append(" FROM ").append(tableName).append(";").toString();
+		public PsqlStringBuilder whereClauses(String conditions) {
+			
+			this.whereClauses = " " + conditions;
+			return this;
+			
+		}
 		
-	}
-	
-	public static void main(String args[]) {
+		public PsqlStringBuilder orderClause(String order) {
+			
+			this.orderClauses = " " + order;
+			return this;
+			
+		}
 		
-		Set<String> variables = new HashSet<>();
-		variables.add("one");
-		variables.add("two");
-		
-		System.out.println(createSelectStatement(variables, "test"));
-		
-		Set<String> set = new HashSet<>();
-		set.add("bla");
-		set.add("blu");
-		set.add("bli");
-		
-		System.out.println(setToString(set));
+		public String build() {
+			
+			if(this.variables.isEmpty()) this.variables = "*";
+			
+			return new StringBuilder(this.process).append(" ").append(this.variables).append(" ").append(" FROM ").append(this.schemaname)
+					.append(".").append(this.tablename).append(this.whereClauses).append(this.orderClauses).toString();
+			
+		}
 		
 	}
 	
