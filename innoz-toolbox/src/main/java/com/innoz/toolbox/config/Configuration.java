@@ -1,5 +1,6 @@
 package com.innoz.toolbox.config;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,6 +75,12 @@ public final class Configuration {
 	void load(String file) {
 		
 		new ConfigurationReaderXml(this).read(file);
+		
+	}
+	
+	void load(InputStream stream) {
+		
+		new ConfigurationReaderXml(this).read(stream);
 		
 	}
 	

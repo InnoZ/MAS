@@ -33,7 +33,6 @@ import com.innoz.toolbox.io.BbsrDataReader;
 import com.innoz.toolbox.io.database.DatabaseReader;
 import com.innoz.toolbox.scenarioGeneration.config.InitialConfigCreator;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.ZensusGrid;
 import com.innoz.toolbox.scenarioGeneration.network.NetworkCreatorFromPsql;
 import com.innoz.toolbox.scenarioGeneration.population.PopulationCreator;
 import com.innoz.toolbox.utils.GlobalNames;
@@ -68,28 +67,26 @@ public class ScenarioGenerationController extends DefaultController {
 			Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 			
 			// Container for geoinformation (admin borders, landuse)
-			Geoinformation geoinformation = new Geoinformation(configuration.scenario().getActivityLocationsType());
+			Geoinformation.init(configuration.scenario().getActivityLocationsType());
 	
 			// A class that reads data from database tables into local containers
-			DatabaseReader dbReader = new DatabaseReader(configuration, geoinformation);
-			dbReader.readGeodataFromDatabase(configuration, scenario);
-			dbReader.readPopulationFromDatabase(configuration, scenario);
+			DatabaseReader.init(configuration);
+//			DatabaseReader dbReader = new DatabaseReader(configuration);
+			DatabaseReader.getInstance().readGeodataFromDatabase(scenario);
+			DatabaseReader.getInstance().readPopulationFromDatabase(scenario);
 			InputStream in = this.getClass().getClassLoader().getResourceAsStream("regionstypen.csv");
-			new BbsrDataReader().read(geoinformation, new InputStreamReader(in));
+			new BbsrDataReader().read(new InputStreamReader(in));
 			
 			// Create a MATSim network from OpenStreetMap data
-			NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(),
-						geoinformation,	configuration);
-			nc.create(dbReader);
+			NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(), configuration);
+			nc.create();
 
 //			CreateCarsharingVehicles.run(configuration, scenario);
 
 			if(configuration.scenario().getAreaSets() != null) {
 			
-				ZensusGrid grid = new ZensusGrid(configuration, geoinformation);
-				
 				// Create a MATSim population
-				new PopulationCreator(geoinformation).run(configuration, scenario);
+				PopulationCreator.run(configuration, scenario);
 				
 			}
 			

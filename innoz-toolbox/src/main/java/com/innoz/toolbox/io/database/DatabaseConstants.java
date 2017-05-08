@@ -1,5 +1,8 @@
 package com.innoz.toolbox.io.database;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * 
  * Some constant values that are used in all InnoZ databases.
@@ -21,7 +24,24 @@ public final class DatabaseConstants {
 	public static final String POPULATIONFORECAST_DB = "population";
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
+	/**
+	 * 
+	 * @param name String identifier for the database table, normally 'schemaname'.'tablename', must not be null!
+	 */
+	public static DatabaseTable getDatabaseTable(final String name) {
+		
+		switch(name) {
+			case "persons": return DatabaseTable.personsTable;
+			case "plans": return DatabaseTable.plansTable;
+			default: return null;
+		}
+		
+	}
+	
 	//DATABASE-SPECIFIC CONSTANTS////////////////////////////////////////////////////////////
+	
+	public static final String PLANS_TABLE = "plans";
+	
 	public enum schemata { gadm, osm };
 	public enum tables { districts, osm_germany_line, osm_germany_nodes, osm_germany_point, osm_germany_polygon,
 		osm_germany_rels, osm_germany_ways };
@@ -53,6 +73,36 @@ public final class DatabaseConstants {
 	public static final String ATT_SHOP = "shop";
 	public static final String ATT_TAGS = "tags";
 	public static final String ATT_WAY = "way";
+	
 	/////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static class DatabaseTable {
+		
+		// final instances
+		private static final DatabaseTable personsTable = new DatabaseTable("persons",
+				new String[]{"id", "age", "sex", "license", "car_avail", "employed"});
+		
+		private static final DatabaseTable plansTable = new DatabaseTable("plans", new String[]{"person_id", "element_index", "selected",
+				"act_type", "act_coord", "act_start", "act_end", "act_duration", "leg_mode"});
+		
+		// members
+		private final String tablename;
+		private final List<String> columnNames;
+		
+		private DatabaseTable(String tablename, String[] columnNames) {
+			
+			this.tablename = tablename;
+			this.columnNames = Arrays.asList(columnNames);
+			
+		}
+		
+		public String getTableName(){
+			return this.tablename;
+		}
+		
+		public List<String> getColumnNames(){
+			return this.columnNames;
+		}
+	}
 	
 }

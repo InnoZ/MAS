@@ -1,30 +1,21 @@
 package com.innoz.toolbox.run;
 
-import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
-import org.matsim.core.network.LinkImpl;
-import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.network.filter.NetworkFilterManager;
-import org.matsim.core.network.filter.NetworkLinkFilter;
+import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.geometry.CoordUtils;
-import org.matsim.withinday.controller.WithinDayControlerListener;
-import org.matsim.withinday.controller.WithinDayModule;
+
+import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup;
+import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup.MobilityAttitudeModeParameterSet;
+import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup.MobilityAttitudeModeParams;
+import com.innoz.toolbox.matsim.scoring.MobilityAttitudeScoringFunctionFactory;
 
 /**
  * 
@@ -40,20 +31,49 @@ public class RunMatsim {
 		
 		Config config = ConfigUtils.loadConfig(args[0]);
 		
-		config.controler().setOutputDirectory("/home/dhosse/scenarios/test/output/");
-		config.controler().setLastIteration(0);
-		config.qsim().setEndTime(30*3600);
-//		
+		//
+		MobilityAttitudeConfigGroup ma = new MobilityAttitudeConfigGroup();
+		ma.setSubpopulationAttribute("mobilityAttitude");
+		ma.setScaleFactor(1d);
+		
+		{
+			MobilityAttitudeModeParameterSet pars = new MobilityAttitudeModeParameterSet();
+			pars.setAttitudeGroup("convBike");
+			MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
+			params.setMode(TransportMode.car);
+			params.setOffset(-1.0);
+			pars.addModeParams(params);
+			ma.addModeParams(pars);
+		}
+		
+		{
+			MobilityAttitudeModeParameterSet pars = new MobilityAttitudeModeParameterSet();
+			pars.setAttitudeGroup(null);
+			ma.addModeParams(pars);
+		}
+		
+		config.addModule(ma);
+		
+		
+		
 //		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
 //		
 //		{
 //			StrategySettings stratSets = new StrategySettings();
 //			stratSets.setDisableAfter(-1);
 //			stratSets.setStrategyName(DefaultSelector.ChangeExpBeta.name());
-//			stratSets.setSubpopulation(null);
-//			stratSets.setWeight(0.7);
+//			stratSets.setSubpopulation("convBike");
+//			stratSets.setWeight(1.0);
 //			config.strategy().addStrategySettings(stratSets);
 //		}
+		{
+			StrategySettings stratSets = new StrategySettings();
+			stratSets.setDisableAfter(-1);
+			stratSets.setStrategyName(DefaultSelector.ChangeExpBeta.name());
+			stratSets.setSubpopulation(null);
+			stratSets.setWeight(1.0);
+			config.strategy().addStrategySettings(stratSets);
+		}
 //		{
 //			StrategySettings stratSets = new StrategySettings();
 //			stratSets.setDisableAfter(-1);
@@ -66,10 +86,18 @@ public class RunMatsim {
 //			StrategySettings stratSets = new StrategySettings();
 //			stratSets.setDisableAfter(-1);
 //			stratSets.setStrategyName(DefaultStrategy.SubtourModeChoice.name());
-//			stratSets.setSubpopulation(null);
-//			stratSets.setWeight(0.1);
+//			stratSets.setSubpopulation("convBike");
+//			stratSets.setWeight(0.2);
 //			config.strategy().addStrategySettings(stratSets);
 //		}
+		{
+			StrategySettings stratSets = new StrategySettings();
+			stratSets.setDisableAfter(-1);
+			stratSets.setStrategyName(DefaultStrategy.SubtourModeChoice.name());
+			stratSets.setSubpopulation(null);
+			stratSets.setWeight(0.2);
+			config.strategy().addStrategySettings(stratSets);
+		}
 //		{
 //			StrategySettings stratSets = new StrategySettings();
 //			stratSets.setDisableAfter(-1);
@@ -78,87 +106,22 @@ public class RunMatsim {
 //			stratSets.setWeight(0.1);
 //			config.strategy().addStrategySettings(stratSets);
 //		}
-//		
-//		config.subtourModeChoice().setChainBasedModes(new String[]{TransportMode.bike, TransportMode.car});
-//		config.subtourModeChoice().setConsiderCarAvailability(true);
-//		config.subtourModeChoice().setModes(new String[]{TransportMode.bike,TransportMode.car,TransportMode.pt,TransportMode.walk});
-//		
+		
+		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		config.controler().setOutputDirectory("/home/dhosse/scenarios/test/output/");
+		config.controler().setLastIteration(0);
+		config.qsim().setEndTime(30*3600);
+
 		Scenario scenario = ScenarioUtils.loadScenario(config);
-//		
-//		NetworkFilterManager mng = new NetworkFilterManager(scenario.getNetwork());
-//		mng.addLinkFilter(new NetworkLinkFilter() {
-//			
-//			@Override
-//			public boolean judgeLink(Link l) {
-//				
-//				if(((LinkImpl)l).getType() != null){
-//
-//					boolean motorway = ((LinkImpl)l).getType().equals("motorway") || ((LinkImpl)l).getType().equals("motorway_link")
-//							|| ((LinkImpl)l).getType().equals("trunk") || ((LinkImpl)l).getType().equals("trunk_link");
-//					
-//					if(l.getAllowedModes().contains("pt") || motorway) return false;
-//					
-//					return true;
-//					
-//				}
-//				
-//				return false;
-//				
-//			}
-//			
-//		});
-//		
-//		Network carNet = mng.applyFilters();
-//		
-//		for(Person person : scenario.getPopulation().getPersons().values()){
-//			
-//			for(Plan plan : person.getPlans()){
-//				
-//				for(PlanElement pe : plan.getPlanElements()){
-//					
-//					if(pe instanceof Activity){
-//						
-//						Activity act = (Activity)pe;
-//						Link l = NetworkUtils.getNearestLink(carNet, act.getCoord());
-//						act.setLinkId(l.getId());
-//						
-//					} else {
-//						
-//						Leg leg = (Leg)pe;
-//						if(leg.getMode().equals(TransportMode.walk)){
-//							
-//							Coord prev = ((Activity)plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)-1)).getCoord();
-//							Coord next = ((Activity)plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)+1)).getCoord();
-//							if(CoordUtils.calcEuclideanDistance(prev, next) > 5000){
-//								leg.setMode(TransportMode.other);
-//							}
-//							
-//						}
-//						
-//					}
-//					
-//				}
-//				
-//			}
-//			
-//		}
-//		
 		Controler controler = new Controler(scenario);
-//
-////		WithinDayControlerListener ctrl = new WithinDayControlerListener();
-////		ctrl.setWithinDayTripRouterFactory(controler.getTripRouterProvider());
-////		ctrl.setLeastCostPathCalculatorFactory(controler.getLeastCostPathCalculatorFactory());
-////		ctrl.setNumberOfReplanningThreads(4);
-////		ctrl.setTransitRouterFactory(transitRouterFactory);
-////		controler.addOverridingModule(new AbstractModule() {
-////			
-////			@Override
-////			public void install() {
-////				install(new WithinDayModule());
-////				addControlerListenerBinding().to(WithinDayControlerListener.class);
-////			}
-////		});
-//		
+		
+		controler.addOverridingModule(new AbstractModule() {
+			
+			@Override
+			public void install() {
+				bindScoringFunctionFactory().to(MobilityAttitudeScoringFunctionFactory.class);
+			}
+		});
 		controler.run();
 		
 	}

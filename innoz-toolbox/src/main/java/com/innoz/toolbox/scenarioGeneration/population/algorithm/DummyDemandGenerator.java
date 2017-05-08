@@ -21,10 +21,10 @@ import com.innoz.toolbox.utils.data.Tree.Node;
 
 public class DummyDemandGenerator extends DemandGenerationAlgorithm {
 
-	public DummyDemandGenerator(final Scenario scenario, final Geoinformation geoinformation,
-			final CoordinateTransformation transformation, final Matrix od , final Distribution distribution) {
+	public DummyDemandGenerator(final Scenario scenario, final CoordinateTransformation transformation, final Matrix od,
+			final Distribution distribution) {
 
-		super(scenario, geoinformation, transformation, od, distribution);
+		super(scenario, transformation, od, distribution);
 		
 	}
 
@@ -57,7 +57,7 @@ public class DummyDemandGenerator extends DemandGenerationAlgorithm {
 		// From each administrative unit to each administrative unit, create a certain amount of commuters
 		for(String s : ids.split(",")){
 
-			Node<AdministrativeUnit> d = this.geoinformation.getAdminUnit(s);
+			Node<AdministrativeUnit> d = Geoinformation.getInstance().getAdminUnit(s);
 			
 			for(Node<AdministrativeUnit> fromEntry : d.getChildren()){
 				

@@ -18,10 +18,9 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.ConfigurationUtils;
-import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.config.SshConnector;
+import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.io.database.DatabaseConstants;
-import com.innoz.toolbox.utils.TextUtils;
 import com.jcraft.jsch.JSchException;
 
 /**
@@ -197,7 +196,7 @@ public class CommuterSpreadsheetFileHandler {
 		Set<String> keys = new HashSet<String>();
 		
 		// Iterate over all lines of the spreadsheed text
-		for(String line : text.split(TextUtils.NEW_LINE)){
+		for(String line : text.split("\n")){
 
 			// If the line is empty, skip it
 			if(!line.isEmpty()){
@@ -217,7 +216,7 @@ public class CommuterSpreadsheetFileHandler {
 				}
 				
 				// Split the current line into its individual cells
-				String[] lineParts = line.split(TextUtils.TAB);
+				String[] lineParts = line.split("\t");
 				
 				// If the line contains only two cells, it's probably a new relation
 				if(lineParts.length == 2){
@@ -282,13 +281,13 @@ public class CommuterSpreadsheetFileHandler {
 		boolean active = false;
 		
 		// Iterate over all lines of the spreadsheed text
-		for(String line : text.split(TextUtils.NEW_LINE)){
+		for(String line : text.split("\n")){
 		
-			if(!line.isEmpty() && line.split(TextUtils.TAB).length >= 12){
+			if(!line.isEmpty() && line.split("\t").length >= 12){
 				
 				if(active){
 
-					String[] lineParts = line.split(TextUtils.TAB);
+					String[] lineParts = line.split("\t");
 					
 					String homeId = lineParts[0];
 					String homeName = lineParts[1];

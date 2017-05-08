@@ -57,10 +57,10 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 
-	public SurveyBasedDemandGenerator(final Scenario scenario, final Geoinformation geoinformation,
-			final CoordinateTransformation transformation, Matrix od, final Distribution distribution) {
+	public SurveyBasedDemandGenerator(final Scenario scenario, final CoordinateTransformation transformation, Matrix od,
+			final Distribution distribution) {
 
-		super(scenario, geoinformation, transformation, od, distribution);
+		super(scenario, transformation, od, distribution);
 		
 	}
 
@@ -85,7 +85,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		// Run the survey data parser that stores all of the travel information
 		SurveyDatabaseParserV2 parser = new SurveyDatabaseParserV2();
 		SurveyDataContainer container = new SurveyDataContainer(configuration);
-		parser.run(configuration, container, this.geoinformation, CollectionUtils.stringToSet(ids));
+		parser.run(configuration, container, CollectionUtils.stringToSet(ids));
 		
 		// Choose the method for demand generation that has been specified in the configuration
 		if(configuration.surveyPopulation().isUsingHouseholds()){
@@ -126,7 +126,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		// pick the current admin unit.
 		for(String s : ids.split(",")){
 
-			AdministrativeUnit d = this.geoinformation.getAdminUnit(s).getData();
+			AdministrativeUnit d = Geoinformation.getInstance().getAdminUnit(s).getData();
 			
 			for(int i = 0; i < d.getNumberOfHouseholds() * configuration.scenario().getScaleFactor(); i++){
 				
@@ -152,7 +152,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				// Go through all residential areas of the home cell and randomly choose one of them
 				if(this.currentHomeCell.getLanduseGeometries().containsKey(ActivityTypes.HOME)){
 					
-					if(this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
+					if(Geoinformation.getInstance().getLanduseType().equals(ActivityLocationsType.FACILITIES)){
 						
 						homeFacility = chooseActivityFacilityInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
 						homeLocation = transformation.transform(homeFacility.getCoord());
@@ -227,7 +227,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 		for(String s : ids.split(",")){
 
-			AdministrativeUnit d = this.geoinformation.getAdminUnit(s).getData();
+			AdministrativeUnit d = Geoinformation.getInstance().getAdminUnit(s).getData();
 			
 			for(Entry<String, Integer> entry : d.getPopulationMap().entrySet()) {
 				
@@ -285,7 +285,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 						// Go through all residential areas of the home cell and randomly choose one of them
 						if(this.currentHomeCell.getLanduseGeometries().containsKey(ActivityTypes.HOME)){
 							
-							if (this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
+							if (Geoinformation.getInstance().getLanduseType().equals(ActivityLocationsType.FACILITIES)){
 								
 								homeFacility = chooseActivityFacilityInAdminUnit(this.currentHomeCell, ActivityTypes.HOME);
 								homeLocation = transformation.transform(homeFacility.getCoord());
@@ -494,7 +494,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				// If there is only one plan element, create a 24hrs home activity
 				Activity home = population.getFactory().createActivityFromCoord(ActivityTypes.HOME, homeCoord);
 				
-				if(this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
+				if(Geoinformation.getInstance().getLanduseType().equals(ActivityLocationsType.FACILITIES)){
 
 					home.setFacilityId(homeFacility.getId());
 					
@@ -512,7 +512,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			// If there is only one plan element, create a 24hrs home activity
 			Activity home = population.getFactory().createActivityFromCoord(ActivityTypes.HOME, homeCoord);
 			
-			if(this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
+			if(Geoinformation.getInstance().getLanduseType().equals(ActivityLocationsType.FACILITIES)){
 
 				home.setFacilityId(homeFacility.getId());
 				
@@ -550,7 +550,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		this.currentMainActLocation = shootLocationForActType(this.currentMainActCell,
 				plan.getMainActType(), distance, plan, mainMode, person);
 		
-		if(this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
+		if(Geoinformation.getInstance().getLanduseType().equals(ActivityLocationsType.FACILITIES)){
 			
 			this.currentMainActFacility = chooseActivityFacilityInAdminUnit(this.currentMainActCell, plan.getMainActType());
 			
@@ -563,7 +563,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 		// Also, add all cells of which the sum of the distances between their centroid and the centroids of
 		// the home and the main act cell is less than twice the distance between the home and the main activity location
-		for(Node<AdministrativeUnit> d : this.geoinformation.getAdminUnits()){
+		for(Node<AdministrativeUnit> d : Geoinformation.getInstance().getAdminUnits()){
 
 			for(Node<AdministrativeUnit> node : d.getChildren()){
 				
@@ -677,7 +677,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	private Activity createActivity(Population population, SurveyPerson personTemplate, SurveyPlan templatePlan,
 			SurveyPlanElement mpe, String cellId) {
 
-		AdministrativeUnit au = this.geoinformation.getAdminUnit(cellId).getData();
+		AdministrativeUnit au = Geoinformation.getInstance().getAdminUnit(cellId).getData();
 		
 		// Initialize the activity type and the start and end time
 		SurveyPlanActivity act = (SurveyPlanActivity)mpe;
@@ -756,8 +756,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 //		activity.setStartTime(start);
 		activity.setMaximumDuration(end - start);
 //		activity.setEndTime(end);
-		if(this.geoinformation.getLanduseType().equals(ActivityLocationsType.FACILITIES)){
-			activity.setFacilityId(((ProxyFacility)this.geoinformation.getLanduseOfType(type)
+		if(Geoinformation.getInstance().getLanduseType().equals(ActivityLocationsType.FACILITIES)){
+			activity.setFacilityId(((ProxyFacility)Geoinformation.getInstance().getLanduseOfType(type)
 					.getClosest(coord.getX(), coord.getY())).get().getId());
 		}
 		
@@ -825,7 +825,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			SurveyPlan templatePlan, String mode, SurveyPerson personTemplate){
 		
 		// Get all landuse geometries of the current activity type within the given administrative unit
-		List<Landuse> closest = (List<Landuse>) this.geoinformation.getLanduseOfType(actType).getRing
+		List<Landuse> closest = (List<Landuse>) Geoinformation.getInstance().getLanduseOfType(actType).getRing
 					(this.lastActCoord.getX(), this.lastActCoord.getY(), d * minFactor, d * maxFactor);
 		
 		// If there were any landuse geometries found, randomly choose one of the geometries.
@@ -840,7 +840,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				
 			} else {
 				
-				Landuse area = this.geoinformation.getLanduseOfType(actType)
+				Landuse area = Geoinformation.getInstance().getLanduseOfType(actType)
 						.getClosest(this.lastActCoord.getX(), this.lastActCoord.getY());
 				
 				return this.transformation.transform(GeometryUtils.shoot(area.getGeometry(), this.random));
@@ -859,7 +859,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				
 			} else {
 				
-				Landuse area = this.geoinformation.getLanduseOfType(actType).getClosest(
+				Landuse area = Geoinformation.getInstance().getLanduseOfType(actType).getClosest(
 						this.lastActCoord.getX(), this.lastActCoord.getY());
 				
 				return this.transformation.transform(GeometryUtils.shoot(area.getGeometry(), this.random));

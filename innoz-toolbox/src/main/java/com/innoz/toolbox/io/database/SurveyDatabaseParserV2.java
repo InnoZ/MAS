@@ -7,25 +7,24 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.SurveyType;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.VehicleType;
+import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.task.ConvertToPlansTask;
 import com.innoz.toolbox.io.database.task.HouseholdRemovalTask;
 import com.innoz.toolbox.io.database.task.PersonRemovalTask;
 import com.innoz.toolbox.io.database.task.ReadHouseholdDatabaseTask;
 import com.innoz.toolbox.io.database.task.ReadPersonDatabaseTask;
-import com.innoz.toolbox.io.database.task.ReadVehicleDatabaseTask;
 import com.innoz.toolbox.io.database.task.ReadTripsDatabaseTask;
+import com.innoz.toolbox.io.database.task.ReadVehicleDatabaseTask;
 import com.innoz.toolbox.io.database.task.ResolveRoundTripsTask;
 import com.innoz.toolbox.io.database.task.SortStagesTask;
 import com.innoz.toolbox.io.database.task.TaskRunner;
 import com.innoz.toolbox.io.database.validation.ValidateMissingTravelTimes;
 import com.innoz.toolbox.io.database.validation.ValidateNegativeTravelTimes;
 import com.innoz.toolbox.io.database.validation.ValidateOverlappingStages;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 
 public class SurveyDatabaseParserV2 {
@@ -43,7 +42,7 @@ public class SurveyDatabaseParserV2 {
 	 * @param container The class containing all survey information needed for demand generation.
 	 * @param geoinformation
 	 */
-	public void run(Configuration configuration, SurveyDataContainer container, Geoinformation geoinformation, Set<String> ids){
+	public void run(Configuration configuration, SurveyDataContainer container, Set<String> ids){
 		
 		// Initialize the survey constants
 		this.constants = SurveyConstants.getInstance();
@@ -65,7 +64,7 @@ public class SurveyDatabaseParserV2 {
 					
 					log.info("Creating survey households...");
 					
-					new ReadHouseholdDatabaseTask(constants, geoinformation, ids).parse(connection, container, group.getSurveyType().name());
+					new ReadHouseholdDatabaseTask(constants, ids).parse(connection, container, group.getSurveyType().name());
 						
 					log.info("Read " + container.getHouseholds().size() + " households...");
 					
@@ -73,19 +72,19 @@ public class SurveyDatabaseParserV2 {
 				
 				log.info("Creating survey persons...");
 				
-				new ReadPersonDatabaseTask(constants, geoinformation, ids, configuration.surveyPopulation().getDayTypes()).parse(connection, container, group.getSurveyType().name());
+				new ReadPersonDatabaseTask(constants, ids, configuration.surveyPopulation().getDayTypes()).parse(connection, container, group.getSurveyType().name());
 				
 				log.info("Read " + container.getPersons().size() + " persons...");
 				
 				log.info("Creating survey trips...");
 
-				new ReadTripsDatabaseTask(constants, geoinformation, ids, configuration.surveyPopulation().getDayTypes()).parse(connection, container, configuration.surveyPopulation().getSurveyType().name());
+				new ReadTripsDatabaseTask(constants, ids, configuration.surveyPopulation().getDayTypes()).parse(connection, container, configuration.surveyPopulation().getSurveyType().name());
 				
 				if(group.getVehicleType().equals(VehicleType.SURVEY) && group.getSurveyType().equals(SurveyType.MiD)){
 				
 					log.info("Creating survey cars...");
 					
-					new ReadVehicleDatabaseTask(constants, geoinformation, ids).parse(connection, container, group.getSurveyType().name());
+					new ReadVehicleDatabaseTask(constants, ids).parse(connection, container, group.getSurveyType().name());
 					
 				}
 	

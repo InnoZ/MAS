@@ -46,28 +46,15 @@ import com.innoz.toolbox.utils.GlobalNames;
 public class PopulationCreator {
 
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
-	private final Geoinformation geoinformation;
 	private static final Logger log = Logger.getLogger(PopulationCreator.class);
 	public static ZensusGrid grid;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
-	private Distribution distribution;
-	private CoordinateTransformation transformation;
-	private Matrix od;
+	private static Distribution distribution;
+	private static CoordinateTransformation transformation;
+	private static Matrix od;
 	/////////////////////////////////////////////////////////////////////////////////////////
-	
-	/**
-	 * 
-	 * Constructor.
-	 * 
-	 * @param geoinformation The geoinformation container.
-	 */
-	public PopulationCreator(final Geoinformation geoinformation){
-		
-		this.geoinformation = geoinformation;
-		
-	};
 	
 	/**
 	 * 
@@ -80,13 +67,13 @@ public class PopulationCreator {
 	 * @throws NoSuchAuthorityCodeException
 	 * @throws FactoryException
 	 */
-	public void run(Configuration configuration, Scenario scenario) {
+	public static void run(Configuration configuration, Scenario scenario) {
 
 		try {
 			
 			if(configuration.scenario().getActivityLocationsType().equals(ActivityLocationsType.GRID)) {
 				
-				grid = new ZensusGrid(configuration, geoinformation);
+				grid = new ZensusGrid(configuration);
 				
 			}
 			
@@ -94,7 +81,7 @@ public class PopulationCreator {
 			
 			CommuterDatabaseParser parser = new CommuterDatabaseParser();
 			parser.run(configuration);
-			this.od = parser.getOD();
+			od = parser.getOD();
 			
 			for(String key : areaSets.keySet()){
 				
@@ -110,7 +97,7 @@ public class PopulationCreator {
 					transformation = TransformationFactory.getCoordinateTransformation(
 							from.toString(), to.toString());
 					
-					this.distribution = new Distribution(scenario.getNetwork(), this.geoinformation, this.transformation);
+					distribution = new Distribution(scenario.getNetwork(), transformation);
 				
 					
 					log.info("Creating population for MATSim scenario...");
@@ -133,7 +120,7 @@ public class PopulationCreator {
 		
 	}
 	
-	private void runI(Configuration configuration, Scenario scenario, PopulationSource populationType, String ids)
+	private static void runI(Configuration configuration, Scenario scenario, PopulationSource populationType, String ids)
 			throws NoSuchAuthorityCodeException, FactoryException, InstantiationException, IllegalAccessException,
 			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException,
 			ClassNotFoundException{
@@ -162,7 +149,7 @@ public class PopulationCreator {
 			
 			((DemandGenerationAlgorithm)Class.forName(className).getConstructor(
 					Scenario.class, Geoinformation.class, CoordinateTransformation.class, Matrix.class, Distribution.class)
-					.newInstance(scenario, this.geoinformation, this.transformation, this.od, this.distribution))
+					.newInstance(scenario, transformation, od, distribution))
 					.run(configuration, ids);
 			
 		}
