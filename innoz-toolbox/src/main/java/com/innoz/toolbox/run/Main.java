@@ -11,6 +11,7 @@ import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.run.controller.task.DemandGenerationTask;
 import com.innoz.toolbox.run.controller.task.NetworkGenerationTask;
 import com.innoz.toolbox.run.controller.task.WriteOutputTask;
+import com.innoz.toolbox.utils.GlobalNames;
 
 /**
  * 
@@ -18,6 +19,8 @@ import com.innoz.toolbox.run.controller.task.WriteOutputTask;
  * a shell execution of the framework. </br>
  * At the moment, the execution is a minimal example of the scenario generation. When invoked, the class needs two runtime arguments,
  * namely an id for the survey area and a year. dhosse 05/17
+ * 
+ * java -cp <path-to-jar> com.innoz.toolbox.run.Main args1 args2
  * 
  * @author dhosse
  *
@@ -42,11 +45,14 @@ public class Main {
 			Controller.configuration().scenario().addAreaSet(set);
 			Controller.configuration().surveyPopulation().setUseHouseholds(false);
 			
+			// MATSim needs a Cartesian coordinate system that measures distances in meters
+			Controller.configuration().misc().setCoordinateSystem(GlobalNames.UTM32N);
+			
 			// Set the scenario year to whatever was passed in the second argument
 			int forecastYear = Integer.parseInt(args[1]);
 			Controller.configuration().scenario().setYear(forecastYear);
 			
-			Controller.configuration().misc().setOutputDirectory("/home/dhosse/outputTestFromController/");
+			Controller.configuration().misc().setOutputDirectory("./" + args[0] + "_" + args[1] + "/");
 			
 			log.info("Starting controller...");
 			
@@ -57,8 +63,6 @@ public class Main {
 			
 			// Start the actual execution
 			Controller.run();
-			
-			log.info("Done.");
 			
 		} else {
 
