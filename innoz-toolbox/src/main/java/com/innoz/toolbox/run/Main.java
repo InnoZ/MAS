@@ -17,10 +17,10 @@ import com.innoz.toolbox.utils.GlobalNames;
  * 
  * Starting point for a shell-based version of the scenario generation framework. This class be used as starting point for
  * a shell execution of the framework. </br>
- * At the moment, the execution is a minimal example of the scenario generation. When invoked, the class needs two runtime arguments,
+ * At the moment, the execution is a minimal example of the scenario generation. When invoked, the class needs three runtime arguments,
  * namely an id for the survey area and a year. dhosse 05/17
  * 
- * java -cp <path-to-jar> com.innoz.toolbox.run.Main args1 args2
+ * java -cp <path-to-jar> com.innoz.toolbox.run.Main args1 args2 args3
  * 
  * @author dhosse
  *
@@ -52,7 +52,15 @@ public class Main {
 			int forecastYear = Integer.parseInt(args[1]);
 			Controller.configuration().scenario().setYear(forecastYear);
 			
-			Controller.configuration().misc().setOutputDirectory("./" + args[0] + "_" + args[1] + "/");
+			if(args.length > 2) {
+				
+				Controller.configuration().misc().setOutputDirectory(args[2]);
+				
+			} else {
+				
+				Controller.configuration().misc().setOutputDirectory("./" + args[0] + "_" + args[1] + "/");
+				
+			}
 			
 			log.info("Starting controller...");
 			
