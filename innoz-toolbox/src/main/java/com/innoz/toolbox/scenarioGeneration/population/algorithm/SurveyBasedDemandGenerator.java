@@ -85,7 +85,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		// Run the survey data parser that stores all of the travel information
 		SurveyDatabaseParserV2 parser = new SurveyDatabaseParserV2();
 		SurveyDataContainer container = new SurveyDataContainer(configuration);
-		parser.run(configuration, container, Geoinformation.getInstance(), CollectionUtils.stringToSet(ids));
+		parser.run(configuration, container, CollectionUtils.stringToSet(ids));
 		
 		// Choose the method for demand generation that has been specified in the configuration
 		if(configuration.surveyPopulation().isUsingHouseholds()){
