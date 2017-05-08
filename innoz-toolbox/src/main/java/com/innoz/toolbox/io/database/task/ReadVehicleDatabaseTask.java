@@ -14,16 +14,15 @@ import com.innoz.toolbox.io.database.handler.DefaultHandler;
 import com.innoz.toolbox.io.database.handler.VehicleFuelTypeHandler;
 import com.innoz.toolbox.io.database.handler.VehicleIdHandler;
 import com.innoz.toolbox.io.database.handler.VehicleKbaSegmentHandler;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyObject;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyVehicle;
 
 public class ReadVehicleDatabaseTask extends DatabaseTask {
 
-	public ReadVehicleDatabaseTask(SurveyConstants constants, Geoinformation geoinformation, Set<String> ids) {
+	public ReadVehicleDatabaseTask(SurveyConstants constants, Set<String> ids) {
 		
-		super(constants, geoinformation, ids);
+		super(constants, ids);
 		
 		this.handlers = new HashSet<>();
 		this.handlers.add(new VehicleIdHandler());

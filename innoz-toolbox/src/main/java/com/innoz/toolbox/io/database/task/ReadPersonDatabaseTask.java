@@ -41,9 +41,9 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 	
 	private final DayTypes dayType;
 
-	public ReadPersonDatabaseTask(SurveyConstants constants, Geoinformation geoinformation, Set<String> ids, DayTypes dayType) {
+	public ReadPersonDatabaseTask(SurveyConstants constants, Set<String> ids, DayTypes dayType) {
 		
-		super(constants, geoinformation, ids);
+		super(constants, ids);
 		this.dayType = dayType;
 		
 		this.handlers = new HashSet<>();
@@ -73,44 +73,40 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 		
 		q = "select * from " + table;
 		
-//		if(container.getHouseholds() == null){
+		if(surveyType.equalsIgnoreCase("mid")){
 			
-			if(surveyType.equalsIgnoreCase("mid")){
-				
-				q +=  " where ";
-				
-				int cntOut = 0;
-				Set<Integer> knownRegionTypes = new HashSet<>();
+			q +=  " where ";
+			
+			int cntOut = 0;
+			Set<Integer> knownRegionTypes = new HashSet<>();
 
-				for(Node<AdministrativeUnit> node: geoinformation.getAdminUnits()){
-					
-					AdministrativeUnit entry = node.getData();
-					
-					if(ids.contains(entry.getId().substring(0, 5))&&!knownRegionTypes.contains(entry.getRegionType())){
-					
-						if(cntOut > 0){
+			for(Node<AdministrativeUnit> node: Geoinformation.getInstance().getAdminUnits()){
+				
+				AdministrativeUnit entry = node.getData();
+				
+				if(ids.contains(entry.getId().substring(0, 5))&&!knownRegionTypes.contains(entry.getRegionType())){
+				
+					if(cntOut > 0){
 
-							q += " or ";
-							
-						}
-						
-						cntOut++;
-						
-						q += SurveyConstants.regionType(surveyType) + " = " + entry.getRegionType();
-						knownRegionTypes.add(entry.getRegionType());
+						q += " or ";
 						
 					}
 					
+					cntOut++;
+					
+					q += SurveyConstants.regionType(surveyType) + " = " + entry.getRegionType();
+					knownRegionTypes.add(entry.getRegionType());
+					
 				}
-				
-			} else {
-				
-				q += " where st_code=44"; //Osnabrück 
 				
 			}
 			
-//		}
-		
+		} else {
+			
+			q += " where st_code=44"; //Osnabrück 
+			
+		}
+			
 		if(dayType.equals(DayTypes.weekday)){
 			q += " and " + SurveyConstants.dayOfTheWeek(surveyType) + " < 6";
 		} else if(dayType.equals(DayTypes.weekend)){

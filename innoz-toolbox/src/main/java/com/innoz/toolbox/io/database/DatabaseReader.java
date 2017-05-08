@@ -11,8 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.geotools.geometry.jts.JTS;
@@ -21,7 +19,6 @@ import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.gbl.Gbl;
-import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -174,7 +171,8 @@ public class DatabaseReader {
 					
 				}
 				
-				// TODO read bbsr data from database
+				
+				readBbsrData(connection, this.configuration);
 				
 				if(this.configuration.scenario().getAreaSets() != null) {
 
@@ -353,7 +351,6 @@ public class DatabaseReader {
 		// Go through all the results
 		while(set.next()){
 			
-			//TODO attributes have to be added to the table
 			String key = set.getString(DatabaseConstants.MUN_KEY);
 			String g = set.getString(DatabaseConstants.functions.st_astext.name());
 			int bland = set.getInt(DatabaseConstants.BLAND);
@@ -407,19 +404,27 @@ public class DatabaseReader {
 		// Create a new statement to execute the sql query
 		Statement statement = connection.createStatement();
 		
-		String ids = CollectionUtils.setToString(Stream.of(configuration.scenario().getAreaSets().values()).
-				filter(c -> c instanceof AreaSet).map(c -> (AreaSet) c).map(AreaSet::getIds).collect(Collectors.toSet()));
+		StringBuilder builder = new StringBuilder();
+		for(ConfigurationGroup cg : configuration.scenario().getAreaSets().values()){
+			AreaSet set = (AreaSet) cg;
+			builder.append(set.getIds());
+		}
+		String ids = builder.toString();
 		
-		String sql = "SELECT ags, typ from bbsr_region_types WHERE ags IN (" + ids + ");";
+		String sql = "SELECT gkz, rtype7 from bbsr.regiontypes WHERE gkz LIKE '" + ids + "%';";
 		
 		ResultSet result = statement.executeQuery(sql);
 		
 		while(result.next()) {
 			
-			String ags = result.getString("ags");
-			int typ = result.getInt("typ");
+			String gkz = result.getString("gkz").substring(0, 5);
+			int typ = result.getInt("rtype7");
 			
-			Geoinformation.getInstance().getAdminUnit(ags).getData().setRegionType(typ);
+			if(Geoinformation.getInstance().getAdminUnit(gkz) != null) {
+			
+				Geoinformation.getInstance().getAdminUnit(gkz).getData().setRegionType(typ);
+				
+			}
 			
 		}
 		
