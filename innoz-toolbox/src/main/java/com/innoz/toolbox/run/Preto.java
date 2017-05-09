@@ -81,7 +81,7 @@ public class Preto {
 		person.setSelectedPlan(plan);
 		population.addPerson(person);
 		
-		new PopulationWriter(population).write(outputDirectory + "plans.xml.gz");
+		new PopulationWriter(population).write(outputDirectory + "plans.xml");
 		
 		PlansToJson.run(scenario, outputDirectory + "features.json", GlobalNames.WGS84);
 		
