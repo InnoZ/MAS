@@ -3,7 +3,9 @@ package com.innoz.toolbox.scenarioGeneration.config;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams;
 import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
 
@@ -29,6 +31,14 @@ public class InitialConfigCreator {
 		// Create a new MATSim configuration
 		Config config = ConfigUtils.createConfig();
 
+		adapt(config, configuration);
+		
+		return config;
+		
+	}
+	
+	public static void adapt(final Config config, final Configuration configuration) {
+		
 		// Network config group
 		config.network().setInputFile(configuration.misc().getOutputDirectory() + "network.xml.gz");
 		
@@ -44,9 +54,12 @@ public class InitialConfigCreator {
 			
 		// Add activity types to the scoring parameters
 		addBasicActivityParams(config);
-			
+		
+		// Add scoring parameters for modes
+		addModeScoringParams(config);
+		
 		// Add mode parameters
-		addBasicModeParams(config);
+		addBasicModeRoutingParams(config);
 		
 		// QSim config group
 		config.qsim().setFlowCapFactor(configuration.scenario().getScaleFactor());
@@ -58,8 +71,6 @@ public class InitialConfigCreator {
 			config.vehicles().setVehiclesFile(configuration.misc().getOutputDirectory() + "vehicles.xml.gz");
 			
 		}
-		
-		return config;
 		
 	}
 
@@ -109,11 +120,11 @@ public class InitialConfigCreator {
 
 	/**
 	 * 
-	 * Creates and adds default mode parameters for the main modes.
+	 * Creates and adds default mode routing parameters for the main modes.
 	 * 
 	 * @param config
 	 */
-	private static void addBasicModeParams(Config config){
+	private static void addBasicModeRoutingParams(Config config){
 		
 		{
 			ModeRoutingParams pars = new ModeRoutingParams(TransportMode.bike);
@@ -148,6 +159,31 @@ public class InitialConfigCreator {
 			pars.setBeelineDistanceFactor(1.3);
 			pars.setTeleportedModeSpeed(4/3.6);
 			config.plansCalcRoute().addModeRoutingParams(pars);
+		}
+		
+	}
+	
+	/**
+	 * 
+	 * Set mode scoring parameters to default values (as starting point for calibration).
+	 * 
+	 * @param config
+	 */
+	private static void addModeScoringParams(Config config) {
+		
+		String[] modes = new String[]{TransportMode.bike, TransportMode.car, TransportMode.other, TransportMode.pt, TransportMode.ride,
+				TransportMode.walk};
+		
+		PlanCalcScoreConfigGroup planCalcScore = config.planCalcScore();
+		
+		for(String mode : modes){
+			
+			ModeParams params = planCalcScore.getOrCreateModeParams(mode);
+			params.setConstant(0.0);
+			params.setMarginalUtilityOfDistance(0.0);
+			params.setMarginalUtilityOfTraveling(0.0);
+			params.setMonetaryDistanceRate(0.0);
+			
 		}
 		
 	}
