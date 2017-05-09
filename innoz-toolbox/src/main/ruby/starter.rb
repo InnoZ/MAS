@@ -1,11 +1,17 @@
 class Starter
 	
-	DEFAULT = '/home/dhosse/workspace/MAS/bla/'
+	DEFAULT = './output/'
 	
 	def initialize (id, year, folder = DEFAULT)
-		@id = id
+	  
+    if year < 2009 || year > 2040
+      raise 'Scenario generation only works for years between 2009 and 2040 at the moment'
+    end
+    
+	  @id = id
 		@year = year
 		@folder = folder
+	
 	end
 
 	def start
@@ -17,4 +23,4 @@ class Starter
 
 end
 
-Starter.new(15001,2017).start
+Starter.new(15001,2040).start
