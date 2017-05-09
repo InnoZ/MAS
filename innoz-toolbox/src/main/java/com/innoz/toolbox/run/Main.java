@@ -52,15 +52,7 @@ public class Main {
 			int forecastYear = Integer.parseInt(args[1]);
 			Controller.configuration().scenario().setYear(forecastYear);
 			
-			if(args.length > 2) {
-				
-				Controller.configuration().misc().setOutputDirectory(args[2]);
-				
-			} else {
-				
-				Controller.configuration().misc().setOutputDirectory("./" + args[0] + "_" + args[1] + "/");
-				
-			}
+			Controller.configuration().misc().setOutputDirectory(args[2] + "/" + args[1] + "_" + args[0] + "_base/");
 			
 			log.info("Starting controller...");
 			
