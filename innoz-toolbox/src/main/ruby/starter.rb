@@ -4,8 +4,8 @@ class Starter
 	
 	def initialize (id, year, folder = DEFAULT)
 	  
-    if year < 2009 || year > 2040
-      raise 'Scenario generation only works for years between 2009 and 2040 at the moment'
+    unless year.between?(2009,2040)
+      fail 'Scenario generation only works for years between 2009 and 2040 at the moment'
     end
     
 	  @id = id
@@ -23,4 +23,4 @@ class Starter
 
 end
 
-Starter.new(15001,2040).start
+Starter.new(15001,2017).start
