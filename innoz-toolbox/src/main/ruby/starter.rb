@@ -15,7 +15,7 @@ class Starter
 	end
 
 	def start
-		Kernel.exec "java -cp /home/dhosse/workspace/MAS/innoz-toolbox/target/innoz-toolbox-0.1-SNAPSHOT.jar com.innoz.toolbox.run.Main #{id} #{year} #{folder}"
+		Kernel.exec "java -cp /home/dhosse/workspace/MAS/innoz-toolbox/target/innoz-toolbox-0.1-SNAPSHOT.jar com.innoz.toolbox.run.Main #{id} #{year} #{folder} >/dev/null 2>&1"
 	end
 
 	private
