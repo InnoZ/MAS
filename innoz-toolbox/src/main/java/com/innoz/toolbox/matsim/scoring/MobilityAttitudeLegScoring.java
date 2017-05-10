@@ -122,7 +122,8 @@ public class MobilityAttitudeLegScoring implements org.matsim.core.scoring.SumSc
 		
 		}
 		
-		tmpScore += travelTime * modeParams.marginalUtilityOfTraveling_s;
+		// replaced std. beta_tt with mobility attitude param
+		tmpScore += travelTime * this.attitudeParams.getOffsetForMode(leg.getMode());//modeParams.marginalUtilityOfTraveling_s;
 		
 		if (modeParams.marginalUtilityOfDistance_m != 0.0
 				|| modeParams.monetaryDistanceCostRate != 0.0) {
@@ -157,9 +158,9 @@ public class MobilityAttitudeLegScoring implements org.matsim.core.scoring.SumSc
 		tmpScore += modeParams.constant;
 
 		// This is the only modification of the original code
-		double offset = this.attitudeParams.getOffsetForMode(leg.getMode()) * this.scaleFactor;
-		
-		tmpScore += offset;
+//		double offset = this.attitudeParams.getOffsetForMode(leg.getMode()) * this.scaleFactor;
+//		
+//		tmpScore += offset;
 		// end of modification
 		
 		return tmpScore;

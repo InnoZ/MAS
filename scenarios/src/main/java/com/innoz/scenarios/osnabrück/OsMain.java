@@ -4,6 +4,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
@@ -26,9 +27,12 @@ public class OsMain {
 		Config config = ConfigUtils.loadConfig(filebase + "config.xml.gz");
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		config.controler().setLastIteration(10);
 		
 		addStrategySettings(config);
 		addMobilityAttitudeConfigGroup(config);
+		
+		new ConfigWriter(config).write(filebase + "configWithMA.xml");
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
@@ -80,28 +84,30 @@ public class OsMain {
 		
 		MobilityAttitudeConfigGroup ma = new MobilityAttitudeConfigGroup();
 		ma.setSubpopulationAttribute("mobilityAttitude");
-		ma.setScaleFactor(10d);
+		ma.setScaleFactor(1d);
 		
 		{
 			MobilityAttitudeModeParameterSet pars = new MobilityAttitudeModeParameterSet();
 			pars.setAttitudeGroup("tradCar");
 			
+			double betaCar = 0.5509808129;
+			
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.car);
-				params.setOffset(0.5509808129);
+				params.setOffset(0.0);
 				pars.addModeParams(params);
 			}
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.bike);
-				params.setOffset(-0.6728124661);
+				params.setOffset(-0.6728124661 - betaCar);
 				pars.addModeParams(params);
 			}
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.pt);
-				params.setOffset(-1.3728579165);
+				params.setOffset(-1.3728579165 - betaCar);
 				pars.addModeParams(params);
 			}
 			
@@ -113,22 +119,24 @@ public class OsMain {
 			MobilityAttitudeModeParameterSet pars = new MobilityAttitudeModeParameterSet();
 			pars.setAttitudeGroup("flexCar");
 			
+			double betaCar = 0.6380481272;
+			
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.car);
-				params.setOffset(0.6380481272);
+				params.setOffset(0.0);
 				pars.addModeParams(params);
 			}
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.bike);
-				params.setOffset(0.1034697375);
+				params.setOffset(0.1034697375 - betaCar);
 				pars.addModeParams(params);
 			}
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.pt);
-				params.setOffset(-0.2605919306);
+				params.setOffset(-0.2605919306 - betaCar);
 				pars.addModeParams(params);
 			}
 			
@@ -139,23 +147,25 @@ public class OsMain {
 		{
 			MobilityAttitudeModeParameterSet pars = new MobilityAttitudeModeParameterSet();
 			pars.setAttitudeGroup("urbanPt");
+		
+			double betaCar = -0.7808252647;
 			
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.car);
-				params.setOffset(-0.7808252647);
+				params.setOffset(0.0);
 				pars.addModeParams(params);
 			}
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.bike);
-				params.setOffset(-1.6880941473);
+				params.setOffset(-1.6880941473 - betaCar);
 				pars.addModeParams(params);
 			}
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.pt);
-				params.setOffset(0.700257666);
+				params.setOffset(0.700257666 - betaCar);
 				pars.addModeParams(params);
 			}
 			
@@ -167,22 +177,24 @@ public class OsMain {
 			MobilityAttitudeModeParameterSet pars = new MobilityAttitudeModeParameterSet();
 			pars.setAttitudeGroup("convBike");
 			
+			double betaCar = -0.582954545;
+			
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.car);
-				params.setOffset(-0.582954545);
+				params.setOffset(0.0);
 				pars.addModeParams(params);
 			}
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.bike);
-				params.setOffset(0.5985309311);
+				params.setOffset(0.5985309311 - betaCar);
 				pars.addModeParams(params);
 			}
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.pt);
-				params.setOffset(0.3420721502);
+				params.setOffset(0.3420721502 - betaCar);
 				pars.addModeParams(params);
 			}
 			
@@ -194,22 +206,24 @@ public class OsMain {
 			MobilityAttitudeModeParameterSet pars = new MobilityAttitudeModeParameterSet();
 			pars.setAttitudeGroup("envtPtBike");
 			
+			double betaCar = -0.5953667551;
+			
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.car);
-				params.setOffset(-0.5953667551);
+				params.setOffset(0.0);
 				pars.addModeParams(params);
 			}
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.bike);
-				params.setOffset(0.4392845925);
+				params.setOffset(0.4392845925 - betaCar);
 				pars.addModeParams(params);
 			}
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.pt);
-				params.setOffset(0.5825576487);
+				params.setOffset(0.5825576487 - betaCar);
 				pars.addModeParams(params);
 			}
 			
@@ -221,22 +235,24 @@ public class OsMain {
 			MobilityAttitudeModeParameterSet pars = new MobilityAttitudeModeParameterSet();
 			pars.setAttitudeGroup("multiOpt");
 			
+			double betaCar = 0.3446035305;
+			
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.car);
-				params.setOffset(0.3446035305);
+				params.setOffset(0.0);
 				pars.addModeParams(params);
 			}
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.bike);
-				params.setOffset(0.3974286492);
+				params.setOffset(0.3974286492 - betaCar);
 				pars.addModeParams(params);
 			}
 			{
 				MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 				params.setMode(TransportMode.pt);
-				params.setOffset(0.2730661675);
+				params.setOffset(0.2730661675 - betaCar);
 				pars.addModeParams(params);
 			}
 			
