@@ -51,6 +51,7 @@ public class PlansToJson {
 		
 		PolylineFeatureFactory pfactory = new PolylineFeatureFactory.Builder()
 				.setCrs(MGC.getCRS(GlobalNames.WGS84))
+				.addAttribute(PAR_ID, String.class)
 				.addAttribute(PAR_DEPARTURE, Double.class)
 				.addAttribute(PAR_ARRIVAL, Double.class)
 				.addAttribute(PAR_MODE, String.class)
