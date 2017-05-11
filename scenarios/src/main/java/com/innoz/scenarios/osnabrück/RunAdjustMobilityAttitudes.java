@@ -22,7 +22,7 @@ import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
  * @bsmoehring
  */
 
-public class AdjustMobilityAttitudes {
+public class RunAdjustMobilityAttitudes {
 
 	
 	static String filebase = "/home/bmoehring/scenarios/osnabrueck/";
