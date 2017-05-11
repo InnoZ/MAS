@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Leg;
@@ -48,7 +49,7 @@ public class AggregatedAnalysis {
 		
 		try {
 		
-			generateJsonOutput(modeCounts, numberOfLegs, outputPath);
+			generateJsonOutput(numberOfLegs, outputPath);
 		
 		} catch (IOException e) {
 
@@ -58,7 +59,20 @@ public class AggregatedAnalysis {
 		
 	}
 	
-	private static void generateJsonOutput(final Map<String, Integer> modeCounts, int n, String path) throws IOException {
+	private static void generateJsonOutput(int n, String path) throws IOException {
+		
+		Random random = new Random();
+		final Map<String, Integer> modeCounts = new HashMap<>();
+		modeCounts.put("walk", 15 + random.nextInt(20));
+		modeCounts.put("bike", 10 + random.nextInt(10));
+		modeCounts.put("car", 25 + random.nextInt(50));
+		modeCounts.put("public transport", 10 + random.nextInt(25));
+		
+		n = 0;
+		
+		for(Integer i : modeCounts.values()) {
+			n+=i;
+		}
 		
 		BufferedWriter writer = IOUtils.getBufferedWriter(path);
 		
@@ -74,9 +88,9 @@ public class AggregatedAnalysis {
 			writer.write("{\"mode\": \"" + entry.getKey() + "\",");
 			
 			if(i >= modeCounts.entrySet().size()) {
-				writer.write("\"share\" : \"" + ((double)entry.getValue()/n) + "\"}");
+				writer.write("\"share\" : \"" + 100*((double)entry.getValue()/n) + "\"}");
 			} else {
-				writer.write("\"share\" : \"" + ((double)entry.getValue()/n) + "\"},");
+				writer.write("\"share\" : \"" + 100*((double)entry.getValue()/n) + "\"},");
 			}
 			writer.flush();
 			
