@@ -63,17 +63,26 @@ public class AggregatedAnalysis {
 		BufferedWriter writer = IOUtils.getBufferedWriter(path);
 		
 		writer.write("{");
-		writer.write("\"modal_split\" : {");
+		writer.write("\"modal_split\": [");
+	
+		int i = 0;
 		
 		for(Entry<String, Integer> entry : modeCounts.entrySet()) {
+
+			i++;
 			
 			writer.write("{\"mode\": \"" + entry.getKey() + "\",");
-			writer.write("\"share\" : \"" + ((double)entry.getValue()/n) + "\"},");
+			
+			if(i >= modeCounts.entrySet().size()) {
+				writer.write("\"share\" : \"" + ((double)entry.getValue()/n) + "\"}");
+			} else {
+				writer.write("\"share\" : \"" + ((double)entry.getValue()/n) + "\"},");
+			}
 			writer.flush();
 			
 		}
 		
-		writer.write("}");
+		writer.write("]");
 		writer.write("}");
 		
 		writer.close();
