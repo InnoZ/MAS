@@ -554,7 +554,7 @@ public class NetworkCreatorFromPsql {
 			}
 			
 			// Set the link's capacity and the resulting freespeed (if it's meant to be scaled)
-			double capacity = lanesPerDirection * laneCapacity * this.configuration.scenario().getScaleFactor();
+			double capacity = lanesPerDirection * laneCapacity;
 			
 			//MATSim seems to have problems with lane numbers smaller than 1
 			//This can be fixed here since we already took the reduced capacity into account
