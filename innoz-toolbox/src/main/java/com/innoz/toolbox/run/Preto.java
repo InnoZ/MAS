@@ -16,6 +16,7 @@ import org.matsim.core.population.PopulationWriter;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 
+import com.innoz.toolbox.analysis.AggregatedAnalysis;
 import com.innoz.toolbox.utils.GlobalNames;
 import com.innoz.toolbox.utils.misc.PlansToJson;
 
@@ -84,6 +85,7 @@ public class Preto {
 		new PopulationWriter(population).write(outputDirectory + "plans.xml");
 		
 		PlansToJson.run(scenario, outputDirectory + "features.json", GlobalNames.WGS84);
+		AggregatedAnalysis.generate(scenario, outputDirectory + "aggregatedAnalysis.json");
 		
 	}
 	
