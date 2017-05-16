@@ -3,6 +3,7 @@ package com.innoz.toolbox.utils.misc;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.geojson.feature.FeatureJSON;
@@ -12,6 +13,7 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -45,6 +47,12 @@ public class PlansToJson {
 	
 	public static void run(final Scenario scenario, String outputFile, String crs) {
 		
+		run(scenario, outputFile, crs, 1d);
+		
+	}
+	
+	public static void run(final Scenario scenario, String outputFile, String crs, double fraction) {
+		
 		CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(crs, GlobalNames.WGS84);
 		
 		List<SimpleFeature> features = new ArrayList<>();
@@ -58,33 +66,40 @@ public class PlansToJson {
 				.addAttribute(PAR_SPEED, Integer.class)
 				.create();
 		
+		Random random = MatsimRandom.getLocalInstance();
+		
 		for(Person person : scenario.getPopulation().getPersons().values()){
-			
-			Plan plan = person.getSelectedPlan();
 
-			for(PlanElement pe : plan.getPlanElements()){
-				
-				if(pe instanceof Leg){
+			if(random.nextDouble() <= fraction) {
+
+				Plan plan = person.getSelectedPlan();
+
+				for(PlanElement pe : plan.getPlanElements()){
 					
-					Leg leg = (Leg)pe;
-					
-					Activity fromAct = (Activity) plan.getPlanElements().get(plan.getPlanElements().indexOf(leg) - 1);
-					Activity toAct = (Activity) plan.getPlanElements().get(plan.getPlanElements().indexOf(leg) + 1);
-					
-					Coordinate from = MGC.coord2Coordinate(ct.transform(fromAct.getCoord()));
-					Coordinate to = MGC.coord2Coordinate(ct.transform(toAct.getCoord()));
-					
-					double startTime = leg.getDepartureTime() != Time.UNDEFINED_TIME ? leg.getDepartureTime() : fromAct.getEndTime();
-					double endTime = leg.getDepartureTime() != Time.UNDEFINED_TIME ? leg.getDepartureTime() + leg.getTravelTime() : toAct.getStartTime();
-					
-					SimpleFeature feature = pfactory.createPolyline(new Coordinate[]{from,to});
-					feature.setAttribute(PAR_ID, person.getId().toString());
-					feature.setAttribute(PAR_DEPARTURE, startTime);
-					feature.setAttribute(PAR_ARRIVAL, endTime);
-					feature.setAttribute(PAR_MODE, leg.getMode());
-					feature.setAttribute(PAR_SPEED,
-							(int)(3.6 * CoordUtils.calcEuclideanDistance(fromAct.getCoord(), toAct.getCoord()) / 1.3 / (endTime - startTime)));
-					features.add(feature);
+					if(pe instanceof Leg){
+						
+						Leg leg = (Leg)pe;
+						
+						Activity fromAct = (Activity) plan.getPlanElements().get(plan.getPlanElements().indexOf(leg) - 1);
+						Activity toAct = (Activity) plan.getPlanElements().get(plan.getPlanElements().indexOf(leg) + 1);
+						
+						Coordinate from = MGC.coord2Coordinate(ct.transform(fromAct.getCoord()));
+						Coordinate to = MGC.coord2Coordinate(ct.transform(toAct.getCoord()));
+						
+						double startTime = leg.getDepartureTime() != Time.UNDEFINED_TIME ? leg.getDepartureTime() : 0;
+						double endTime = leg.getDepartureTime() != Time.UNDEFINED_TIME && leg.getTravelTime() != Time.UNDEFINED_TIME
+								? leg.getDepartureTime() + leg.getTravelTime() : 0;
+						
+						SimpleFeature feature = pfactory.createPolyline(new Coordinate[]{from,to});
+						feature.setAttribute(PAR_ID, person.getId().toString());
+						feature.setAttribute(PAR_DEPARTURE, startTime);
+						feature.setAttribute(PAR_ARRIVAL, endTime);
+						feature.setAttribute(PAR_MODE, leg.getMode());
+						feature.setAttribute(PAR_SPEED,
+								(int)(3.6 * CoordUtils.calcEuclideanDistance(fromAct.getCoord(), toAct.getCoord()) / 1.3 / (endTime - startTime)));
+						features.add(feature);
+						
+					}
 					
 				}
 				
