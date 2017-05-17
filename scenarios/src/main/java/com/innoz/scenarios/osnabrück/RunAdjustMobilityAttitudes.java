@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
@@ -79,8 +77,10 @@ public class RunAdjustMobilityAttitudes {
 		
 		for (Entry<String, Integer> entry : distributionOld.entrySet()){
 			
-			sumPersonsWithAttitude = sumPersonsWithAttitude + entry.getValue();
+			if (!entry.getKey().equals(NONE)){
 			
+				sumPersonsWithAttitude = sumPersonsWithAttitude + entry.getValue();
+			}
 		}
 		
 		double sum = 0;
@@ -111,11 +111,7 @@ public class RunAdjustMobilityAttitudes {
 			
 			String mobilityAttitude = attributes.getAttribute(id.toString(), MOBILITYATTITUDE).toString();
 			
-			if (mobilityAttitude.equals(NONE)){
-				
-				
-				
-			} else if (Integer.parseInt((String) attributes.getAttribute(id.toString(), "age")) < 18){
+			if (mobilityAttitude.equals(NONE) || Integer.parseInt((String) attributes.getAttribute(id.toString(), "age")) < 18){
 				
 				attributes.putAttribute(id.toString(), MOBILITYATTITUDE, NONE);
 				
@@ -151,6 +147,13 @@ public class RunAdjustMobilityAttitudes {
 		int none = 0;
 		
 		Map<String, Integer> mobilityAttitudesCount = new HashMap<String, Integer>();
+		mobilityAttitudesCount.put(TRADCAR, 0);
+		mobilityAttitudesCount.put(FLEXCAR, 0);
+		mobilityAttitudesCount.put(URBANPT, 0);
+		mobilityAttitudesCount.put(ENVTPTBIKE, 0);
+		mobilityAttitudesCount.put(CONVBIKE, 0);
+		mobilityAttitudesCount.put(MULTIOPT, 0);
+		mobilityAttitudesCount.put(NONE, 0);		
 		
 //		iterate through personalAttributes by 
 		
@@ -158,13 +161,20 @@ public class RunAdjustMobilityAttitudes {
 			
 			String mobilityAttitude = attributes.getAttribute(id.toString(), MOBILITYATTITUDE).toString();
 			
-			if ( mobilityAttitude.equals(NONE) || Integer.parseInt((String) attributes.getAttribute(id.toString(), "age")) < 18){
+			if (mobilityAttitude==null){
 				
+				attributes.putAttribute(id.toString(), MOBILITYATTITUDE, null);
 				
-				none ++;
-				
+			}
 			
-			} else if (!mobilityAttitudesCount.containsKey(mobilityAttitude)){
+//			if ( mobilityAttitude.equals(NONE) || Integer.parseInt((String) attributes.getAttribute(id.toString(), "age")) < 18){
+//				
+//				
+//				none ++;
+//				
+//			
+//			} else 			
+			if (!mobilityAttitudesCount.containsKey(mobilityAttitude)){
 							
 				mobilityAttitudesCount.put(mobilityAttitude, 1);
 				
@@ -179,7 +189,6 @@ public class RunAdjustMobilityAttitudes {
 		
 		System.out.println("in total: " + persons + " persons");
 		System.out.println(mobilityAttitudesCount);
-		System.out.println("none=" + none);
 		
 		return mobilityAttitudesCount;
 		
