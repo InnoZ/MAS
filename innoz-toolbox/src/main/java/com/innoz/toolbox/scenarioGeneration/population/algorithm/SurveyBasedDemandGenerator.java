@@ -221,7 +221,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 		// Get the MATSim population and initialize person attributes
 		Population population = scenario.getPopulation();
-		ObjectAttributes personAttributes = new ObjectAttributes();
+		ObjectAttributes personAttributes = population.getPersonAttributes();
 		scenario.addScenarioElement(com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.PERSON_ATTRIBUTES,
 				personAttributes);
 		
