@@ -30,7 +30,7 @@ public final class NetworkGenerationTask implements ControllerTask {
 		
 			new NetworkCreatorFromPsql(scenario.getNetwork(), configuration).create();
 
-			new NetworkWriter(scenario.getNetwork()).write("/home/dhosse/scenarios/network.xml.gz");
+			new NetworkWriter(scenario.getNetwork()).write(configuration.misc().getOutputDirectory() + "network.xml.gz");
 			
 		} catch (InstantiationException | IllegalAccessException
 		        | ClassNotFoundException | SQLException | ParseException
