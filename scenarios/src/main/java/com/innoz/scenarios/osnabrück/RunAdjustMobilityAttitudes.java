@@ -25,7 +25,7 @@ import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 public class RunAdjustMobilityAttitudes {
 
 	
-	static String filebase = "/home/bmoehring/scenarios/osnabrueck/";
+	static String filebase = "/home/bmoehring/scenarios/osnabrueck/2017_03404_base/";
 	
 	static final String MOBILITYATTITUDE = "mobilityAttitude";
 	
@@ -115,6 +115,10 @@ public class RunAdjustMobilityAttitudes {
 				
 				
 				
+			} else if (Integer.parseInt((String) attributes.getAttribute(id.toString(), "age")) < 18){
+				
+				attributes.putAttribute(id.toString(), MOBILITYATTITUDE, NONE);
+				
 			} else if (distributionDiff.get(mobilityAttitude) < 0){
 				
 				for (Entry<String, Integer> entry : distributionDiff.entrySet()){
@@ -154,12 +158,14 @@ public class RunAdjustMobilityAttitudes {
 			
 			String mobilityAttitude = attributes.getAttribute(id.toString(), MOBILITYATTITUDE).toString();
 			
-			if ( mobilityAttitude.equals(NONE)){
+			if ( mobilityAttitude.equals(NONE) || Integer.parseInt((String) attributes.getAttribute(id.toString(), "age")) < 18){
+				
 				
 				none ++;
 				
+			
 			} else if (!mobilityAttitudesCount.containsKey(mobilityAttitude)){
-				
+							
 				mobilityAttitudesCount.put(mobilityAttitude, 1);
 				
 			} else {
