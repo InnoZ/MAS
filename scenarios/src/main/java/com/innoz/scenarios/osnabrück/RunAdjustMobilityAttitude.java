@@ -51,18 +51,11 @@ public class RunAdjustMobilityAttitude {
 		printCount(distributionOld);
 		
 		Map<String, Double> distributionNew = new HashMap<String, Double>();
-//		distributionNew.put(TRADCAR, 		0.152);
-//		distributionNew.put(FLEXCAR, 		0.209);
-//		distributionNew.put(URBANPT, 		0.082);
-//		distributionNew.put(CONVBIKE, 		0.189);
-//		distributionNew.put(ENVTPTBIKE, 	0.170);
-//		distributionNew.put(MULTIOPT, 		0.198);
-		
 //		You can specify the distribution for people older 18 years here:
 		distributionNew.put(TRADCAR, 		0.152);
 		distributionNew.put(FLEXCAR, 		0.209);
 		distributionNew.put(URBANPT, 		0.082);
-		distributionNew.put(CONVBIKE, 		1.189);
+		distributionNew.put(CONVBIKE, 		0.189);
 		distributionNew.put(ENVTPTBIKE, 	0.170);
 		distributionNew.put(MULTIOPT, 		0.198);
 		
