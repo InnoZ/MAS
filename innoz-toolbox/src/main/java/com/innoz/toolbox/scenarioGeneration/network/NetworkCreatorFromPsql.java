@@ -13,7 +13,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.core.network.LinkImpl;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
@@ -587,13 +587,8 @@ public class NetworkCreatorFromPsql {
 						link.setLength(length);
 						link.setNumberOfLanes(lanesPerDirection);
 						link.setAllowedModes(modes);
-						
-						if(link instanceof LinkImpl){
-							
-							((LinkImpl)link).setOrigId(origId);
-							((LinkImpl)link).setType(entry.getHighwayTag());
-							
-						}
+						NetworkUtils.setOrigId(link, origId);
+						NetworkUtils.setType(link, entry.getHighwayTag());
 						
 						network.addLink(link);
 						linkCounter.incrementAndGet();
@@ -609,13 +604,8 @@ public class NetworkCreatorFromPsql {
 						link.setLength(length);
 						link.setNumberOfLanes(lanesPerDirection);
 						link.setAllowedModes(modes);
-						
-						if(link instanceof LinkImpl){
-							
-							((LinkImpl)link).setOrigId(origId);
-							((LinkImpl)link).setType(entry.getHighwayTag());
-							
-						}
+						NetworkUtils.setOrigId(link, origId);
+						NetworkUtils.setType(link, entry.getHighwayTag());
 						
 						network.addLink(link);
 						linkCounter.incrementAndGet();

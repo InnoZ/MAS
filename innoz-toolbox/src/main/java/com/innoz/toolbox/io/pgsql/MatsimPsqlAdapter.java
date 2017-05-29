@@ -24,7 +24,7 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.config.Config;
-import org.matsim.core.network.LinkImpl;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PersonUtils;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.utils.objectattributes.ObjectAttributes;
@@ -143,8 +143,8 @@ public class MatsimPsqlAdapter {
 				ll.setCapacity(linksSet.getDouble("capacity"));
 				ll.setNumberOfLanes(linksSet.getInt("permlanes"));
 				ll.setAllowedModes(CollectionUtils.stringToSet(linksSet.getString("modes")));
-				((LinkImpl)ll).setOrigId(linksSet.getString("origid"));
-				((LinkImpl)ll).setType(linksSet.getString("type"));
+				NetworkUtils.setOrigId(ll, linksSet.getString("origid"));
+				NetworkUtils.setType(ll, linksSet.getString("type"));
 				
 				network.addLink(ll);
 				
@@ -255,8 +255,8 @@ public class MatsimPsqlAdapter {
 			stmt.setDouble(7, link.getNumberOfLanes());
 			stmt.setInt(8, 1);
 			stmt.setString(9, CollectionUtils.setToString(link.getAllowedModes()));
-			stmt.setString(10, ((LinkImpl)link).getOrigId());
-			stmt.setString(11, ((LinkImpl)link).getType());
+			stmt.setString(10, NetworkUtils.getOrigId(link));
+			stmt.setString(11, NetworkUtils.getType(link));
 			stmt.addBatch();
 			
 		}

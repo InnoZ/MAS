@@ -46,14 +46,11 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.LinkFactory;
-import org.matsim.core.network.LinkFactoryImpl;
-import org.matsim.core.network.MatsimNetworkReader;
-import org.matsim.core.network.NetworkImpl;
-import org.matsim.core.network.NetworkWriter;
-import org.matsim.core.network.NodeImpl;
+import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -202,12 +199,14 @@ public class GTFS2MATSimTransitSchedule {
 				}
 			reader = new BufferedReader(new FileReader(RoutesPathsGenerator.NEW_NETWORK_LINKS_FILE));
 			line = reader.readLine();
-			LinkFactory linkFactory = new LinkFactoryImpl();
 			while(line!=null) {
 				Node fromNode = network.getNodes().get(Id.create(reader.readLine(), Node.class));
 				Node toNode = network.getNodes().get(Id.create(reader.readLine(), Node.class));
 				double length = CoordUtils.calcEuclideanDistance(coordinateTransformation.transform(fromNode.getCoord()),coordinateTransformation.transform(toNode.getCoord()));
-				Link link = linkFactory.createLink(Id.create(line, Link.class), fromNode, toNode, network, length, DEFAULT_FREE_SPEED, DEFAULT_CAPACITY, 1);
+				Link link = this.network.getFactory().createLink(Id.create(line, Link.class), fromNode, toNode);
+				link.setCapacity(DEFAULT_CAPACITY);
+				link.setFreespeed(DEFAULT_FREE_SPEED);
+				link.setLength(length);
 				Set<String> modes = new HashSet<String>();
 				modes.add("car");
 				modes.add(RouteTypes.BUS.name);
@@ -474,7 +473,7 @@ public class GTFS2MATSimTransitSchedule {
 			}
 			//Coordinates system of the network
 			for(Node node:network.getNodes().values())
-				((NodeImpl)node).setCoord(coordinateTransformation.transform(node.getCoord()));
+				node.setCoord(coordinateTransformation.transform(node.getCoord()));
 			//Public Transport Schedule
 			TransitScheduleFactory transitScheduleFactory = new TransitScheduleFactoryImpl();
 			TransitSchedule transitSchedule = transitScheduleFactory.createTransitSchedule();
@@ -565,7 +564,7 @@ public class GTFS2MATSimTransitSchedule {
 		//Convert
 		(new TransitScheduleWriter(g2m.getTransitSchedule())).writeFile(args[0]);
 		//Write modified network
-		((NetworkImpl)network).setName(args[3]);
+		network.setName(args[3]);
 		NetworkWriter networkWriter =  new NetworkWriter(network);
 		networkWriter.write(args[2]);
 	}

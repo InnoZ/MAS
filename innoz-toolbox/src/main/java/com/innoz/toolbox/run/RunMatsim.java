@@ -69,7 +69,7 @@ public class RunMatsim {
 		{
 			StrategySettings stratSets = new StrategySettings();
 			stratSets.setDisableAfter(-1);
-			stratSets.setStrategyName(DefaultSelector.ChangeExpBeta.name());
+			stratSets.setStrategyName(DefaultSelector.ChangeExpBeta);
 			stratSets.setSubpopulation(null);
 			stratSets.setWeight(1.0);
 			config.strategy().addStrategySettings(stratSets);

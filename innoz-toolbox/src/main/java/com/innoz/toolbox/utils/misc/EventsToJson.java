@@ -23,8 +23,8 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsReaderXMLv1;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.gbl.MatsimRandom;
-import org.matsim.core.network.MatsimNetworkReader;
-import org.matsim.core.population.MatsimPopulationReader;
+import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -68,7 +68,7 @@ public class EventsToJson {
 		// Init
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
-		new MatsimPopulationReader(scenario).readFile(plansFile);
+		new PopulationReader(scenario).readFile(plansFile);
 		
 		for(Person person : scenario.getPopulation().getPersons().values()){
 			
@@ -86,7 +86,7 @@ public class EventsToJson {
 		
 		ExporterEventsHandler handler = new ExporterEventsHandler();
 		em.addHandler(handler);
-		new EventsReaderXMLv1(em).parse(eventsFile);
+		new EventsReaderXMLv1(em).readFile(eventsFile);
 		
 		CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation("EPSG:32632", "EPSG:4326");
 		

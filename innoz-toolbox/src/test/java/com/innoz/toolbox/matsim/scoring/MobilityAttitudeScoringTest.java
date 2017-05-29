@@ -52,7 +52,7 @@ public class MobilityAttitudeScoringTest {
 		{
 			StrategySettings stratSets = new StrategySettings();
 			stratSets.setDisableAfter(-1);
-			stratSets.setStrategyName(DefaultSelector.ChangeExpBeta.name());
+			stratSets.setStrategyName(DefaultSelector.ChangeExpBeta);
 			stratSets.setWeight(0.5);
 			config.strategy().addStrategySettings(stratSets);
 		}
@@ -62,7 +62,7 @@ public class MobilityAttitudeScoringTest {
 			stratSets.setWeight(0.5);
 			config.strategy().addStrategySettings(stratSets);
 			
-			config.changeLegMode().setModes(new String[]{TransportMode.car, TransportMode.bike});
+			config.changeMode().setModes(new String[]{TransportMode.car, TransportMode.bike});
 			
 		}
 		
