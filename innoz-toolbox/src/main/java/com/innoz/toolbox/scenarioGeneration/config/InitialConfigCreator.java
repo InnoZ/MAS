@@ -10,7 +10,7 @@ import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams
 import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.VehicleType;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.SurveyVehicleType;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 
 /**
@@ -65,7 +65,7 @@ public class InitialConfigCreator {
 		config.qsim().setFlowCapFactor(configuration.scenario().getScaleFactor());
 		config.qsim().setStorageCapFactor(configuration.scenario().getScaleFactor());
 
-		if(configuration.surveyPopulation().getVehicleType().equals(VehicleType.SURVEY)){
+		if(configuration.surveyPopulation().getVehicleType().equals(SurveyVehicleType.SURVEY)){
 			
 			config.qsim().setVehiclesSource(VehiclesSource.fromVehiclesData);
 			config.vehicles().setVehiclesFile(configuration.misc().getOutputDirectory() + "vehicles.xml.gz");

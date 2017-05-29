@@ -191,7 +191,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				}
 				
 				// If we model non-generic cars, create all cars that were reported in the survey and add them to the household
-				if(configuration.surveyPopulation().getVehicleType().equals(com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.VehicleType.SURVEY)){
+				if(configuration.surveyPopulation().getVehicleType().equals(com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.SurveyVehicleType.SURVEY)){
 					
 					createSurveyVehicles(container, template,
 							household);

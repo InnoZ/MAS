@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.VehicleType;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.SurveyVehicleType;
 import com.innoz.toolbox.scenarioGeneration.population.utils.HashGenerator;
 import com.innoz.toolbox.scenarioGeneration.utils.Hydrograph;
 import com.innoz.toolbox.utils.matsim.RecursiveStatsContainer;
@@ -36,7 +36,7 @@ public class SurveyDataContainer {
 			this.households = new HashMap<String, SurveyHousehold>();
 		}
 		
-		if(configuration.surveyPopulation().getVehicleType().equals(VehicleType.SURVEY)){
+		if(configuration.surveyPopulation().getVehicleType().equals(SurveyVehicleType.SURVEY)){
 			this.vehicles = new HashMap<String, SurveyVehicle>();
 		}
 		
