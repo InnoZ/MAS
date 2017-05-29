@@ -1,5 +1,6 @@
 package com.innoz.toolbox.run;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.matsim.api.core.v01.Coord;
@@ -11,10 +12,9 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.population.PopulationWriter;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.io.IOUtils;
 
 import com.innoz.toolbox.analysis.AggregatedAnalysis;
 import com.innoz.toolbox.utils.GlobalNames;
@@ -25,7 +25,12 @@ public class Preto {
 	public static void main(String args[]) throws IOException {
 		
 		String outputDirectory = args[2] + "/" + args[0] + "_" + args[1] + "/";
-		IOUtils.createDirectory(outputDirectory);
+		
+		File file = new File(outputDirectory);
+		
+		if(!file.exists()) {
+			file.mkdirs();
+		}
 
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		
