@@ -1,12 +1,14 @@
 package com.innoz.toolbox.io.pgsql;
 
+import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
+import java.sql.Time;
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -25,7 +27,6 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.config.Config;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.PersonUtils;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.postgis.PGgeometry;
@@ -87,9 +88,9 @@ public class MatsimPsqlAdapter {
 		
 		try {
 		
-			connection = PsqlAdapter.createConnection(DatabaseConstants.SIMULATIONS_DB);
+			connection = PsqlAdapter.createConnection(DatabaseConstants.INTERFACE_DEVEL);
 			
-			network2Table(scenario.getNetwork(), tablespace);
+//			network2Table(scenario.getNetwork(), tablespace);
 			plans2Table(scenario.getPopulation(), tablespace);
 			
 			connection.close();
@@ -275,40 +276,9 @@ public class MatsimPsqlAdapter {
 		
 		try {
 			
-			Statement statement = connection.createStatement();
-			
-			statement.executeUpdate("DROP TABLE IF EXISTS " + tablespace + ".persons;");
-			statement.executeUpdate("DROP TABLE IF EXISTS " + tablespace + ".plans;");
-			
-			statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + tablespace + ".persons("
-					+ "id varchar,"
-					+ "age double precision,"
-					+ "sex char,"
-					+ "license varchar,"
-					+ "car_avail varchar,"
-					+ "employed boolean"
-					+ ");");
-			
-			((org.postgresql.PGConnection)connection).addDataType("geometry", Class.forName("org.postgis.PGgeometry"));
-			
-			statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + tablespace + ".plans("
-					+ "person_id varchar,"
-					+ "element_index integer,"
-					+ "selected boolean,"
-					+ "act_type varchar,"
-					+ "act_coord geometry,"
-					+ "act_start double precision,"
-					+ "act_end double precision,"
-					+ "act_duration double precision,"
-					+ "leg_mode varchar"
-					+ ");");
-			
-			statement.close();
-			
-			writePersonsTable(population, tablespace);
 			writePlansTable(population, tablespace);
 			
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 
 			e.printStackTrace();
 			
@@ -360,10 +330,13 @@ public class MatsimPsqlAdapter {
 	 * @param tablespace
 	 * @throws SQLException
 	 */
-	private static void writePlansTable(final Population population, String tablespace) throws SQLException {
+	private static void writePlansTable(final Population population, String scenario) throws SQLException {
 		
-		PreparedStatement stmt = connection.prepareStatement("INSERT INTO " + tablespace + ".plans (person_id, element_index, selected, act_type,"
-				+ "act_coord, act_start, act_end, act_duration, leg_mode) VALUES(?, ?, ?, ?, st_geomfromtext(?), ?, ?, ?, ?);");
+		PreparedStatement stmt = connection.prepareStatement("INSERT INTO plans (agent_id, started_at, ended_at,"
+				+ "from_activity_type, to_activity_type, location_start, location_end, mode, scenario_id)"
+				+ " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);");
+		
+		int i = 0;
 		
 		for(Person person : population.getPersons().values()) {
 			
@@ -373,42 +346,38 @@ public class MatsimPsqlAdapter {
 				
 				for(PlanElement pe : plan.getPlanElements()) {
 					
-					stmt.setInt(2, plan.getPlanElements().indexOf(pe));
-					stmt.setBoolean(3, (boolean) PersonUtils.isSelected(plan));
-					
-					if(pe instanceof Activity) {
+					if(pe instanceof Leg) {
 						
-						Activity act = (Activity) pe;
-						
-						stmt.setString(4, act.getType());
-						stmt.setString(5, createWKT(act.getCoord()));
-						stmt.setDouble(6, act.getStartTime());
-						stmt.setDouble(7, act.getEndTime());
-						stmt.setDouble(8, act.getMaximumDuration());
-						stmt.setNull(9, Types.VARCHAR);
-						
-					} else {
+						Activity from = (Activity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)-1);
+						Activity to = (Activity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)+1);
 						
 						Leg leg = (Leg) pe;
 						
-						stmt.setNull(4, Types.VARCHAR);
-						stmt.setNull(5, Types.OTHER);
-						stmt.setNull(6, Types.DOUBLE);
-						stmt.setNull(7, Types.DOUBLE);
-						stmt.setNull(8, Types.DOUBLE);
-						stmt.setString(9, leg.getMode());
+						stmt.setTime(2, new Time(TimeUnit.SECONDS.toMillis((long)from.getEndTime())));
+						stmt.setTime(3, new Time(TimeUnit.SECONDS.toMillis((long)to.getStartTime())));
+						stmt.setString(4, from.getType());
+						stmt.setString(5, to.getType());
+						stmt.setObject(6, new PGgeometry(createWKT(from.getCoord())));
+						stmt.setObject(7, new PGgeometry(createWKT(to.getCoord())));
+						stmt.setString(8, leg.getMode());
+						stmt.setString(9, scenario);
+						
+						stmt.addBatch();
 						
 					}
-					
-					stmt.addBatch();
 					
 				}
 				
 			}
 			
 		}
-		
-		stmt.executeBatch();
+		try {
+			
+			stmt.executeBatch();
+			
+		} catch(BatchUpdateException e) {
+			System.out.println(e.getNextException().toString());
+		}
 		stmt.close();
 		
 	}

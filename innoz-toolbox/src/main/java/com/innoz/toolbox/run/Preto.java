@@ -17,6 +17,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import com.innoz.toolbox.analysis.AggregatedAnalysis;
+import com.innoz.toolbox.io.pgsql.MatsimPsqlAdapter;
 import com.innoz.toolbox.utils.GlobalNames;
 import com.innoz.toolbox.utils.misc.PlansToJson;
 
@@ -87,9 +88,10 @@ public class Preto {
 		person.setSelectedPlan(plan);
 		population.addPerson(person);
 		
-		new PopulationWriter(population).write(outputDirectory + "plans.xml");
+//		new PopulationWriter(population).write(outputDirectory + "plans.xml");
 		
-		PlansToJson.run(scenario, outputDirectory + "features.json", GlobalNames.WGS84);
+//		PlansToJson.run(scenario, outputDirectory + "features.json", GlobalNames.WGS84);
+		MatsimPsqlAdapter.writeScenarioToPsql(scenario, args[0] + "_" + args[1]);
 		AggregatedAnalysis.generate(scenario, outputDirectory + "aggregatedAnalysis.json");
 		
 	}

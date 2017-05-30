@@ -1,49 +1,34 @@
 package com.innoz.toolbox.run.controller.task;
 
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.NetworkWriter;
-import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.ConfigWriter;
 
-import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.utils.misc.PlansToJson;
+import com.innoz.toolbox.io.pgsql.MatsimPsqlAdapter;
+import com.innoz.toolbox.run.controller.Controller;
 
 public class WriteOutputTask implements ControllerTask {
 
-	Scenario scenario;
-	String outputDirectory;
-	String crs;
+	String scenarioName;
 	
 	private WriteOutputTask(Builder builder) {
 		
-		this.scenario = builder.scenario;
-		this.outputDirectory = builder.outputDirectory;
-		this.crs = builder.crs;
+		this.scenarioName = builder.scenarioName;
 		
 	}
 	
 	@Override
 	public void run() {
 		
-		new ConfigWriter(scenario.getConfig()).write(this.outputDirectory + "config.xml.gz");
-		new NetworkWriter(this.scenario.getNetwork()).write(this.outputDirectory + "network.xml.gz");
-		new PopulationWriter(scenario.getPopulation()).write(this.outputDirectory + "plans.xml.gz");
-		PlansToJson.run(this.scenario, this.outputDirectory + "features.json", this.crs);
-
+		new ConfigWriter(Controller.scenario().getConfig()).write(Controller.configuration().misc().getOutputDirectory()+ "config.xml.gz");
+		MatsimPsqlAdapter.writeScenarioToPsql(Controller.scenario(), scenarioName);
+		
 	}
 	
 	public static class Builder {
 		
-		Scenario scenario;
-		String outputDirectory;
-		String crs;
+		String scenarioName;
 		
-		public Builder(Configuration configuration, Scenario scenario) {
-			
-			this.scenario = scenario;
-			this.outputDirectory = configuration.misc().getOutputDirectory();
-			this.crs = configuration.misc().getCoordinateSystem();
-			
+		public Builder(String scenarioName) {
+			this.scenarioName = scenarioName;
 		}
 		
 		public WriteOutputTask build() {
