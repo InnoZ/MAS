@@ -29,6 +29,7 @@ import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
+import org.postgis.PGgeometry;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.groups.ConfigurationGroup;
@@ -747,11 +748,7 @@ public class DatabaseReader {
 			// Create a new statement and execute an SQL query to retrieve OSM road data
 			Statement statement = connection.createStatement();
 			statement.setFetchSize(1000);
-			ResultSet result = statement.executeQuery("select " + DatabaseConstants.ATT_OSM_ID + ", " + DatabaseConstants.ATT_ACCESS + ", "
-					+ DatabaseConstants.ATT_RAILWAY + ", "
-					+ DatabaseConstants.ATT_HIGHWAY + ", " + DatabaseConstants.ATT_JUNCTION + ", " + DatabaseConstants.ATT_ONEWAY + ", "
-					+ DatabaseConstants.TAG_LANES + " ," + DatabaseConstants.TAG_MAXSPEED + ", "
-					+ DatabaseConstants.functions.st_astext.name() + "(" + DatabaseConstants.ATT_WAY + ") from "
+			ResultSet result = statement.executeQuery("SELECT * from "
 					+ DatabaseConstants.schemata.osm.name() + "." + DatabaseConstants.tables.osm_germany_line.name() + " where ("
 					+ DatabaseConstants.ATT_RAILWAY + " is not null or "+ DatabaseConstants.ATT_HIGHWAY + " is not null) and "
 					+ DatabaseConstants.functions.st_within.name() + "(" + DatabaseConstants.ATT_WAY + ","
@@ -772,8 +769,12 @@ public class DatabaseReader {
 				entry.setLanesTag(result.getString(DatabaseConstants.TAG_LANES));
 				entry.setMaxspeedTag(result.getString(DatabaseConstants.TAG_MAXSPEED));
 				entry.setOnewayTag(result.getString(DatabaseConstants.ATT_ONEWAY));
+//				entry.setForwardLanesTag(result.getString("lanes:forward"));
+//				entry.setBackwardLanesTag(result.getString("lanes:backward"));
+//				entry.setConditionalMaxspeedTag(result.getString("maxspeed:conditional"));
 				
-				Geometry geom = this.wktReader.read(result.getString(DatabaseConstants.functions.st_astext.name()));
+				PGgeometry geometry = (PGgeometry)result.getObject("way");
+				Geometry geom = this.wktReader.read(geometry.toString().split(";")[1]);
 				
 				if(geom.getCoordinates().length > 1){
 

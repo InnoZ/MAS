@@ -753,9 +753,9 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 		// Create a new activity
 		Activity activity = population.getFactory().createActivityFromCoord(type.split("_")[0], coord);
-//		activity.setStartTime(start);
+		activity.setStartTime(start);
 		activity.setMaximumDuration(end - start);
-//		activity.setEndTime(end);
+		activity.setEndTime(end);
 		if(Geoinformation.getInstance().getLanduseType().equals(ActivityLocationsType.FACILITIES)){
 			activity.setFacilityId(((ProxyFacility)Geoinformation.getInstance().getLanduseOfType(type)
 					.getClosest(coord.getX(), coord.getY())).get().getId());
@@ -766,7 +766,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			// Set the activity duration to at least 1/4 hour if it's been reported shorter to avoid
 			// extremely negative scores
 			activity.setMaximumDuration(900);
-//			activity.setEndTime(start + 900);
+			activity.setEndTime(start + 900);
 			
 		} else{
 				

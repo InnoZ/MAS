@@ -44,6 +44,8 @@ public class Main {
 			set.setPopulationSource(PopulationSource.SURVEY);
 			Controller.configuration().scenario().addAreaSet(set);
 			Controller.configuration().surveyPopulation().setUseHouseholds(false);
+			Controller.configuration().scenario().setScaleFactor(0.1);
+//			Controller.configuration().psql().setPsqlPort(9999);
 			
 			// MATSim needs a Cartesian coordinate system that measures distances in meters
 			Controller.configuration().misc().setCoordinateSystem(GlobalNames.UTM32N);
@@ -52,6 +54,8 @@ public class Main {
 			int forecastYear = Integer.parseInt(args[1]);
 			Controller.configuration().scenario().setYear(forecastYear);
 			
+			String scenarioName = args[1] + "_" + args[0] + "_base";
+			
 			Controller.configuration().misc().setOutputDirectory(args[2] + "/" + args[1] + "_" + args[0] + "_base/");
 			
 			log.info("Starting controller...");
@@ -59,7 +63,7 @@ public class Main {
 			// Add all the necessary tasks to the controller queue
 			Controller.submit(new NetworkGenerationTask.Builder(Controller.configuration(), Controller.scenario()).build());
 			Controller.submit(new DemandGenerationTask.Builder(Controller.configuration(), Controller.scenario()).build());
-			Controller.submit(new WriteOutputTask.Builder(Controller.configuration(), Controller.scenario()).build());
+			Controller.submit(new WriteOutputTask.Builder(scenarioName).build());
 			
 			// Start the actual execution
 			Controller.run();

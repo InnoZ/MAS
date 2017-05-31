@@ -4,6 +4,7 @@ import java.sql.SQLException;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.NetworkWriter;
+import org.matsim.core.network.io.NetworkChangeEventsWriter;
 import org.opengis.referencing.FactoryException;
 
 import com.innoz.toolbox.config.Configuration;
@@ -28,9 +29,12 @@ public final class NetworkGenerationTask implements ControllerTask {
 
 		try {
 		
-			new NetworkCreatorFromPsql(scenario.getNetwork(), configuration).create();
+			NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(), configuration);
+			nc.create();
 
 			new NetworkWriter(scenario.getNetwork()).write(configuration.misc().getOutputDirectory() + "network.xml.gz");
+			
+//			new NetworkChangeEventsWriter().write(configuration.misc().getOutputDirectory() + "networkChangeEvents.xml.gz", nc.getNetworkChangeEvents());
 			
 		} catch (InstantiationException | IllegalAccessException
 		        | ClassNotFoundException | SQLException | ParseException
