@@ -1,7 +1,8 @@
 package com.innoz.toolbox.run;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -12,7 +13,6 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
-import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
@@ -26,13 +26,9 @@ public class Preto {
 	public static void main(String args[]) throws IOException {
 		
 		String outputDirectory = args[2] + "/" + args[0] + "_" + args[1] + "/";
-		
-		File file = new File(outputDirectory);
-		
-		if(!file.exists()) {
-			file.mkdirs();
-		}
 
+		Files.createDirectories(Paths.get(outputDirectory));
+		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		
 		Population population = scenario.getPopulation();
@@ -88,9 +84,7 @@ public class Preto {
 		person.setSelectedPlan(plan);
 		population.addPerson(person);
 		
-//		new PopulationWriter(population).write(outputDirectory + "plans.xml");
-		
-//		PlansToJson.run(scenario, outputDirectory + "features.json", GlobalNames.WGS84);
+		PlansToJson.run(scenario, outputDirectory + "features.json", GlobalNames.WGS84);
 		MatsimPsqlAdapter.writeScenarioToPsql(scenario, args[0] + "_" + args[1]);
 		AggregatedAnalysis.generate(scenario, outputDirectory + "aggregatedAnalysis.json");
 		
