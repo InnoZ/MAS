@@ -88,7 +88,7 @@ public class MatsimPsqlAdapter {
 		
 		try {
 		
-			connection = PsqlAdapter.createConnectionROR(DatabaseConstants.INTERFACE_DEVEL);
+			connection = PsqlAdapter.createConnection(DatabaseConstants.INTERFACE_DEVEL);
 			
 //			network2Table(scenario.getNetwork(), tablespace);
 			plans2Table(scenario.getPopulation(), tablespace);
@@ -335,8 +335,6 @@ public class MatsimPsqlAdapter {
 		PreparedStatement stmt = connection.prepareStatement("INSERT INTO plans (agent_id, started_at, ended_at,"
 				+ "from_activity_type, to_activity_type, location_start, location_end, mode, scenario_id)"
 				+ " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);");
-		
-		int i = 0;
 		
 		for(Person person : population.getPersons().values()) {
 			
