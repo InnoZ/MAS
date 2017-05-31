@@ -23,11 +23,20 @@ public class PsqlAdapter {
 	}
 	
 	public static Connection createConnection(String dbName) throws SQLException,
-	InstantiationException, IllegalAccessException, ClassNotFoundException{
+	InstantiationException, IllegalAccessException, ClassNotFoundException {
 		
 	Class.forName(PSQL_DRIVER).newInstance();
 	return DriverManager.getConnection(PSQL_URL + 5432 + "/" + dbName,
 			"postgres", "postgres");
+		
+	}
+	
+	public static Connection createConnectionROR(String dbName) throws SQLException,
+	InstantiationException, IllegalAccessException, ClassNotFoundException {
+	
+		Class.forName(PSQL_DRIVER).newInstance();
+		return DriverManager.getConnection(PSQL_URL + 5432 + "/" + dbName,
+				"apprunner", "");
 		
 	}
 		

@@ -88,7 +88,7 @@ public class MatsimPsqlAdapter {
 		
 		try {
 		
-			connection = PsqlAdapter.createConnection(DatabaseConstants.INTERFACE_DEVEL);
+			connection = PsqlAdapter.createConnectionROR(DatabaseConstants.INTERFACE_DEVEL);
 			
 //			network2Table(scenario.getNetwork(), tablespace);
 			plans2Table(scenario.getPopulation(), tablespace);
