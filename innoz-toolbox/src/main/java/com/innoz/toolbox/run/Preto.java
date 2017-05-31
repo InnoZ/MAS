@@ -16,10 +16,7 @@ import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import com.innoz.toolbox.analysis.AggregatedAnalysis;
 import com.innoz.toolbox.io.pgsql.MatsimPsqlAdapter;
-import com.innoz.toolbox.utils.GlobalNames;
-import com.innoz.toolbox.utils.misc.PlansToJson;
 
 public class Preto {
 
@@ -39,7 +36,7 @@ public class Preto {
 		Plan plan = factory.createPlan();
 		
 		{
-			Activity act = factory.createActivityFromCoord("home", new Coord(-0.144194, 51.431663));
+			Activity act = factory.createActivityFromCoord("home", new Coord(9.732166, 52.418675));
 			act.setStartTime(0);
 			act.setEndTime(8 * 3600);
 			plan.addActivity(act);
@@ -48,7 +45,7 @@ public class Preto {
 		plan.addLeg(factory.createLeg(TransportMode.pt));
 		
 		{
-			Activity act = factory.createActivityFromCoord("work", new Coord(-0.085854, 51.512692));
+			Activity act = factory.createActivityFromCoord("work", new Coord(9.713913, 52.417740));
 			act.setStartTime(9 * 3600);
 			act.setEndTime(14 * 3600);
 			plan.addActivity(act);
@@ -57,7 +54,7 @@ public class Preto {
 		plan.addLeg(factory.createLeg(TransportMode.walk));
 		
 		{
-			Activity act = factory.createActivityFromCoord("eating_out", new Coord(-0.083639, 51.511175));
+			Activity act = factory.createActivityFromCoord("eating_out", new Coord(9.715572, 52.418324));
 			act.setStartTime(14.1 * 3600);
 			act.setEndTime(14.5 * 3600);
 			plan.addActivity(act);
@@ -66,7 +63,7 @@ public class Preto {
 		plan.addLeg(factory.createLeg(TransportMode.walk));
 		
 		{
-			Activity act = factory.createActivityFromCoord("work", new Coord(-0.085854, 51.512692));
+			Activity act = factory.createActivityFromCoord("work", new Coord(9.713913, 52.417740));
 			act.setStartTime(14.75 * 3600);
 			act.setEndTime(18 * 3600);
 			plan.addActivity(act);
@@ -75,7 +72,7 @@ public class Preto {
 		plan.addLeg(factory.createLeg("carsharing"));
 		
 		{
-			Activity act = factory.createActivityFromCoord("home", new Coord(-0.144194, 51.431663));
+			Activity act = factory.createActivityFromCoord("home", new Coord(9.732166, 52.418675));
 			act.setStartTime(19 * 3600);
 			act.setEndTime(24 * 3600);
 			plan.addActivity(act);
@@ -84,9 +81,7 @@ public class Preto {
 		person.setSelectedPlan(plan);
 		population.addPerson(person);
 		
-		PlansToJson.run(scenario, outputDirectory + "features.json", GlobalNames.WGS84);
 		MatsimPsqlAdapter.writeScenarioToPsql(scenario, args[0] + "_" + args[1]);
-		AggregatedAnalysis.generate(scenario, outputDirectory + "aggregatedAnalysis.json");
 		
 	}
 	
