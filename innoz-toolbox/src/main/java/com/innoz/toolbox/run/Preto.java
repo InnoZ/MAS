@@ -39,7 +39,7 @@ public class Preto {
 		Plan plan = factory.createPlan();
 		
 		{
-			Activity act = factory.createActivityFromCoord("home", new Coord(0.0, 0.0));
+			Activity act = factory.createActivityFromCoord("home", new Coord(-0.144194, 51.431663));
 			act.setStartTime(0);
 			act.setEndTime(8 * 3600);
 			plan.addActivity(act);
@@ -48,7 +48,7 @@ public class Preto {
 		plan.addLeg(factory.createLeg(TransportMode.pt));
 		
 		{
-			Activity act = factory.createActivityFromCoord("work", new Coord(100.0, 100.0));
+			Activity act = factory.createActivityFromCoord("work", new Coord(-0.085854, 51.512692));
 			act.setStartTime(9 * 3600);
 			act.setEndTime(14 * 3600);
 			plan.addActivity(act);
@@ -57,7 +57,7 @@ public class Preto {
 		plan.addLeg(factory.createLeg(TransportMode.walk));
 		
 		{
-			Activity act = factory.createActivityFromCoord("eating_out", new Coord(105.0, 100.0));
+			Activity act = factory.createActivityFromCoord("eating_out", new Coord(-0.083639, 51.511175));
 			act.setStartTime(14.1 * 3600);
 			act.setEndTime(14.5 * 3600);
 			plan.addActivity(act);
@@ -66,7 +66,7 @@ public class Preto {
 		plan.addLeg(factory.createLeg(TransportMode.walk));
 		
 		{
-			Activity act = factory.createActivityFromCoord("work", new Coord(100.0, 100.0));
+			Activity act = factory.createActivityFromCoord("work", new Coord(-0.085854, 51.512692));
 			act.setStartTime(14.75 * 3600);
 			act.setEndTime(18 * 3600);
 			plan.addActivity(act);
@@ -75,7 +75,7 @@ public class Preto {
 		plan.addLeg(factory.createLeg("carsharing"));
 		
 		{
-			Activity act = factory.createActivityFromCoord("home", new Coord(0.0, 0.0));
+			Activity act = factory.createActivityFromCoord("home", new Coord(-0.144194, 51.431663));
 			act.setStartTime(19 * 3600);
 			act.setEndTime(24 * 3600);
 			plan.addActivity(act);
