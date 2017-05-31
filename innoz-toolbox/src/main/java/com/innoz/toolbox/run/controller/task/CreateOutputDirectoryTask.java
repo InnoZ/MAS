@@ -1,7 +1,8 @@
 package com.innoz.toolbox.run.controller.task;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.matsim.core.controler.OutputDirectoryLogging;
 
@@ -18,11 +19,10 @@ public class CreateOutputDirectoryTask implements ControllerTask {
 	@Override
 	public void run() {
 
-		// Dump scenario generation settings on the console and create the output directory
-		new File(this.outputDirectory).mkdirs();
-		
 		try {
-		
+			
+			// Dump scenario generation settings on the console and create the output directory		
+			Files.createDirectories(Paths.get(outputDirectory));
 			OutputDirectoryLogging.initLoggingWithOutputDirectory(this.outputDirectory);
 		
 		} catch (IOException e) {
