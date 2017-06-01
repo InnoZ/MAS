@@ -8,13 +8,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
@@ -26,8 +26,13 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.population.PopulationUtils;
+import org.matsim.core.population.io.PopulationReader;
+import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.CollectionUtils;
+import org.matsim.pt.PtConstants;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.postgis.PGgeometry;
 import org.postgis.Point;
@@ -47,10 +52,16 @@ import com.innoz.toolbox.utils.PsqlUtils;
  */
 public class MatsimPsqlAdapter {
 	
-	@Inject static Configuration configuration;
-
 	// only one connection at a time
 	private static Connection connection;
+	
+	public static void main(String args[]) {
+		
+		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+		new PopulationReader(scenario).readFile("/home/dhosse/scenarios/eGAP/output_plans.xml.gz");
+		MatsimPsqlAdapter.writeScenarioToPsql(scenario, "eGAP_base");
+		
+	}
 	
 	// private!
 	private MatsimPsqlAdapter() {};
@@ -64,14 +75,14 @@ public class MatsimPsqlAdapter {
 	 * @param scenario The MATSim scenario to read the data in.
 	 * @param tablespace The schema name containing the MATSim data tables.
 	 */
-	public static void createScenarioFromPsql(final Scenario scenario, final Configuration configuration, final String tablespace) {
+	public static void createScenarioFromPsql(final Scenario scenario, final Configuration configuration, final String scenarioName) {
 		
 		try {
 		
 			connection = PsqlAdapter.createConnection(DatabaseConstants.SIMULATIONS_DB);
 			
-			createNetworkFromTable(scenario.getNetwork(), tablespace);
-			createPopulationFromTable(scenario.getPopulation(), tablespace);
+			createNetworkFromTable(scenario.getNetwork(), scenarioName);
+			createPopulationFromTable(scenario.getPopulation(), scenarioName);
 			
 			connection.close();
 			
@@ -84,14 +95,14 @@ public class MatsimPsqlAdapter {
 		
 	}
 	
-	public static void writeScenarioToPsql(final Scenario scenario, final String tablespace) {
+	public static void writeScenarioToPsql(final Scenario scenario, final String scenarioName) {
 		
 		try {
 		
 			connection = PsqlAdapter.createConnection(DatabaseConstants.INTERFACE_DEVEL);
 			
 //			network2Table(scenario.getNetwork(), tablespace);
-			plans2Table(scenario.getPopulation(), tablespace);
+			plans2Table(scenario.getPopulation(), scenarioName);
 			
 			connection.close();
 			
@@ -336,38 +347,42 @@ public class MatsimPsqlAdapter {
 				+ "from_activity_type, to_activity_type, location_start, location_end, mode, scenario_id)"
 				+ " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);");
 		
+		filterTransitWalkLegs(population);
+		
 		for(Person person : population.getPersons().values()) {
 			
 			stmt.setString(1, person.getId().toString());
 			
-			for(Plan plan : person.getPlans()) {
+			Plan plan = person.getSelectedPlan();
+			
+			for(PlanElement pe : plan.getPlanElements()) {
 				
-				for(PlanElement pe : plan.getPlanElements()) {
+				if(pe instanceof Leg) {
 					
-					if(pe instanceof Leg) {
-						
-						Activity from = (Activity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)-1);
-						Activity to = (Activity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)+1);
-						
-						Leg leg = (Leg) pe;
-						
-						stmt.setTime(2, new Time(TimeUnit.SECONDS.toMillis((long)from.getEndTime())));
-						stmt.setTime(3, new Time(TimeUnit.SECONDS.toMillis((long)to.getStartTime())));
-						stmt.setString(4, from.getType());
-						stmt.setString(5, to.getType());
-						stmt.setObject(6, new PGgeometry(createWKT(from.getCoord())));
-						stmt.setObject(7, new PGgeometry(createWKT(to.getCoord())));
-						stmt.setString(8, leg.getMode());
-						stmt.setString(9, scenario);
-						
-						stmt.addBatch();
-						
-					}
+					Activity from = (Activity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)-1);
+					Activity to = (Activity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)+1);
+					
+					Leg leg = (Leg) pe;
+					
+					String mode = leg.getMode();
+					String fromActType = from.getType().contains(".") ? interpretActivityTypeString(from.getType()) : from.getType();
+					String toActType = to.getType().contains(".") ? interpretActivityTypeString(to.getType()) : to.getType();
+					
+					stmt.setTime(2, new Time(TimeUnit.SECONDS.toMillis((long)from.getEndTime())));
+					stmt.setTime(3, new Time(TimeUnit.SECONDS.toMillis((long)to.getStartTime())));
+					stmt.setString(4, fromActType);
+					stmt.setString(5, toActType);
+					stmt.setObject(6, new PGgeometry(createWKT(from.getCoord())));
+					stmt.setObject(7, new PGgeometry(createWKT(to.getCoord())));
+					stmt.setString(8, mode);
+					stmt.setString(9, scenario);
+					
+					stmt.addBatch();
 					
 				}
 				
 			}
-			
+				
 		}
 		try {
 			
@@ -377,6 +392,68 @@ public class MatsimPsqlAdapter {
 			System.out.println(e.getNextException().toString());
 		}
 		stmt.close();
+		
+	}
+	
+	private static String interpretActivityTypeString(String type) {
+		
+		if(type.startsWith("home"))
+			return "home";
+		else if(type.startsWith("work"))
+			return "work";
+		else if(type.startsWith("leis"))
+			return "leisure";
+		else if(type.startsWith("educ"))
+			return "education";
+		else if(type.startsWith("shop"))
+			return "shop";
+		else
+			return "other";
+		
+	}
+	
+	private static void filterTransitWalkLegs(final Population population) {
+		
+		for(Person person : population.getPersons().values()) {
+			
+			Plan selectedPlan = person.getSelectedPlan();
+			List<PlanElement> planElements = selectedPlan.getPlanElements();
+			
+			for (int i = 0, n = planElements.size(); i < n; i++) {
+				PlanElement pe = planElements.get(i);
+				if (pe instanceof Activity) {
+					Activity act = (Activity) pe;
+					if (PtConstants.TRANSIT_ACTIVITY_TYPE.equals(act.getType())) {
+						PlanElement previousPe = planElements.get(i-1);
+						if (previousPe instanceof Leg) {
+							Leg previousLeg = (Leg) previousPe;
+							previousLeg.setMode(TransportMode.pt);
+							previousLeg.setRoute(null);
+						} else {
+							throw new RuntimeException("A transit activity should follow a leg! Aborting...");
+						}
+						final int index = i;
+						PopulationUtils.removeActivity(((Plan) selectedPlan), index); // also removes the following leg
+						n -= 2;
+						i--;
+					}
+				}
+			}
+			
+		}
+		for (Person person : population.getPersons().values()){
+			Plan selectedPlan = person.getSelectedPlan();
+			List<PlanElement> planElements = selectedPlan.getPlanElements();
+			for (int i = 0, n = planElements.size(); i < n; i++) {
+				PlanElement pe = planElements.get(i);
+				if (pe instanceof Leg) {
+					String legMode = ((Leg) pe).getMode();
+					if(legMode.equals(TransportMode.transit_walk)){
+						((Leg) pe).setMode(TransportMode.walk);
+					}
+				}
+			}
+		}
 		
 	}
 	
