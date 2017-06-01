@@ -22,6 +22,7 @@ import com.innoz.toolbox.io.database.task.ReadTripsDatabaseTask;
 import com.innoz.toolbox.io.database.task.ResolveRoundTripsTask;
 import com.innoz.toolbox.io.database.task.SortStagesTask;
 import com.innoz.toolbox.io.database.task.TaskRunner;
+import com.innoz.toolbox.io.database.validation.ValidateDistances;
 import com.innoz.toolbox.io.database.validation.ValidateMissingTravelTimes;
 import com.innoz.toolbox.io.database.validation.ValidateNegativeTravelTimes;
 import com.innoz.toolbox.io.database.validation.ValidateOverlappingStages;
@@ -129,6 +130,7 @@ public class SurveyDatabaseParserV2 {
 		TaskRunner.exec(new ValidateMissingTravelTimes(), container.getPersons().values());
 		TaskRunner.exec(new ValidateNegativeTravelTimes(), container.getPersons().values());
 		TaskRunner.exec(new ValidateOverlappingStages(), container.getPersons().values());
+		TaskRunner.exec(new ValidateDistances(), container.getPersons().values());
 		TaskRunner.exec(new PersonRemovalTask(), container);
 		
 		if(container.getHouseholds() != null){
