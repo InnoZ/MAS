@@ -39,6 +39,7 @@ import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.Popula
 import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.io.database.datasets.OsmPointDataset;
 import com.innoz.toolbox.io.database.datasets.OsmPolygonDataset;
+import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.run.parallelization.BuildingThread;
 import com.innoz.toolbox.run.parallelization.DataProcessingAlgoThread;
 import com.innoz.toolbox.run.parallelization.MultithreadedModule;
@@ -95,14 +96,8 @@ public class DatabaseReader {
 	private Geometry buffer;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
-	private static DatabaseReader instance;
+	private static DatabaseReader instance = new DatabaseReader(Controller.configuration());
 
-	public static void init(final Configuration configuration) {
-		
-		instance = new DatabaseReader(configuration);
-		
-	}
-	
 	public static DatabaseReader getInstance() {
 		
 		return instance;

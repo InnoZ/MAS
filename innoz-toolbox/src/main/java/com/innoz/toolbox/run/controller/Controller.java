@@ -14,7 +14,6 @@ import com.innoz.toolbox.config.ConfigurationUtils;
 import com.innoz.toolbox.run.controller.task.ControllerTask;
 import com.innoz.toolbox.run.controller.task.CreateOutputDirectoryTask;
 import com.innoz.toolbox.run.controller.task.ReadGeodataTask;
-import com.innoz.toolbox.run.controller.task.StaticClassesInitialisationTask;
 
 /**
  * 
@@ -97,7 +96,6 @@ public final class Controller {
 	private static void addMandatoryTasks() {
 		
 		queue.add(new CreateOutputDirectoryTask.Builder(Controller.configuration.misc().getOutputDirectory()).build());
-		queue.add(new StaticClassesInitialisationTask.Builder(Controller.configuration).build());
 		queue.add(new ReadGeodataTask.Builder().build());
 		
 	}

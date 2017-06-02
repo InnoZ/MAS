@@ -1,11 +1,10 @@
 package com.innoz.toolbox.scenarioGeneration.geoinformation;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Building;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -14,8 +13,6 @@ public class GeoinformationTest {
 
 	@Before
 	public void setup() {
-
-		Geoinformation.init(ActivityLocationsType.BUILDINGS);
 
 		AdministrativeUnit unit1 = new AdministrativeUnit("01");
 		

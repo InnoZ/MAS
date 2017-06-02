@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import com.innoz.toolbox.analysis.AggregatedAnalysis;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.PopulationSource;
 import com.innoz.toolbox.run.controller.Controller;
@@ -13,7 +12,6 @@ import com.innoz.toolbox.run.controller.task.DemandGenerationTask;
 import com.innoz.toolbox.run.controller.task.NetworkGenerationTask;
 import com.innoz.toolbox.run.controller.task.WriteOutputTask;
 import com.innoz.toolbox.utils.GlobalNames;
-import com.innoz.toolbox.utils.misc.PlansToJson;
 
 /**
  * 

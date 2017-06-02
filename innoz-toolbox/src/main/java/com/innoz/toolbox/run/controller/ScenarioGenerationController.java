@@ -32,7 +32,6 @@ import com.innoz.toolbox.config.validation.ConfigurationValidator;
 import com.innoz.toolbox.io.BbsrDataReader;
 import com.innoz.toolbox.io.database.DatabaseReader;
 import com.innoz.toolbox.scenarioGeneration.config.InitialConfigCreator;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.network.NetworkCreatorFromPsql;
 import com.innoz.toolbox.scenarioGeneration.population.PopulationCreator;
 import com.innoz.toolbox.utils.GlobalNames;
@@ -66,12 +65,6 @@ public class ScenarioGenerationController extends DefaultController {
 			// Create a MATSim scenario
 			Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 			
-			// Container for geoinformation (admin borders, landuse)
-			Geoinformation.init(configuration.scenario().getActivityLocationsType());
-	
-			// A class that reads data from database tables into local containers
-			DatabaseReader.init(configuration);
-//			DatabaseReader dbReader = new DatabaseReader(configuration);
 			DatabaseReader.getInstance().readGeodataFromDatabase(scenario);
 			DatabaseReader.getInstance().readPopulationFromDatabase(scenario);
 			InputStream in = this.getClass().getClassLoader().getResourceAsStream("regionstypen.csv");
