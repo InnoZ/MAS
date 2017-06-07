@@ -1,5 +1,7 @@
 package com.innoz.toolbox.io.pgsql;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,8 +9,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.matsim.api.core.v01.Coord;
@@ -37,10 +45,13 @@ import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.postgis.PGgeometry;
 import org.postgis.Point;
 
+import com.aol.cyclops.data.collections.extensions.standard.ListX;
+import com.innoz.toolbox.analysis.AggregatedAnalysis;
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.io.database.DatabaseConstants;
 import com.innoz.toolbox.io.database.DatabaseConstants.DatabaseTable;
+import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.utils.PsqlUtils;
 
 /**
@@ -54,14 +65,6 @@ public class MatsimPsqlAdapter {
 	
 	// only one connection at a time
 	private static Connection connection;
-	
-	public static void main(String args[]) {
-		
-		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		new PopulationReader(scenario).readFile("/home/dhosse/scenarios/eGAP/output_plans.xml.gz");
-		MatsimPsqlAdapter.writeScenarioToPsql(scenario, "eGAP_base");
-		
-	}
 	
 	// private!
 	private MatsimPsqlAdapter() {};
@@ -103,6 +106,7 @@ public class MatsimPsqlAdapter {
 			
 //			network2Table(scenario.getNetwork(), tablespace);
 			plans2Table(scenario.getPopulation(), scenarioName);
+			writeScenarioMetaData(scenario, scenarioName);
 			
 			connection.close();
 			
@@ -364,12 +368,34 @@ public class MatsimPsqlAdapter {
 					
 					Leg leg = (Leg) pe;
 					
-					String mode = leg.getMode();
+					String mode = interpretLegMode(leg.getMode());
 					String fromActType = from.getType().contains(".") ? interpretActivityTypeString(from.getType()) : from.getType();
 					String toActType = to.getType().contains(".") ? interpretActivityTypeString(to.getType()) : to.getType();
 					
-					stmt.setTime(2, new Time(TimeUnit.SECONDS.toMillis((long)from.getEndTime())));
-					stmt.setTime(3, new Time(TimeUnit.SECONDS.toMillis((long)to.getStartTime())));
+					double startTime = from.getEndTime() != org.matsim.core.utils.misc.Time.UNDEFINED_TIME ? from.getEndTime() : leg.getDepartureTime();
+					double endTime = to.getStartTime() != org.matsim.core.utils.misc.Time.UNDEFINED_TIME ? to.getStartTime() : leg.getDepartureTime() + leg.getTravelTime();
+					
+					if(!diurnalCurves.containsKey(mode)) {
+						List<Integer> list = new ArrayList<>();
+						for(int i = 0; i < 24; i++) {
+							list.add(0);
+						}
+						diurnalCurves.put(mode, list);
+					}
+					
+					List<Integer> list = diurnalCurves.get(mode);
+					int startHour = (int) startTime / 3600;
+					int endHour = (int) endTime / 3600;
+					if(startHour < 0 || endHour < 0 || startHour > 23 || endHour > 23)
+						continue;
+					for(int i = startHour; i <= endHour; i++) {
+						int val = list.get(i);
+						list.set(i, val+1);
+					}
+					diurnalCurves.put(mode, list);
+					
+					stmt.setTime(2, new Time(TimeUnit.SECONDS.toMillis((long)startTime)));
+					stmt.setTime(3, new Time(TimeUnit.SECONDS.toMillis((long)endTime)));
 					stmt.setString(4, fromActType);
 					stmt.setString(5, toActType);
 					stmt.setObject(6, new PGgeometry(createWKT(from.getCoord())));
@@ -391,9 +417,12 @@ public class MatsimPsqlAdapter {
 		} catch(BatchUpdateException e) {
 			System.out.println(e.getNextException().toString());
 		}
+		
 		stmt.close();
 		
 	}
+	
+	private static Map<String, List<Integer>> diurnalCurves = new HashMap<>();
 	
 	private static String interpretActivityTypeString(String type) {
 		
@@ -465,6 +494,16 @@ public class MatsimPsqlAdapter {
 	private static String createWKT(Coord coord) {
 		
 		return "POINT(" + Double.toString(coord.getX()) + " " + Double.toString(coord.getY()) + ")";
+		
+	}
+	
+	private static String interpretLegMode(String mode) {
+		
+		if(mode.contains("oneway") || mode.contains("twoway") || mode.contains("freefloat")) {
+			return "carsharing";
+		} else {
+			return mode;
+		}
 		
 	}
 	
@@ -583,6 +622,92 @@ public class MatsimPsqlAdapter {
 			e.printStackTrace();
 			
 		}
+		
+	}
+	
+	static void writeScenarioMetaData(final Scenario scenario, String scenarioId) {
+		
+		try {
+		
+			AggregatedAnalysis.generate(scenario);
+			
+			Map<String, String> modeCounts = AggregatedAnalysis.getModeCounts();
+			Map<String, String> modeDistances = AggregatedAnalysis.getModeDistanceStats();
+			Map<String, String> modeEmissions = AggregatedAnalysis.getModeEmissionStats();
+			
+			PreparedStatement statement = connection.prepareStatement("INSERT INTO scenarios (district_id, year, population, population_diff_2017,"
+					+ "person_km, trips, diurnal_curve, carbon_emissions, seed, created_at, updated_at) "
+					+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+		
+			String[][] diurnalCurves = new String[modeDistances.size()*24][3];
+			int i = 0;
+			for(Entry<String, List<Integer>> entry : MatsimPsqlAdapter.diurnalCurves.entrySet()) {
+				
+				int j = 0;
+				
+				for(Integer integer : entry.getValue()) {
+					
+					diurnalCurves[i][0] = entry.getKey();
+					diurnalCurves[i][1] = Integer.toString(j);
+					diurnalCurves[i][2] = Integer.toString(integer);
+					
+					j++;
+					i++;
+					
+				}
+				
+			}
+			
+			String[] scenarioData = scenarioId.split("_");
+			
+			statement.setString(1, scenarioData[0]);
+			statement.setInt(2, Integer.parseInt(scenarioData[1]));
+			statement.setInt(3, scenario.getPopulation().getPersons().size());
+			statement.setInt(4, 0);
+			statement.setArray(5, connection.createArrayOf("varchar", createArrayFromMap(modeDistances)));
+			statement.setArray(6, connection.createArrayOf("varchar", createArrayFromMap(modeCounts)));
+			statement.setArray(7, connection.createArrayOf("varchar", diurnalCurves));
+			statement.setArray(8, connection.createArrayOf("varchar", createArrayFromMap(modeEmissions)));
+			statement.setBoolean(9, true);
+			statement.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
+			statement.setTimestamp(11, new Timestamp(System.currentTimeMillis()));
+			
+			statement.addBatch();
+			
+			try {
+				
+				statement.executeBatch();
+				
+			} catch(BatchUpdateException e) {
+				
+				System.out.println(e.getNextException().toString());
+			
+			}
+			
+			statement.close();
+			
+		} catch (SQLException e) {
+
+			e.printStackTrace();
+			
+		}
+		
+	}
+	
+	private static String[][] createArrayFromMap(Map<String, String> map) {
+
+		String[][] array = new String[map.size()][2]; 
+		
+		int i = 0;
+		for(Entry<String, String> entry : map.entrySet()) {
+			
+			array[i][0] = entry.getKey();
+			array[i][1] = entry.getValue();
+			i++;
+			
+		}
+		
+		return array;
 		
 	}
 	
