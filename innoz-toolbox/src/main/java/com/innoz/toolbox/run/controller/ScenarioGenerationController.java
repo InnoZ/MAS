@@ -90,9 +90,14 @@ public class ScenarioGenerationController {
 			new PopulationWriter(scenario.getPopulation()).write(Controller.configuration().misc()
 					.getOutputDirectory() + "plans.xml.gz");
 				
+<<<<<<< HEAD
 			new ObjectAttributesXmlWriter(scenario.getPopulation().
 					getPersonAttributes()).writeFile(Controller.configuration().misc().getOutputDirectory()
 							+ "personAttributes.xml.gz");
+=======
+			new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes()).writeFile(configuration.misc()
+					.getOutputDirectory() + "personAttributes.xml.gz");
+>>>>>>> branch 'bmoehring' of https://github.com/00Bock/MAS.git
 					
 			new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(Controller.configuration().misc()
 					.getOutputDirectory() + "households.xml.gz");
