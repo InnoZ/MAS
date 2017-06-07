@@ -79,18 +79,6 @@ public class RilCreateLeastSquares {
 	private static void computeStationwise(RegMethod m) throws InstantiationException, IllegalAccessException,
 		ClassNotFoundException, SQLException, IOException {
 		
-//		Connection c = PsqlAdapter.createConnection(RIL_DATABASE);
-//		Statement statement = c.createStatement();
-//		
-//		String[] tables = new String[]{
-//				
-//				"daten_2006_regionstyp_final", "daten_2007_regionstyp_final",
-//				"daten_2008_regionstyp_final", "daten_2009_regionstyp_final", "daten_2010_regionstyp_final",
-//				"daten_2011_regionstyp_final", "daten_2012_regionstyp_final", "daten_2013_regionstyp_final",
-//				"daten_2014_regionstyp_final", "daten_2015_regionstyp_final", "daten_2016_regionstyp_final"
-//		
-//		};
-
 		Map<String, double[]> stationData = new HashMap<>();
 		double[] x = xValues();
 		
@@ -124,6 +112,24 @@ public class RilCreateLeastSquares {
 		csv.read("/home/dhosse/01_Projects/GSP/Änderungsraten_2013-zu-2030_V2_fuer-InnoZ.csv");
 		
 		log.info("Read " + stationData.size() + " stations");
+		
+		AbstractCsvReader csv2 = new AbstractCsvReader(";", true) {
+			
+			@Override
+			public void handleRow(String[] line) {
+				
+				String stationId = line[2];
+				String ds100Nr = line[4];
+				
+				if(stations2016.containsKey(stationId)) {
+					stations2016.get(stationId).ds100 = ds100Nr;
+				}
+				
+			}
+			
+		};
+		
+		csv2.read("/home/dhosse/01_Projects/GSP/Daten/DBSuS-Uebersicht_Bahnhoefe-Stand2016-07.csv");
 		
 		String path = "/home/dhosse/01_Projects/GSP/Daten/20_Stationsdaten/for_import/";
 		
@@ -172,50 +178,10 @@ public class RilCreateLeastSquares {
 			
 		}
 		
-//		for(String table : tables){
-//		
-//			ResultSet result = statement.executeQuery(
-//					PsqlUtils.createSelectStatement("nr,station,fv,nv,fv_fremd,nv_fremd,ges,verkehrs15", table));
-//			
-//			while(result.next()){
-//				
-//				int fv = result.getInt("fv");
-//				int nv = result.getInt("nv");
-//				int fvo = result.getInt("fv_fremd");
-//				int nvo = result.getInt("nv_fremd");
-//				String id = Integer.toString(result.getInt("nr"));
-//				String name = result.getString("station");
-//				int year = result.getInt("verkehrs15");
-//				
-//				if(year == 2013) {
-//					stations2016.add(id);
-//				}
-//				
-//				if(fv >= 0 && nv >= 0 && fvo >= 0 && nvo >= 0){
-//
-//					int n = result.getInt("ges");
-//					
-//					if(stationData.containsKey(id)){
-//						stationData.get(id)[year-2006] = (double) n;
-//					} else {
-//						log.error("Station " + name + " (" + id + ") has no counterpart!");
-//					}
-//					
-//				}
-//				
-//			}
-//			
-//			result.close();
-//
-//		}
-//		
-//		statement.close();
-//		c.close();
-		
 		Set<String> newStations = new HashSet<>();
 		
 		BufferedWriter out = IOUtils.getBufferedWriter("/home/dhosse/01_Projects/GSP/Documentation/trends_" + m.name() + ".csv");
-		out.write("station;name;cluster;2016;2027;2028;2029;2030;2031;2032;r2");
+		out.write("station;name;ds100;regiontype;passengers;cluster;2016;2027;2028;2029;2030;2031;2032;r2");
 		out.flush();
 		
 		for(Entry<String, double[]> entry : stationData.entrySet()) {
@@ -223,6 +189,7 @@ public class RilCreateLeastSquares {
 			String id= entry.getKey();
 			String name = stations2016.get(id).name;
 			String cluster = stations2016.get(id).type;
+			String ds100 = stations2016.get(id).ds100;
 			
 			double[] y = entry.getValue();
 			
@@ -267,7 +234,7 @@ public class RilCreateLeastSquares {
 				TrendLine t = getRegressionMethod(m);
 				t.setValues(yValues, xValues);
 				
-				appendDataToCsv(out, id, name, cluster, y[y.length-1], t);
+				appendDataToCsv(out, id, name, cluster, ds100, y[y.length-1], t);
 				
 			} else {
 				
@@ -379,15 +346,18 @@ public class RilCreateLeastSquares {
 		
 	}
 	
-	private static void appendDataToCsv(BufferedWriter writer, String id, String name, String type, double n2016, TrendLine t) throws IOException {
+	private static void appendDataToCsv(BufferedWriter writer, String id, String name, String type, String ds100Nr, double n2016, TrendLine t) throws IOException {
 
 		writer.newLine();
 		
-		writer.write(id + ";" + name + ";" + type + ";" + n2016);
+		writer.write(id + ";" + name + ";" + ds100Nr + ";" + type.split(",")[0] + ";" + type.split(",")[1] + ";" + type + ";" + n2016);
 		
 		for(int i = 2027; i < 2033; i++) {
 			
-			writer.write(";" + Math.ceil(t.predict(i)));
+			double d = Math.ceil(t.predict(i));
+			if(Double.isNaN(d)) d = 0;
+			
+			writer.write(";" + d);
 			
 		}
 		
@@ -782,6 +752,7 @@ public class RilCreateLeastSquares {
 		String id;
 		String name;
 		String type;
+		String ds100;
 		
 	}
 
