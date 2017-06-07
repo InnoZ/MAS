@@ -10,8 +10,8 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.gbl.Gbl;
-import org.matsim.core.scoring.functions.CharyparNagelScoringParameters;
 import org.matsim.core.scoring.functions.ModeUtilityParameters;
+import org.matsim.core.scoring.functions.ScoringParameters;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.pt.PtConstants;
 
@@ -20,7 +20,7 @@ import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup.MobilityAtti
 public class MobilityAttitudeLegScoring implements org.matsim.core.scoring.SumScoringFunction.LegScoring,
 	org.matsim.core.scoring.SumScoringFunction.ArbitraryEventScoring {
 	
-	protected final CharyparNagelScoringParameters params;
+	protected final ScoringParameters params;
 	protected Network network;
 	
 	protected double score;
@@ -33,7 +33,7 @@ public class MobilityAttitudeLegScoring implements org.matsim.core.scoring.SumSc
 	
 	private static int ccc=0 ;
 	
-	public MobilityAttitudeLegScoring(CharyparNagelScoringParameters params, MobilityAttitudeModeParameterSet attitudeParams,
+	public MobilityAttitudeLegScoring(ScoringParameters params, MobilityAttitudeModeParameterSet attitudeParams,
 	        Network network) {
 		
 		this.params = params;

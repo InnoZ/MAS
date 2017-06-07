@@ -19,7 +19,10 @@ public class WayEntry{
 	private String highwayTag;
 	private String junctionTag;
 	private String lanesTag;
+	private String forwardLanesTag;
+	private String backwardLanesTag;
 	private String maxspeedTag;
+	private String conditionalMaxspeedTag;
 	private String onewayTag;
 	Geometry geometry;
 	
@@ -45,6 +48,14 @@ public class WayEntry{
 	
 	public void setLanesTag(String lanesTag){
 		this.lanesTag = lanesTag;
+	}
+	
+	public void setForwardLanesTag(String tag) {
+		this.forwardLanesTag = tag;
+	}
+	
+	public void setBackwardLanesTag(String tag) {
+		this.backwardLanesTag = tag;
 	}
 	
 	public void setMaxspeedTag(String maxspeedTag){
@@ -78,6 +89,14 @@ public class WayEntry{
 	public String getLanesTag() {
 		return lanesTag;
 	}
+	
+	public String getForwardLanesTag() {
+		return this.forwardLanesTag;
+	}
+	
+	public String getBackwardLanesTag() {
+		return this.backwardLanesTag;
+	}
 
 	public String getMaxspeedTag() {
 		return maxspeedTag;
@@ -94,4 +113,13 @@ public class WayEntry{
 	public List<String> getNodes(){
 		return this.nodes;
 	}
+	
+	public String getConditionalMaxspeedTag() {
+		return this.conditionalMaxspeedTag;
+	}
+	
+	public void setConditionalMaxspeedTag(String tag) {
+		this.conditionalMaxspeedTag = tag;
+	}
+	
 }

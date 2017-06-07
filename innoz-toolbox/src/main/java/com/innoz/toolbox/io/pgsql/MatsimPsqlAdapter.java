@@ -1,18 +1,28 @@
 package com.innoz.toolbox.io.pgsql;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
-
-import javax.inject.Inject;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
@@ -24,17 +34,24 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.config.Config;
-import org.matsim.core.network.LinkImpl;
-import org.matsim.core.population.PersonUtils;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.population.PopulationUtils;
+import org.matsim.core.population.io.PopulationReader;
+import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.CollectionUtils;
+import org.matsim.pt.PtConstants;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.postgis.PGgeometry;
 import org.postgis.Point;
 
+import com.aol.cyclops.data.collections.extensions.standard.ListX;
+import com.innoz.toolbox.analysis.AggregatedAnalysis;
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.io.database.DatabaseConstants;
 import com.innoz.toolbox.io.database.DatabaseConstants.DatabaseTable;
+import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.utils.PsqlUtils;
 
 /**
@@ -46,8 +63,6 @@ import com.innoz.toolbox.utils.PsqlUtils;
  */
 public class MatsimPsqlAdapter {
 	
-	@Inject static Configuration configuration;
-
 	// only one connection at a time
 	private static Connection connection;
 	
@@ -63,14 +78,14 @@ public class MatsimPsqlAdapter {
 	 * @param scenario The MATSim scenario to read the data in.
 	 * @param tablespace The schema name containing the MATSim data tables.
 	 */
-	public static void createScenarioFromPsql(final Scenario scenario, final Configuration configuration, final String tablespace) {
+	public static void createScenarioFromPsql(final Scenario scenario, final Configuration configuration, final String scenarioName) {
 		
 		try {
 		
 			connection = PsqlAdapter.createConnection(DatabaseConstants.SIMULATIONS_DB);
 			
-			createNetworkFromTable(scenario.getNetwork(), tablespace);
-			createPopulationFromTable(scenario.getPopulation(), tablespace);
+			createNetworkFromTable(scenario.getNetwork(), scenarioName);
+			createPopulationFromTable(scenario.getPopulation(), scenarioName);
 			
 			connection.close();
 			
@@ -83,14 +98,15 @@ public class MatsimPsqlAdapter {
 		
 	}
 	
-	public static void writeScenarioToPsql(final Scenario scenario, final String tablespace) {
+	public static void writeScenarioToPsql(final Scenario scenario, final String scenarioName) {
 		
 		try {
 		
-			connection = PsqlAdapter.createConnection(DatabaseConstants.SIMULATIONS_DB);
+			connection = PsqlAdapter.createConnection(DatabaseConstants.INTERFACE_DEVEL);
 			
-			network2Table(scenario.getNetwork(), tablespace);
-			plans2Table(scenario.getPopulation(), tablespace);
+//			network2Table(scenario.getNetwork(), tablespace);
+			plans2Table(scenario.getPopulation(), scenarioName);
+			writeScenarioMetaData(scenario, scenarioName);
 			
 			connection.close();
 			
@@ -143,8 +159,8 @@ public class MatsimPsqlAdapter {
 				ll.setCapacity(linksSet.getDouble("capacity"));
 				ll.setNumberOfLanes(linksSet.getInt("permlanes"));
 				ll.setAllowedModes(CollectionUtils.stringToSet(linksSet.getString("modes")));
-				((LinkImpl)ll).setOrigId(linksSet.getString("origid"));
-				((LinkImpl)ll).setType(linksSet.getString("type"));
+				NetworkUtils.setOrigId(ll, linksSet.getString("origid"));
+				NetworkUtils.setType(ll, linksSet.getString("type"));
 				
 				network.addLink(ll);
 				
@@ -255,8 +271,8 @@ public class MatsimPsqlAdapter {
 			stmt.setDouble(7, link.getNumberOfLanes());
 			stmt.setInt(8, 1);
 			stmt.setString(9, CollectionUtils.setToString(link.getAllowedModes()));
-			stmt.setString(10, ((LinkImpl)link).getOrigId());
-			stmt.setString(11, ((LinkImpl)link).getType());
+			stmt.setString(10, NetworkUtils.getOrigId(link));
+			stmt.setString(11, NetworkUtils.getType(link));
 			stmt.addBatch();
 			
 		}
@@ -275,40 +291,9 @@ public class MatsimPsqlAdapter {
 		
 		try {
 			
-			Statement statement = connection.createStatement();
-			
-			statement.executeUpdate("DROP TABLE IF EXISTS " + tablespace + ".persons;");
-			statement.executeUpdate("DROP TABLE IF EXISTS " + tablespace + ".plans;");
-			
-			statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + tablespace + ".persons("
-					+ "id varchar,"
-					+ "age double precision,"
-					+ "sex char,"
-					+ "license varchar,"
-					+ "car_avail varchar,"
-					+ "employed boolean"
-					+ ");");
-			
-			((org.postgresql.PGConnection)connection).addDataType("geometry", Class.forName("org.postgis.PGgeometry"));
-			
-			statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + tablespace + ".plans("
-					+ "person_id varchar,"
-					+ "element_index integer,"
-					+ "selected boolean,"
-					+ "act_type varchar,"
-					+ "act_coord geometry,"
-					+ "act_start double precision,"
-					+ "act_end double precision,"
-					+ "act_duration double precision,"
-					+ "leg_mode varchar"
-					+ ");");
-			
-			statement.close();
-			
-			writePersonsTable(population, tablespace);
 			writePlansTable(population, tablespace);
 			
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 
 			e.printStackTrace();
 			
@@ -360,56 +345,144 @@ public class MatsimPsqlAdapter {
 	 * @param tablespace
 	 * @throws SQLException
 	 */
-	private static void writePlansTable(final Population population, String tablespace) throws SQLException {
+	private static void writePlansTable(final Population population, String scenario) throws SQLException {
 		
-		PreparedStatement stmt = connection.prepareStatement("INSERT INTO " + tablespace + ".plans (person_id, element_index, selected, act_type,"
-				+ "act_coord, act_start, act_end, act_duration, leg_mode) VALUES(?, ?, ?, ?, st_geomfromtext(?), ?, ?, ?, ?);");
+		PreparedStatement stmt = connection.prepareStatement("INSERT INTO plans (agent_id, started_at, ended_at,"
+				+ "from_activity_type, to_activity_type, location_start, location_end, mode, scenario_id)"
+				+ " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);");
+		
+		filterTransitWalkLegs(population);
 		
 		for(Person person : population.getPersons().values()) {
 			
 			stmt.setString(1, person.getId().toString());
 			
-			for(Plan plan : person.getPlans()) {
+			Plan plan = person.getSelectedPlan();
+			
+			for(PlanElement pe : plan.getPlanElements()) {
 				
-				for(PlanElement pe : plan.getPlanElements()) {
+				if(pe instanceof Leg) {
 					
-					stmt.setInt(2, plan.getPlanElements().indexOf(pe));
-					stmt.setBoolean(3, (boolean) PersonUtils.isSelected(plan));
+					Activity from = (Activity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)-1);
+					Activity to = (Activity) plan.getPlanElements().get(plan.getPlanElements().indexOf(pe)+1);
 					
-					if(pe instanceof Activity) {
-						
-						Activity act = (Activity) pe;
-						
-						stmt.setString(4, act.getType());
-						stmt.setString(5, createWKT(act.getCoord()));
-						stmt.setDouble(6, act.getStartTime());
-						stmt.setDouble(7, act.getEndTime());
-						stmt.setDouble(8, act.getMaximumDuration());
-						stmt.setNull(9, Types.VARCHAR);
-						
-					} else {
-						
-						Leg leg = (Leg) pe;
-						
-						stmt.setNull(4, Types.VARCHAR);
-						stmt.setNull(5, Types.OTHER);
-						stmt.setNull(6, Types.DOUBLE);
-						stmt.setNull(7, Types.DOUBLE);
-						stmt.setNull(8, Types.DOUBLE);
-						stmt.setString(9, leg.getMode());
-						
+					Leg leg = (Leg) pe;
+					
+					String mode = interpretLegMode(leg.getMode());
+					String fromActType = from.getType().contains(".") ? interpretActivityTypeString(from.getType()) : from.getType();
+					String toActType = to.getType().contains(".") ? interpretActivityTypeString(to.getType()) : to.getType();
+					
+					double startTime = from.getEndTime() != org.matsim.core.utils.misc.Time.UNDEFINED_TIME ? from.getEndTime() : leg.getDepartureTime();
+					double endTime = to.getStartTime() != org.matsim.core.utils.misc.Time.UNDEFINED_TIME ? to.getStartTime() : leg.getDepartureTime() + leg.getTravelTime();
+					
+					if(!diurnalCurves.containsKey(mode)) {
+						List<Integer> list = new ArrayList<>();
+						for(int i = 0; i < 24; i++) {
+							list.add(0);
+						}
+						diurnalCurves.put(mode, list);
 					}
+					
+					List<Integer> list = diurnalCurves.get(mode);
+					int startHour = (int) startTime / 3600;
+					int endHour = (int) endTime / 3600;
+					if(startHour < 0 || endHour < 0 || startHour > 23 || endHour > 23)
+						continue;
+					for(int i = startHour; i <= endHour; i++) {
+						int val = list.get(i);
+						list.set(i, val+1);
+					}
+					diurnalCurves.put(mode, list);
+					
+					stmt.setTime(2, new Time(TimeUnit.SECONDS.toMillis((long)startTime)));
+					stmt.setTime(3, new Time(TimeUnit.SECONDS.toMillis((long)endTime)));
+					stmt.setString(4, fromActType);
+					stmt.setString(5, toActType);
+					stmt.setObject(6, new PGgeometry(createWKT(from.getCoord())));
+					stmt.setObject(7, new PGgeometry(createWKT(to.getCoord())));
+					stmt.setString(8, mode);
+					stmt.setString(9, scenario);
 					
 					stmt.addBatch();
 					
 				}
 				
 			}
+				
+		}
+		try {
 			
+			stmt.executeBatch();
+			
+		} catch(BatchUpdateException e) {
+			System.out.println(e.getNextException().toString());
 		}
 		
-		stmt.executeBatch();
 		stmt.close();
+		
+	}
+	
+	private static Map<String, List<Integer>> diurnalCurves = new HashMap<>();
+	
+	private static String interpretActivityTypeString(String type) {
+		
+		if(type.startsWith("home"))
+			return "home";
+		else if(type.startsWith("work"))
+			return "work";
+		else if(type.startsWith("leis"))
+			return "leisure";
+		else if(type.startsWith("educ"))
+			return "education";
+		else if(type.startsWith("shop"))
+			return "shop";
+		else
+			return "other";
+		
+	}
+	
+	private static void filterTransitWalkLegs(final Population population) {
+		
+		for(Person person : population.getPersons().values()) {
+			
+			Plan selectedPlan = person.getSelectedPlan();
+			List<PlanElement> planElements = selectedPlan.getPlanElements();
+			
+			for (int i = 0, n = planElements.size(); i < n; i++) {
+				PlanElement pe = planElements.get(i);
+				if (pe instanceof Activity) {
+					Activity act = (Activity) pe;
+					if (PtConstants.TRANSIT_ACTIVITY_TYPE.equals(act.getType())) {
+						PlanElement previousPe = planElements.get(i-1);
+						if (previousPe instanceof Leg) {
+							Leg previousLeg = (Leg) previousPe;
+							previousLeg.setMode(TransportMode.pt);
+							previousLeg.setRoute(null);
+						} else {
+							throw new RuntimeException("A transit activity should follow a leg! Aborting...");
+						}
+						final int index = i;
+						PopulationUtils.removeActivity(((Plan) selectedPlan), index); // also removes the following leg
+						n -= 2;
+						i--;
+					}
+				}
+			}
+			
+		}
+		for (Person person : population.getPersons().values()){
+			Plan selectedPlan = person.getSelectedPlan();
+			List<PlanElement> planElements = selectedPlan.getPlanElements();
+			for (int i = 0, n = planElements.size(); i < n; i++) {
+				PlanElement pe = planElements.get(i);
+				if (pe instanceof Leg) {
+					String legMode = ((Leg) pe).getMode();
+					if(legMode.equals(TransportMode.transit_walk)){
+						((Leg) pe).setMode(TransportMode.walk);
+					}
+				}
+			}
+		}
 		
 	}
 	
@@ -421,6 +494,16 @@ public class MatsimPsqlAdapter {
 	private static String createWKT(Coord coord) {
 		
 		return "POINT(" + Double.toString(coord.getX()) + " " + Double.toString(coord.getY()) + ")";
+		
+	}
+	
+	private static String interpretLegMode(String mode) {
+		
+		if(mode.contains("oneway") || mode.contains("twoway") || mode.contains("freefloat")) {
+			return "carsharing";
+		} else {
+			return mode;
+		}
 		
 	}
 	
@@ -539,6 +622,92 @@ public class MatsimPsqlAdapter {
 			e.printStackTrace();
 			
 		}
+		
+	}
+	
+	static void writeScenarioMetaData(final Scenario scenario, String scenarioId) {
+		
+		try {
+		
+			AggregatedAnalysis.generate(scenario);
+			
+			Map<String, String> modeCounts = AggregatedAnalysis.getModeCounts();
+			Map<String, String> modeDistances = AggregatedAnalysis.getModeDistanceStats();
+			Map<String, String> modeEmissions = AggregatedAnalysis.getModeEmissionStats();
+			
+			PreparedStatement statement = connection.prepareStatement("INSERT INTO scenarios (district_id, year, population, population_diff_2017,"
+					+ "person_km, trips, diurnal_curve, carbon_emissions, seed, created_at, updated_at) "
+					+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+		
+			String[][] diurnalCurves = new String[modeDistances.size()*24][3];
+			int i = 0;
+			for(Entry<String, List<Integer>> entry : MatsimPsqlAdapter.diurnalCurves.entrySet()) {
+				
+				int j = 0;
+				
+				for(Integer integer : entry.getValue()) {
+					
+					diurnalCurves[i][0] = entry.getKey();
+					diurnalCurves[i][1] = Integer.toString(j);
+					diurnalCurves[i][2] = Integer.toString(integer);
+					
+					j++;
+					i++;
+					
+				}
+				
+			}
+			
+			String[] scenarioData = scenarioId.split("_");
+			
+			statement.setString(1, scenarioData[0]);
+			statement.setInt(2, Integer.parseInt(scenarioData[1]));
+			statement.setInt(3, scenario.getPopulation().getPersons().size());
+			statement.setInt(4, 0);
+			statement.setArray(5, connection.createArrayOf("varchar", createArrayFromMap(modeDistances)));
+			statement.setArray(6, connection.createArrayOf("varchar", createArrayFromMap(modeCounts)));
+			statement.setArray(7, connection.createArrayOf("varchar", diurnalCurves));
+			statement.setArray(8, connection.createArrayOf("varchar", createArrayFromMap(modeEmissions)));
+			statement.setBoolean(9, true);
+			statement.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
+			statement.setTimestamp(11, new Timestamp(System.currentTimeMillis()));
+			
+			statement.addBatch();
+			
+			try {
+				
+				statement.executeBatch();
+				
+			} catch(BatchUpdateException e) {
+				
+				System.out.println(e.getNextException().toString());
+			
+			}
+			
+			statement.close();
+			
+		} catch (SQLException e) {
+
+			e.printStackTrace();
+			
+		}
+		
+	}
+	
+	private static String[][] createArrayFromMap(Map<String, String> map) {
+
+		String[][] array = new String[map.size()][2]; 
+		
+		int i = 0;
+		for(Entry<String, String> entry : map.entrySet()) {
+			
+			array[i][0] = entry.getKey();
+			array[i][1] = entry.getValue();
+			i++;
+			
+		}
+		
+		return array;
 		
 	}
 	

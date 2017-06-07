@@ -8,7 +8,6 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkChangeEvent.ChangeType;
 import org.matsim.core.network.NetworkChangeEvent.ChangeValue;
-import org.matsim.core.network.NetworkChangeEventFactoryImpl;
 import org.matsim.core.scenario.ScenarioUtils;
 
 public class LeipzigMain {
@@ -18,14 +17,12 @@ public class LeipzigMain {
 		Config config = ConfigUtils.loadConfig(args[0]);
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
-		NetworkChangeEventFactoryImpl factory = new NetworkChangeEventFactoryImpl();
-		
 		//TODO This is a stub. The flow capacities and free speeds have to be changed according to traffic counts
 		for(Link link : scenario.getNetwork().getLinks().values()){
 			
-			NetworkChangeEvent event = factory.createNetworkChangeEvent(7 * 3600);
-			event.setFlowCapacityChange(new ChangeValue(ChangeType.ABSOLUTE, 1000.));
-			event.setFreespeedChange(new ChangeValue(ChangeType.ABSOLUTE, 20/3.6));
+			NetworkChangeEvent event = new NetworkChangeEvent(7 * 3600);
+			event.setFlowCapacityChange(new ChangeValue(ChangeType.ABSOLUTE_IN_SI_UNITS, 1000.));
+			event.setFreespeedChange(new ChangeValue(ChangeType.ABSOLUTE_IN_SI_UNITS, 20/3.6));
 			event.addLink(link);
 			
 		}

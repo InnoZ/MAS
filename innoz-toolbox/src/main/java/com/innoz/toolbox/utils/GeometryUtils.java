@@ -22,7 +22,7 @@ import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
-import org.matsim.core.network.LinkImpl;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordUtils;
@@ -37,14 +37,13 @@ import org.matsim.facilities.ActivityFacility;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.opengis.feature.simple.SimpleFeature;
 
+import com.innoz.toolbox.utils.io.AbstractCsvReader;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
-
-import com.innoz.toolbox.utils.io.AbstractCsvReader;
 
 /**
  * 
@@ -224,9 +223,9 @@ public class GeometryUtils {
 			SimpleFeature ft = linkFactory.createPolyline(new Coordinate [] {fromNodeCoordinate,
 					linkCoordinate, toNodeCoordinate},
 					new Object [] {link.getId().toString(), link.getFromNode().getId().toString(),
-					link.getToNode().getId().toString(), link.getLength(), ((LinkImpl)link).getType(),
+					link.getToNode().getId().toString(), link.getLength(), NetworkUtils.getType(link),
 					link.getCapacity(), link.getFreespeed(), CollectionUtils.setToString(
-					link.getAllowedModes()), link.getNumberOfLanes(), ((LinkImpl)link).getOrigId()},
+					link.getAllowedModes()), link.getNumberOfLanes(), NetworkUtils.getOrigId(link)},
 					null);
 			linkFeatures.add(ft);
 		}

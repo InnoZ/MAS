@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.matsim.core.utils.collections.QuadTree;
 
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
+import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
 import com.innoz.toolbox.utils.data.Tree;
 import com.innoz.toolbox.utils.data.Tree.Node;
@@ -49,13 +50,7 @@ public class Geoinformation {
 	protected Geometry catchmentAreaPt;
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
-	private static Geoinformation instance;
-	
-	public static void init(ActivityLocationsType type) {
-		
-		instance = new Geoinformation(type);
-		
-	}
+	private static Geoinformation instance = new Geoinformation(Controller.configuration().scenario().getActivityLocationsType());
 	
 	public static Geoinformation getInstance() {
 		

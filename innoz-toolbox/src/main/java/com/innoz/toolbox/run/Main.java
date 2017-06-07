@@ -16,9 +16,9 @@ import com.innoz.toolbox.utils.GlobalNames;
 /**
  * 
  * Starting point for a shell-based version of the scenario generation framework. This class be used as starting point for
- * a shell execution of the framework. </br>
+ * a shell execution of the framework. <br>
  * At the moment, the execution is a minimal example of the scenario generation. When invoked, the class needs three runtime arguments,
- * namely an id for the survey area and a year. dhosse 05/17
+ * namely an id for the survey area, a (forecast) year and the output path. dhosse 05/17 <br>
  * 
  * java -cp <path-to-jar> com.innoz.toolbox.run.Main args1 args2 args3
  * 
@@ -37,6 +37,7 @@ public class Main {
 		if(args.length > 1){
 			
 			// Create a new area set containing a single county
+			// The other parameters are set to more or less meaningful default values until we implement switches
 			AreaSet set = new AreaSet();
 			set.setIds(args[0]);
 			set.setIsSurveyArea(true);
@@ -44,6 +45,7 @@ public class Main {
 			set.setPopulationSource(PopulationSource.SURVEY);
 			Controller.configuration().scenario().addAreaSet(set);
 			Controller.configuration().surveyPopulation().setUseHouseholds(false);
+			Controller.configuration().scenario().setScaleFactor(0.1);
 			
 			// MATSim needs a Cartesian coordinate system that measures distances in meters
 			Controller.configuration().misc().setCoordinateSystem(GlobalNames.UTM32N);
@@ -52,14 +54,18 @@ public class Main {
 			int forecastYear = Integer.parseInt(args[1]);
 			Controller.configuration().scenario().setYear(forecastYear);
 			
-			Controller.configuration().misc().setOutputDirectory(args[2] + "/" + args[1] + "_" + args[0] + "_base/");
+			// Set the name of the scenario (combination of gkz and forecast year)
+			String scenarioName = args[0] + "_" + args[1];
+			
+			// Set the output directory according to the scenario name
+			Controller.configuration().misc().setOutputDirectory(args[2] + "/" + scenarioName + "/");
 			
 			log.info("Starting controller...");
 			
 			// Add all the necessary tasks to the controller queue
 			Controller.submit(new NetworkGenerationTask.Builder(Controller.configuration(), Controller.scenario()).build());
 			Controller.submit(new DemandGenerationTask.Builder(Controller.configuration(), Controller.scenario()).build());
-			Controller.submit(new WriteOutputTask.Builder(Controller.configuration(), Controller.scenario()).build());
+			Controller.submit(new WriteOutputTask.Builder(scenarioName).build());
 			
 			// Start the actual execution
 			Controller.run();

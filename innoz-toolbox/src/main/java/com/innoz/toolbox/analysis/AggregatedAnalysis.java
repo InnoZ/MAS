@@ -1,45 +1,61 @@
 package com.innoz.toolbox.analysis;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
 
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.core.utils.io.IOUtils;
+import org.matsim.core.utils.geometry.CoordUtils;
 
 public class AggregatedAnalysis {
 
 	private AggregatedAnalysis(){};
-	
-	public static void generate(Scenario scenario, String outputPath) {
 
-		Map<String, Integer> modeCounts = new HashMap<>();
-		int numberOfLegs = 0;
-		
+	static Map<String, Integer> modeCounts = new HashMap<>();
+	static Map<String, Double> modeDistanceStats = new HashMap<>();
+	static Map<String, Double> modeEmissionStats = new HashMap<>();
+	
+	public static void generate(Scenario scenario) {
+
 		for(Person person : scenario.getPopulation().getPersons().values()) {
 			
-			for(PlanElement planElement : person.getSelectedPlan().getPlanElements()) {
+			Plan plan = person.getSelectedPlan();
+			
+			for(PlanElement planElement : plan.getPlanElements()) {
 				
 				if(planElement instanceof Leg) {
 					
-					numberOfLegs++;
-					
 					Leg leg = (Leg) planElement;
+	
+					String mode = interpretLegMode(leg.getMode());
 					
-					if(!modeCounts.containsKey(leg.getMode())) {
+					if(!modeCounts.containsKey(mode)) {
 						
-						modeCounts.put(leg.getMode(), 0);
+						modeCounts.put(mode, 0);
+						modeDistanceStats.put(mode, 0.0);
+						modeEmissionStats.put(mode, 0.0);
 						
 					}
 					
-					int count = modeCounts.get(leg.getMode());
-					modeCounts.put(leg.getMode(), count+1);
+					int count = modeCounts.get(mode);
+					modeCounts.put(mode, count+1);
+					
+					double distance = modeDistanceStats.get(mode);
+					
+					Coord from = ((Activity)plan.getPlanElements().get(plan.getPlanElements().indexOf(leg) - 1)).getCoord();
+					Coord to = ((Activity)plan.getPlanElements().get(plan.getPlanElements().indexOf(leg) + 1)).getCoord();
+					double additionalDistance = CoordUtils.calcEuclideanDistance(from, to) * 1.3;
+					modeDistanceStats.put(mode, distance + additionalDistance);
+					
+					double emissions = modeEmissionStats.get(mode);
+					double additionalEmissions = additionalDistance * getEmissionsFactorForMode(mode);
+					modeEmissionStats.put(mode, emissions + additionalEmissions);
 					
 				}
 				
@@ -47,60 +63,61 @@ public class AggregatedAnalysis {
 			
 		}
 		
-		try {
+	}
+	
+	private static double getEmissionsFactorForMode(String mode) {
 		
-			generateJsonOutput(numberOfLegs, outputPath);
+		if(TransportMode.car.equals(mode)) return 150d / 1000000;
+		else if(TransportMode.pt.equals(mode)) return 75d / 1000000;
+		else return 0;
 		
-		} catch (IOException e) {
+	}
+	
+	public static Map<String, String> getModeCounts() {
+		
+		Map<String, String> map = new HashMap<>();
+		
+		modeCounts.forEach((mode,count) ->  {
+			map.put(mode, Integer.toString(count));
+		});
+		
+		return map;
+		
+	}
+	
+	public static Map<String, String> getModeDistanceStats() {
+		
+		Map<String, String> map = new HashMap<>();
+		
+		modeDistanceStats.forEach((mode, d) -> {
+			map.put(mode, Double.toString(d));
+		});
+		
+		return map;
+		
+	}
+	
+	public static Map<String, String> getModeEmissionStats() {
 
-			e.printStackTrace();
-			
+		Map<String, String> map = new HashMap<>();
+		
+		modeEmissionStats.forEach((mode, d) -> {
+			map.put(mode, Double.toString(d));
+		});
+		
+		return map;
+		
+	}
+	
+	private static String interpretLegMode(String mode) {
+		
+		if(mode.contains("oneway") || mode.contains("twoway") || mode.contains("freefloat")) {
+			return "carsharing";
+		} else {
+			return mode;
 		}
 		
 	}
 	
-	private static void generateJsonOutput(int n, String path) throws IOException {
-		
-		Random random = new Random();
-		final Map<String, Integer> modeCounts = new HashMap<>();
-		modeCounts.put("walk", 15 + random.nextInt(20));
-		modeCounts.put("bike", 10 + random.nextInt(10));
-		modeCounts.put("car", 25 + random.nextInt(50));
-		modeCounts.put("public transport", 10 + random.nextInt(25));
-		
-		n = 0;
-		
-		for(Integer i : modeCounts.values()) {
-			n+=i;
-		}
-		
-		BufferedWriter writer = IOUtils.getBufferedWriter(path);
-		
-		writer.write("{");
-		writer.write("\"modal_split\": [");
-	
-		int i = 0;
-		
-		for(Entry<String, Integer> entry : modeCounts.entrySet()) {
-
-			i++;
-			
-			writer.write("{\"mode\": \"" + entry.getKey() + "\",");
-			
-			if(i >= modeCounts.entrySet().size()) {
-				writer.write("\"share\" : \"" + 100*((double)entry.getValue()/n) + "\"}");
-			} else {
-				writer.write("\"share\" : \"" + 100*((double)entry.getValue()/n) + "\"},");
-			}
-			writer.flush();
-			
-		}
-		
-		writer.write("]");
-		writer.write("}");
-		
-		writer.close();
-		
-	}
 	
 }

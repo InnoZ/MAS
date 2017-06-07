@@ -16,33 +16,33 @@ import org.matsim.vehicles.VehiclesFactory;
 
 public class OsVehicleTypes {
 
-	public final Map<Id<VehicleType>, VehicleType> vehicleTypes = new HashMap<>();
+	public static final Map<Id<VehicleType>, VehicleType> vehicleTypes = new HashMap<>();
 	
 	private OsVehicleTypes(){};
 	
-	public VehicleType get(String vType){
+	public static VehicleType get(String vType){
 		
 		if(vehicleTypes.isEmpty()){
 			
-			this.init();
+			init();
 			
 		}
 		
-		return this.vehicleTypes.get(vType);
+		return vehicleTypes.get(vType);
 		
 	}
 	
-	public Map<Id<VehicleType>, VehicleType> getAll(){
+	public static Map<Id<VehicleType>, VehicleType> getAll(){
 		
-		if(this.vehicleTypes.isEmpty()){
-			this.init();
+		if(vehicleTypes.isEmpty()){
+			init();
 		}
 		
-		return this.vehicleTypes;
+		return vehicleTypes;
 		
 	}
 	
-	private void init(){
+	private static void init(){
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		VehiclesFactory vehiclesFactory = scenario.getVehicles().getFactory();
@@ -55,7 +55,7 @@ public class OsVehicleTypes {
 			EngineInformation currentEngineInfo = vehiclesFactory.createEngineInformation(FuelType.electricity, 0.0);
 			type.setEngineInformation(currentEngineInfo);
 			type.setMaximumVelocity(130/3.6);
-			this.vehicleTypes.put(type.getId(), type);
+			vehicleTypes.put(type.getId(), type);
 		}
 		{	
 			VehicleType type = vehiclesFactory.createVehicleType(Id.create("mini", VehicleType.class));
@@ -65,7 +65,7 @@ public class OsVehicleTypes {
 			type.setCapacity(cap);
 			EngineInformation currentEngineInfo = vehiclesFactory.createEngineInformation(FuelType.gasoline, 0.0);
 			type.setEngineInformation(currentEngineInfo);
-			this.vehicleTypes.put(type.getId(), type);
+			vehicleTypes.put(type.getId(), type);
 		}
 		{	
 			VehicleType type = vehiclesFactory.createVehicleType(Id.create("kompakt", VehicleType.class));
@@ -75,7 +75,7 @@ public class OsVehicleTypes {
 			type.setCapacity(cap);
 			EngineInformation currentEngineInfo = vehiclesFactory.createEngineInformation(FuelType.gasoline, 0.0);
 			type.setEngineInformation(currentEngineInfo);
-			this.vehicleTypes.put(type.getId(), type);
+			vehicleTypes.put(type.getId(), type);
 		}
 		{	
 			VehicleType type = vehiclesFactory.createVehicleType(Id.create("komfort", VehicleType.class));
@@ -85,7 +85,7 @@ public class OsVehicleTypes {
 			type.setCapacity(cap);
 			EngineInformation currentEngineInfo = vehiclesFactory.createEngineInformation(FuelType.gasoline, 0.0);
 			type.setEngineInformation(currentEngineInfo);
-			this.vehicleTypes.put(type.getId(), type);
+			vehicleTypes.put(type.getId(), type);
 		}
 		{	
 			VehicleType type = vehiclesFactory.createVehicleType(Id.create("maxi", VehicleType.class));
@@ -98,7 +98,7 @@ public class OsVehicleTypes {
 			type.setCapacity(cap);
 			EngineInformation currentEngineInfo = vehiclesFactory.createEngineInformation(FuelType.gasoline, 0.0);
 			type.setEngineInformation(currentEngineInfo);
-			this.vehicleTypes.put(type.getId(), type);
+			vehicleTypes.put(type.getId(), type);
 		}
 		{	
 			VehicleType type = vehiclesFactory.createVehicleType(Id.create("flowk", VehicleType.class));
@@ -108,7 +108,7 @@ public class OsVehicleTypes {
 			type.setCapacity(cap);
 			EngineInformation currentEngineInfo = vehiclesFactory.createEngineInformation(FuelType.gasoline, 0.0);
 			type.setEngineInformation(currentEngineInfo);
-			this.vehicleTypes.put(type.getId(), type);
+			vehicleTypes.put(type.getId(), type);
 		}
 		
 	}

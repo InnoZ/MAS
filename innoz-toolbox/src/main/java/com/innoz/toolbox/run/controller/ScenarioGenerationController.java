@@ -8,13 +8,13 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.NetworkWriter;
+import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.PopulationWriter;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
@@ -26,26 +26,21 @@ import org.matsim.households.HouseholdsWriterV10;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.matsim.vehicles.VehicleWriterV1;
 
-import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
 import com.innoz.toolbox.config.validation.ConfigurationValidator;
 import com.innoz.toolbox.io.BbsrDataReader;
 import com.innoz.toolbox.io.database.DatabaseReader;
 import com.innoz.toolbox.scenarioGeneration.config.InitialConfigCreator;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.network.NetworkCreatorFromPsql;
 import com.innoz.toolbox.scenarioGeneration.population.PopulationCreator;
 import com.innoz.toolbox.utils.GlobalNames;
 
-public class ScenarioGenerationController extends DefaultController {
+public class ScenarioGenerationController {
 
-	public ScenarioGenerationController(final Configuration configuration){
-		
-		super(configuration);
-		
-	}
+	private static final Logger log = Logger.getLogger(ScenarioGenerationController.class);
 	
-	@Override
+	public ScenarioGenerationController(){}
+	
 	public void run() {
 
 		try {
@@ -53,65 +48,59 @@ public class ScenarioGenerationController extends DefaultController {
 			double t0 = System.currentTimeMillis();
 			Logger.getLogger(org.matsim.matrices.Matrix.class).setLevel(Level.OFF);
 			
-			ConfigurationValidator.validate(this.configuration);
+			ConfigurationValidator.validate(Controller.configuration());
 			
 			// Dump scenario generation settings on the console and create the output directory
-			new File(configuration.misc().getOutputDirectory()).mkdirs();
+			new File(Controller.configuration().misc().getOutputDirectory()).mkdirs();
 			
-			OutputDirectoryLogging.initLoggingWithOutputDirectory(configuration.misc().getOutputDirectory());
+			OutputDirectoryLogging.initLoggingWithOutputDirectory(Controller.configuration().misc().getOutputDirectory());
 			
 			// Reset the random seed
-			MatsimRandom.reset(configuration.scenario().getRandomSeed());
+			MatsimRandom.reset(Controller.configuration().scenario().getRandomSeed());
 			
 			// Create a MATSim scenario
 			Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 			
-			// Container for geoinformation (admin borders, landuse)
-			Geoinformation.init(configuration.scenario().getActivityLocationsType());
-	
-			// A class that reads data from database tables into local containers
-			DatabaseReader.init(configuration);
-//			DatabaseReader dbReader = new DatabaseReader(configuration);
 			DatabaseReader.getInstance().readGeodataFromDatabase(scenario);
 			DatabaseReader.getInstance().readPopulationFromDatabase(scenario);
 			InputStream in = this.getClass().getClassLoader().getResourceAsStream("regionstypen.csv");
 			new BbsrDataReader().read(new InputStreamReader(in));
 			
 			// Create a MATSim network from OpenStreetMap data
-			NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(), configuration);
+			NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(), Controller.configuration());
 			nc.create();
 
 //			CreateCarsharingVehicles.run(configuration, scenario);
 
-			if(configuration.scenario().getAreaSets() != null) {
+			if(Controller.configuration().scenario().getAreaSets() != null) {
 			
 				// Create a MATSim population
-				PopulationCreator.run(configuration, scenario);
+				PopulationCreator.run(Controller.configuration(), scenario);
 				
 			}
 			
 			// Create an initial MATSim config file and write it into the output directory
-			Config config = InitialConfigCreator.create(configuration);
-			new ConfigWriter(config).write(configuration.misc().getOutputDirectory() + "config.xml.gz");
+			Config config = InitialConfigCreator.create();
+			new ConfigWriter(config).write(Controller.configuration().misc().getOutputDirectory() + "config.xml.gz");
 			
 			// Dump scenario elements into the output directory
-			new NetworkWriter(scenario.getNetwork()).write(configuration.misc()
+			new NetworkWriter(scenario.getNetwork()).write(Controller.configuration().misc()
 					.getOutputDirectory() + "network.xml.gz");
 	
-			new PopulationWriter(scenario.getPopulation()).write(configuration.misc()
+			new PopulationWriter(scenario.getPopulation()).write(Controller.configuration().misc()
 					.getOutputDirectory() + "plans.xml.gz");
 				
 			new ObjectAttributesXmlWriter(scenario.getPopulation().
-					getPersonAttributes()).writeFile(configuration.misc().getOutputDirectory()
+					getPersonAttributes()).writeFile(Controller.configuration().misc().getOutputDirectory()
 							+ "personAttributes.xml.gz");
 					
-			new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(configuration.misc()
+			new HouseholdsWriterV10(scenario.getHouseholds()).writeFile(Controller.configuration().misc()
 					.getOutputDirectory() + "households.xml.gz");
 					
-			new VehicleWriterV1(scenario.getVehicles()).writeFile(configuration.misc()
+			new VehicleWriterV1(scenario.getVehicles()).writeFile(Controller.configuration().misc()
 					.getOutputDirectory() + "vehicles.xml.gz");
 				
-			if(configuration.scenario().getActivityLocationsType().equals(ActivityLocationsType.FACILITIES)){
+			if(Controller.configuration().scenario().getActivityLocationsType().equals(ActivityLocationsType.FACILITIES)){
 
 				CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(GlobalNames.WGS84, GlobalNames.UTM32N);
 				
@@ -123,7 +112,8 @@ public class ScenarioGenerationController extends DefaultController {
 					
 				}
 				
-				new FacilitiesWriter(scenario.getActivityFacilities()).write(configuration.misc().getOutputDirectory() + "facilities.xml.gz");
+				new FacilitiesWriter(scenario.getActivityFacilities()).write(Controller.configuration().misc().getOutputDirectory()
+						+ "facilities.xml.gz");
 				
 			}
 			
@@ -140,7 +130,7 @@ public class ScenarioGenerationController extends DefaultController {
 		}
 
 		log.info("> Scenario generation complete. All files have been written to "
-				+ configuration.misc().getOutputDirectory());
+				+ Controller.configuration().misc().getOutputDirectory());
 		
 		OutputDirectoryLogging.closeOutputDirLogging();
 		

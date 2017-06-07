@@ -10,7 +10,7 @@ import org.junit.Test;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.DayTypes;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.SurveyType;
-import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.VehicleType;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.SurveyVehicleType;
 
 public class ConfigurationTest {
 
@@ -39,7 +39,7 @@ public class ConfigurationTest {
 		
 		assertEquals(SurveyType.MiD, configuration.surveyPopulation().getSurveyType());
 		assertEquals(DayTypes.weekday, configuration.surveyPopulation().getDayTypes());
-		assertEquals(VehicleType.DEFAULT, configuration.surveyPopulation().getVehicleType());
+		assertEquals(SurveyVehicleType.DEFAULT, configuration.surveyPopulation().getVehicleType());
 		assertTrue(configuration.surveyPopulation().isUsingHouseholds());
 		
 		assertEquals(null, configuration.scenario().getAreaSets());

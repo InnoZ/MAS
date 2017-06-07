@@ -1,8 +1,10 @@
 package com.innoz.toolbox.scenarioGeneration.network;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,13 +15,17 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.core.network.LinkImpl;
+import org.matsim.core.network.NetworkChangeEvent;
+import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.network.NetworkChangeEvent.ChangeType;
+import org.matsim.core.network.NetworkChangeEvent.ChangeValue;
 import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.core.utils.misc.Time;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -47,6 +53,7 @@ public class NetworkCreatorFromPsql {
 
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
 	private final Network network;
+	private final List<NetworkChangeEvent> networkChangeEvents = new ArrayList<>();
 	private final CoordinateTransformation transformation;
 	private final Configuration configuration;
 	
@@ -578,47 +585,60 @@ public class NetworkCreatorFromPsql {
 				
 				if(this.network.getNodes().get(from) != null && this.network.getNodes().get(to) != null){
 
-				// Create a link in one direction
+					String conditionalSpeed = entry.getConditionalMaxspeedTag();
+					
+					// Create a link in one direction
 					if(!onewayReverse){
+						
+						double lanes = lanesPerDirection;
+						if(entry.getForwardLanesTag() != null) {
+							lanes = Double.parseDouble(entry.getForwardLanesTag());
+						}
 						
 						Link link = network.getFactory().createLink(Id.createLinkId(linkCounter.get()), this.network.getNodes().get(from), this.network.getNodes().get(to));
 						link.setCapacity(capacity);
 						link.setFreespeed(freespeed);
 						link.setLength(length);
-						link.setNumberOfLanes(lanesPerDirection);
+						link.setNumberOfLanes(lanes);
 						link.setAllowedModes(modes);
-						
-						if(link instanceof LinkImpl){
-							
-							((LinkImpl)link).setOrigId(origId);
-							((LinkImpl)link).setType(entry.getHighwayTag());
-							
-						}
+						NetworkUtils.setOrigId(link, origId);
+						NetworkUtils.setType(link, entry.getHighwayTag());
 						
 						network.addLink(link);
 						linkCounter.incrementAndGet();
+						
+						if(conditionalSpeed != null) {
+							resolveConditionalSpeed(conditionalSpeed, link);
+						}
 						
 					}
 					
 					// If it's not a oneway link, create another link in the opposite direction
 					if(!oneway){
 						
+						double lanes = lanesPerDirection;
+						if(entry.getBackwardLanesTag() != null) {
+							lanes = Double.parseDouble(entry.getBackwardLanesTag());
+						} else if(entry.getForwardLanesTag() != null) {
+							lanes -= Double.parseDouble(entry.getForwardLanesTag());
+							if(lanes <= 0) lanes = 1;
+						}
+						
 						Link link = network.getFactory().createLink(Id.createLinkId(linkCounter.get()), this.network.getNodes().get(to), this.network.getNodes().get(from));
 						link.setCapacity(capacity);
 						link.setFreespeed(freespeed);
 						link.setLength(length);
-						link.setNumberOfLanes(lanesPerDirection);
+						link.setNumberOfLanes(lanes);
 						link.setAllowedModes(modes);
-						
-						if(link instanceof LinkImpl){
-							
-							((LinkImpl)link).setOrigId(origId);
-							((LinkImpl)link).setType(entry.getHighwayTag());
-							
-						}
+						NetworkUtils.setOrigId(link, origId);
+						NetworkUtils.setType(link, entry.getHighwayTag());
 						
 						network.addLink(link);
 						linkCounter.incrementAndGet();
+						
+						if(conditionalSpeed != null) {
+							resolveConditionalSpeed(conditionalSpeed, link);
+						}
 						
 					}
 					
@@ -663,6 +683,43 @@ public class NetworkCreatorFromPsql {
 		return kmh / 3.6;
 		
 	}
+	
+	public void resolveConditionalSpeed(String c, Link l) {
+		
+		// We can't model weather conditions... yet
+		if(c.contains("wet") || !c.contains(":")) return;
+		
+		String[] parts = c.split("@");
+		
+		String[] timeStringArray =  parts[1].split("-");
+
+		double speed = Double.parseDouble(parts[0]);
+		String startTimeString = timeStringArray[0].replace("(", "");
+		if(startTimeString.startsWith("0")) startTimeString.substring(1, startTimeString.length());
+		double startTime = Time.parseTime(startTimeString);
+		double endTime = Time.parseTime(timeStringArray[1].replace(")", ""));
+		
+		if(endTime < startTime) endTime += Time.MIDNIGHT;
+		
+		// Reduce the free speed at start time
+		{
+			NetworkChangeEvent event = new NetworkChangeEvent(startTime);
+			ChangeValue freespeedChange = new ChangeValue(ChangeType.ABSOLUTE_IN_SI_UNITS, speed / 3.6);
+			event.setFreespeedChange(freespeedChange);
+			event.addLink(l);
+			this.networkChangeEvents.add(event);
+		}
+		
+		// Increase free speed when the event is over
+		{
+			NetworkChangeEvent event = new NetworkChangeEvent(endTime);
+			ChangeValue freespeedChange = new ChangeValue(ChangeType.ABSOLUTE_IN_SI_UNITS, l.getFreespeed());
+			event.setFreespeedChange(freespeedChange);
+			event.addLink(l);
+			this.networkChangeEvents.add(event);
+		}
+		
+	}
 		
 	public Geometry getBufferedArea(){
 		return this.bufferedArea;
@@ -674,6 +731,10 @@ public class NetworkCreatorFromPsql {
 	
 	public CoordinateTransformation getTransformation(){
 		return this.transformation;
+	}
+	
+	public List<NetworkChangeEvent> getNetworkChangeEvents() {
+		return this.networkChangeEvents;
 	}
 
 }

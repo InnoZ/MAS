@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.SurveyType;
-import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.VehicleType;
+import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.SurveyVehicleType;
 import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.task.ConvertToPlansTask;
@@ -80,7 +80,7 @@ public class SurveyDatabaseParserV2 {
 
 				new ReadTripsDatabaseTask(constants, ids, configuration.surveyPopulation().getDayTypes()).parse(connection, container, configuration.surveyPopulation().getSurveyType().name());
 				
-				if(group.getVehicleType().equals(VehicleType.SURVEY) && group.getSurveyType().equals(SurveyType.MiD)){
+				if(group.getVehicleType().equals(SurveyVehicleType.SURVEY) && group.getSurveyType().equals(SurveyType.MiD)){
 				
 					log.info("Creating survey cars...");
 					

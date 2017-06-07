@@ -22,6 +22,7 @@ public final class DatabaseConstants {
 	public static final String SURVEYS_DB = "surveyed_mobility";
 	public static final String TRACKS_DB = "modalyzer";
 	public static final String POPULATIONFORECAST_DB = "population";
+	public static final String INTERFACE_DEVEL = "mas_interface_development";
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
 	/**

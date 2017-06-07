@@ -88,7 +88,7 @@ public class RunnerActionListener implements ActionListener, Runnable {
 			this.mainFrame.getConfiguration().scenario().addParameterSet(areaSet2);
 		}
 		
-		new ScenarioGenerationController(this.mainFrame.getConfiguration()).run();
+		new ScenarioGenerationController().run();
 		
 		this.mainFrame.getMainPanel().getRunButton().setEnabled(true);
 		

@@ -17,7 +17,7 @@ public class SurveyPopulationConfigurationGroup extends ConfigurationGroup {
 	
 	private SurveyType source = SurveyType.MiD;
 	private DayTypes dayTypes = DayTypes.weekday;
-	private VehicleType vehicleType = VehicleType.DEFAULT;
+	private SurveyVehicleType vehicleType = SurveyVehicleType.DEFAULT;
 	private boolean useHouseholds = true;
 	
 	public enum SurveyType{
@@ -32,7 +32,7 @@ public class SurveyPopulationConfigurationGroup extends ConfigurationGroup {
 		all
 	};
 	
-	public enum VehicleType{
+	public enum SurveyVehicleType{
 		DEFAULT,
 		SURVEY
 	}
@@ -72,14 +72,14 @@ public class SurveyPopulationConfigurationGroup extends ConfigurationGroup {
 	}
 	
 	@StringGetter(VEHICLE_TYPE)
-	public VehicleType getVehicleType(){
+	public SurveyVehicleType getVehicleType(){
 		
 		return this.vehicleType;
 		
 	}
 	
 	@StringSetter(VEHICLE_TYPE)
-	public void setVehicleType(VehicleType type){
+	public void setVehicleType(SurveyVehicleType type){
 		
 		this.vehicleType = type;
 		
