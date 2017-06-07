@@ -668,7 +668,7 @@ public class MatsimPsqlAdapter {
 			statement.setArray(6, connection.createArrayOf("varchar", createArrayFromMap(modeCounts)));
 			statement.setArray(7, connection.createArrayOf("varchar", diurnalCurves));
 			statement.setArray(8, connection.createArrayOf("varchar", createArrayFromMap(modeEmissions)));
-			statement.setBoolean(9, true);
+			statement.setBoolean(9, false);
 			statement.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
 			statement.setTimestamp(11, new Timestamp(System.currentTimeMillis()));
 			
