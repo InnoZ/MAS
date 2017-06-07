@@ -9,8 +9,8 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams;
 import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
 
-import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.SurveyVehicleType;
+import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 
 /**
@@ -26,31 +26,31 @@ public class InitialConfigCreator {
 	
 	private InitialConfigCreator(){};
 	
-	public static Config create(final Configuration configuration){
+	public static Config create(){
 		
 		// Create a new MATSim configuration
 		Config config = ConfigUtils.createConfig();
 
-		adapt(config, configuration);
+		adapt(config);
 		
 		return config;
 		
 	}
 	
-	public static void adapt(final Config config, final Configuration configuration) {
+	public static void adapt(final Config config) {
 		
 		// Network config group
-		config.network().setInputFile(configuration.misc().getOutputDirectory() + "network.xml.gz");
+		config.network().setInputFile(Controller.configuration().misc().getOutputDirectory() + "network.xml.gz");
 		
 		// Plans config group
-		config.plans().setInputFile(configuration.misc().getOutputDirectory() + "plans.xml.gz");
+		config.plans().setInputFile(Controller.configuration().misc().getOutputDirectory() + "plans.xml.gz");
 		
-		config.plans().setInputPersonAttributeFile(configuration.misc().getOutputDirectory() + "personAttributes.xml.gz");
+		config.plans().setInputPersonAttributeFile(Controller.configuration().misc().getOutputDirectory() + "personAttributes.xml.gz");
 		
 		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
 	
 		// If households are used, adapt the parameters that define the usage in MATSim
-		config.households().setInputFile(configuration.misc().getOutputDirectory() + "households.xml.gz");
+		config.households().setInputFile(Controller.configuration().misc().getOutputDirectory() + "households.xml.gz");
 			
 		// Add activity types to the scoring parameters
 		addBasicActivityParams(config);
@@ -62,13 +62,13 @@ public class InitialConfigCreator {
 		addBasicModeRoutingParams(config);
 		
 		// QSim config group
-		config.qsim().setFlowCapFactor(configuration.scenario().getScaleFactor());
-		config.qsim().setStorageCapFactor(configuration.scenario().getScaleFactor());
+		config.qsim().setFlowCapFactor(Controller.configuration().scenario().getScaleFactor());
+		config.qsim().setStorageCapFactor(Controller.configuration().scenario().getScaleFactor());
 
-		if(configuration.surveyPopulation().getVehicleType().equals(SurveyVehicleType.SURVEY)){
+		if(Controller.configuration().surveyPopulation().getVehicleType().equals(SurveyVehicleType.SURVEY)){
 			
 			config.qsim().setVehiclesSource(VehiclesSource.fromVehiclesData);
-			config.vehicles().setVehiclesFile(configuration.misc().getOutputDirectory() + "vehicles.xml.gz");
+			config.vehicles().setVehiclesFile(Controller.configuration().misc().getOutputDirectory() + "vehicles.xml.gz");
 			
 		}
 		
