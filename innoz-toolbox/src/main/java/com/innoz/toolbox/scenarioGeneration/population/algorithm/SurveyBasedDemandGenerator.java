@@ -223,13 +223,6 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		// Get the MATSim population and initialize person attributes
 		Population population = scenario.getPopulation();
 		ObjectAttributes personAttributes = population.getPersonAttributes();
-<<<<<<< HEAD
-		scenario.addScenarioElement(com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.PERSON_ATTRIBUTES,
-				personAttributes);
-=======
-//		scenario.addScenarioElement(com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.PERSON_ATTRIBUTES,
-//				personAttributes);
->>>>>>> branch 'bmoehring' of https://github.com/00Bock/MAS.git
 		
 		for(String s : ids.split(",")){
 
