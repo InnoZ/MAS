@@ -40,6 +40,7 @@ import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.ProxyFacility;
+import com.innoz.toolbox.scenarioGeneration.population.mobilityAttitude.MobilityAttitudeGroups;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyHousehold;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
@@ -221,9 +222,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 		// Get the MATSim population and initialize person attributes
 		Population population = scenario.getPopulation();
-		ObjectAttributes personAttributes = new ObjectAttributes();
-		scenario.addScenarioElement(com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.PERSON_ATTRIBUTES,
-				personAttributes);
+		ObjectAttributes personAttributes = population.getPersonAttributes();
 		
 		for(String s : ids.split(",")){
 
@@ -407,6 +406,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		PersonUtils.setCarAvail(person, carAvail);
 		String hasLicense = personTemplate.hasLicense() ? "yes" : "no";
 		PersonUtils.setLicence(person, hasLicense);
+		String mobilityAttitude = MobilityAttitudeGroups.getMobilityAttitudeForAge(personTemplate.getAge());
 		
 		personAttributes.putAttribute(person.getId().toString(),
 				com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.ATT_SEX, personTemplate.getSex());
@@ -418,6 +418,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.ATT_CAR_AVAIL, carAvail);
 		personAttributes.putAttribute(person.getId().toString(),
 				com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.ATT_LICENSE, hasLicense);
+		personAttributes.putAttribute(person.getId().toString(), 
+				com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.ATT_MOBILITYATTITUDE, mobilityAttitude);
 		if(personTemplate.isCarsharingUser()){
 			personAttributes.putAttribute(person.getId().toString(), "OW_CARD", "true");
 			personAttributes.putAttribute(person.getId().toString(), "RT_CARD", "true");

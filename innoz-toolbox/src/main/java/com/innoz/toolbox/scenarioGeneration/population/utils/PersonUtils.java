@@ -21,10 +21,18 @@ public class PersonUtils {
 	public static final String ATT_EMPLOYED = "isEmployed";
 	public static final String ATT_CAR_AVAIL = "carAvail";
 	public static final String ATT_LICENSE = "hasLicense";
+	public static final String ATT_MOBILITYATTITUDE = "mobilityAttitude";
 	
-	static final Integer[] ageGroups = new Integer[]{5,10,18,25,35,45,55,65,75,85,120};
-
-	private PersonUtils(){};
+	static final String[] mobilityAttitudes = {"none", "tradCar", "flexCar", "urbanPt",
+			"convBike", "envtPtBike", "multiOpt",null};
+	
+	public static String[] getMobilityAttitudes() {
+		
+		return mobilityAttitudes;
+		
+	}
+	
+	static final Integer[] ageGroups = new Integer[]{0,5,10,18,25,35,45,55,65,75,85};
 	
 	public static int getAgeGroup(int age) {
 		

@@ -9,7 +9,6 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import com.innoz.toolbox.utils.GeometryUtils;
-import com.innoz.toolbox.utils.PopulationToCsvWriter;
 
 public class Population2Shape {
 
