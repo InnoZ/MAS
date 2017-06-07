@@ -1,35 +1,27 @@
 package com.innoz.toolbox.io.database.validation;
 
 import com.innoz.toolbox.io.database.handler.Logbook;
-import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyStage;
 
 public class ValidateNegativeTravelTimes implements Validator {
 
 	@Override
 	public boolean validate(Logbook logbook){
 		
-		for(SurveyStage stage : logbook.getStages()){
-
-			String start = stage.getStartTime();
-			String end = stage.getEndTime();
+		logbook.getStages().stream().filter(stage -> stage.getStartTime() != null).filter(stage -> stage.getEndTime() != null).forEach(stage ->{
 			
-			if(start != null && end != null){
-
-				double startTime = Double.parseDouble(stage.getStartTime());
-				double endTime = Double.parseDouble(stage.getEndTime());
+			double startTime = Double.parseDouble(stage.getStartTime());
+			double endTime = Double.parseDouble(stage.getEndTime());
+			
+			if(startTime > endTime) {
 				
-				if(startTime > endTime){
-					
-					logbook.setDelete(true);
-					return false;
-					
-				}
+				logbook.setDelete(true);
+				return;
 				
 			}
 			
-		}
+		});
 		
-		return true;
+		return !logbook.isDelete();
 		
 	}
 	
