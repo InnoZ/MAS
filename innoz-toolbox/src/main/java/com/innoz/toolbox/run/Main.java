@@ -4,13 +4,17 @@ import java.io.IOException;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigWriter;
 
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.PopulationSource;
 import com.innoz.toolbox.run.controller.Controller;
+import com.innoz.toolbox.run.controller.task.ConfigCreatorTask;
 import com.innoz.toolbox.run.controller.task.DemandGenerationTask;
 import com.innoz.toolbox.run.controller.task.NetworkGenerationTask;
 import com.innoz.toolbox.run.controller.task.WriteOutputTask;
+import com.innoz.toolbox.scenarioGeneration.config.InitialConfigCreator;
 import com.innoz.toolbox.utils.GlobalNames;
 
 /**
@@ -45,10 +49,13 @@ public class Main {
 			set.setPopulationSource(PopulationSource.SURVEY);
 			Controller.configuration().scenario().addAreaSet(set);
 			Controller.configuration().surveyPopulation().setUseHouseholds(false);
-			Controller.configuration().scenario().setScaleFactor(0.1);
+			Controller.configuration().scenario().setScaleFactor(0.001);
+			Controller.configuration().psql().setPsqlPort(9999);
+			Controller.configuration().psql().setPsqlUser("bmoehring");
+			Controller.configuration().psql().setPsqlPassword("yBGJ3NKeus");
 			
 			// MATSim needs a Cartesian coordinate system that measures distances in meters
-			Controller.configuration().misc().setCoordinateSystem(GlobalNames.UTM32N);
+			Controller.configuration().misc().setCoordinateSystem("EPSG:32632");
 			
 			// Set the scenario year to whatever was passed in the second argument
 			int forecastYear = Integer.parseInt(args[1]);
@@ -63,6 +70,7 @@ public class Main {
 			log.info("Starting controller...");
 			
 			// Add all the necessary tasks to the controller queue
+			Controller.submit(new ConfigCreatorTask.Builder(Controller.scenario()).build());
 			Controller.submit(new NetworkGenerationTask.Builder(Controller.configuration(), Controller.scenario()).build());
 			Controller.submit(new DemandGenerationTask.Builder(Controller.configuration(), Controller.scenario()).build());
 			Controller.submit(new WriteOutputTask.Builder(scenarioName).build());
