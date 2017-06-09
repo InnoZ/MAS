@@ -1,7 +1,5 @@
 package com.innoz.toolbox.io.pgsql;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,7 +10,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,24 +31,19 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.pt.PtConstants;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.postgis.PGgeometry;
 import org.postgis.Point;
 
-import com.aol.cyclops.data.collections.extensions.standard.ListX;
 import com.innoz.toolbox.analysis.AggregatedAnalysis;
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.io.database.DatabaseConstants;
 import com.innoz.toolbox.io.database.DatabaseConstants.DatabaseTable;
-import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.utils.PsqlUtils;
 
 /**
@@ -372,8 +364,10 @@ public class MatsimPsqlAdapter {
 					String fromActType = from.getType().contains(".") ? interpretActivityTypeString(from.getType()) : from.getType();
 					String toActType = to.getType().contains(".") ? interpretActivityTypeString(to.getType()) : to.getType();
 					
-					double startTime = from.getEndTime() != org.matsim.core.utils.misc.Time.UNDEFINED_TIME ? from.getEndTime() : leg.getDepartureTime();
-					double endTime = to.getStartTime() != org.matsim.core.utils.misc.Time.UNDEFINED_TIME ? to.getStartTime() : leg.getDepartureTime() + leg.getTravelTime();
+					double startTime = from.getEndTime() != org.matsim.core.utils.misc.Time.UNDEFINED_TIME ? from.getEndTime() :
+						leg.getDepartureTime();
+					double endTime = to.getStartTime() != org.matsim.core.utils.misc.Time.UNDEFINED_TIME ? to.getStartTime() :
+						leg.getDepartureTime() + leg.getTravelTime();
 					
 					if(!diurnalCurves.containsKey(mode)) {
 						List<Integer> list = new ArrayList<>();
@@ -635,8 +629,8 @@ public class MatsimPsqlAdapter {
 			Map<String, String> modeDistances = AggregatedAnalysis.getModeDistanceStats();
 			Map<String, String> modeEmissions = AggregatedAnalysis.getModeEmissionStats();
 			
-			PreparedStatement statement = connection.prepareStatement("INSERT INTO scenarios (district_id, year, population, population_diff_2017,"
-					+ "person_km, trips, diurnal_curve, carbon_emissions, seed, created_at, updated_at) "
+			PreparedStatement statement = connection.prepareStatement("INSERT INTO scenarios (district_id, year, population,"
+					+ " population_diff_2017,person_km, trips, diurnal_curve, carbon_emissions, seed, created_at, updated_at) "
 					+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 		
 			String[][] diurnalCurves = new String[modeDistances.size()*24][3];

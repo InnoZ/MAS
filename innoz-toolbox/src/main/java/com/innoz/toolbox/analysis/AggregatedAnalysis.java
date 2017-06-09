@@ -50,7 +50,7 @@ public class AggregatedAnalysis {
 					
 					Coord from = ((Activity)plan.getPlanElements().get(plan.getPlanElements().indexOf(leg) - 1)).getCoord();
 					Coord to = ((Activity)plan.getPlanElements().get(plan.getPlanElements().indexOf(leg) + 1)).getCoord();
-					double additionalDistance = CoordUtils.calcEuclideanDistance(from, to) * 1.3;
+					double additionalDistance = CoordUtils.calcEuclideanDistance(from, to) * 1.3 / 1000;
 					modeDistanceStats.put(mode, distance + additionalDistance);
 					
 					double emissions = modeEmissionStats.get(mode);
