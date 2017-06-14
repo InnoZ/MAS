@@ -50,7 +50,9 @@ public class InitialConfigCreator {
 		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
 	
 		// If households are used, adapt the parameters that define the usage in MATSim
-		config.households().setInputFile(Controller.configuration().misc().getOutputDirectory() + "households.xml.gz");
+		if(Controller.configuration().surveyPopulation().isUsingHouseholds()){
+			config.households().setInputFile(Controller.configuration().misc().getOutputDirectory() + "households.xml.gz");
+		}
 			
 		// Add activity types to the scoring parameters
 		addBasicActivityParams(config);
