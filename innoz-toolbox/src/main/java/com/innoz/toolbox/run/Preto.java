@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -14,6 +15,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import com.innoz.toolbox.io.pgsql.MatsimPsqlAdapter;
@@ -32,11 +34,26 @@ import com.innoz.toolbox.io.pgsql.MatsimPsqlAdapter;
  */
 public class Preto {
 
+	private static final Logger log = Logger.getLogger(Preto.class);
+	
+	/**
+	 * 
+	 * Creates the pretotype of a scenario containing one agent named 'nigel' moving in Hannover. <br>
+	 * Aside from the demand generation side, this method has full functionality.
+	 * 
+	 * @param args 0: survey area id, 1: year, 2: output path, 3: rails environment
+	 * @throws IOException
+	 */
 	public static void main(String args[]) throws IOException {
 		
+		
+		// Combine the output path from the respective parameters
 		String outputDirectory = args[2] + "/" + args[0] + "_" + args[1] + "/";
 
+		// Create the output directory
 		Files.createDirectories(Paths.get(outputDirectory));
+		
+		OutputDirectoryLogging.initLoggingWithOutputDirectory(outputDirectory);
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		
@@ -93,7 +110,12 @@ public class Preto {
 		person.setSelectedPlan(plan);
 		population.addPerson(person);
 		
+		// Write the scenario data to the database defined in runtime argument 4
 		MatsimPsqlAdapter.writeScenarioToPsql(scenario, args[0] + "_" + args[1], args[3]);
+
+		log.info("Finished successfully!");
+		
+		OutputDirectoryLogging.closeOutputDirLogging();
 		
 	}
 	

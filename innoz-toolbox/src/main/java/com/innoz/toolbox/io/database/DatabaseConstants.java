@@ -25,6 +25,13 @@ public final class DatabaseConstants {
 	public static final String INTERFACE_DEVEL = "mas_interface_development";
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
+	/**
+	 * 
+	 * Enumeration as closed choice set for Ruby on Rails databases.
+	 * 
+	 * @author dhosse
+	 *
+	 */
 	public static enum RailsEnvironments {
 		
 		development("mas_interface_development"),
@@ -40,7 +47,9 @@ public final class DatabaseConstants {
 		}
 		
 		public String getDatabaseName() {
+			
 			return this.dbName;
+			
 		}
 		
 	}

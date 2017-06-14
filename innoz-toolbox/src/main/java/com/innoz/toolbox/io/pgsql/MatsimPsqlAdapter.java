@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -31,8 +32,10 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PopulationUtils;
+import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.pt.PtConstants;
 import org.matsim.utils.objectattributes.ObjectAttributes;
@@ -56,11 +59,17 @@ import com.innoz.toolbox.utils.PsqlUtils;
  */
 public class MatsimPsqlAdapter {
 	
+	private static final Logger log = Logger.getLogger(MatsimPsqlAdapter.class);
+	
 	// only one connection at a time
 	private static Connection connection;
 	
 	// private!
 	private MatsimPsqlAdapter() {};
+	
+	public static void main(String args[]) {
+		MatsimPsqlAdapter.writeScenarioToPsql(ScenarioUtils.createScenario(ConfigUtils.createConfig()), "", null);
+	}
 	
 	/**
 	 * 
@@ -95,7 +104,11 @@ public class MatsimPsqlAdapter {
 		
 		try {
 		
-			connection = PsqlAdapter.createConnection(RailsEnvironments.valueOf(railsEnvironment).getDatabaseName());
+			String dbName = RailsEnvironments.valueOf(railsEnvironment).getDatabaseName();
+			
+			connection = PsqlAdapter.createConnection(dbName);
+			
+			log.info("Connected to database " + dbName);
 			
 //			network2Table(scenario.getNetwork(), tablespace);
 			plans2Table(scenario.getPopulation(), scenarioName);
