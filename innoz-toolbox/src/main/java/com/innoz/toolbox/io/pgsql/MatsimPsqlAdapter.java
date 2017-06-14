@@ -44,6 +44,7 @@ import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.io.database.DatabaseConstants;
 import com.innoz.toolbox.io.database.DatabaseConstants.DatabaseTable;
+import com.innoz.toolbox.io.database.DatabaseConstants.RailsEnvironments;
 import com.innoz.toolbox.utils.PsqlUtils;
 
 /**
@@ -90,11 +91,11 @@ public class MatsimPsqlAdapter {
 		
 	}
 	
-	public static void writeScenarioToPsql(final Scenario scenario, final String scenarioName) {
+	public static void writeScenarioToPsql(final Scenario scenario, final String scenarioName, final String railsEnvironment) {
 		
 		try {
 		
-			connection = PsqlAdapter.createConnection(DatabaseConstants.INTERFACE_DEVEL);
+			connection = PsqlAdapter.createConnection(RailsEnvironments.valueOf(railsEnvironment).getDatabaseName());
 			
 //			network2Table(scenario.getNetwork(), tablespace);
 			plans2Table(scenario.getPopulation(), scenarioName);

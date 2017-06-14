@@ -18,6 +18,18 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 import com.innoz.toolbox.io.pgsql.MatsimPsqlAdapter;
 
+/**
+ * 
+ * java -cp <path-to-jar> com.innoz.toolbox.run.Main args1 args2 args3 args4
+ * 
+ * args0: survey area id (AGKZ)
+ * args1: year
+ * args2: output path
+ * args3: rails environment
+ * 
+ * @author dhosse
+ *
+ */
 public class Preto {
 
 	public static void main(String args[]) throws IOException {
@@ -81,7 +93,7 @@ public class Preto {
 		person.setSelectedPlan(plan);
 		population.addPerson(person);
 		
-		MatsimPsqlAdapter.writeScenarioToPsql(scenario, args[0] + "_" + args[1]);
+		MatsimPsqlAdapter.writeScenarioToPsql(scenario, args[0] + "_" + args[1], args[3]);
 		
 	}
 	

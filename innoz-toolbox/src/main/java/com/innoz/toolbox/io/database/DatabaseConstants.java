@@ -25,6 +25,26 @@ public final class DatabaseConstants {
 	public static final String INTERFACE_DEVEL = "mas_interface_development";
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
+	public static enum RailsEnvironments {
+		
+		development("mas_interface_development"),
+		production("mas_interface_production"),
+		test("mas_interface_test");
+		
+		final String dbName;
+		
+		private RailsEnvironments(final String dbName) {
+			
+			this.dbName = dbName;
+			
+		}
+		
+		public String getDatabaseName() {
+			return this.dbName;
+		}
+		
+	}
+	
 	/**
 	 * 
 	 * @param name String identifier for the database table, normally 'schemaname'.'tablename', must not be null!

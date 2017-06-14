@@ -8,10 +8,12 @@ import com.innoz.toolbox.run.controller.Controller;
 public class WriteOutputTask implements ControllerTask {
 
 	String scenarioName;
+	String railsEnvironment;
 	
 	private WriteOutputTask(Builder builder) {
 		
 		this.scenarioName = builder.scenarioName;
+		this.railsEnvironment = builder.railsEnvironment;
 		
 	}
 	
@@ -19,17 +21,19 @@ public class WriteOutputTask implements ControllerTask {
 	public void run() {
 		
 		new ConfigWriter(Controller.scenario().getConfig()).write(Controller.configuration().misc().getOutputDirectory() + "config.xml.gz");
-		MatsimPsqlAdapter.writeScenarioToPsql(Controller.scenario(), scenarioName);
+		MatsimPsqlAdapter.writeScenarioToPsql(Controller.scenario(), scenarioName, railsEnvironment);
 
 	}
 	
 	public static class Builder {
 		
 		String scenarioName;
+		String railsEnvironment;
 		
-		public Builder(String scenarioName) {
+		public Builder(String scenarioName, String railsEnvironment) {
 			
 			this.scenarioName = scenarioName;
+			this.railsEnvironment = railsEnvironment;
 			
 		}
 		
