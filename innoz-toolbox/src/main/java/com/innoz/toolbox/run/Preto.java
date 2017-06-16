@@ -41,81 +41,88 @@ public class Preto {
 	 * Creates the pretotype of a scenario containing one agent named 'nigel' moving in Hannover. <br>
 	 * Aside from the demand generation side, this method has full functionality.
 	 * 
-	 * @param args 0: survey area id, 1: year, 2: output path, 3: rails environment
+	 * @param args <br>
+	 * 0: survey area id,<br>
+	 * 1: year,<br>
+	 * 2: output path,<br>
+	 * 3: rails environment (one of: development, production, test)
 	 * @throws IOException
 	 */
 	public static void main(String args[]) throws IOException {
-		
-		
-		// Combine the output path from the respective parameters
-		String outputDirectory = args[2] + "/" + args[0] + "_" + args[1] + "/";
 
-		// Create the output directory
-		Files.createDirectories(Paths.get(outputDirectory));
-		
-		OutputDirectoryLogging.initLoggingWithOutputDirectory(outputDirectory);
-		
-		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		
-		Population population = scenario.getPopulation();
-		PopulationFactory factory = population.getFactory();
-		
-		Person person = factory.createPerson(Id.createPersonId("nigel"));
-		
-		Plan plan = factory.createPlan();
-		
-		{
-			Activity act = factory.createActivityFromCoord("home", new Coord(9.732166, 52.418675));
-			act.setStartTime(0);
-			act.setEndTime(8 * 3600);
-			plan.addActivity(act);
-		}
+		if(args.length > 3) {
 
-		plan.addLeg(factory.createLeg(TransportMode.pt));
-		
-		{
-			Activity act = factory.createActivityFromCoord("work", new Coord(9.713913, 52.417740));
-			act.setStartTime(9 * 3600);
-			act.setEndTime(14 * 3600);
-			plan.addActivity(act);
-		}
-		
-		plan.addLeg(factory.createLeg(TransportMode.walk));
-		
-		{
-			Activity act = factory.createActivityFromCoord("eating_out", new Coord(9.715572, 52.418324));
-			act.setStartTime(14.1 * 3600);
-			act.setEndTime(14.5 * 3600);
-			plan.addActivity(act);
-		}
-		
-		plan.addLeg(factory.createLeg(TransportMode.walk));
-		
-		{
-			Activity act = factory.createActivityFromCoord("work", new Coord(9.713913, 52.417740));
-			act.setStartTime(14.75 * 3600);
-			act.setEndTime(18 * 3600);
-			plan.addActivity(act);
-		}
-		
-		plan.addLeg(factory.createLeg("carsharing"));
-		
-		{
-			Activity act = factory.createActivityFromCoord("home", new Coord(9.732166, 52.418675));
-			act.setStartTime(19 * 3600);
-			act.setEndTime(24 * 3600);
-			plan.addActivity(act);
-		}		
-		person.addPlan(plan);
-		person.setSelectedPlan(plan);
-		population.addPerson(person);
-		
-		// Write the scenario data to the database defined in runtime argument 4
-		MatsimPsqlAdapter.writeScenarioToPsql(scenario, args[0] + "_" + args[1], args[3]);
+			// Combine the output path from the respective parameters
+			String outputDirectory = args[2] + "/" + args[0] + "_" + args[1] + "/";
+			
+			// Create the output directory
+			Files.createDirectories(Paths.get(outputDirectory));
+			
+			OutputDirectoryLogging.initLoggingWithOutputDirectory(outputDirectory);
+			
+			Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+			
+			Population population = scenario.getPopulation();
+			PopulationFactory factory = population.getFactory();
+			
+			Person person = factory.createPerson(Id.createPersonId("nigel"));
+			
+			Plan plan = factory.createPlan();
+			
+			{
+				Activity act = factory.createActivityFromCoord("home", new Coord(9.732166, 52.418675));
+				act.setStartTime(0);
+				act.setEndTime(8 * 3600);
+				plan.addActivity(act);
+			}
 
-		log.info("Finished successfully!");
-		
-		OutputDirectoryLogging.closeOutputDirLogging();
+			plan.addLeg(factory.createLeg(TransportMode.pt));
+			
+			{
+				Activity act = factory.createActivityFromCoord("work", new Coord(9.713913, 52.417740));
+				act.setStartTime(9 * 3600);
+				act.setEndTime(14 * 3600);
+				plan.addActivity(act);
+			}
+			
+			plan.addLeg(factory.createLeg(TransportMode.walk));
+			
+			{
+				Activity act = factory.createActivityFromCoord("eating_out", new Coord(9.715572, 52.418324));
+				act.setStartTime(14.1 * 3600);
+				act.setEndTime(14.5 * 3600);
+				plan.addActivity(act);
+			}
+			
+			plan.addLeg(factory.createLeg(TransportMode.walk));
+			
+			{
+				Activity act = factory.createActivityFromCoord("work", new Coord(9.713913, 52.417740));
+				act.setStartTime(14.75 * 3600);
+				act.setEndTime(18 * 3600);
+				plan.addActivity(act);
+			}
+			
+			plan.addLeg(factory.createLeg("carsharing"));
+			
+			{
+				Activity act = factory.createActivityFromCoord("home", new Coord(9.732166, 52.418675));
+				act.setStartTime(19 * 3600);
+				act.setEndTime(24 * 3600);
+				plan.addActivity(act);
+			}		
+			person.addPlan(plan);
+			person.setSelectedPlan(plan);
+			population.addPerson(person);
+			
+			// Write the scenario data to the database defined in runtime argument 4
+			MatsimPsqlAdapter.writeScenarioToPsql(scenario, args[0] + "_" + args[1], args[3]);
+
+			log.info("Finished successfully!");
+			
+			OutputDirectoryLogging.closeOutputDirLogging();
+			
+		}
 		
 	}
 	

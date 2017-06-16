@@ -33,8 +33,8 @@ public class Main {
 		
 		Logger.getLogger(org.matsim.matrices.Matrix.class).setLevel(Level.OFF);
 		
-		// If at least two runtime arguments were given, we can go on with our execution
-		if(args.length > 1){
+		// If at least four runtime arguments were given, we can go on with our execution
+		if(args.length > 3){
 			
 			// Create a new area set containing a single county
 			// The other parameters are set to more or less meaningful default values until we implement switches
@@ -73,7 +73,8 @@ public class Main {
 		} else {
 
 			// Not enough runtime arguments to continue
-			throw new RuntimeException("You must pass at least two arguments to the controller ('region id' and 'scenario year'.");
+			throw new RuntimeException("You must pass at least four arguments to the controller ('region id', 'scenario year',"
+					+ "'output directory' and 'Rails environment'.");
 			
 		}
 		
