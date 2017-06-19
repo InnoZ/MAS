@@ -42,7 +42,7 @@ public class MobilityAttitudeScoringFunctionFactory implements ScoringFunctionFa
 		sumScoringFunction.addScoringFunction(new CharyparNagelActivityScoring( parameters ));
 		sumScoringFunction.addScoringFunction(new MobilityAttitudeLegScoring( parameters ,
 				this.config.getParamsForGroup((String)(this.personAttributes.getAttribute(person.getId().toString(),
-				this.config.getSubpopulationAttribute()))),	this.network));
+				this.config.getSubpopulationAttribute()))),	this.network, config.getScaleFactor()));
 		sumScoringFunction.addScoringFunction(new CharyparNagelMoneyScoring( parameters ));
 		sumScoringFunction.addScoringFunction(new CharyparNagelAgentStuckScoring( parameters ));
 		return sumScoringFunction;

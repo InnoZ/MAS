@@ -4,11 +4,11 @@ import java.util.Random;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
-import org.matsim.core.population.PopulationReaderMatsimV5;
-import org.matsim.core.population.PopulationWriter;
+import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
 
 public class SamplePopulation {
@@ -18,7 +18,7 @@ public class SamplePopulation {
 		Config config = ConfigUtils.createConfig();
 		Scenario scenario = ScenarioUtils.createScenario(config);
 		
-		new PopulationReaderMatsimV5(scenario).readFile("/home/dhosse/scenarios/3connect/plans.xml.gz");
+		new PopulationReader(scenario).readFile("/home/dhosse/scenarios/3connect/plans.xml.gz");
 		
 		Scenario scenario2 = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		

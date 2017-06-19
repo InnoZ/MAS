@@ -50,7 +50,7 @@ public class OsMain {
 		{
 			StrategySettings stratSets = new StrategySettings();
 			stratSets.setDisableAfter(-1);
-			stratSets.setStrategyName(DefaultSelector.ChangeExpBeta.name());
+			stratSets.setStrategyName(DefaultSelector.ChangeExpBeta);
 			stratSets.setSubpopulation(null);
 			stratSets.setWeight(0.7);
 			config.strategy().addStrategySettings(stratSets);
