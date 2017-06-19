@@ -525,7 +525,7 @@ public class RilCreateLeastSquares {
 					
 					int year = 2006;
 					
-					for(int i = 14; i < 31; i++) {
+					for(int i = 14; i < 32; i++) {
 						
 						if(!map.containsKey(year)) {
 							
