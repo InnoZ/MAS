@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -26,7 +27,7 @@ import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 public class RunAdjustMobilityAttitude {
 
 	
-	static String filebase = "/home/bmoehring/scenarios/osnabrueck/input/";
+	static String filebase = "/home/bmoehring/scenarios/osnabrueck/03404_2017/";
 	
 	static final String MOBILITYATTITUDE = "mobilityAttitude";
 	
@@ -44,11 +45,10 @@ public class RunAdjustMobilityAttitude {
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		ObjectAttributes attributes = scenario.getPopulation().getPersonAttributes();
-		Set<Id<Person>> personIds = scenario.getPopulation().getPersons().keySet();
 		
-		Map<String, Integer> distributionOld = countMobilityAttitudes(personIds, attributes);
+		Map<String, Integer> distribution = countMobilityAttitudes(scenario.getPopulation().getPersons().keySet(), attributes);
 		
-		printCount(distributionOld);
+		printCount(distribution);
 		
 		Map<String, Double> distributionNew = new HashMap<String, Double>();
 //		You can specify the distribution for people older 18 years here:
@@ -58,16 +58,18 @@ public class RunAdjustMobilityAttitude {
 		distributionNew.put(CONVBIKE, 		0.189);
 		distributionNew.put(ENVTPTBIKE, 	0.170);
 		distributionNew.put(MULTIOPT, 		0.198);
+		distributionNew.put("null", 		0.000);
 		
-		Map<String, Integer> distributionDiff = calcDistribution(distributionOld, distributionNew);
+		Map<String, Integer> distributionDiff = calcDistribution(distribution, distributionNew);
 		
-		adjustAttitudes(personIds, attributes, distributionDiff);
+		attributes = adjustAttitudes(scenario.getPopulation(), attributes, distributionDiff);
 		
-		distributionOld = countMobilityAttitudes(personIds, attributes);
-		printCount(distributionOld);
+		distribution = countMobilityAttitudes(scenario.getPopulation().getPersons().keySet(), attributes);
+		printCount(distribution);
 		
 		ObjectAttributesXmlWriter writer = new ObjectAttributesXmlWriter(attributes);
-		writer.writeFile(filebase + "personAttributesAdjusted.xml.gz");
+		writer.writeFile(filebase + "personAttributes.xml.gz");
+		System.out.println("Attitudes adjusted and writen to "+ filebase + "personAttributes.xml.gz");
 
 	}
 	
@@ -90,13 +92,23 @@ public class RunAdjustMobilityAttitude {
 		}
 		
 		System.out.println("sum of weights:  " + sum);
+		System.out.println(sumPersonsWithAttitude);
 		
 		for (Entry<String, Double> entry : distributionNew.entrySet()){
 			
 			String mobilityAttitude = entry.getKey().toString(); 
-			Integer attitudePersons = (int)(Math.round((distributionNew.get(mobilityAttitude)/sum) * sumPersonsWithAttitude)-distributionOld.get(mobilityAttitude));
+			int oldcount = 0;
+			try {
+				
+				oldcount = distributionOld.get(mobilityAttitude).intValue();
+				
+			} catch (Exception e) {
+				
+				oldcount = 0;
+				
+			} 
+			Integer attitudePersons = (int)(Math.round((distributionNew.get(mobilityAttitude)/sum) * sumPersonsWithAttitude)-oldcount);
 			distributionDiff.put(mobilityAttitude, attitudePersons);
-			
 		}
 		
 		System.out.println(distributionDiff.toString());
@@ -104,15 +116,25 @@ public class RunAdjustMobilityAttitude {
 		return distributionDiff;
 	}
 
-	private static void adjustAttitudes(Set<Id<Person>> personIds, ObjectAttributes attributes, Map<String, Integer> distributionDiff) {
+	private static ObjectAttributes adjustAttitudes(Population population, ObjectAttributes attributes, Map<String, Integer> distributionDiff) {
 		
-		for (Id<Person> id : personIds){
+		for (Person p : population.getPersons().values()){
 			
-			String mobilityAttitude = attributes.getAttribute(id.toString(), MOBILITYATTITUDE).toString();
+			String mobilityAttitude; 
 			
-			if (mobilityAttitude.equals(NONE)){
+			try {
 				
+				mobilityAttitude = attributes.getAttribute(p.getId().toString(), MOBILITYATTITUDE).toString();
 				
+			} catch(Exception e) { 
+				
+				mobilityAttitude = "null";
+				
+			} 
+			
+			if (mobilityAttitude.equals(NONE) || (Integer) p.getAttributes().getAttribute("age") < 18){
+				
+				attributes.putAttribute(p.getId().toString(), MOBILITYATTITUDE, NONE);
 				
 			} else if (distributionDiff.get(mobilityAttitude) < 0){
 				
@@ -120,13 +142,13 @@ public class RunAdjustMobilityAttitude {
 					
 					if (entry.getValue()>0){
 						
-						attributes.putAttribute(id.toString(), MOBILITYATTITUDE, entry.getKey());
+						attributes.putAttribute(p.getId().toString(), MOBILITYATTITUDE, entry.getKey());
 						
 						entry.setValue(entry.getValue()-1);
 						
 						distributionDiff.put(mobilityAttitude, distributionDiff.get(mobilityAttitude)+1);	
 						
-						System.out.println(id.toString() + " changed from " + mobilityAttitude + " to " + entry.getKey());
+//						System.out.println(p.getId().toString() + " changed from " + mobilityAttitude + " to " + entry.getKey());
 						
 						break;
 						
@@ -137,6 +159,8 @@ public class RunAdjustMobilityAttitude {
 			} 
 			
 		}
+		
+		return attributes;
 		
 	}
 
@@ -151,8 +175,17 @@ public class RunAdjustMobilityAttitude {
 		
 		for (Id<Person> id  : personIds){
 			
-			String mobilityAttitude = attributes.getAttribute(id.toString(), MOBILITYATTITUDE).toString();
+			String mobilityAttitude;
 			
+			try {	
+				
+				mobilityAttitude = attributes.getAttribute(id.toString(), MOBILITYATTITUDE).toString();
+				
+			} catch (Exception e) {
+				
+				mobilityAttitude = "null";
+			} 
+				
 			if (!mobilityAttitudesCount.containsKey(mobilityAttitude)){
 				
 				mobilityAttitudesCount.put(mobilityAttitude, 1);
@@ -161,7 +194,7 @@ public class RunAdjustMobilityAttitude {
 				
 				mobilityAttitudesCount.put(mobilityAttitude, mobilityAttitudesCount.get(mobilityAttitude)+1);
 			} 
-			
+
 			persons++;
 			
 		}
