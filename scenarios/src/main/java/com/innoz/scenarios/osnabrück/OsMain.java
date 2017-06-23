@@ -1,5 +1,8 @@
 package com.innoz.scenarios.osnabrück;
 
+import java.util.Map;
+
+import org.hsqldb.lib.HashMap;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
@@ -19,13 +22,15 @@ import com.innoz.toolbox.matsim.scoring.MobilityAttitudeScoringFunctionFactory;
 
 public class OsMain {
 
-	static String filebase = "/home/dhosse/scenarios/mobilityAttitude/osnabrueck/";
+	static String filebase = "/home/bmoehring/scenarios/osnabrueck/03404_2017/";
 	
 	public static void main(String args[]){
 		
 		Config config = ConfigUtils.loadConfig(filebase + "config.xml.gz");
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		config.controler().setLastIteration(10);
+		config.controler().setOutputDirectory(filebase + "output/");
 		
 		addStrategySettings(config);
 		addMobilityAttitudeConfigGroup(config);
@@ -80,7 +85,7 @@ public class OsMain {
 		
 		MobilityAttitudeConfigGroup ma = new MobilityAttitudeConfigGroup();
 		ma.setSubpopulationAttribute("mobilityAttitude");
-		ma.setScaleFactor(10d);
+		ma.setScaleFactor(1.0);
 		
 		{
 			MobilityAttitudeModeParameterSet pars = new MobilityAttitudeModeParameterSet();

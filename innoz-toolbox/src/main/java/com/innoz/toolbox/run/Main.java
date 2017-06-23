@@ -34,7 +34,7 @@ public class Main {
 		Logger.getLogger(org.matsim.matrices.Matrix.class).setLevel(Level.OFF);
 		
 		// If at least four runtime arguments were given, we can go on with our execution
-		if(args.length > 3){
+		if(args.length > 2){
 			
 			// Create a new area set containing a single county
 			// The other parameters are set to more or less meaningful default values until we implement switches
@@ -46,9 +46,12 @@ public class Main {
 			Controller.configuration().scenario().addAreaSet(set);
 			Controller.configuration().surveyPopulation().setUseHouseholds(false);
 			Controller.configuration().scenario().setScaleFactor(0.1);
+			Controller.configuration().psql().setPsqlPort(9999);
+			Controller.configuration().psql().setPsqlUser("bmoehring");
+			Controller.configuration().psql().setPsqlPassword("yBGJ3NKeus");
 			
 			// MATSim needs a Cartesian coordinate system that measures distances in meters
-			Controller.configuration().misc().setCoordinateSystem(GlobalNames.UTM32N);
+			Controller.configuration().misc().setCoordinateSystem("EPSG:32632");
 			
 			// Set the scenario year to whatever was passed in the second argument
 			int forecastYear = Integer.parseInt(args[1]);
@@ -65,7 +68,7 @@ public class Main {
 			// Add all the necessary tasks to the controller queue
 			Controller.submit(new NetworkGenerationTask.Builder(Controller.configuration(), Controller.scenario()).build());
 			Controller.submit(new DemandGenerationTask.Builder(Controller.configuration(), Controller.scenario()).build());
-			Controller.submit(new WriteOutputTask.Builder(scenarioName, args[4]).build());
+			Controller.submit(new WriteOutputTask.Builder(scenarioName /**, args[4]*/).build());
 			
 			// Start the actual execution
 			Controller.run();
