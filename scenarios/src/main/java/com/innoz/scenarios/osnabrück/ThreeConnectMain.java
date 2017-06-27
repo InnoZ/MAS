@@ -1,4 +1,4 @@
-package com.innoz.toolbox.run;
+package com.innoz.scenarios.osnabrück;
 
 import java.util.HashMap;
 import java.util.Map;
