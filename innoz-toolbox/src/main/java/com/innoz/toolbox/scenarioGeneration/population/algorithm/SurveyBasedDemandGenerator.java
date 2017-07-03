@@ -28,6 +28,7 @@ import org.matsim.households.HouseholdImpl;
 import org.matsim.households.Income.IncomePeriod;
 import org.matsim.households.IncomeImpl;
 import org.matsim.matrices.Matrix;
+import org.matsim.pt.PtConstants;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
@@ -474,7 +475,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 					
 					if(mpe instanceof SurveyPlanActivity){
 						
-						Activity act = createActivity(population, personTemplate, planTemplate, mpe, cellIds.get(actIndex));
+						Activity act = createActivity(population, personTemplate, planTemplate, mpe, cellIds.get(actIndex), container);
 						if(act == null){
 							plan.getPlanElements().remove(plan.getPlanElements().size()-1);
 							break;
@@ -531,9 +532,49 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		person.addPlan(plan);
 		person.setSelectedPlan(plan);
 		
+		timeShift = 0.0;
+		
+		plan.getPlanElements().stream().filter(pe -> pe instanceof Activity).map(pe -> (Activity)pe)
+			.filter(pe -> pe.getStartTime() != Time.UNDEFINED_TIME && pe.getEndTime() != Time.UNDEFINED_TIME).forEach(pe -> {
+			
+			if(pe.getStartTime() - pe.getEndTime() == 0) timeShift += 1800;
+			
+		});
+		
+		Activity firstAct = (Activity) plan.getPlanElements().get(0);
+		Activity lastAct = (Activity) plan.getPlanElements().get(plan.getPlanElements().size()-1);
+		
+		delta = 0;
+		while(delta == 0) {
+			delta = com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.createRandomEndTime();
+			if(firstAct.getEndTime() + delta < 0)
+				delta = 0;
+			if(lastAct.getStartTime() + delta + timeShift > Time.MIDNIGHT)
+				delta = 0;
+			if(lastAct.getEndTime() != Time.UNDEFINED_TIME) {
+				if(lastAct.getStartTime() + delta + timeShift >= lastAct.getEndTime())
+					delta = 0;
+			}
+		}
+		
+		plan.getPlanElements().stream().filter(pe -> pe instanceof Activity).map(pe -> (Activity)pe)
+			.filter(pe -> !pe.getType().equals(PtConstants.TRANSIT_ACTIVITY_TYPE)).forEach(pe -> {
+				
+				if(plan.getPlanElements().indexOf(pe) > 0) {
+					pe.setStartTime(pe.getStartTime() + delta);
+				}
+				if(plan.getPlanElements().indexOf(pe) < plan.getPlanElements().size()-1) {
+					pe.setEndTime(pe.getEndTime() + delta);
+				}
+				
+			});
+		
 		return person;
 		
 	}
+	
+	double timeShift = 0.0;
+	double delta = 0;
 	
 	private List<String> distributeActivitiesInCells(final SurveyPerson person, final SurveyPlan plan, SurveyDataContainer container){
 		
@@ -655,6 +696,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 		SurveyPlanTrip trip = (SurveyPlanTrip)mpe;
 		String mode = trip.getMainMode();
+		
 //		double departure = way.getStartTime();
 //		double ttime = way.getEndTime() - departure;
 		
@@ -677,7 +719,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	 * @return A MATSim activity.
 	 */
 	private Activity createActivity(Population population, SurveyPerson personTemplate, SurveyPlan templatePlan,
-			SurveyPlanElement mpe, String cellId) {
+			SurveyPlanElement mpe, String cellId, SurveyDataContainer container) {
 
 		AdministrativeUnit au = Geoinformation.getInstance().getAdminUnit(cellId).getData();
 		
@@ -693,7 +735,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		double distance = 0.;
 		String mode = null;
 		if(this.lastLeg != null){
-			distance = this.lastLeg.getTravelDistance();
+			distance = this.lastLeg.getTravelTime() * container.getModeStatsContainer().get(this.lastLeg.getMainMode()).getMean();
 			mode = this.lastLeg.getMainMode();
 		}
 		if(this.lastActCoord == null){

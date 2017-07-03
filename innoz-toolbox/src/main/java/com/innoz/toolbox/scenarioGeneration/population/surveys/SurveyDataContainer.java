@@ -27,7 +27,7 @@ public class SurveyDataContainer {
 	
 	private Map<String, ArrayList<SurveyPerson>> classifiedPersons;
 	
-	private Map<String, RecursiveStatsContainer> modeStatsContainer;
+	private Map<String, RecursiveStatsContainer> modeSpeedStatsContainer;
 	private Map<String, Hydrograph> activityTypeHydrographs;
 	
 	public SurveyDataContainer(final Configuration configuration){
@@ -42,7 +42,7 @@ public class SurveyDataContainer {
 		
 		this.persons = new HashMap<String, SurveyPerson>();
 		this.classifiedPersons = new HashMap<String, ArrayList<SurveyPerson>>();
-		this.modeStatsContainer = new HashMap<String, RecursiveStatsContainer>();
+		this.modeSpeedStatsContainer = new HashMap<String, RecursiveStatsContainer>();
 		this.activityTypeHydrographs = new HashMap<String, Hydrograph>();
 		
 	}
@@ -95,7 +95,7 @@ public class SurveyDataContainer {
 	
 	public Map<String, RecursiveStatsContainer> getModeStatsContainer(){
 		
-		return this.modeStatsContainer;
+		return this.modeSpeedStatsContainer;
 		
 	}
 	
@@ -124,15 +124,15 @@ public class SurveyDataContainer {
 		
 	}
 	
-	public void handleNewModeEntry(String mode, double distance){
+	public void handleNewModeEntry(String mode, double speed){
 	
-		if(!this.modeStatsContainer.containsKey(mode)){
+		if(!this.modeSpeedStatsContainer.containsKey(mode)){
 			
-			this.modeStatsContainer.put(mode, new RecursiveStatsContainer());
+			this.modeSpeedStatsContainer.put(mode, new RecursiveStatsContainer());
 			
 		}
 		
-		this.modeStatsContainer.get(mode).handleNewEntry(distance);
+		this.modeSpeedStatsContainer.get(mode).handleNewEntry(speed);
 		
 	}
 	

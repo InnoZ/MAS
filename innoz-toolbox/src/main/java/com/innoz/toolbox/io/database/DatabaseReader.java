@@ -401,13 +401,16 @@ public class DatabaseReader {
 		Statement statement = connection.createStatement();
 		
 		StringBuilder builder = new StringBuilder();
-		for(ConfigurationGroup cg : configuration.scenario().getAreaSets().values()){
+		for(ConfigurationGroup cg : Controller.configuration().scenario().getAreaSets().values()){
 			AreaSet set = (AreaSet) cg;
-			builder.append(set.getIds());
+			String[] ids = set.getIds().split(",");
+			for(String i : ids)
+				builder.append("'" + i + "%' OR gkz LIKE ");
 		}
 		String ids = builder.toString();
+		ids = ids.substring(0,ids.length()-13);
 		
-		String sql = "SELECT gkz, rtype7 from bbsr.regiontypes WHERE gkz LIKE '" + ids + "%';";
+		String sql = "SELECT gkz, rtype7 from bbsr.regiontypes WHERE gkz LIKE " + ids + ";";
 		
 		ResultSet result = statement.executeQuery(sql);
 		

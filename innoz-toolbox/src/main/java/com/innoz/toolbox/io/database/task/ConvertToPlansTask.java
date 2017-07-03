@@ -76,6 +76,10 @@ public class ConvertToPlansTask implements SurveyDataTask {
 					if(stage.getDistance() != null){
 						trip.setTravelDistance(Double.parseDouble(stage.getDistance()));
 					}
+					trip.setTravelTime(trip.getEndTime() - trip.getStartTime());
+					
+					container.handleNewModeEntry(trip.getMainMode(), trip.getTravelDistance() / trip.getTravelTime());
+					
 					plan.getPlanElements().add(trip);
 					
 					Double distance = trip.getTravelDistance();

@@ -84,7 +84,7 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 				
 				AdministrativeUnit entry = node.getData();
 				
-				if(ids.contains(entry.getId().substring(0, 5))&&!knownRegionTypes.contains(entry.getRegionType())){
+				if(ids.contains(entry.getId().substring(0, 5))&&entry.getRegionType()!= null&&!knownRegionTypes.contains(entry.getRegionType())){
 				
 					if(cntOut > 0){
 
