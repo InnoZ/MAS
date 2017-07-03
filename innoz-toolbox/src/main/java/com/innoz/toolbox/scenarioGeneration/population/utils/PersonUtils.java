@@ -6,7 +6,10 @@ import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
+
+import org.matsim.core.gbl.MatsimRandom;
 
 public class PersonUtils {
 
@@ -97,6 +100,19 @@ public class PersonUtils {
 	public static double getTotalWeight(Collection<SurveyPerson> collection){
 		
 		return collection.stream().collect(Collectors.summarizingDouble(SurveyPerson::getWeight)).getSum();
+		
+	}
+	
+	public static double createRandomEndTime() {
+		
+		Random random = MatsimRandom.getLocalInstance();
+		double r1 = random.nextDouble();
+		double r2 = random.nextDouble();
+		// Box-Muller-Method in order to get a normally distributed variable
+		double normal = Math.cos(2 * Math.PI * r1) * Math.sqrt(-2 * Math.log(r2));
+		double endTime = 20 * 60 * normal;
+		
+		return endTime;
 		
 	}
 	
