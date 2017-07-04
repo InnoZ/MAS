@@ -155,6 +155,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
+			<artifactId>av</artifactId>
+			<version>${matsim.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
 			<artifactId>eventsBasedPTRouter</artifactId>
 			<version>${matsim.version}</version>
 			<scope>compile</scope>
