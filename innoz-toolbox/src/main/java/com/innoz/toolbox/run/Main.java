@@ -45,7 +45,6 @@ public class Main {
 			set.setPopulationSource(PopulationSource.SURVEY);
 			Controller.configuration().scenario().addAreaSet(set);
 			Controller.configuration().surveyPopulation().setUseHouseholds(false);
-			Controller.configuration().scenario().setScaleFactor(0.1);
 			
 			// MATSim needs a Cartesian coordinate system that measures distances in meters
 			Controller.configuration().misc().setCoordinateSystem(GlobalNames.UTM32N);
@@ -65,7 +64,7 @@ public class Main {
 			// Add all the necessary tasks to the controller queue
 			Controller.submit(new NetworkGenerationTask.Builder(Controller.configuration(), Controller.scenario()).build());
 			Controller.submit(new DemandGenerationTask.Builder(Controller.configuration(), Controller.scenario()).build());
-			Controller.submit(new WriteOutputTask.Builder(scenarioName, args[4]).build());
+			Controller.submit(new WriteOutputTask.Builder(scenarioName, args[3]).build());
 			
 			// Start the actual execution
 			Controller.run();
