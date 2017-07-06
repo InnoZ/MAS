@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.geotools.referencing.CRS;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.core.population.io.PopulationWriter;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.matrices.Matrix;
@@ -17,6 +18,7 @@ import com.innoz.toolbox.config.groups.ConfigurationGroup;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.PopulationSource;
 import com.innoz.toolbox.io.database.CommuterDatabaseParser;
+import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.ZensusGrid;
 import com.innoz.toolbox.scenarioGeneration.population.algorithm.CommuterDemandGenerator;
@@ -109,6 +111,8 @@ public class DemandGenerationTask implements ControllerTask {
 			}
 			
 		}
+		
+		new PopulationWriter(Controller.scenario().getPopulation()).write(Controller.configuration().misc().getOutputDirectory() + "plans.xml.gz");
 		
 	}
 	
