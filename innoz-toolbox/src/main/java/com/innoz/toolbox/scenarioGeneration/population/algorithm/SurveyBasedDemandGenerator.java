@@ -380,7 +380,6 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	 * @param homeCoord The home location.
 	 * @return A MATSim person with an initial daily plan.
 	 */
-	@SuppressWarnings("deprecation")
 	private Person createPerson(Configuration configuration, SurveyPerson personTemplate, Population population,
 			ObjectAttributes personAttributes, double personalRandom, int i, Coord homeCoord, ActivityFacility homeFacility,
 			SurveyDataContainer container, double hhIncome) {
@@ -420,21 +419,14 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		personAttributes.putAttribute(person.getId().toString(),
 				com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.ATT_LICENSE, hasLicense);
 		personAttributes.putAttribute(person.getId().toString(), 
+				com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.ATT_BIKE_AVAIL, personTemplate.hasBikeAvailable());
+		personAttributes.putAttribute(person.getId().toString(), 
 				com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.ATT_MOBILITYATTITUDE, mobilityAttitude);
 		if(personTemplate.isCarsharingUser()){
 			personAttributes.putAttribute(person.getId().toString(), "OW_CARD", "true");
 			personAttributes.putAttribute(person.getId().toString(), "RT_CARD", "true");
 			personAttributes.putAttribute(person.getId().toString(), "FF_CARD", "true");
 		}
-		
-		//TODO add possibility to generate subpopulations somewhere in the configuration groups...
-//		if(configuration.scenario().getSubpopulationsType().equals(Subpopulations.mobility_attitude)){
-//			String mag = MobilityAttitudeGroups.assignPersonToGroup(person, random,
-//					hhIncome, personAttributes);
-//			if(mag != null){
-//				personAttributes.putAttribute(person.getId().toString(), "mobilityAttitude", mag);
-//			}
-//		}
 		
 		// Check if there are any plans for the person (if it is a mobile person)
 		if(personTemplate.getPlans().size() > 0){

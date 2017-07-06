@@ -24,6 +24,7 @@ public class PersonUtils {
 	public static final String ATT_EMPLOYED = "isEmployed";
 	public static final String ATT_CAR_AVAIL = "carAvail";
 	public static final String ATT_LICENSE = "hasLicense";
+	public static final String ATT_BIKE_AVAIL = "bikeAvail";
 	public static final String ATT_MOBILITYATTITUDE = "mobilityAttitude";
 	
 	static final String[] mobilityAttitudes = {"none", "tradCar", "flexCar", "urbanPt",

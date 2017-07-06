@@ -36,6 +36,7 @@ public class SurveyPerson extends SurveyObject implements Weighted, Comparable<D
 	private boolean carAvailable;
 	private boolean hasLicense;
 	private boolean isEmployed;
+	private boolean bikeAvailable;
 	private boolean carsharingUser;
 	
 	private List<SurveyPlan> plans;
@@ -161,6 +162,18 @@ public class SurveyPerson extends SurveyObject implements Weighted, Comparable<D
 	public void setEmployed(boolean b) {
 		
 		this.isEmployed = b;
+		
+	}
+	
+	public void setBikeAvailable(boolean b) {
+		
+		this.bikeAvailable = b;
+		
+	}
+	
+	public boolean hasBikeAvailable() {
+		
+		return this.bikeAvailable;
 		
 	}
 	

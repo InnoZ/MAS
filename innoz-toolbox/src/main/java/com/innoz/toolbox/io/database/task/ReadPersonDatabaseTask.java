@@ -13,6 +13,7 @@ import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.DayTyp
 import com.innoz.toolbox.io.SurveyConstants;
 import com.innoz.toolbox.io.database.handler.DefaultHandler;
 import com.innoz.toolbox.io.database.handler.PersonAgeHandler;
+import com.innoz.toolbox.io.database.handler.PersonBikeAvailHandler;
 import com.innoz.toolbox.io.database.handler.PersonCarAvailabilityHandler;
 import com.innoz.toolbox.io.database.handler.PersonEmploymentHandler;
 import com.innoz.toolbox.io.database.handler.PersonGroupHandler;
@@ -57,6 +58,7 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 		this.handlers.add(new PersonIsMobileHandler());
 		this.handlers.add(new PersonRegionTypeHandler());
 		this.handlers.add(new PersonGroupHandler());
+		this.handlers.add(new PersonBikeAvailHandler());
 	
 	}
 
@@ -139,7 +141,8 @@ public class ReadPersonDatabaseTask extends DatabaseTask {
 				attributes.put(SurveyConstants.mobile(surveyType), resultSet.getString(SurveyConstants.mobile(surveyType)));
 				attributes.put(SurveyConstants.regionType(surveyType), resultSet.getString(SurveyConstants.regionType(surveyType)));
 				attributes.put(SurveyConstants.personGroup(surveyType), resultSet.getString(SurveyConstants.personGroup(surveyType)));
-								
+				attributes.put(SurveyConstants.bikeAvail(surveyType), resultSet.getString(SurveyConstants.bikeAvail(surveyType)));
+				
 				SurveyPerson person = (SurveyPerson) SurveyObject.newInstance(SurveyPerson.class);
 				
 				for(DefaultHandler handler : this.handlers){

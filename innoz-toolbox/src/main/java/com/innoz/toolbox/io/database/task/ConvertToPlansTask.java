@@ -122,6 +122,7 @@ public class ConvertToPlansTask implements SurveyDataTask {
 		for(SurveyPerson person : container.getPersons().values()){
 			
 			boolean licenseAndCarAvailabilitySet = false;
+			boolean bikeAvailabilitySet = false;
 			
 			for(SurveyPlan plan : person.getPlans()){
 				
@@ -167,6 +168,21 @@ public class ConvertToPlansTask implements SurveyDataTask {
 								
 							}
 		
+						}
+						if(way.getMainMode().equals(TransportMode.bike) && !person.hasBikeAvailable()) {
+							if(!bikeAvailabilitySet){
+								if(warnCounterLicense < 5){
+									log.warn("Person " + person.getId() + " reported that no bike was available, but it is riding anyway!");
+									log.info("Setting bikeavailability to ’true’.");
+									warnCounterLicense++;
+								} else if(warnCounterLicense == 5){
+									log.info("Further occurences of this message are suppressed.");
+									warnCounterLicense++;
+								}
+								person.setBikeAvailable(true);
+								bikeAvailabilitySet = true;
+								
+							}
 						}
 						
 					}

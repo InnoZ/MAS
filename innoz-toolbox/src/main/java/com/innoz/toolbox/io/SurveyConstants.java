@@ -21,6 +21,7 @@ public final class SurveyConstants {
 		PSEX("hp_sex", "v_geschlecht"),
 		PAGE("hp_alter", "v_alter"),
 		PCARAVAIL("p01_1", "v_pkw_verfueg"),
+		PBIKEAVAIL("p02",""),
 		PLICENSE("hp_pkwfs", "v_fuehr_pkw"),
 		PEMPLOYED("hp_beruf", "v_erw"),
 		PCSUSER(null, "v_carshare"),
@@ -343,6 +344,12 @@ public final class SurveyConstants {
 	public static String mobile(String namespace){
 		
 		return SurveyConstant.MOBILE.getName(namespace);
+		
+	}
+	
+	public static String bikeAvail(String namespace) {
+		
+		return SurveyConstant.PBIKEAVAIL.getName(namespace);
 		
 	}
 	
