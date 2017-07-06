@@ -17,6 +17,8 @@ import org.matsim.contrib.carsharing.manager.supply.costs.CostCalculation;
  */
 public class FlinksterCompanyCostStructure {
 
+	public static final String COMPANY_NAME = "flinkster";
+	
 	private FlinksterCompanyCostStructure() {}
 	
 	public static CompanyCosts create() {

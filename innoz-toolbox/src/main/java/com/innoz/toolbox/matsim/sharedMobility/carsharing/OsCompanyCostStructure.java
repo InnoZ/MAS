@@ -15,6 +15,10 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 
 public class OsCompanyCostStructure {
 
+	public static final String COMPANY_NAME = "stadtteilauto";
+	
+	private OsCompanyCostStructure() {}
+	
 	public static CompanyCosts create(Scenario scenario) {
 		
 		ServiceArea area = new ServiceArea();

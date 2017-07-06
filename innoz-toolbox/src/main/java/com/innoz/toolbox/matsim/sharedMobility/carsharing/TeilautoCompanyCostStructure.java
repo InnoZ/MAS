@@ -9,6 +9,8 @@ import org.matsim.contrib.carsharing.manager.supply.costs.CostCalculation;
 
 public class TeilautoCompanyCostStructure {
 
+	public static final String COMPANY_NAME = "teilauto";
+	
 	private TeilautoCompanyCostStructure() {}
 	
 	public static CompanyCosts create() {

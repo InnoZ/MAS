@@ -9,6 +9,8 @@ import org.matsim.contrib.carsharing.manager.supply.costs.CostCalculation;
 
 public class DriveNowCompanyCostStructure {
 
+	public static final String COMPANY_NAME = "drive_now";
+	
 	private DriveNowCompanyCostStructure() {};
 	
 	public static CompanyCosts create() {
