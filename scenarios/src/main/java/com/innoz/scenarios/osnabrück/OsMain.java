@@ -25,7 +25,19 @@ public class OsMain {
 
 	public static void main(String args[]){
 		
+//		INPUT configurationcd
 		Config config = ConfigUtils.loadConfig("/home/bmoehring/scenarios/osnabrueck/03404_2017/config.xml.gz");
+//		INPUT MODAL SPLIT HERE:
+		Map<String, Double> modalSplitGoal = new HashMap<String, Double>();
+		modalSplitGoal.put(TransportMode.bike, 	0.12);
+		modalSplitGoal.put(TransportMode.car, 	0.55);
+		modalSplitGoal.put(TransportMode.pt, 	0.07);
+//		modalSplitGoal.put(TransportMode.ride, 	0.13);
+		modalSplitGoal.put(TransportMode.walk, 	0.24);
+//		modalSplitGoal.put(TransportMode.other, 0.0);
+//		Transport.Mode to fix and keep with constant=0 HERE:
+		String holdMode = TransportMode.car;
+		
 //				,
 //				new CarsharingConfigGroup(), new OneWayCarsharingConfigGroup(), new TwoWayCarsharingConfigGroup(), new FreeFloatingConfigGroup());
 		
@@ -130,14 +142,7 @@ public class OsMain {
 		controler.addControlerListener(new RememberModeStats());
 
 //		RunCarsharing.installCarSharing(controler);
-		
-		Map<String, Double> modalSplitGoal = new HashMap<String, Double>();
-		modalSplitGoal.put(TransportMode.bike, 	0.12);
-		modalSplitGoal.put(TransportMode.car, 	0.55);
-		modalSplitGoal.put(TransportMode.pt, 	0.07);
-//		modalSplitGoal.put(TransportMode.ride, 	0.13);
-		modalSplitGoal.put(TransportMode.walk, 	0.24);
-//		modalSplitGoal.put(TransportMode.other, 0.0);
+
 		ASCModalSplitCallibration asc = new ASCModalSplitCallibration(modalSplitGoal);
 		double delta = Double.POSITIVE_INFINITY;
 		int run = 1;
@@ -155,7 +160,7 @@ public class OsMain {
 				
 				ModeParams params = config.planCalcScore().getOrCreateModeParams(e.getKey());
 				// keep one mode constant at 0 and adjust the others according to the constant
-				params.addParam("constant", String.valueOf(e.getValue()-constants.get(TransportMode.car)));
+				params.addParam("constant", String.valueOf(e.getValue()-constants.get(holdMode)));
 				config.planCalcScore().addModeParams(params);
 				
 			}
