@@ -65,9 +65,8 @@ public class CSMembersXmlWriter extends MatsimXmlWriter {
 				// write attributes
 				for (String csType : e.getValue()) {
 					xmlAttributes.add(super.createTuple(ATTR_ATTRIBUTENAME, csType));
-					writeStartTag(CONTENT_ATTRIBUTE, xmlAttributes);
+					writeStartTag(CONTENT_ATTRIBUTE, xmlAttributes, true);
 					xmlAttributes.clear();
-					writeEndTag(CONTENT_ATTRIBUTE);
 				}
 				writeEndTag(TAG_ATTRIBUTE);
 			}
