@@ -35,8 +35,11 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PopulationUtils;
+import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.CollectionUtils;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.pt.PtConstants;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.postgis.PGgeometry;
@@ -48,6 +51,7 @@ import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.io.database.DatabaseConstants;
 import com.innoz.toolbox.io.database.DatabaseConstants.DatabaseTable;
 import com.innoz.toolbox.io.database.DatabaseConstants.RailsEnvironments;
+import com.innoz.toolbox.utils.GlobalNames;
 import com.innoz.toolbox.utils.PsqlUtils;
 
 /**
@@ -68,7 +72,11 @@ public class MatsimPsqlAdapter {
 	private MatsimPsqlAdapter() {};
 	
 	public static void main(String args[]) {
-		MatsimPsqlAdapter.writeScenarioToPsql(ScenarioUtils.createScenario(ConfigUtils.createConfig()), "", null);
+		
+		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+		new PopulationReader(scenario).readFile("/home/dhosse/garmisch/run16/output_plans.xml.gz");
+		
+		MatsimPsqlAdapter.writeScenarioToPsql(scenario, "09180_2025", "development");
 	}
 	
 	/**
@@ -93,7 +101,7 @@ public class MatsimPsqlAdapter {
 			
 		} catch (InstantiationException | IllegalAccessException
 		        | ClassNotFoundException | SQLException e) {
-
+			
 			e.printStackTrace();
 			
 		}
@@ -103,7 +111,7 @@ public class MatsimPsqlAdapter {
 	public static void writeScenarioToPsql(final Scenario scenario, final String scenarioName, final String railsEnvironment) {
 		
 		try {
-		
+			
 			String dbName = RailsEnvironments.valueOf(railsEnvironment).getDatabaseName();
 			
 			connection = PsqlAdapter.createConnection(dbName);
@@ -359,6 +367,8 @@ public class MatsimPsqlAdapter {
 		
 		filterTransitWalkLegs(population);
 		
+		final CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(GlobalNames.UTM32N, GlobalNames.WGS84);
+		
 		for(Person person : population.getPersons().values()) {
 			
 			stmt.setString(1, person.getId().toString());
@@ -406,8 +416,8 @@ public class MatsimPsqlAdapter {
 					stmt.setTime(3, new Time(TimeUnit.SECONDS.toMillis((long)endTime)));
 					stmt.setString(4, fromActType);
 					stmt.setString(5, toActType);
-					stmt.setObject(6, new PGgeometry(createWKT(from.getCoord())));
-					stmt.setObject(7, new PGgeometry(createWKT(to.getCoord())));
+					stmt.setObject(6, new PGgeometry(createWKT(ct.transform(from.getCoord()))));
+					stmt.setObject(7, new PGgeometry(createWKT(ct.transform(to.getCoord()))));
 					stmt.setString(8, mode);
 					stmt.setString(9, scenario);
 					
@@ -676,7 +686,7 @@ public class MatsimPsqlAdapter {
 			statement.setArray(6, connection.createArrayOf("varchar", createArrayFromMap(modeCounts)));
 			statement.setArray(7, connection.createArrayOf("varchar", diurnalCurves));
 			statement.setArray(8, connection.createArrayOf("varchar", createArrayFromMap(modeEmissions)));
-			statement.setBoolean(9, false);
+			statement.setBoolean(9, true);
 			statement.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
 			statement.setTimestamp(11, new Timestamp(System.currentTimeMillis()));
 			

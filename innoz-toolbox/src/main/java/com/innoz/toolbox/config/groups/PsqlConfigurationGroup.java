@@ -15,14 +15,18 @@ public class PsqlConfigurationGroup extends ConfigurationGroup {
 	public static final String LOCAL_PORT = "port";
 	public static final String IS_WRITING_INTO_DATAHUB = "isWritingIntoDataHub";
 	
-	private String dbUser = "postgres";
-	private String dbPassword = "postgres";
+	private String dbUser = System.getenv("matsim");
+	private String dbPassword = System.getenv("matsim_db_password");
 	private int localPort = 5432;
 	private boolean writeIntoDataHub = false;
 	
 	public PsqlConfigurationGroup() {
 		
 		super(GROUP_NAME);
+		if(this.dbUser == null || this.dbPassword == null) {
+			this.dbUser = "postgres";
+			this.dbPassword = "postgres";
+		}
 		
 	}
 	
