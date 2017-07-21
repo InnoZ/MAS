@@ -80,7 +80,7 @@ public final class Controller {
 				
 				} catch (InterruptedException e) {
 
-					e.printStackTrace();
+					log.error(e.getMessage());
 					
 				}
 				

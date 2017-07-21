@@ -72,8 +72,10 @@ public class Main {
 		} else {
 
 			// Not enough runtime arguments to continue
-			throw new RuntimeException("You must pass at least four arguments to the controller ('region id', 'scenario year',"
+			
+			log.error("You must pass at least four arguments to the controller ('region id', 'scenario year',"
 					+ "'output directory' and 'Rails environment'.");
+			throw new RuntimeException();
 			
 		}
 		
