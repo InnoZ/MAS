@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.run.controller.Controller;
 
 /**
  * 
@@ -62,7 +63,7 @@ public class PsqlAdapter {
 		
 	Class.forName(PSQL_DRIVER).newInstance();
 	return DriverManager.getConnection(PSQL_URL + 5432 + "/" + dbName,
-			"postgres", "postgres");
+			Controller.configuration().psql().getPsqlUser(), Controller.configuration().psql().getPsqlPassword());
 		
 	}
 	
