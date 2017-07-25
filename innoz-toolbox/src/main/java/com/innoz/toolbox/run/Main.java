@@ -1,9 +1,12 @@
 package com.innoz.toolbox.run;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.matsim.core.controler.OutputDirectoryLogging;
 
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.PopulationSource;
@@ -15,10 +18,10 @@ import com.innoz.toolbox.utils.GlobalNames;
 
 /**
  * 
- * Starting point for a shell-based version of the scenario generation framework. This class be used as starting point for
- * a shell execution of the framework. <br>
- * At the moment, the execution is a minimal example of the scenario generation. When invoked, the class needs three runtime arguments,
- * namely an id for the survey area, a (forecast) year and the output path. dhosse 05/17 <br>
+ * Starting point for a shell-based version of the scenario generation framework. <br>
+ * At the moment, the execution is a minimal example of the scenario generation. When invoked, the class needs four runtime arguments,
+ * namely an id for the survey area, a (forecast) year, the output path and the rails environment (one of: development,
+ * production, test). dhosse 05/17, 07/17 <br>
  * 
  * java -cp <path-to-jar> com.innoz.toolbox.run.Main args1 args2 args3
  * 
@@ -35,6 +38,20 @@ public class Main {
 		
 		// If at least four runtime arguments were given, we can go on with our execution
 		if(args.length > 3){
+
+			// Set the name of the scenario (combination of gkz and forecast year)
+			String scenarioName = args[0] + "_" + args[1];
+			
+			String outputDirectory = args[2] + "/" + scenarioName + "/";
+			
+			// Set the output directory according to the scenario name
+			Controller.configuration().misc().setOutputDirectory(outputDirectory);
+			
+			Files.createDirectories(Paths.get(outputDirectory));
+			
+			OutputDirectoryLogging.initLoggingWithOutputDirectory(outputDirectory);
+			
+			log.info("Starting scenario geneartion with " + Main.class.getSimpleName());
 			
 			// Create a new area set containing a single county
 			// The other parameters are set to more or less meaningful default values until we implement switches
@@ -46,6 +63,8 @@ public class Main {
 			Controller.configuration().scenario().addAreaSet(set);
 			Controller.configuration().surveyPopulation().setUseHouseholds(false);
 			
+			log.info("Added survey area with AGKZ '" + args[0] + "'");
+			
 			// MATSim needs a Cartesian coordinate system that measures distances in meters
 			Controller.configuration().misc().setCoordinateSystem(GlobalNames.UTM32N);
 			
@@ -53,11 +72,7 @@ public class Main {
 			int forecastYear = Integer.parseInt(args[1]);
 			Controller.configuration().scenario().setYear(forecastYear);
 			
-			// Set the name of the scenario (combination of gkz and forecast year)
-			String scenarioName = args[0] + "_" + args[1];
-			
-			// Set the output directory according to the scenario name
-			Controller.configuration().misc().setOutputDirectory(args[2] + "/" + scenarioName + "/");
+			log.info("Scenario year set to " + args[1]);
 			
 			log.info("Starting controller...");
 			
@@ -78,6 +93,8 @@ public class Main {
 			throw new RuntimeException();
 			
 		}
+		
+		OutputDirectoryLogging.closeOutputDirLogging();
 		
 	}
 	

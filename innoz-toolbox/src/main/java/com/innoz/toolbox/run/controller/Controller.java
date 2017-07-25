@@ -12,7 +12,6 @@ import org.matsim.core.scenario.ScenarioUtils;
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.ConfigurationUtils;
 import com.innoz.toolbox.run.controller.task.ControllerTask;
-import com.innoz.toolbox.run.controller.task.CreateOutputDirectoryTask;
 import com.innoz.toolbox.run.controller.task.ReadGeodataTask;
 
 /**
@@ -95,7 +94,6 @@ public final class Controller {
 	
 	private static void addMandatoryTasks() {
 		
-		queue.add(new CreateOutputDirectoryTask.Builder(Controller.configuration.misc().getOutputDirectory()).build());
 		queue.add(new ReadGeodataTask.Builder().build());
 		
 	}
