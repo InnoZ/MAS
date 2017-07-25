@@ -12,6 +12,8 @@
 	  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	  <geotools.version>13.0</geotools.version>
 	  <matsim.version>0.9.0</matsim.version>
+	  <timestamp>${maven.build.timestamp}</timestamp>
+	  <maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
 	</properties>
 	<repositories>
 		<repository>
@@ -48,7 +50,7 @@
 		</repository>
 	</repositories>
 	<build>
-		<finalName>${project.artifactId}-${project.version}-${maven.build.timestamp}</finalName>
+		<finalName>${project.artifactId}-${project.version}-${timestamp}</finalName>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
