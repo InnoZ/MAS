@@ -22,11 +22,10 @@ public class CarsharingSupplyAdaptation {
 
 	/**
 	 * 
-	 * @param allVehicles A map containing all vehicles. The mapping is <VehicleId, Vehicle>.
-	 * @param allLocations A map containing all vehicles and their locations in the network. The mapping is <Vehicle, Link>
-	 * @param bookedVehicles A map of all the vehicles that have at least been rent once in the last iteration. The mapping is <VehicleId, Number of Bookings>
-	 * @param threshold The number of iterations after which the supply side is modified. Normally any number greater or equal than 1.
-	 * Since too small values tend to cause oscillation of demand, it should be set with
+	 * @param allVehicles A map containing all vehicles. The mapping is (VehicleId, Vehicle).
+	 * @param allLocations A map containing all vehicles and their locations in the network. The mapping is (Vehicle, Link).
+	 * @param bookedVehicles A map of all the vehicles that have at least been rent once in the last iteration. The mapping is (VehicleId, Number of Bookings).
+	 * @param threshold The minimum number of bookings that have to be at least reached before a vehicle can be declared 'idle'.
 	 */
 	static void removeIdleVehicles(Map<String, CSVehicle> allVehicles, Map<CSVehicle, Link> allLocations,
 			Map<String, Integer> bookedVehicles, int threshold) {
@@ -37,6 +36,17 @@ public class CarsharingSupplyAdaptation {
 		
 	}
 	
+	/**
+	 * 
+	 * @param network The scenario's network (links and nodes)
+	 * @param allVehicles A map containing all vehicles. The mapping is (VehicleId, Vehicle).
+	 * @param allLocations A map containing all vehicles and their locations in the network. The mapping is (Vehicle, Link).
+	 * @param stuckCountsPerCsType A map containing stuck counts for each carsharing type. 'Stuck' means no carsharing vehicle was 
+	 * available when an agent arrived. This is used for the generation of new vehicles. The mapping is (LinkId, Map(Carsharing Type,
+	 * Number of Stuck Events)).
+	 * @param averageOverIterations The number of iterations after which the supply side is modified. Normally any number greater or equal than 1.
+	 * Since too small values tend to cause oscillation of demand, it should be set with caution.
+	 */
 	static void addNewVehicles(final Network network, Map<String, CSVehicle> allVehicles, Map<CSVehicle, Link> allLocations,
 			Map<Id<Link>, Map<String, Integer>> stuckCountsPerCsType, int averageOverIterations) {
 		
