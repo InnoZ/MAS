@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import org.apache.log4j.Logger;
+
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.run.controller.Controller;
 
@@ -19,6 +21,7 @@ public class PsqlAdapter {
 	// FIELDS /////////////////////////////////////////////
 	static final String PSQL_DRIVER = "org.postgresql.Driver";
 	static final String PSQL_URL = "jdbc:postgresql://localhost:";
+	private static final Logger log = Logger.getLogger(PsqlAdapter.class);
 	///////////////////////////////////////////////////////
 	
 	// No instantiation!
@@ -41,6 +44,9 @@ public class PsqlAdapter {
 		InstantiationException, IllegalAccessException, ClassNotFoundException{
 		
 		Class.forName(PSQL_DRIVER).newInstance();
+		
+		log.info("Connecting to database " + dbName + " as user " + configuration.psql().getPsqlUser() + "...");
+		
 		return DriverManager.getConnection(PSQL_URL + configuration.psql().getPsqlPort() + "/" + dbName,
 				configuration.psql().getPsqlUser(), configuration.psql().getPsqlPassword());
 		
@@ -62,6 +68,9 @@ public class PsqlAdapter {
 	InstantiationException, IllegalAccessException, ClassNotFoundException {
 		
 	Class.forName(PSQL_DRIVER).newInstance();
+	
+	log.info("Connecting to database " + dbName + " as user " + Controller.configuration().psql().getPsqlUser() + "...");
+	
 	return DriverManager.getConnection(PSQL_URL + 5432 + "/" + dbName,
 			Controller.configuration().psql().getPsqlUser(), Controller.configuration().psql().getPsqlPassword());
 		

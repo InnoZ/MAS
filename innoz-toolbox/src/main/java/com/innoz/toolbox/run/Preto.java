@@ -46,19 +46,22 @@ public class Preto {
 	 * 1: year,<br>
 	 * 2: output path,<br>
 	 * 3: rails environment (one of: development, production, test)
+	 * 4: logging directory
 	 * @throws IOException
 	 */
 	public static void main(String args[]) throws IOException {
 
-		if(args.length > 3) {
+		if(args.length > 4) {
 
 			// Combine the output path from the respective parameters
 			String outputDirectory = args[2] + "/" + args[0] + "_" + args[1] + "/";
+			String logDirectory = args[4] + "/" + args[0] + "_" + args[1] + "/";
 			
-			// Create the output directory
+			// Create the output and log directories (if not present)
 			Files.createDirectories(Paths.get(outputDirectory));
+			Files.createDirectories(Paths.get(logDirectory));
 			
-			OutputDirectoryLogging.initLoggingWithOutputDirectory(outputDirectory);
+			OutputDirectoryLogging.initLoggingWithOutputDirectory(logDirectory);
 			
 			Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 			
