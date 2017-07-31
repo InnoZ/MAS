@@ -118,7 +118,6 @@ public class MatsimPsqlAdapter {
 			
 			log.info("Connected to database " + dbName);
 			
-//			network2Table(scenario.getNetwork(), tablespace);
 			plans2Table(scenario.getPopulation(), scenarioName);
 			writeScenarioMetaData(scenario, scenarioName);
 			
@@ -305,11 +304,13 @@ public class MatsimPsqlAdapter {
 		
 		try {
 			
+			log.info("Writing plans...");
+			
 			writePlansTable(population, tablespace);
 			
 		} catch (SQLException e) {
 
-			e.printStackTrace();
+			log.error(e.getMessage());
 			
 		}
 		
@@ -646,6 +647,8 @@ public class MatsimPsqlAdapter {
 	static void writeScenarioMetaData(final Scenario scenario, String scenarioId) {
 		
 		try {
+			
+			log.info("Writing scenario metadata...");
 		
 			AggregatedAnalysis.generate(scenario);
 			
@@ -698,7 +701,7 @@ public class MatsimPsqlAdapter {
 				
 			} catch(BatchUpdateException e) {
 				
-				System.out.println(e.getNextException().toString());
+				log.error(e.getNextException().toString());
 			
 			}
 			
@@ -706,7 +709,7 @@ public class MatsimPsqlAdapter {
 			
 		} catch (SQLException e) {
 
-			e.printStackTrace();
+			log.error(e.getMessage());
 			
 		}
 		

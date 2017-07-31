@@ -9,7 +9,6 @@
   </parent>
   <groupId>com.innoz.scenarios</groupId>
   <artifactId>scenarios</artifactId>
-  <version>1.0-SNAPSHOT</version>
   <name>scenarios</name>
   <url>http://maven.apache.org</url>
   <dependencies>

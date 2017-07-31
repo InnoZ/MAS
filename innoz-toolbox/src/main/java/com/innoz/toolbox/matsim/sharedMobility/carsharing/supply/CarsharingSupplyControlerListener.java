@@ -34,7 +34,7 @@ public class CarsharingSupplyControlerListener implements StartupListener, Itera
 
 	static final Logger log = Logger.getLogger(CarsharingSupplyControlerListener.class);
 	
-	CarsharingSupplyInterface container;
+	@Inject CarsharingSupplyInterface container;
 	CarsharingSupplyEventHandler handler;
 	CarsharingConfigGroup csConfig;
 	TwoWayCarsharingConfigGroup twConfig;
@@ -45,12 +45,10 @@ public class CarsharingSupplyControlerListener implements StartupListener, Itera
 	final int lastIteration = 20;
 	final int threshold = 1;
 	
-	public CarsharingSupplyControlerListener(CarsharingSupplyInterface container,
-			CarsharingSupplyEventHandler handler, CarsharingConfigGroup carsharing, TwoWayCarsharingConfigGroup twoway) {
+	public CarsharingSupplyControlerListener(CarsharingSupplyEventHandler handler, CarsharingConfigGroup carsharing,
+			TwoWayCarsharingConfigGroup twoway) {
 		
-		this.container = container;
 		this.handler = handler;
-		
 		this.csConfig = carsharing;
 		this.twConfig = twoway;
 		

@@ -3,20 +3,23 @@ package com.innoz.toolbox.config.groups;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.matsim.core.config.ReflectiveConfigGroup.StringGetter;
 import org.matsim.core.config.ReflectiveConfigGroup.StringSetter;
 
 public class PsqlConfigurationGroup extends ConfigurationGroup {
 
 	public static final String GROUP_NAME = "psql";
+
+	private static final Logger log = Logger.getLogger(PsqlConfigurationGroup.class);
 	
 	public static final String DB_PASSWORD = "dbPassword";
 	public static final String DB_USER = "dbUser";
 	public static final String LOCAL_PORT = "port";
 	public static final String IS_WRITING_INTO_DATAHUB = "isWritingIntoDataHub";
 	
-	private String dbUser = System.getenv("matsim");
-	private String dbPassword = System.getenv("matsim_db_password");
+	private String dbUser = "matsim";//System.getenv("matsim");
+	private String dbPassword = "matsim";//System.getenv("matsim_db_password");
 	private int localPort = 5432;
 	private boolean writeIntoDataHub = false;
 	
@@ -24,8 +27,9 @@ public class PsqlConfigurationGroup extends ConfigurationGroup {
 		
 		super(GROUP_NAME);
 		if(this.dbUser == null || this.dbPassword == null) {
-			this.dbUser = "postgres";
-			this.dbPassword = "postgres";
+			log.error("CRITICAL: Could not find postgres user " + this.dbUser + "!");
+			log.error("Make sure the environment variable is accessible and retry!");
+			throw new RuntimeException();
 		}
 		
 	}
