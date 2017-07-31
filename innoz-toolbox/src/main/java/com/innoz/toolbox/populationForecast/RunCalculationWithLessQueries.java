@@ -14,8 +14,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.innoz.toolbox.config.SshConnector;
-
 public class RunCalculationWithLessQueries {
 	
 	static int calcYear = 2040;
@@ -44,7 +42,6 @@ public class RunCalculationWithLessQueries {
 		String user = "";
 		String password = "";
 		
-		SshConnector.connect(user, password, localPort, 5432);
 		con = DriverManager.getConnection(url, user, password);
 		st = con.createStatement();
 		
@@ -99,7 +96,6 @@ public class RunCalculationWithLessQueries {
 		
   	  	st.close();
 		con.close();
-		SshConnector.disconnect();
 		
 //  	Calculation
 		int pop = 0;
