@@ -34,7 +34,7 @@ public class ZensusGrid {
 
 			this.nodes = new ArrayList<>();
 			
-			Connection c = PsqlAdapter.createConnection(configuration, DatabaseConstants.GEODATA_DB);
+			Connection c = PsqlAdapter.createConnection(DatabaseConstants.GEODATA_DB);
 			
 			Statement st = c.createStatement();
 			st.setFetchSize(100000);

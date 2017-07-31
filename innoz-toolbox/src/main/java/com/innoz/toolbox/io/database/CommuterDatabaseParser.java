@@ -39,7 +39,7 @@ public class CommuterDatabaseParser {
 			this.commuterData = new HashSet<CommuterDataElement> ();
 			this.od = new Matrix("", "");
 			
-			Connection connection = PsqlAdapter.createConnection(configuration, DatabaseConstants.SURVEYS_DB);
+			Connection connection = PsqlAdapter.createConnection(DatabaseConstants.SURVEYS_DB);
 		
 			if(connection != null){
 				

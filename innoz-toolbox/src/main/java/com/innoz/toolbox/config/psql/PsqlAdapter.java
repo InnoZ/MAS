@@ -6,7 +6,6 @@ import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 
-import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.run.controller.Controller;
 
 /**
@@ -25,32 +24,7 @@ public class PsqlAdapter {
 	///////////////////////////////////////////////////////
 	
 	// No instantiation!
-	private PsqlAdapter(){};
-
-	/**
-	 * 
-	 * Creates a connection object to interact with a postgreSQL database. Information about the database user's name and password
-	 * have to be provided as parameters (given in configuration).
-	 * 
-	 * @param configuration The scenario generation configuration containing such information as database user and password.
-	 * @param dbName The name of the database you want to connect to. Must not be null!
-	 * @return A {@link java.sql.Connection} object.
-	 * @throws SQLException
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws ClassNotFoundException
-	 */
-	public static Connection createConnection(final Configuration configuration, String dbName) throws SQLException,
-		InstantiationException, IllegalAccessException, ClassNotFoundException{
-		
-		Class.forName(PSQL_DRIVER).newInstance();
-		
-		log.info("Connecting to database " + dbName + " as user " + configuration.psql().getPsqlUser() + "...");
-		
-		return DriverManager.getConnection(PSQL_URL + configuration.psql().getPsqlPort() + "/" + dbName,
-				configuration.psql().getPsqlUser(), configuration.psql().getPsqlPassword());
-		
-	}
+	private PsqlAdapter() {};
 	
 	/**
 	 * 

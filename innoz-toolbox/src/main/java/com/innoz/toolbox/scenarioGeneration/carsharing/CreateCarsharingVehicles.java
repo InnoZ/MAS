@@ -53,7 +53,7 @@ public class CreateCarsharingVehicles {
 		
 		try {
 		
-			Connection connection = PsqlAdapter.createConnection(configuration, DatabaseConstants.SHARED_DB);
+			Connection connection = PsqlAdapter.createConnection(DatabaseConstants.SHARED_DB);
 			
 			if(connection != null){
 				

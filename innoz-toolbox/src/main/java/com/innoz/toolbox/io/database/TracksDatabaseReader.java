@@ -53,7 +53,7 @@ public class TracksDatabaseReader {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			Date currentDate = sdf.parse(config.getDate());
 			
-			Connection c = PsqlAdapter.createConnection(this.configuration, DatabaseConstants.TRACKS_DB);
+			Connection c = PsqlAdapter.createConnection(DatabaseConstants.TRACKS_DB);
 			
 			String sql = "SELECT user_id,id,started_at,finished_at,length,mode,st_astext(start_point) as start,"
 					+ "st_astext(end_point) as end FROM tracks_natur where started_on='"+ config.getDate() + "';";

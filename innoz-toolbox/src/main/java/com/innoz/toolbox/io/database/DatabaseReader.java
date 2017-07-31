@@ -147,7 +147,7 @@ public class DatabaseReader {
 		try {
 			
 			// Create a postgresql database connection
-			Connection connection = PsqlAdapter.createConnection(configuration, DatabaseConstants.GEODATA_DB);
+			Connection connection = PsqlAdapter.createConnection(DatabaseConstants.GEODATA_DB);
 			
 			if(connection != null){
 
@@ -737,7 +737,7 @@ public class DatabaseReader {
 		Map<Coordinate, OsmNodeEntry> coordinates2Nodes = new HashMap<>();
 		
 		// Connect to the geodata database
-		Connection connection = PsqlAdapter.createConnection(configuration, DatabaseConstants.GEODATA_DB);
+		Connection connection = PsqlAdapter.createConnection(DatabaseConstants.GEODATA_DB);
 	
 		if(connection != null){
 
@@ -829,7 +829,7 @@ public class DatabaseReader {
 		try {
 			
 			// Create a postgresql database connection
-			Connection connection = PsqlAdapter.createConnection(configuration, DatabaseConstants.POPULATIONFORECAST_DB);
+			Connection connection = PsqlAdapter.createConnection(DatabaseConstants.POPULATIONFORECAST_DB);
 			
 			if(connection != null){
 

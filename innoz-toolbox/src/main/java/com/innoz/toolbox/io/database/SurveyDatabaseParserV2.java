@@ -53,7 +53,7 @@ public class SurveyDatabaseParserV2 {
 			log.info("Parsing surveys database to create a synthetic population");
 			
 			// Instantiate a new postgreSQL driver and establish a connection to the mobility database
-			Connection connection = PsqlAdapter.createConnection(configuration, DatabaseConstants.SURVEYS_DB);
+			Connection connection = PsqlAdapter.createConnection(DatabaseConstants.SURVEYS_DB);
 		
 			SurveyPopulationConfigurationGroup group = configuration.surveyPopulation();
 			
