@@ -14,8 +14,10 @@ import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 
 public class PersonUtilsTest {
 
+	// uses ListX class to add some conviniece methods
 	ListX<SurveyPerson> persons;
 	
+	// setup test persons and fill ListX object
 	@Before
 	public void setup() {
 		
@@ -36,6 +38,7 @@ public class PersonUtilsTest {
 		
 	}
 	
+	// tests anything attributed to suvery persons
 	@Test
 	public void testAgeGroupsClassification() {
 		
