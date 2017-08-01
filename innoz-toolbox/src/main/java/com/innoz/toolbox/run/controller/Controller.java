@@ -16,6 +16,14 @@ import com.innoz.toolbox.run.controller.task.ReadGeodataTask;
 
 /**
  * 
+ * A class that connects the front-end of the MAS software with the back-end. The basic use is that of a static access class, meaning
+ * there can only be one controller at a time resulting in one JVM running per scenario generation task.<br>
+ * The controller contains an InnoZ configuration with specific information about the scenario generation task and MATSim data
+ * structures that store the information generated during this task.<br>
+ * Basically, the controller works task-oriented. Each work step of the process is represented by a <code>ControllerTask</code> (e.g.
+ * read geodata, read network data, generate demand etc.). These processes are stored inside a queue and subsequently executed (in a
+ * specific predefined order). The controller and thus the JVM runs as long as there is another task to be executed.
+ * 
  * @author dhosse
  *
  */
@@ -43,7 +51,7 @@ public final class Controller {
 	 * Adds a new task at the end of the task queue.
 	 * 
 	 * @param r The {@link ControllerTask} to be submitted.
-	 * @return
+	 * @return True if the task could be appended to the queue, false otherwise.
 	 */
 	public static boolean submit(ControllerTask r) {
 		
@@ -53,7 +61,9 @@ public final class Controller {
 
 	/**
 	 * 
-	 * @param configuration The scenario generation configuration
+	 * Executes the tasks stored inside the controller task queue subsequently.
+	 * 
+	 * @param configuration The scenario generation configuration holding all the information about the process.
 	 */
 	public static void run() {
 		
@@ -92,18 +102,36 @@ public final class Controller {
 		
 	}
 	
+	/**
+	 * 
+	 * Adds tasks that need to be executed regardless of the execution context.<br>
+	 * Maybe discard this method or put ALL the tasks in here because there isn't any user interaction on this level. //dhosse 08/17
+	 * 
+	 */
 	private static void addMandatoryTasks() {
 		
 		queue.add(new ReadGeodataTask.Builder().build());
 		
 	}
 	
+	/**
+	 * 
+	 * Getter method for the scenario generation configuration (InnoZ).
+	 * 
+	 * @return The configuration class with all the information for the scenario generation process.
+	 */
 	public static final Configuration configuration() {
 		
 		return Controller.configuration;
 		
 	}
 	
+	/**
+	 * 
+	 * Getter method for the MATSim scenario object.
+	 * 
+	 * @return The MATSim scenario (to be) generated during the controller execution.
+	 */
 	public static final Scenario scenario() {
 		
 		return Controller.scenario;
