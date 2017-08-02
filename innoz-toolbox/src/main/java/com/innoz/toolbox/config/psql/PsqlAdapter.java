@@ -45,7 +45,7 @@ public class PsqlAdapter {
 	
 	log.info("Connecting to database " + dbName + " as user " + Controller.configuration().psql().getPsqlUser() + "...");
 	
-	return DriverManager.getConnection(PSQL_URL + 5432 + "/" + dbName,
+	return DriverManager.getConnection(PSQL_URL + Controller.configuration().psql().getPsqlPort() + "/" + dbName,
 			Controller.configuration().psql().getPsqlUser(), Controller.configuration().psql().getPsqlPassword());
 		
 	}
