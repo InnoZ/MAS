@@ -61,7 +61,7 @@ public class SurveyDatabaseParserV2 {
 				
 				boolean isUsingHouseholds = group.isUsingHouseholds();
 				
-				if(isUsingHouseholds){
+				if(isUsingHouseholds) {
 					
 					log.info("Creating survey households...");
 					

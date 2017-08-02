@@ -463,11 +463,11 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 				// Create a MATSim plan element for each survey plan element and add them to the MATSim plan
 				for(int j = 0; j < planTemplate.getPlanElements().size(); j++){
 					
-					SurveyPlanElement mpe = planTemplate.getPlanElements().get(j);
+					SurveyPlanElement planElement = planTemplate.getPlanElements().get(j);
 					
-					if(mpe instanceof SurveyPlanActivity){
+					if(planElement instanceof SurveyPlanActivity){
 						
-						Activity act = createActivity(population, personTemplate, planTemplate, mpe, cellIds.get(actIndex), container);
+						Activity act = createActivity(population, personTemplate, planTemplate, planElement, cellIds.get(actIndex), container);
 						if(act == null){
 							plan.getPlanElements().remove(plan.getPlanElements().size()-1);
 							break;
@@ -478,7 +478,7 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 						
 					} else {
 						
-						plan.addLeg(createLeg(population, mpe));
+						plan.addLeg(createLeg(population, planElement));
 						
 					}
 					

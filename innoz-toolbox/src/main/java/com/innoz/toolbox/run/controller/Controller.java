@@ -12,6 +12,8 @@ import org.matsim.core.scenario.ScenarioUtils;
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.ConfigurationUtils;
 import com.innoz.toolbox.run.controller.task.ControllerTask;
+import com.innoz.toolbox.run.controller.task.DemandGenerationTask;
+import com.innoz.toolbox.run.controller.task.NetworkGenerationTask;
 import com.innoz.toolbox.run.controller.task.ReadGeodataTask;
 
 /**
@@ -71,7 +73,7 @@ public final class Controller {
 	
 		// Add the tasks that have to be executed regardless of the actual goal of the call
 		addMandatoryTasks();
-		queue.addAll(queueBuffer);
+//		queue.addAll(queueBuffer);
 		
 		// Create a new thread that runs until every ControllerTask has been executed
 		Thread t = new Thread(() -> {
@@ -111,6 +113,9 @@ public final class Controller {
 	private static void addMandatoryTasks() {
 		
 		queue.add(new ReadGeodataTask.Builder().build());
+		queue.add(new NetworkGenerationTask.Builder(configuration, scenario).build());
+		queue.add(new DemandGenerationTask.Builder(Controller.configuration(), Controller.scenario()).build());
+//		queue.add(new WriteOutputTask.Builder(scenarioName, args[3]).build()); TODO
 		
 	}
 	

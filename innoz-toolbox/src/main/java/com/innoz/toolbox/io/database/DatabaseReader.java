@@ -113,22 +113,6 @@ public class DatabaseReader {
 		
 	}
 	
-//	/**
-//	 * 
-//	 * Constructor.
-//	 * 
-//	 * @param geoinformation The geoinformation container.
-//	 */
-//	public DatabaseReader(final Configuration configuration, final Geoinformation geoinformation){
-//		
-//		// Initialize all final fields
-//		this.gFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.maximumPreciseValue));
-//		this.wktReader = new WKTReader();
-//		Geoinformation.getInstance() = geoinformation;
-//		this.configuration = configuration;
-//		
-//	}
-	
 	public Configuration getConfiguration(){
 		return this.configuration;
 	}
@@ -166,7 +150,6 @@ public class DatabaseReader {
 					throw new RuntimeException("Execution aborts...");
 					
 				}
-				
 				
 				readBbsrData(connection, this.configuration);
 				
