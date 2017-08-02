@@ -19,7 +19,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-    	<groupId>com.innoz.toolbox</groupId>
+    	<groupId>com.innox.toolbox</groupId>
     	<artifactId>innoz-toolbox</artifactId>
     	<version>0.1-SNAPSHOT</version>
     </dependency>
