@@ -1,4 +1,4 @@
-package com.innoz.scenarios.osnabrück;
+package com.innoz.scenarios.osnabrueck;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,13 +60,13 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 
-import com.innoz.toolbox.matsim.carsharing.CarsharingQsimFactoryNewWithPt;
-import com.innoz.toolbox.matsim.carsharing.MyCarsharingSupplyContainer;
-import com.innoz.toolbox.matsim.carsharing.ServiceArea;
 import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup;
 import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup.MobilityAttitudeModeParameterSet;
 import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup.MobilityAttitudeModeParams;
 import com.innoz.toolbox.matsim.scoring.MobilityAttitudeScoringFunctionFactory;
+import com.innoz.toolbox.matsim.sharedMobility.carsharing.CarsharingQsimFactoryNewWithPt;
+import com.innoz.toolbox.matsim.sharedMobility.carsharing.MyCarsharingSupplyContainer;
+import com.innoz.toolbox.matsim.sharedMobility.carsharing.ServiceArea;
 
 public class ThreeConnectMain {
 

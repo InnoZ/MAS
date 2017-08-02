@@ -1,4 +1,4 @@
-package com.innoz.scenarios.osnabrück;
+package com.innoz.scenarios.osnabrueck;
 
 import java.util.Arrays;
 
