@@ -5,7 +5,6 @@ import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.ConfigWriter;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 
-import com.innoz.toolbox.io.pgsql.MatsimPsqlAdapter;
 import com.innoz.toolbox.run.controller.Controller;
 
 public class WriteOutputTask implements ControllerTask {
@@ -23,11 +22,6 @@ public class WriteOutputTask implements ControllerTask {
 	@Override
 	public void run() {
 		
-		new ConfigWriter(Controller.scenario().getConfig()).write(Controller.configuration().misc().getOutputDirectory() + "config.xml.gz");
-		MatsimPsqlAdapter.writeScenarioToPsql(Controller.scenario(), scenarioName, railsEnvironment);
-		new NetworkWriter(Controller.scenario().getNetwork()).write(Controller.configuration().misc().getOutputDirectory() + "network.xml.gz");
-		new PopulationWriter(Controller.scenario().getPopulation()).write(Controller.configuration().misc().getOutputDirectory() + "plans.xml.gz");
-//		MatsimPsqlAdapter.writeScenarioToPsql(Controller.scenario(), scenarioName);
 		new ConfigWriter(Controller.scenario().getConfig()).write(
 				Controller.configuration().misc().getOutputDirectory() + "config.xml.gz");
 		new NetworkWriter(Controller.scenario().getNetwork()).write(
