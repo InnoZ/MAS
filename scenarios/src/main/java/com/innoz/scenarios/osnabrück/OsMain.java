@@ -8,7 +8,6 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.config.groups.StrategyConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -32,23 +31,14 @@ public class OsMain {
 		modalSplitGoal.put(TransportMode.bike, 	0.12);
 		modalSplitGoal.put(TransportMode.car, 	0.55);
 		modalSplitGoal.put(TransportMode.pt, 	0.07);
-//		modalSplitGoal.put(TransportMode.ride, 	0.13);
 		modalSplitGoal.put(TransportMode.walk, 	0.24);
-//		modalSplitGoal.put(TransportMode.other, 0.0);
-//		Transport.Mode to fix and keep with constant=0 HERE:
 		String holdMode = TransportMode.car;
-		
-//				,
-//				new CarsharingConfigGroup(), new OneWayCarsharingConfigGroup(), new TwoWayCarsharingConfigGroup(), new FreeFloatingConfigGroup());
 		
 		config.plansCalcRoute().setInsertingAccessEgressWalk(false);
 		
 		config.vspExperimental().setWritingOutputEvents(true);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		config.controler().setLastIteration(50);
-		
-//		config.qsim().setMainModes(Arrays.asList(TransportMode.car, "freefloating_vehicle",
-//				"twoway_vehicle", "oneway_vehicle"));
 		
 		StrategyConfigGroup strategy = config.strategy();
 		{
@@ -63,12 +53,6 @@ public class OsMain {
 			stratSets.setWeight(0.2);
 			strategy.addStrategySettings(stratSets);
 		}
-//		{
-//			StrategySettings stratSets = new StrategySettings();
-//			stratSets.setStrategyName(DefaultStrategy.ChangeTripMode.name());
-//			stratSets.setWeight(0.1);
-//			strategy.addStrategySettings(stratSets);
-//		}
 		{
 			StrategySettings stratSets = new StrategySettings();
 			stratSets.setStrategyName(DefaultStrategy.SubtourModeChoice.name());
@@ -76,72 +60,11 @@ public class OsMain {
 			strategy.addStrategySettings(stratSets);
 		}
 
-//		{
-//			StrategySettings stratSets = new StrategySettings();
-//			stratSets.setStrategyName("CarsharingSubtourModeChoiceStrategy");
-//			stratSets.setWeight(0.05);
-//			strategy.addStrategySettings(stratSets);
-//		}
-//		{
-//			StrategySettings stratSets = new StrategySettings();
-//			stratSets.setStrategyName("RandomTripToCarsharingStrategy");
-//			stratSets.setWeight(0.05);
-//			strategy.addStrategySettings(stratSets);
-//		}
-		
-		PlanCalcScoreConfigGroup planCalcScore = config.planCalcScore();
-//		{
-//			ModeParams params = new ModeParams(TransportMode.ride);
-//			params.setConstant(0d);
-//			params.setMarginalUtilityOfTraveling(0d);
-//			planCalcScore.addModeParams(params);
-//		}
-//		{
-//			ModeParams params = new ModeParams("access_walk_tw");
-//			params.setConstant(0d);
-//			params.setMarginalUtilityOfTraveling(0d);
-//			planCalcScore.addModeParams(params);
-//		}
-//		{
-//			ModeParams params = new ModeParams("access_walk_ff");
-//			params.setConstant(0d);
-//			params.setMarginalUtilityOfTraveling(0d);
-//			planCalcScore.addModeParams(params);
-//		}
-//		{
-//			ModeParams params = new ModeParams("egress_walk_tw");
-//			params.setConstant(0d);
-//			params.setMarginalUtilityOfTraveling(0d);
-//			planCalcScore.addModeParams(params);
-//		}
-//		{
-//			ModeParams params = new ModeParams("egress_walk_ff");
-//			params.setConstant(0d);
-//			params.setMarginalUtilityOfTraveling(0d);
-//			planCalcScore.addModeParams(params);
-//		}
-//		{
-//			ModeParams params = new ModeParams("twoway_vehicle");
-//			params.setConstant(0d);
-//			params.setMarginalUtilityOfTraveling(0d);
-//			planCalcScore.addModeParams(params);
-//		}
-//		{
-//			ModeParams params = new ModeParams("freefloating_vehicle");
-//			params.setConstant(0d);
-//			params.setMarginalUtilityOfTraveling(0d);
-//			planCalcScore.addModeParams(params);
-//		}
-		
-//		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
-		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
 		Controler controler = new Controler(scenario);
 		
 		controler.addControlerListener(new RememberModeStats());
-
-//		RunCarsharing.installCarSharing(controler);
 
 		ASCModalSplitCallibration asc = new ASCModalSplitCallibration(modalSplitGoal);
 		double delta = Double.POSITIVE_INFINITY;

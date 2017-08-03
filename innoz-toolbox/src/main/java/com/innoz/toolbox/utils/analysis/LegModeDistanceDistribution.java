@@ -22,7 +22,6 @@ package com.innoz.toolbox.utils.analysis;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -41,7 +40,6 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
-import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
@@ -81,11 +79,6 @@ public class LegModeDistanceDistribution {
 		initializeUsedModes(this.scenario.getPopulation());
 	}
 
-	public List<EventHandler> getEventHandler() {
-		// nothing to return
-		return new LinkedList<EventHandler>();
-	}
-
 	public void preProcessData() {
 		
 		log.info("Checking if the plans file that will be analyzed is based on a run with simulated public transport.");
@@ -112,6 +105,11 @@ public class LegModeDistanceDistribution {
 						PopulationUtils.removeActivity(((Plan) selectedPlan), index); // also removes the following leg
 						n -= 2;
 						i--;
+					}
+				} else {
+					Leg leg = (Leg)pe;
+					if(leg.getMode().contains("access") || leg.getMode().contains("egress")) {
+						PopulationUtils.removeLeg(selectedPlan, planElements.indexOf(leg)); // we don't consider access / egress legs for modal split
 					}
 				}
 			}
