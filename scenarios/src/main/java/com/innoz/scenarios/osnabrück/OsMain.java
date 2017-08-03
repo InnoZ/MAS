@@ -68,14 +68,15 @@ public class OsMain {
 
 		ASCModalSplitCallibration asc = new ASCModalSplitCallibration(modalSplitGoal);
 		double delta = Double.POSITIVE_INFINITY;
-		int run = 1;
-		Map<Integer, Double> deltas = new HashMap<Integer, Double>();
 			
-		while (delta > 0.01 && run <= 100) {
+		for(int i = 0 ; i < 10; i++) {
 			
-			config.controler().setOutputDirectory("/home/bmoehring/scenarios/osnabrueck/03404_2017/output" + run);
+			System.out.println("Iteration " + i);
 			
 			controler.run();
+			
+			delta = asc.calculateDelta();
+			if(delta < 0.1) break;
 			
 			Map<String, Double> constants = asc.calculateModeConstants(config);
 			
@@ -87,21 +88,7 @@ public class OsMain {
 				config.planCalcScore().addModeParams(params);
 				
 			}
-			
-			delta = asc.calculateDelta();
-			deltas.put(run, delta);
-			//have at least five runs to 'gain knowledge and experience'
-			if(run <= 5) delta = 1;
-			run++;
-			
-			System.out.println(run + " Delta: " + delta);
-			System.out.println(config.planCalcScore().getModes());
 		
-		}
-		
-		for (Entry<Integer, Double> e : deltas.entrySet()){
-			System.out.println(e.getValue());
-			
 		}
 		
 		

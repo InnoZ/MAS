@@ -107,7 +107,7 @@ public class ASCModalSplitCallibration {
 			
 		}
 		
-		return delta;
+		return delta/ 100;
 	}
 	
 	/**
