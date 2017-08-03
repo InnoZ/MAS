@@ -2,7 +2,6 @@ package com.innoz.toolbox.scenarioGeneration.config;
 
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
@@ -23,19 +22,9 @@ import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
  *
  */
 public class InitialConfigCreator {
-	
-	private InitialConfigCreator(){};
-	
-	public static Config create(){
-		
-		// Create a new MATSim configuration
-		Config config = ConfigUtils.createConfig();
 
-		adapt(config);
-		
-		return config;
-		
-	}
+	// No instance!
+	private InitialConfigCreator(){};
 	
 	public static void adapt(final Config config) {
 		
