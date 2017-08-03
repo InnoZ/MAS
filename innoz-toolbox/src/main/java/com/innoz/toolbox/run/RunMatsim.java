@@ -9,13 +9,13 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
-import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup;
 import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup.MobilityAttitudeModeParameterSet;
 import com.innoz.toolbox.matsim.scoring.MobilityAttitudeConfigGroup.MobilityAttitudeModeParams;
 import com.innoz.toolbox.matsim.scoring.MobilityAttitudeScoringFunctionFactory;
+import com.innoz.toolbox.scenarioGeneration.population.mobilityAttitude.MobilityAttitudeGroups;
 
 /**
  * 
@@ -36,80 +36,31 @@ public class RunMatsim {
 		ma.setSubpopulationAttribute("mobilityAttitude");
 		ma.setScaleFactor(1d);
 		
+		for (int ii = 0 ; ii < MobilityAttitudeGroups.subpops.length ; ii++)
 		{
 			MobilityAttitudeModeParameterSet pars = new MobilityAttitudeModeParameterSet();
-			pars.setAttitudeGroup("convBike");
+			pars.setAttitudeGroup(MobilityAttitudeGroups.subpops[ii]);
 			MobilityAttitudeModeParams params = new MobilityAttitudeModeParams();
 			params.setMode(TransportMode.car);
-			params.setOffset(-1.0);
+			params.setOffset(MobilityAttitudeGroups.getAttitude(MobilityAttitudeGroups.subpops[ii], TransportMode.car));
 			pars.addModeParams(params);
 			ma.addModeParams(pars);
-		}
-		
-		{
-			MobilityAttitudeModeParameterSet pars = new MobilityAttitudeModeParameterSet();
-			pars.setAttitudeGroup(null);
-			ma.addModeParams(pars);
+			
+			StrategySettings stratSets = new StrategySettings();
+			stratSets.setDisableAfter(-1);
+			stratSets.setStrategyName(DefaultSelector.ChangeExpBeta);
+			stratSets.setSubpopulation(MobilityAttitudeGroups.subpops[ii]);
+			stratSets.setWeight(1.0);
+			config.strategy().addStrategySettings(stratSets);
 		}
 		
 		config.addModule(ma);
 		
-		
-		
-//		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
-//		
-//		{
-//			StrategySettings stratSets = new StrategySettings();
-//			stratSets.setDisableAfter(-1);
-//			stratSets.setStrategyName(DefaultSelector.ChangeExpBeta.name());
-//			stratSets.setSubpopulation("convBike");
-//			stratSets.setWeight(1.0);
-//			config.strategy().addStrategySettings(stratSets);
-//		}
-		{
-			StrategySettings stratSets = new StrategySettings();
-			stratSets.setDisableAfter(-1);
-			stratSets.setStrategyName(DefaultSelector.ChangeExpBeta);
-			stratSets.setSubpopulation(null);
-			stratSets.setWeight(1.0);
-			config.strategy().addStrategySettings(stratSets);
-		}
-//		{
-//			StrategySettings stratSets = new StrategySettings();
-//			stratSets.setDisableAfter(-1);
-//			stratSets.setStrategyName(DefaultStrategy.ReRoute.name());
-//			stratSets.setSubpopulation(null);
-//			stratSets.setWeight(0.1);
-//			config.strategy().addStrategySettings(stratSets);
-//		}
-//		{
-//			StrategySettings stratSets = new StrategySettings();
-//			stratSets.setDisableAfter(-1);
-//			stratSets.setStrategyName(DefaultStrategy.SubtourModeChoice.name());
-//			stratSets.setSubpopulation("convBike");
-//			stratSets.setWeight(0.2);
-//			config.strategy().addStrategySettings(stratSets);
-//		}
-		{
-			StrategySettings stratSets = new StrategySettings();
-			stratSets.setDisableAfter(-1);
-			stratSets.setStrategyName(DefaultStrategy.SubtourModeChoice.name());
-			stratSets.setSubpopulation(null);
-			stratSets.setWeight(0.2);
-			config.strategy().addStrategySettings(stratSets);
-		}
-//		{
-//			StrategySettings stratSets = new StrategySettings();
-//			stratSets.setDisableAfter(-1);
-//			stratSets.setStrategyName(DefaultStrategy.TimeAllocationMutator_ReRoute.name());
-//			stratSets.setSubpopulation(null);
-//			stratSets.setWeight(0.1);
-//			config.strategy().addStrategySettings(stratSets);
-//		}
+		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
 		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("/home/dhosse/scenarios/test/output/");
-		config.controler().setLastIteration(0);
+		config.controler().setOutputDirectory("/home/bmoehring/scenarios/osnabrueck/03404_2017/output/");
+		config.controler().setLastIteration(10);
 		config.qsim().setEndTime(30*3600);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);

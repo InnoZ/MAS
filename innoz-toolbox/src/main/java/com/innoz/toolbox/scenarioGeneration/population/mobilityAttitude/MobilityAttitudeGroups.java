@@ -1,6 +1,7 @@
 package com.innoz.toolbox.scenarioGeneration.population.mobilityAttitude;
 
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import org.matsim.api.core.v01.TransportMode;
@@ -17,7 +18,7 @@ import com.innoz.toolbox.scenarioGeneration.utils.Modes;
 
 public class MobilityAttitudeGroups {
 	
-	final static String[] subpops = new String[]{"none", "tradCar", "flexCar", "urbanPt",
+	public final static String[] subpops = new String[]{"none", "tradCar", "flexCar", "urbanPt",
 			"convBike", "envtPtBike", "multiOpt",null};
 	
 	final static double[] pWomen = new double[]{
@@ -27,6 +28,31 @@ public class MobilityAttitudeGroups {
 	final static double[] pCSmembers = new double[]{
 		0.006, 0.01, 0.0, 0.0, 0.04, 0.044	
 	};
+	
+	// EInstellung zu Verkehrsmitteln aus Mobilitätstypen. PKW, Fahrrad, ÖPNV
+	private static final Map<String,double[]> attitudes = new HashMap<String, double[]>(){{
+		put(subpops[0], new double[]{ 0.00,	 0.00,	 0.00});
+	    put(subpops[1], new double[]{ 0.55,	-0.67,	-1.37});
+	    put(subpops[2], new double[]{ 0.64,	 0.10,	-0.26});
+	    put(subpops[3], new double[]{-0.78,	-1.69,	 0.70});
+	    put(subpops[4], new double[]{-0.58,	 0,60,	 0.34});
+	    put(subpops[5], new double[]{-0.60,	 0.44,	 0.58});
+	    put(subpops[6], new double[]{ 0.34,	 0.40,	 0.27});
+	    put(subpops[7], new double[]{ 0.00,	 0.00,	 0.00});
+	}};
+		
+	public final static double getAttitude(String subpop, String mode){
+		if (mode.equalsIgnoreCase(TransportMode.car)){
+			return attitudes.get(subpop)[0];
+		} else if (mode.equalsIgnoreCase(TransportMode.bike)){
+			return attitudes.get(subpop)[1];
+		} else if (mode.equalsIgnoreCase(TransportMode.pt)){
+			return attitudes.get(subpop)[2];
+		} else {		
+			return 0.0;
+		}
+	}
+	
 	
 //	//THE FOLLOWING IS ONLY VALID FOR OSNABRÜCK!!!
 //	final static double[][] ageIndices = new double[][]{
