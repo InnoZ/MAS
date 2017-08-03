@@ -1,4 +1,4 @@
-package com.innoz.toolbox.run.callibration;
+package com.innoz.toolbox.run.calibration;
 
 import java.util.HashMap;
 import java.util.Iterator;

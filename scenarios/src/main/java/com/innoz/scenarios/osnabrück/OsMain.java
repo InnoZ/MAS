@@ -18,8 +18,8 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.Default
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import com.innoz.toolbox.run.callibration.ASCModalSplitCallibration;
-import com.innoz.toolbox.run.callibration.RememberModeStats;
+import com.innoz.toolbox.run.calibration.ASCModalSplitCallibration;
+import com.innoz.toolbox.run.calibration.RememberModeStats;
 
 public class OsMain {
 
