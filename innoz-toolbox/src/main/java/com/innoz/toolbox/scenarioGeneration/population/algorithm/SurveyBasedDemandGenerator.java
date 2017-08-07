@@ -86,7 +86,8 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 		
 		// Run the survey data parser that stores all of the travel information
 		SurveyDatabaseParserV2 parser = new SurveyDatabaseParserV2();
-		SurveyDataContainer container = new SurveyDataContainer(configuration);
+		SurveyDataContainer container = SurveyDataContainer.getInstance();
+		container.init(configuration);
 		parser.run(configuration, container, CollectionUtils.stringToSet(ids));
 		
 		// Choose the method for demand generation that has been specified in the configuration
@@ -767,23 +768,22 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 			
 			// If it's neither a home nor the main activity, locate the activity in any cell of the search space
 			if(this.lastActCell == null) this.lastActCell = this.currentHomeCell;
-//			au = locateActivityInCell(lastActCell.getId(), type, mode, personTemplate,distance);
 			
 			if(au == null) au = this.lastActCell;
 			
-			double a = 0;
-			double b = 0;
+//			double a = 0;
+//			double b = 0;
+//			
+//			int cnt = 0;
 			
-			int cnt = 0;
+//			do{
 			
-			do{
+//				cnt++;
+			coord = shootLocationForActType(au, type, distance, templatePlan, mode, personTemplate);
+//				a = CoordUtils.calcEuclideanDistance(this.currentHomeLocation, coord);
+//				b = CoordUtils.calcEuclideanDistance(this.currentMainActLocation, coord);
 			
-				cnt++;
-				coord = shootLocationForActType(au, type, distance, templatePlan, mode, personTemplate);
-				a = CoordUtils.calcEuclideanDistance(this.currentHomeLocation, coord);
-				b = CoordUtils.calcEuclideanDistance(this.currentMainActLocation, coord);
-			
-			} while(a + b > 2 * c && cnt < 20);
+//			} while(a + b > 2 * c && cnt < 20);
 				
 		}
 		
@@ -860,47 +860,42 @@ public class SurveyBasedDemandGenerator extends DemandGenerationAlgorithm {
 	private Coord shootGeometry(AdministrativeUnit au, String actType, double d, double minFactor, double maxFactor,
 			SurveyPlan templatePlan, String mode, SurveyPerson personTemplate){
 		
+		if(Geoinformation.getInstance().getLanduseOfType(actType) == null) {
+			actType = actType.split("_")[0];
+		}
+		
 		// Get all landuse geometries of the current activity type within the given administrative unit
 		List<Landuse> closest = (List<Landuse>) Geoinformation.getInstance().getLanduseOfType(actType).getRing
 					(this.lastActCoord.getX(), this.lastActCoord.getY(), d * minFactor, d * maxFactor);
 		
 		// If there were any landuse geometries found, randomly choose one of the geometries.
 		// Else pick the landuse geometry closest to the last activity coordinate.
-		if(closest != null){
+		if(closest != null && !closest.isEmpty()){
 			
-			if(!closest.isEmpty()){
-				
-				Geometry area = ((Landuse)WeightedSelection.choose(closest, this.random.nextDouble())).getGeometry();
-				
-				return this.transformation.transform(GeometryUtils.shoot(area, this.random));
-				
-			} else {
-				
-				Landuse area = Geoinformation.getInstance().getLanduseOfType(actType)
-						.getClosest(this.lastActCoord.getX(), this.lastActCoord.getY());
-				
-				return this.transformation.transform(GeometryUtils.shoot(area.getGeometry(), this.random));
-				
-			}
+			Geometry area = ((Landuse)WeightedSelection.choose(closest, this.random.nextDouble())).getGeometry();
+			
+			return this.transformation.transform(GeometryUtils.shoot(area, this.random));
 		
 		} else {
 			
-			closest = au.getLanduseGeometries().get(actType);
-			
-			if(!closest.isEmpty()){
+//			closest = au.getLanduseGeometries().get(actType);
+//			
+//			if(!closest.isEmpty()){
+//				
+//				Geometry area = ((Landuse)WeightedSelection.choose(closest, this.random.nextDouble())).getGeometry();
+//				
+//				return this.transformation.transform(GeometryUtils.shoot(area, this.random));
+//				
+//			} else {
 				
-				Geometry area = ((Landuse)WeightedSelection.choose(closest, this.random.nextDouble())).getGeometry();
+//				Landuse area = Geoinformation.getInstance().getLanduseOfType(actType).getClosest(
+//						this.lastActCoord.getX(), this.lastActCoord.getY());
 				
-				return this.transformation.transform(GeometryUtils.shoot(area, this.random));
+				Coord newCoord = (GeometryUtils.shoot(lastActCoord, d * minFactor, d * maxFactor, random));
 				
-			} else {
+				return newCoord;
 				
-				Landuse area = Geoinformation.getInstance().getLanduseOfType(actType).getClosest(
-						this.lastActCoord.getX(), this.lastActCoord.getY());
-				
-				return this.transformation.transform(GeometryUtils.shoot(area.getGeometry(), this.random));
-				
-			}
+//			}
 			
 		}
 		

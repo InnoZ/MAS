@@ -455,6 +455,19 @@ public class GeometryUtils {
 		
 	}
 	
+	public static Coord shoot(Coord center, double minDistance, double maxDistance, Random random) {
+		
+		double x = center.getX();
+		double y = center.getY();
+		double angle = random.nextDouble() * 360;
+		double newDistance = random.nextDouble() * (maxDistance - minDistance) + minDistance;
+		double newX = x + Math.cos(angle) * newDistance;
+		double newY = y + Math.sin(angle) * newDistance;
+		
+		return new Coord(newX, newY);
+		
+	}
+	
 	/**
 	 * 
 	 * Merges a given administrative boundaries shapefile and a region type csv file into a result

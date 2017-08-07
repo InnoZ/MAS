@@ -1,5 +1,7 @@
 package com.innoz.toolbox.scenarioGeneration.config;
 
+import java.util.Map;
+
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
@@ -9,7 +11,9 @@ import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
 
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.SurveyVehicleType;
 import com.innoz.toolbox.run.controller.Controller;
+import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
+import com.innoz.toolbox.utils.matsim.RecursiveStatsContainer;
 
 /**
  * 
@@ -54,7 +58,7 @@ public class InitialConfigCreator {
 		addModeScoringParams();
 		
 		// Add mode parameters
-		addBasicModeRoutingParams();
+		addBasicModeRoutingParams(SurveyDataContainer.getInstance().getModeStatsContainer());
 		
 		// QSim config group
 		Controller.scenario().getConfig().qsim().setFlowCapFactor(Controller.configuration().scenario().getScaleFactor());
@@ -119,40 +123,40 @@ public class InitialConfigCreator {
 	 * 
 	 * @param config
 	 */
-	private static void addBasicModeRoutingParams(){
+	private static void addBasicModeRoutingParams(final Map<String, RecursiveStatsContainer> modeSpeedStats){
 		
 		{
 			ModeRoutingParams pars = new ModeRoutingParams(TransportMode.bike);
 			pars.setBeelineDistanceFactor(1.3);
-			pars.setTeleportedModeSpeed(15/3.6);
+			pars.setTeleportedModeSpeed(modeSpeedStats.get(TransportMode.bike).getMean());
 			Controller.scenario().getConfig().plansCalcRoute().addModeRoutingParams(pars);
 		}
 		
 		{
 			ModeRoutingParams pars = new ModeRoutingParams(TransportMode.other);
 			pars.setBeelineDistanceFactor(1.3);
-			pars.setTeleportedModeSpeed(30/3.6);
+			pars.setTeleportedModeFreespeedFactor(modeSpeedStats.get(TransportMode.car).getMean());
 			Controller.scenario().getConfig().plansCalcRoute().addModeRoutingParams(pars);
 		}
 		
 		{
 			ModeRoutingParams pars = new ModeRoutingParams(TransportMode.pt);
 			pars.setBeelineDistanceFactor(1.3);
-			pars.setTeleportedModeFreespeedFactor(2.0);
+			pars.setTeleportedModeSpeed(modeSpeedStats.get(TransportMode.pt).getMean());
 			Controller.scenario().getConfig().plansCalcRoute().addModeRoutingParams(pars);
 		}
 		
 		{
 			ModeRoutingParams pars = new ModeRoutingParams(TransportMode.ride);
 			pars.setBeelineDistanceFactor(1.3);
-			pars.setTeleportedModeSpeed(30/3.6);
+			pars.setTeleportedModeSpeed(modeSpeedStats.get(TransportMode.ride).getMean());
 			Controller.scenario().getConfig().plansCalcRoute().addModeRoutingParams(pars);
 		}
 		
 		{
 			ModeRoutingParams pars = new ModeRoutingParams(TransportMode.walk);
 			pars.setBeelineDistanceFactor(1.3);
-			pars.setTeleportedModeSpeed(4/3.6);
+			pars.setTeleportedModeSpeed(modeSpeedStats.get(TransportMode.walk).getMean());
 			Controller.scenario().getConfig().plansCalcRoute().addModeRoutingParams(pars);
 		}
 		

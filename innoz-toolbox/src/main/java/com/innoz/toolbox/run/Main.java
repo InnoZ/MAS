@@ -41,13 +41,15 @@ public class Main {
 			String scenarioName = args[0] + "_" + args[1];
 			
 			String outputDirectory = args[2] + "/" + scenarioName + "/";
+			String logDirectory = args[4] + "/" + scenarioName + "/";
 			
 			// Set the output directory according to the scenario name
 			Controller.configuration().misc().setOutputDirectory(outputDirectory);
 			
 			Files.createDirectories(Paths.get(outputDirectory));
+			Files.createDirectories(Paths.get(logDirectory));
 			
-			OutputDirectoryLogging.initLoggingWithOutputDirectory(outputDirectory);
+			OutputDirectoryLogging.initLoggingWithOutputDirectory(logDirectory);
 			
 			log.info("Starting scenario geneartion with " + Main.class.getSimpleName());
 			
@@ -63,8 +65,6 @@ public class Main {
 
 			log.info("Added survey area with AGKZ '" + args[0] + "'");
 			
-			Controller.configuration().psql().setPsqlPort(9999);
-			
 			// MATSim needs a Cartesian coordinate system that measures distances in meters
 			Controller.configuration().misc().setCoordinateSystem("EPSG:32632");
 			
@@ -72,7 +72,7 @@ public class Main {
 			int forecastYear = Integer.parseInt(args[1]);
 			Controller.configuration().scenario().setYear(forecastYear);
 			
-			Controller.configuration().psql().setPsqlPort(9999);
+//			Controller.configuration().psql().setPsqlPort(9999);
 			
 			log.info("Scenario year set to " + args[1]);
 			
@@ -90,8 +90,6 @@ public class Main {
 			throw new RuntimeException();
 			
 		}
-		
-		OutputDirectoryLogging.closeOutputDirLogging();
 		
 	}
 	

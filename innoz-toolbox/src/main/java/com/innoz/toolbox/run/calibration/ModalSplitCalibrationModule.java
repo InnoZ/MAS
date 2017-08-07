@@ -7,6 +7,8 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
@@ -26,6 +28,9 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.Default
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 
+import com.google.inject.Injector;
+import com.innoz.toolbox.io.database.DatabaseConstants.RailsEnvironments;
+import com.innoz.toolbox.io.pgsql.MatsimPsqlAdapter;
 import com.innoz.toolbox.utils.analysis.LegModeDistanceDistribution;
 
 /**
@@ -39,15 +44,17 @@ import com.innoz.toolbox.utils.analysis.LegModeDistanceDistribution;
  */
 public class ModalSplitCalibrationModule {
 
+	private static final Logger log = Logger.getLogger(ModalSplitCalibrationModule.class); 
+	
 	public static void main(String args[]) {
 		
 		// Load the config from the location defined in the runtime arguments
 		Config config = ConfigUtils.loadConfig(args[0]);
 		
 		// Run sample with factor defined by args[1]
-		run(config, Double.parseDouble(args[1]));
+		run(config, Double.parseDouble(args[1]), null);
 		// Run full sample
-		run(config, 1);
+		run(config, 1, args[1]);
 		
 	}
 	
@@ -62,7 +69,7 @@ public class ModalSplitCalibrationModule {
 	 * @param config The MATSim config that defines the scenario to be run by this method.
 	 * @param sampleFactor The "scale factor" for traffic demand and supply. Must be a non-null numerical value (0,1]
 	 */
-	public static void run(final Config config, double sampleFactor) {
+	public static void run(final Config config, double sampleFactor, String scenarioName) {
 		
 		// Modify the config with some necessary changes and load the scenario
 		modifyConfig(config, sampleFactor);
@@ -121,9 +128,13 @@ public class ModalSplitCalibrationModule {
 		// The error produced by the simulation
 		double delta = Double.POSITIVE_INFINITY;
 		
+		Logger.getLogger(Injector.class).setLevel(Level.OFF);
+		
 		// Outer loop of the simulation:
 		// Run as long as the maximum number of runs isn't reached
 		for(int i = 0 ; i < numberOfRuns; i++) {
+			
+			log.info("Simulation run #" + i);
 			
 			// The MATSim run
 			controler.run();
@@ -135,6 +146,11 @@ public class ModalSplitCalibrationModule {
 			
 			adaptModeConstants(config, asc.calculateModeConstants(config));
 		
+		}
+		
+		// Write the output plans into the rails db
+		if(scenarioName != null) {
+			MatsimPsqlAdapter.writeScenarioToPsql(scenario, scenarioName, RailsEnvironments.production.name());
 		}
 		
 	}
@@ -201,6 +217,7 @@ public class ModalSplitCalibrationModule {
 				// keep one mode constant at 0 and adjust the others according to the constant
 				params.addParam("constant", String.valueOf(e.getValue()));
 				config.planCalcScore().addModeParams(params);
+				log.info(String.format("New constant for mode %s : %s", e.getKey(), e.getValue()));
 				
 			}
 

@@ -30,7 +30,17 @@ public class SurveyDataContainer {
 	private Map<String, RecursiveStatsContainer> modeSpeedStatsContainer;
 	private Map<String, Hydrograph> activityTypeHydrographs;
 	
-	public SurveyDataContainer(final Configuration configuration){
+	private static final SurveyDataContainer instance = new SurveyDataContainer();
+	
+	private SurveyDataContainer() {}
+	
+	public static SurveyDataContainer getInstance() {
+		
+		return SurveyDataContainer.instance;
+		
+	}
+	
+	public void init(final Configuration configuration) {
 		
 		if(configuration.surveyPopulation().isUsingHouseholds()){
 			this.households = new HashMap<String, SurveyHousehold>();
