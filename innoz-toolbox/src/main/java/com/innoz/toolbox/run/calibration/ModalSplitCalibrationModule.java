@@ -54,7 +54,7 @@ public class ModalSplitCalibrationModule {
 		// Run sample with factor defined by args[1]
 		run(config, Double.parseDouble(args[1]), null);
 		// Run full sample
-		run(config, 1, args[1]);
+		run(config, 1, args[2]);
 		
 	}
 	
