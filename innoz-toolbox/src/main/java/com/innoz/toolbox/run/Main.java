@@ -13,10 +13,6 @@ import org.matsim.core.controler.OutputDirectoryLogging;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.PopulationSource;
 import com.innoz.toolbox.run.controller.Controller;
-import com.innoz.toolbox.run.controller.task.ConfigCreatorTask;
-import com.innoz.toolbox.run.controller.task.DemandGenerationTask;
-import com.innoz.toolbox.run.controller.task.NetworkGenerationTask;
-import com.innoz.toolbox.run.controller.task.WriteOutputTask;
 
 /**
  * 
@@ -82,14 +78,8 @@ public class Main {
 			
 			log.info("Starting controller...");
 			
-			// Add all the necessary tasks to the controller queue
-			Controller.submit(new ConfigCreatorTask.Builder(Controller.scenario()).build());
-			Controller.submit(new NetworkGenerationTask.Builder(Controller.configuration(), Controller.scenario()).build());
-			Controller.submit(new DemandGenerationTask.Builder(Controller.configuration(), Controller.scenario()).build());
-			Controller.submit(new WriteOutputTask.Builder(scenarioName, args[3]).build());
-			
 			// Start the actual execution
-			Controller.run();
+			Controller.run(scenarioName, args[3]);
 			
 		} else {
 

@@ -1,11 +1,16 @@
 package com.innoz.toolbox.run.calibration;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
@@ -13,8 +18,12 @@ import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.gbl.MatsimRandom;
+import org.matsim.core.network.algorithms.NetworkCleaner;
+import org.matsim.core.network.filter.NetworkFilterManager;
+import org.matsim.core.network.filter.NetworkLinkFilter;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
+import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import com.innoz.toolbox.utils.analysis.LegModeDistanceDistribution;
@@ -71,6 +80,28 @@ public class ModalSplitCalibrationModule {
 			final Random random = MatsimRandom.getRandom();
 			scenario.getPopulation().getPersons().values().removeIf(p -> random.nextDouble() > sampleFactor);
 			
+			// Define which links to use in a sample scenario
+			// This is a hard-coded variant for a 10% sample using all OSM link types from primary to tertiary
+			Set<String> acceptedOsmLinkTypes = new HashSet<>(Arrays.asList(new String[] {"primary", "primary_link",
+					"trunk", "trunk_link", "secondary", "tertiary"}));
+			NetworkFilterManager filters = new NetworkFilterManager(scenario.getNetwork());
+			filters.addLinkFilter(new NetworkLinkFilter() {
+				
+				@Override
+				public boolean judgeLink(Link l) {
+
+					// If the type of the link is contained in the accepted types, it is kept for the simulation network
+					return acceptedOsmLinkTypes.contains(l.getAttributes().getAttribute("type"));
+					
+				}
+				
+			});
+			
+			// Apply the filters to the network, clean it from leftovers of minor type links and add it to the scenario
+			Network network = filters.applyFilters();
+			new NetworkCleaner().run(network);
+			((MutableScenario)scenario).setNetwork(network);
+			
 		}
 		
 		///////////////////////////////////////////////////////////
@@ -119,7 +150,8 @@ public class ModalSplitCalibrationModule {
 		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		config.qsim().setFlowCapFactor(sampleFactor);
-		config.qsim().setStorageCapFactor(sampleFactor);
+		// This is recommended by KN (see https://matsim.atlassian.net/wiki/questions/48955430/answers/48955435)
+		config.qsim().setStorageCapFactor(Math.pow(sampleFactor, 0.75));
 		
 		// Disable innovation after 80% of the simulation
 		config.planCalcScore().setFractionOfIterationsToStartScoreMSA(0.8);

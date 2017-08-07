@@ -2,7 +2,6 @@ package com.innoz.toolbox.run.controller.task;
 
 import org.matsim.api.core.v01.Scenario;
 
-import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.scenarioGeneration.config.InitialConfigCreator;
 
 public class ConfigCreatorTask implements ControllerTask{
@@ -21,7 +20,7 @@ public class ConfigCreatorTask implements ControllerTask{
 		try {
 			
 			// Write initial Config
-			InitialConfigCreator.adapt(scenario.getConfig());
+			InitialConfigCreator.adapt();
 			
 		} catch (Exception e) {
 			

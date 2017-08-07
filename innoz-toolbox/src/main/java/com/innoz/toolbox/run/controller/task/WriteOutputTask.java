@@ -5,6 +5,7 @@ import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.ConfigWriter;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 
+import com.innoz.toolbox.io.pgsql.MatsimPsqlAdapter;
 import com.innoz.toolbox.run.controller.Controller;
 
 public class WriteOutputTask implements ControllerTask {
@@ -30,7 +31,7 @@ public class WriteOutputTask implements ControllerTask {
 				Controller.configuration().misc().getOutputDirectory() + "plans.xml.gz");
 		new ObjectAttributesXmlWriter(Controller.scenario().getPopulation().getPersonAttributes()).writeFile(
 				Controller.configuration().misc().getOutputDirectory() + "personAttributes.xml.gz");
-//		MatsimPsqlAdapter.writeScenarioToPsql(Controller.scenario(), scenarioName);
+		MatsimPsqlAdapter.writeScenarioToPsql(Controller.scenario(), this.scenarioName, this.railsEnvironment);
 
 	}
 	

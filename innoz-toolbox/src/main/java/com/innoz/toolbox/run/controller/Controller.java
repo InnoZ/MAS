@@ -11,10 +11,12 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.ConfigurationUtils;
+import com.innoz.toolbox.run.controller.task.ConfigCreatorTask;
 import com.innoz.toolbox.run.controller.task.ControllerTask;
 import com.innoz.toolbox.run.controller.task.DemandGenerationTask;
 import com.innoz.toolbox.run.controller.task.NetworkGenerationTask;
 import com.innoz.toolbox.run.controller.task.ReadGeodataTask;
+import com.innoz.toolbox.run.controller.task.WriteOutputTask;
 
 /**
  * 
@@ -34,8 +36,6 @@ public final class Controller {
 	// The task queue
 	private static final BlockingQueue<ControllerTask> queue = new ArrayBlockingQueue<>(15, true);
 	
-	private static final BlockingQueue<ControllerTask> queueBuffer = new ArrayBlockingQueue<>(15, true);
-	
 	static final Logger log = Logger.getLogger(Controller.class);
 	
 	// InnoZ
@@ -50,30 +50,16 @@ public final class Controller {
 	
 	/**
 	 * 
-	 * Adds a new task at the end of the task queue.
-	 * 
-	 * @param r The {@link ControllerTask} to be submitted.
-	 * @return True if the task could be appended to the queue, false otherwise.
-	 */
-	public static boolean submit(ControllerTask r) {
-		
-		return queueBuffer.add(r);
-		
-	}
-
-	/**
-	 * 
 	 * Executes the tasks stored inside the controller task queue subsequently.
 	 * 
 	 * @param configuration The scenario generation configuration holding all the information about the process.
 	 */
-	public static void run() {
+	public static void run(String scenarioName, String railsEnvironment) {
 		
 		log.info("Starting scenario generation...");
 	
 		// Add the tasks that have to be executed regardless of the actual goal of the call
-		addMandatoryTasks();
-//		queue.addAll(queueBuffer);
+		addMandatoryTasks(scenarioName, railsEnvironment);
 		
 		// Create a new thread that runs until every ControllerTask has been executed
 		Thread t = new Thread(() -> {
@@ -110,12 +96,13 @@ public final class Controller {
 	 * Maybe discard this method or put ALL the tasks in here because there isn't any user interaction on this level. //dhosse 08/17
 	 * 
 	 */
-	private static void addMandatoryTasks() {
+	private static void addMandatoryTasks(String scenarioName, String railsEnvironment) {
 		
 		queue.add(new ReadGeodataTask.Builder().build());
 		queue.add(new NetworkGenerationTask.Builder(configuration, scenario).build());
 		queue.add(new DemandGenerationTask.Builder(Controller.configuration(), Controller.scenario()).build());
-//		queue.add(new WriteOutputTask.Builder(scenarioName, args[3]).build()); TODO
+		queue.add(new ConfigCreatorTask.Builder(scenario).build());
+		queue.add(new WriteOutputTask.Builder(scenarioName, railsEnvironment).build());
 		
 	}
 	
