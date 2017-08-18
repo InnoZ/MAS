@@ -1,9 +1,7 @@
 package com.innoz.toolbox.scenarioGeneration.population.algorithm;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -11,23 +9,20 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.collections.CollectionUtils;
-import org.matsim.core.utils.collections.Tuple;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
-import org.matsim.core.utils.geometry.geotools.MGC;
+import org.matsim.core.utils.misc.Time;
 import org.matsim.facilities.ActivityFacility;
-import org.matsim.matrices.Matrix;
+import org.matsim.pt.PtConstants;
 
-import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.ZensusGrid.ZensusGridNode;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.ProxyFacility;
+import com.innoz.toolbox.scenarioGeneration.population.OriginDestinationData;
 import com.innoz.toolbox.scenarioGeneration.population.PopulationCreator;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPerson;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyPlanTrip;
@@ -39,18 +34,12 @@ import com.innoz.toolbox.utils.data.WeightedSelection;
 public abstract class DemandGenerationAlgorithm {
 
 	//CONSTANTS//////////////////////////////////////////////////////////////////////////////
-	final Random random = MatsimRandom.getLocalInstance();
-	Map<String, Tuple<List<ZensusGridNode>, Integer>> map = new HashMap<>();
+	final Random random = MatsimRandom.getRandom();
 	
 	static final Logger log = Logger.getLogger(PopulationCreator.class);
 	/////////////////////////////////////////////////////////////////////////////////////////
 
 	//MEMBERS////////////////////////////////////////////////////////////////////////////////
-	CoordinateTransformation transformation;
-	final Distribution distribution;
-	
-	final Scenario scenario;
-	
 	Coord currentHomeLocation = null;
 	Coord currentMainActLocation = null;
 	ActivityFacility currentHomeFacility = null;
@@ -62,23 +51,11 @@ public abstract class DemandGenerationAlgorithm {
 	AdministrativeUnit currentMainActCell;
 	Set<AdministrativeUnit> currentSearchSpace;
 	AdministrativeUnit lastActCell = null;
-	Matrix od;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
-	public DemandGenerationAlgorithm(final Scenario scenario, final CoordinateTransformation transformation, final Matrix od,
-			final Distribution distribution){
-		
-		this.transformation = transformation;
-		this.scenario = scenario;
-		this.od = od;
-		
-		// Initialize the disutilities for traveling from each cell to each other cell
-		// to eventually get a gravitation model.
-		this.distribution = distribution;
-		
-	}
+	public DemandGenerationAlgorithm() {}
 	
-	public abstract void run(final Configuration configuration, String ids);
+	public abstract void run(String ids);
 
 	AdministrativeUnit chooseAdminUnit(AdministrativeUnit district, String activityType){
 
@@ -111,52 +88,11 @@ public abstract class DemandGenerationAlgorithm {
 	
 	Coord chooseActivityCoordInAdminUnit(AdministrativeUnit admin, String activityType){
 		
-		return (PopulationCreator.grid != null && activityType.equals(ActivityTypes.HOME)) ?
-				chooseActivityCoordAccordingToZensusGrid(admin) : 
-				transformation.transform(GeometryUtils.shoot(
+		return (activityType.equals(ActivityTypes.HOME)) ?
+				OriginDestinationData.chooseHomeLocationFromGrid(admin) : 
+				Geoinformation.getTransformation().transform(GeometryUtils.shoot(
 				((Landuse)WeightedSelection.choose(admin.getLanduseGeometries().get(activityType), this.random.nextDouble()))
 				.getGeometry(), this.random));
-		
-	}
-	
-	Coord chooseActivityCoordAccordingToZensusGrid(AdministrativeUnit admin) {
-		
-		if(!map.containsKey(admin.getId())) {
-			
-			List<ZensusGridNode> nodes = new ArrayList<>();
-			int weight = 0;
-			
-			for(ZensusGridNode node : PopulationCreator.grid.getNodes()){
-				
-				if(admin.getGeometry().contains(MGC.coord2Point(node.getCoord()))){
-					
-					nodes.add(node);
-					weight += node.getNumberOfInhabitants();
-					
-				}
-				
-			}
-			
-			map.put(admin.getId(), new Tuple<List<ZensusGridNode>, Integer>(nodes, weight));
-			
-			map.put(admin.getId(), new Tuple<List<ZensusGridNode>, Integer>(nodes, weight));
-			
-		}
-		
-		Tuple<List<ZensusGridNode>, Integer> entry = map.get(admin.getId());
-		
-		double p = random.nextDouble() * entry.getSecond();
-		double accumulatedWeight = 0.0;
-		
-		for(ZensusGridNode node : entry.getFirst()){
-			
-			accumulatedWeight += node.getNumberOfInhabitants();
-			if(p <= accumulatedWeight){
-				return transformation.transform(node.getCoord());
-			}
-			
-		}
-		return null;
 		
 	}
 	
@@ -182,47 +118,6 @@ public abstract class DemandGenerationAlgorithm {
 		
 	}
 	
-	AdministrativeUnit locateWorkActivity(){
-		
-		String fromId = this.currentHomeCell.getId().substring(0, 5);
-		
-		int weight = 0;
-		
-		for(org.matsim.matrices.Entry entry : this.od.getFromLocations().get(fromId)){
-			
-			weight += entry.getValue();
-			
-		}
-		
-		double p = this.random.nextDouble() * weight;
-		double accumulatedWeight = 0d;
-		
-		for(org.matsim.matrices.Entry entry : this.od.getFromLocations().get(fromId)){
-			
-			accumulatedWeight += entry.getValue();
-			if(p <= accumulatedWeight){
-
-				AdministrativeUnit unit = Geoinformation.getInstance().getAdminUnit(fromId).getData();
-				
-				if(unit.getGeometry() != null){
-					
-					return unit;
-					
-				} else {
-					
-					return Geoinformation.getInstance().getAdminUnit(fromId).getChildren().get(
-							random.nextInt(Geoinformation.getInstance().getAdminUnit(fromId).getChildren().size())).getData();
-					
-				}
-				
-			}
-			
-		}
-		
-		return null;
-		
-	}
-
 	/**
 	 * 
 	 * Same method as {@link #locateActivityInCell(String, String, SurveyPerson)}, only that this method locates an activity of a sequence
@@ -240,11 +135,12 @@ public abstract class DemandGenerationAlgorithm {
 		Set<String> modes = new HashSet<String>();
 		
 		if(fromId == null){
-			fromId = this.currentHomeCell.getId();
+			fromId = this.lastActCell != null ? this.lastActCell.getId() : this.currentHomeCell.getId();
 		}
 		
-		if(activityType.equals(ActivityTypes.WORK)){
-			return locateWorkActivity();
+		if(activityType.equals(ActivityTypes.WORK)) {
+			if (mode != null && mode.equals(TransportMode.walk)) return this.currentHomeCell;
+			return OriginDestinationData.chooseWorkLocation(this.currentHomeCell.getId(), MatsimRandom.getRandom().nextDouble());
 		}
 		
 		if(activityType.split("_")[0].equals(ActivityTypes.EDUCATION) && this.currentHomeCell.getWeightForKey(ActivityTypes.EDUCATION) > 0){
@@ -253,21 +149,14 @@ public abstract class DemandGenerationAlgorithm {
 		
 		if(mode != null){
 
-			// If the person walked, it most likely didn't leave the last cell (to avoid very long walk legs)
-//			if(mode.equals(TransportMode.walk) && fromId != null){
-//				
-//				return this.geoinformation.getAdminUnit(fromId).getData();
-//				
-//			}
-			
+			if(mode.equals(TransportMode.walk)) return this.lastActCell != null ? this.lastActCell : this.currentHomeCell;
 			// Add the transport mode used
 			modes.add(mode);
 			
 		} else {
 			
 			// If the transport mode wasn't reported, consider all modes the person could have used
-			modes = CollectionUtils.stringToSet(TransportMode.bike + "," + TransportMode.pt + ","
-					+ TransportMode.walk);
+			modes = CollectionUtils.stringToSet(TransportMode.bike + "," + TransportMode.pt);
 			
 			if(personTemplate.hasCarAvailable()){
 			
@@ -318,12 +207,12 @@ public abstract class DemandGenerationAlgorithm {
 				
 				if(fromId != null){
 					
-					disutility = this.distribution.getDisutilityForActTypeAndMode(fromId, au.getId(),
+					disutility = OriginDestinationData.getDistribution().getDisutilityForActTypeAndMode(fromId, au.getId(),
 							activityType, m);
 					
 				} else {
 					
-					disutility = this.distribution.getDisutilityForActTypeAndMode(
+					disutility = OriginDestinationData.getDistribution().getDisutilityForActTypeAndMode(
 							this.currentHomeCell.getId(), au.getId(), activityType, m);
 					
 				}
@@ -359,6 +248,50 @@ public abstract class DemandGenerationAlgorithm {
 		if(result == null) return this.currentHomeCell;
 		
 		return result;
+		
+	}
+	
+	double timeShift = 0.0;
+	double delta = 0;
+	
+	void mutateActivityEndTimes(Plan plan) {
+		
+		timeShift = 0.0;
+		
+		plan.getPlanElements().stream().filter(pe -> pe instanceof Activity).map(pe -> (Activity)pe)
+			.filter(pe -> pe.getStartTime() != Time.UNDEFINED_TIME && pe.getEndTime() != Time.UNDEFINED_TIME).forEach(pe -> {
+			
+			if(pe.getStartTime() - pe.getEndTime() == 0) timeShift += 1800;
+			
+		});
+		
+		Activity firstAct = (Activity) plan.getPlanElements().get(0);
+		Activity lastAct = (Activity) plan.getPlanElements().get(plan.getPlanElements().size()-1);
+		
+		delta = 0;
+		while(delta == 0) {
+			delta = com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.createRandomEndTime();
+			if(firstAct.getEndTime() + delta < 0)
+				delta = 0;
+			if(lastAct.getStartTime() + delta + timeShift > Time.MIDNIGHT)
+				delta = 0;
+			if(lastAct.getEndTime() != Time.UNDEFINED_TIME) {
+				if(lastAct.getStartTime() + delta + timeShift >= lastAct.getEndTime())
+					delta = 0;
+			}
+		}
+		
+		plan.getPlanElements().stream().filter(pe -> pe instanceof Activity).map(pe -> (Activity)pe)
+			.filter(pe -> !pe.getType().equals(PtConstants.TRANSIT_ACTIVITY_TYPE)).forEach(pe -> {
+				
+				if(plan.getPlanElements().indexOf(pe) > 0) {
+					pe.setStartTime(pe.getStartTime() + delta);
+				}
+				if(plan.getPlanElements().indexOf(pe) < plan.getPlanElements().size()-1) {
+					pe.setEndTime(pe.getEndTime() + delta);
+				}
+				
+			});
 		
 	}
 	

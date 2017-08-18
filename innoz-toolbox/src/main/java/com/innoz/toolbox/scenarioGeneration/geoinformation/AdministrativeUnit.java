@@ -20,7 +20,6 @@ public class AdministrativeUnit {
 	
 	private String id;
 	
-	private Integer bland;
 	private Integer regionType;
 	
 	private Integer networkDetail = 6;
@@ -90,14 +89,6 @@ public class AdministrativeUnit {
 	
 	public Map<String, List<Landuse>> getLanduseGeometries(){
 		return this.landuseGeometries;
-	}
-	
-	public void setBland(int bland){
-		this.bland = bland;
-	}
-	
-	public Integer getBland(){
-		return this.bland;
 	}
 	
 	public void setNumberOfHouseholds(int n){

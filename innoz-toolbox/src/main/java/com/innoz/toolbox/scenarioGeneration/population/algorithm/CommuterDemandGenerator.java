@@ -4,7 +4,6 @@ import java.util.Set;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
@@ -13,30 +12,23 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.population.PersonUtils;
 import org.matsim.core.utils.collections.CollectionUtils;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.matrices.Entry;
-import org.matsim.matrices.Matrix;
 
-import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
+import com.innoz.toolbox.scenarioGeneration.population.OriginDestinationData;
 import com.innoz.toolbox.scenarioGeneration.population.commuters.CommuterDataElement;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 
 public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 
-	public CommuterDemandGenerator(final Scenario scenario, final CoordinateTransformation transformation, final Matrix od,
-			final Distribution distribution) {
-
-		super(scenario, transformation, od, distribution);
-		
-	}
+	public CommuterDemandGenerator() {}
 
 	@Override
-	public void run(Configuration configuration, String ids) {
+	public void run(String ids) {
 
-		createCommuterPopulation(configuration, ids);
+		createCommuterPopulation(ids);
 		
 	}
 	
@@ -54,9 +46,9 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 	 * @param configuration The scenario generation configuration file.
 	 * @param ids The admin unit ids of the commuters' home locations
 	 */
-	private void createCommuterPopulation(Configuration configuration, String ids){
+	private void createCommuterPopulation(String ids){
 		
-		Population population = scenario.getPopulation();
+		Population population = Controller.scenario().getPopulation();
 		
 		Set<String> idSet = CollectionUtils.stringToSet(ids);
 		
@@ -64,9 +56,9 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 		
 		for(String id : idSet){
 			
-			for(Entry e : this.od.getFromLocations().get(id)){
+			for(Entry e : OriginDestinationData.getFromLocations(id)){
 				
-				int d = (int) (e.getValue() * configuration.scenario().getScaleFactor());
+				int d = (int) (e.getValue() * Controller.configuration().scenario().getScaleFactor());
 				
 				for(int i = n; i < n + d; i++){
 					
@@ -88,7 +80,6 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 		
 	}
 	
-	@SuppressWarnings("deprecation")
 	void createOneCommuter(String homeId, String workId, Population population, int n){
 		
 		if(Geoinformation.getInstance().getAdminUnit(homeId) == null || Geoinformation.getInstance().getAdminUnit(workId) == null){
@@ -133,9 +124,11 @@ public class CommuterDemandGenerator extends DemandGenerationAlgorithm {
 		person.addPlan(plan);
 		person.setSelectedPlan(plan);
 		
+		mutateActivityEndTimes(plan);
+		
 		population.addPerson(person);
 		PersonUtils.setCarAvail(person, "always");
-		scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(),
+		Controller.scenario().getPopulation().getPersonAttributes().putAttribute(person.getId().toString(),
 				com.innoz.toolbox.scenarioGeneration.population.utils.PersonUtils.ATT_CAR_AVAIL, "always");
 		
 	}

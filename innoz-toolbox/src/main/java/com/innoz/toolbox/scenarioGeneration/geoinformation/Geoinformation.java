@@ -2,16 +2,20 @@ package com.innoz.toolbox.scenarioGeneration.geoinformation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.matsim.core.utils.collections.QuadTree;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
 import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Landuse;
+import com.innoz.toolbox.utils.GlobalNames;
 import com.innoz.toolbox.utils.data.Tree;
 import com.innoz.toolbox.utils.data.Tree.Node;
 import com.vividsolutions.jts.geom.Geometry;
@@ -45,12 +49,16 @@ public class Geoinformation {
 	private Geometry vicinityBoundingBox;
 	private Geometry completeGeometry;
 	
+	private Set<String> vicinityIds = new HashSet<>();
+	
 	private LanduseDataContainer landuseData;
 	
 	protected Geometry catchmentAreaPt;
 	/////////////////////////////////////////////////////////////////////////////////////////	
 	
-	private static Geoinformation instance = new Geoinformation(Controller.configuration().scenario().getActivityLocationsType());
+	private static final Geoinformation instance = new Geoinformation();
+	private static CoordinateTransformation transformation;
+	private static CoordinateTransformation reverseTransformation;
 	
 	public static Geoinformation getInstance() {
 		
@@ -58,14 +66,35 @@ public class Geoinformation {
 		
 	}
 	
-	private Geoinformation(ActivityLocationsType type){
+	private Geoinformation(){
 		
 		// Initialize the tree with the highest level admin unit (Germany)
 		this.adminUnitTree = new Tree<AdministrativeUnit>(new AdministrativeUnit("0"));
-		this.landuseData = new LanduseDataContainer(type);
+		this.landuseData = new LanduseDataContainer(Controller.configuration().scenario().getActivityLocationsType());
 		
 		this.regionTypesToDistricts = new HashMap<Integer, Set<Integer>>();
 		
+		transformation = TransformationFactory.getCoordinateTransformation(
+				GlobalNames.WGS84, Controller.configuration().misc().getCoordinateSystem());
+		reverseTransformation = TransformationFactory.getCoordinateTransformation(
+				Controller.configuration().misc().getCoordinateSystem(), GlobalNames.WGS84);
+		
+	}
+	
+	public static CoordinateTransformation getTransformation() {
+		return Geoinformation.transformation;
+	}
+	
+	public static CoordinateTransformation getReverseTransformation() {
+		return Geoinformation.reverseTransformation;
+	}
+	
+	public Set<String> getVicinityIds() {
+		return this.vicinityIds;
+	}
+	
+	public void addIdToVicinity(String id) {
+		this.vicinityIds.add(id);
 	}
 	
 	public ActivityLocationsType getLanduseType(){

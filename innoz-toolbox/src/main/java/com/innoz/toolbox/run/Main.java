@@ -8,10 +8,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.core.controler.OutputDirectoryLogging;
 
-//github.com/00Bock/MAS.git
-
-import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
-import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.PopulationSource;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.PopulationSource;
 import com.innoz.toolbox.run.controller.Controller;
 
 /**
@@ -55,12 +52,9 @@ public class Main {
 			
 			// Create a new area set containing a single county
 			// The other parameters are set to more or less meaningful default values until we implement switches
-			AreaSet set = new AreaSet();
-			set.setIds(args[0]);
-			set.setIsSurveyArea(true);
-			set.setNetworkLevel(6);
-			set.setPopulationSource(PopulationSource.SURVEY);
-			Controller.configuration().scenario().addAreaSet(set);
+			Controller.configuration().scenario().setSurveyAreaId(args[0]);
+			Controller.configuration().scenario().setNetworkLevel(6);
+			Controller.configuration().scenario().setPopulationSource(PopulationSource.SURVEY);
 			Controller.configuration().surveyPopulation().setUseHouseholds(false);
 
 			log.info("Added survey area with AGKZ '" + args[0] + "'");
@@ -72,7 +66,7 @@ public class Main {
 			int forecastYear = Integer.parseInt(args[1]);
 			Controller.configuration().scenario().setYear(forecastYear);
 			
-//			Controller.configuration().psql().setPsqlPort(9999);
+			Controller.configuration().psql().setPsqlPort(9999);
 			
 			log.info("Scenario year set to " + args[1]);
 			

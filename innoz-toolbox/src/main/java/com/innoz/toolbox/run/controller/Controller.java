@@ -99,9 +99,9 @@ public final class Controller {
 	private static void addMandatoryTasks(String scenarioName, String railsEnvironment) {
 		
 		queue.add(new ReadGeodataTask.Builder().build());
-		queue.add(new NetworkGenerationTask.Builder(configuration, scenario).build());
-		queue.add(new DemandGenerationTask.Builder(Controller.configuration(), Controller.scenario()).build());
-		queue.add(new ConfigCreatorTask.Builder(scenario).build());
+		queue.add(new NetworkGenerationTask.Builder().build());
+		queue.add(new DemandGenerationTask.Builder().build());
+		queue.add(new ConfigCreatorTask.Builder().build());
 		queue.add(new WriteOutputTask.Builder(scenarioName, railsEnvironment).build());
 		
 	}

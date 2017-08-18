@@ -1,32 +1,18 @@
 package com.innoz.toolbox.scenarioGeneration.population;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.geotools.referencing.CRS;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.matrices.Matrix;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.groups.ConfigurationGroup;
-import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
-import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
-import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.PopulationSource;
-import com.innoz.toolbox.io.database.CommuterDatabaseParser;
+import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.PopulationSource;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.ZensusGrid;
-import com.innoz.toolbox.scenarioGeneration.population.algorithm.CommuterDemandGenerator;
-import com.innoz.toolbox.scenarioGeneration.population.algorithm.DemandGenerationAlgorithm;
-import com.innoz.toolbox.scenarioGeneration.population.algorithm.SurveyBasedDemandGenerator;
-import com.innoz.toolbox.scenarioGeneration.population.algorithm.TracksDemandGenerator;
-import com.innoz.toolbox.utils.GlobalNames;
 
 /**
  * 
@@ -69,54 +55,54 @@ public class PopulationCreator {
 	 */
 	public static void run(Configuration configuration, Scenario scenario) {
 
-		try {
-			
-			if(configuration.scenario().getActivityLocationsType().equals(ActivityLocationsType.GRID)) {
-				
-				grid = new ZensusGrid(configuration);
-				
-			}
-			
-			Map<String, ConfigurationGroup> areaSets = configuration.scenario().getAreaSets();
-			
-			CommuterDatabaseParser parser = new CommuterDatabaseParser();
-			parser.run(configuration);
-			od = parser.getOD();
-			
-			for(String key : areaSets.keySet()){
-				
-				AreaSet set = (AreaSet)areaSets.get(key);
-					
-					if(set.getPopulationSource() != null){
-					
-					// Create the coordinate transformation for all of the geometries
-					// This could also be done by just passing the auth id strings, but doing it this way suppresses
-					// warnings.
-					CoordinateReferenceSystem from = CRS.decode(GlobalNames.WGS84, true);
-					CoordinateReferenceSystem to = CRS.decode(configuration.misc().getCoordinateSystem(), true);
-					transformation = TransformationFactory.getCoordinateTransformation(
-							from.toString(), to.toString());
-					
-					distribution = new Distribution(scenario.getNetwork(), transformation);
-				
-					
-					log.info("Creating population for MATSim scenario...");
-				
-					runI(configuration, scenario, set.getPopulationSource(), set.getIds());
-					
-				}
-				
-			}
-		
-		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException |
-				IllegalArgumentException | InvocationTargetException | NoSuchMethodException |
-				SecurityException | FactoryException e) {
-			
-			e.printStackTrace();
-			
-		}
-		
-		log.info("...done.");
+//		try {
+//			
+//			if(configuration.scenario().getActivityLocationsType().equals(ActivityLocationsType.GRID)) {
+//				
+//				grid = new ZensusGrid(configuration);
+//				
+//			}
+//			
+//			Map<String, ConfigurationGroup> areaSets = configuration.scenario().getAreaSets();
+//			
+//			CommuterDatabaseParser parser = new CommuterDatabaseParser();
+//			parser.run(configuration);
+//			od = parser.getOD();
+//			
+//			for(String key : areaSets.keySet()){
+//				
+//				AreaSet set = (AreaSet)areaSets.get(key);
+//					
+//					if(set.getPopulationSource() != null){
+//					
+//					// Create the coordinate transformation for all of the geometries
+//					// This could also be done by just passing the auth id strings, but doing it this way suppresses
+//					// warnings.
+//					CoordinateReferenceSystem from = CRS.decode(GlobalNames.WGS84, true);
+//					CoordinateReferenceSystem to = CRS.decode(configuration.misc().getCoordinateSystem(), true);
+//					transformation = TransformationFactory.getCoordinateTransformation(
+//							from.toString(), to.toString());
+//					
+//					distribution = new Distribution(scenario.getNetwork(), transformation);
+//				
+//					
+//					log.info("Creating population for MATSim scenario...");
+//				
+//					runI(configuration, scenario, set.getPopulationSource(), set.getIds());
+//					
+//				}
+//				
+//			}
+//		
+//		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException |
+//				IllegalArgumentException | InvocationTargetException | NoSuchMethodException |
+//				SecurityException | FactoryException e) {
+//			
+//			e.printStackTrace();
+//			
+//		}
+//		
+//		log.info("...done.");
 		
 	}
 	
@@ -125,34 +111,34 @@ public class PopulationCreator {
 			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException,
 			ClassNotFoundException{
 		
-		log.info("Selected type of population: " + populationType.name());
-		
-		String className = null;
-		
-		// Choose the demand generation method according to what type of population was defined in the configuration
-		switch(populationType){
-							
-			case COMMUTER:	className = CommuterDemandGenerator.class.getName();
-							break;
-							
-			case SURVEY:	className = SurveyBasedDemandGenerator.class.getName();
-							break;
-							
-			case TRACKS:	className = TracksDemandGenerator.class.getName();
-							break;
-							
-			default: 		break;
-			
-		}
-		
-		if(className != null){
-			
-			((DemandGenerationAlgorithm)Class.forName(className).getConstructor(
-					Scenario.class, Geoinformation.class, CoordinateTransformation.class, Matrix.class, Distribution.class)
-					.newInstance(scenario, transformation, od, distribution))
-					.run(configuration, ids);
-			
-		}
+//		log.info("Selected type of population: " + populationType.name());
+//		
+//		String className = null;
+//		
+//		// Choose the demand generation method according to what type of population was defined in the configuration
+//		switch(populationType){
+//							
+//			case COMMUTER:	className = CommuterDemandGenerator.class.getName();
+//							break;
+//							
+//			case SURVEY:	className = SurveyBasedDemandGenerator.class.getName();
+//							break;
+//							
+//			case TRACKS:	className = TracksDemandGenerator.class.getName();
+//							break;
+//							
+//			default: 		break;
+//			
+//		}
+//		
+//		if(className != null){
+//			
+//			((DemandGenerationAlgorithm)Class.forName(className).getConstructor(
+//					Scenario.class, Geoinformation.class, CoordinateTransformation.class, Matrix.class, Distribution.class)
+//					.newInstance(scenario, transformation, od, distribution))
+//					.run(configuration, ids);
+//			
+//		}
 			
 	}
 	

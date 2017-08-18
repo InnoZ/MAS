@@ -13,6 +13,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
@@ -23,6 +24,7 @@ import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.network.filter.NetworkFilterManager;
 import org.matsim.core.network.filter.NetworkLinkFilter;
+import org.matsim.core.population.PersonUtils;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.scenario.MutableScenario;
@@ -135,6 +137,10 @@ public class ModalSplitCalibrationModule {
 		for(int i = 0 ; i < numberOfRuns; i++) {
 			
 			log.info("Simulation run #" + i);
+			log.info("Error last run: " + delta);
+			
+			scenario.getPopulation().getPersons().values().stream().forEach(p -> PersonUtils.removeUnselectedPlans(p));
+			scenario.getPopulation().getPersons().values().stream().map(Person::getSelectedPlan).forEach(plan -> plan.setScore(null));
 			
 			// The MATSim run
 			controler.run();
@@ -172,6 +178,9 @@ public class ModalSplitCalibrationModule {
 		// Disable innovation after 80% of the simulation
 		config.planCalcScore().setFractionOfIterationsToStartScoreMSA(0.8);
 		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
+		config.subtourModeChoice().setConsiderCarAvailability(true);
+		
+		config.qsim().setEndTime(30*3600);
 		
 		// Replanning strategies
 		// Choose existing plan

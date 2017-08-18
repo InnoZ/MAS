@@ -27,8 +27,8 @@ public class ConfigurationTest {
 		
 		assertTrue(configuration != null);
 		
-		assertNull("There is at least one area set in a newly created configuration!",
-				configuration.scenario().getAreaSets());
+		assertNull("There is already a survey area defined in the configuration!",
+				configuration.scenario().getSurveyAreaId());
 		
 		assertEquals(".", configuration.misc().getOutputDirectory());
 		assertFalse(configuration.misc().isOverwritingExistingFiles());
@@ -42,8 +42,6 @@ public class ConfigurationTest {
 		assertEquals(SurveyVehicleType.DEFAULT, configuration.surveyPopulation().getVehicleType());
 		assertTrue(configuration.surveyPopulation().isUsingHouseholds());
 		
-		assertEquals(null, configuration.scenario().getAreaSets());
-
 		assertFalse(configuration.psql().isWritingIntoMobilityDatahub());
 		assertEquals(0, configuration.psql().getParameterSets().size());
 		

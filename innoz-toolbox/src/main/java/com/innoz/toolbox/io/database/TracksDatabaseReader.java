@@ -18,9 +18,9 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.config.groups.TracksConfigurationGroup;
+import com.innoz.toolbox.config.psql.PsqlAdapter;
+import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.tracks.Track;
 import com.innoz.toolbox.scenarioGeneration.population.tracks.TrackedPerson;
@@ -32,12 +32,10 @@ import com.vividsolutions.jts.io.WKTReader;
 
 public class TracksDatabaseReader {
 
-	private final Configuration configuration;
 	private Map<String, TrackedPerson> persons;
 	
-	public TracksDatabaseReader(Configuration configuration) {
+	public TracksDatabaseReader() {
 		
-		this.configuration = configuration;
 		this.persons = new HashMap<>();
 		
 	}
@@ -46,7 +44,7 @@ public class TracksDatabaseReader {
 		
 		try {
 			
-			TracksConfigurationGroup config = this.configuration.tracks();
+			TracksConfigurationGroup config = Controller.configuration().tracks();
 			
 			WKTReader wkt = new WKTReader();
 			

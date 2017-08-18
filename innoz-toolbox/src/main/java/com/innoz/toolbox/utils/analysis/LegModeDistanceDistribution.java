@@ -44,7 +44,6 @@ import org.matsim.core.gbl.Gbl;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.io.IOUtils;
-import org.matsim.pt.PtConstants;
 
 /**
  * This tool calculates modal split over predefined distance classes.
@@ -92,24 +91,23 @@ public class LegModeDistanceDistribution {
 				PlanElement pe = planElements.get(i);
 				if (pe instanceof Activity) {
 					Activity act = (Activity) pe;
-					if (PtConstants.TRANSIT_ACTIVITY_TYPE.equals(act.getType())) {
+					if (act.getType().contains("interaction")) {
 						PlanElement previousPe = planElements.get(i-1);
+						PlanElement next = planElements.get(i+1);
 						if (previousPe instanceof Leg) {
 							Leg previousLeg = (Leg) previousPe;
-							previousLeg.setMode(TransportMode.pt);
-							previousLeg.setRoute(null);
+							Leg nextLeg = (Leg) next;
+							if(!nextLeg.getMode().contains("_walk")) {
+								previousLeg.setMode(nextLeg.getMode());
+								previousLeg.setRoute(null);
+							}
 						} else {
-							throw new RuntimeException("A transit activity should follow a leg! Aborting...");
+							throw new RuntimeException("An activity should follow a leg! Aborting...");
 						}
 						final int index = i;
 						PopulationUtils.removeActivity(((Plan) selectedPlan), index); // also removes the following leg
 						n -= 2;
 						i--;
-					}
-				} else {
-					Leg leg = (Leg)pe;
-					if(leg.getMode().contains("access") || leg.getMode().contains("egress")) {
-						PopulationUtils.removeLeg(selectedPlan, planElements.indexOf(leg)); // we don't consider access / egress legs for modal split
 					}
 				}
 			}

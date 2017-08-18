@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
@@ -23,11 +25,13 @@ import org.matsim.core.network.filter.NetworkLinkFilter;
 public class MyCarsharingSupplyContainer implements CarsharingSupplyInterface {
 	
 	private Map<String, CompanyContainer> companies = new HashMap<String, CompanyContainer>();
+	private Map<String, CompanyAgent> companyAgents = new HashMap<String, CompanyAgent>();
 	private Map<String, CSVehicle> allVehicles = new HashMap<String, CSVehicle>();
 	private Map<CSVehicle, Link> allVehicleLocations = new HashMap<CSVehicle, Link>();
 	private Set<String> companyNames;
 	private Scenario scenario;
 	
+	@Inject
 	public MyCarsharingSupplyContainer(Scenario scenario) {
 		this.scenario = scenario;
 	}	
@@ -102,10 +106,10 @@ public class MyCarsharingSupplyContainer implements CarsharingSupplyInterface {
 		Network network = filterNetwork();
 
 		final CarsharingConfigGroup configGroup = (CarsharingConfigGroup)
-				scenario.getConfig().getModule( CarsharingConfigGroup.GROUP_NAME );
+				scenario.getConfig().getModules().get( CarsharingConfigGroup.GROUP_NAME );
 
 		final FreeFloatingConfigGroup ffConfigGroup = (FreeFloatingConfigGroup)
-				this.scenario.getConfig().getModule(FreeFloatingConfigGroup.GROUP_NAME);
+				this.scenario.getConfig().getModules().get(FreeFloatingConfigGroup.GROUP_NAME);
 
 		CarsharingXmlReaderNew reader = new CarsharingXmlReaderNew(network);
 
@@ -121,6 +125,12 @@ public class MyCarsharingSupplyContainer implements CarsharingSupplyInterface {
 		this.allVehicleLocations = reader.getAllVehicleLocations();
 		this.allVehicles = reader.getAllVehicles();
 		this.companyNames = reader.getCompanyNames();
+		
+		for(String companyName : this.companyNames) {
+			CompanyAgent agent = new CompanyAgentImpl(this.companies.get(companyName), "");
+			this.companyAgents.put(companyName, agent);
+		}
+		
 	}
 
 	/* (non-Javadoc)
@@ -129,6 +139,10 @@ public class MyCarsharingSupplyContainer implements CarsharingSupplyInterface {
 	@Override
 	public Set<String> getCompanyNames() {
 		return companyNames;
+	}
+	
+	public Map<String, CompanyAgent> getCompanyAgents() {
+		return this.companyAgents;
 	}
 	
 	private Network filterNetwork() {

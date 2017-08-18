@@ -22,7 +22,6 @@ import org.matsim.vehicles.VehicleType;
 
 import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.ConfigurationUtils;
-import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.io.database.DatabaseConstants;
 
@@ -31,10 +30,7 @@ public class CreateCarsharingVehicles {
 	public static void main(String args[]) {
 		
 		Configuration configuration = ConfigurationUtils.createConfiguration();
-		AreaSet set = new AreaSet();
-		set.setIds("03404");
-		set.setIsSurveyArea(true);
-		configuration.scenario().addAreaSet(set);
+		configuration.scenario().setSurveyAreaId("03404");
 		CreateCarsharingVehicles.run(configuration, ScenarioUtils.createScenario(ConfigUtils.createConfig()));
 		
 	}
@@ -136,6 +132,16 @@ public class CreateCarsharingVehicles {
 		Coord c;
 		List<CSVehicle> vehicles = new ArrayList<CSVehicle>();
 		TwoWayEntry(String id){
+			this.id = id;
+		}
+	}
+	
+	static class OnewayEntry extends VehicleEntry {
+		String id;
+		Coord c;
+		int freeparking;
+		List<CSVehicle> vehicles = new ArrayList<CSVehicle>();
+		OnewayEntry(String id) {
 			this.id = id;
 		}
 	}

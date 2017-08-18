@@ -11,7 +11,6 @@ import org.matsim.core.config.ReflectiveConfigGroup.StringSetter;
 
 import com.innoz.toolbox.config.groups.NetworkConfigurationGroup.HighwayDefaults;
 import com.innoz.toolbox.config.groups.PsqlConfigurationGroup.OutputTablesParameterSet;
-import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 
 public abstract class ConfigurationGroup {
 
@@ -53,11 +52,7 @@ public abstract class ConfigurationGroup {
 	
 	public ConfigurationGroup createParameterSet(String name){
 		
-		if("areaSet".equals(name)){
-			
-			return new AreaSet();
-			
-		} else if("outputTables".equals(name)){
+		if("outputTables".equals(name)){
 			
 			return new OutputTablesParameterSet();
 			
@@ -73,11 +68,7 @@ public abstract class ConfigurationGroup {
 	
 	public void addParameterSet(ConfigurationGroup parameterSet){
 		
-		if(parameterSet instanceof AreaSet) {
-			
-			((ScenarioConfigurationGroup)this).addAreaSet((AreaSet)parameterSet);
-			
-		} else if(parameterSet instanceof OutputTablesParameterSet) {
+		if(parameterSet instanceof OutputTablesParameterSet) {
 			
 			((PsqlConfigurationGroup)this).addOutputTablesParameterSet((OutputTablesParameterSet)parameterSet);
 			

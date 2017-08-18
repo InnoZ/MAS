@@ -51,11 +51,10 @@ public class CarsharingSupplyEventHandler implements NoVehicleCarSharingEventHan
 			
 			this.stuckEventsCausedByNoCsVeh.put(linkId, new HashMap<String, Integer>());
 			
-			if(!this.stuckEventsCausedByNoCsVeh.get(linkId).containsKey(csType)) {
-				
-				this.stuckEventsCausedByNoCsVeh.get(linkId).put(csType, 0);
-				
-			}
+		}
+		if(!this.stuckEventsCausedByNoCsVeh.get(linkId).containsKey(csType)) {
+			
+			this.stuckEventsCausedByNoCsVeh.get(linkId).put(csType, 0);
 			
 		}
 		

@@ -2,18 +2,14 @@ package com.innoz.toolbox.scenarioGeneration.population.algorithm;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
-import org.matsim.matrices.Matrix;
 
-import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.AdministrativeUnit;
-import com.innoz.toolbox.scenarioGeneration.geoinformation.Distribution;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.utils.GeometryUtils;
@@ -21,15 +17,10 @@ import com.innoz.toolbox.utils.data.Tree.Node;
 
 public class DummyDemandGenerator extends DemandGenerationAlgorithm {
 
-	public DummyDemandGenerator(final Scenario scenario, final CoordinateTransformation transformation, final Matrix od,
-			final Distribution distribution) {
-
-		super(scenario, transformation, od, distribution);
-		
-	}
+	public DummyDemandGenerator() {}
 
 	@Override
-	public void run(final Configuration configuration, String ids) {
+	public void run(String ids) {
 
 		this.createDummyPopulation(ids);
 		
@@ -67,35 +58,35 @@ public class DummyDemandGenerator extends DemandGenerationAlgorithm {
 					for(int i = 0; i < 1000; i++){
 
 						// Create a new person and an empty plan
-						Person person = scenario.getPopulation().getFactory().createPerson(Id.createPersonId(
+						Person person = Controller.scenario().getPopulation().getFactory().createPerson(Id.createPersonId(
 								fromEntry.getData().getId() + "_" + toEntry.getData().getId() + "-" + i));
-						Plan plan = scenario.getPopulation().getFactory().createPlan();
+						Plan plan = Controller.scenario().getPopulation().getFactory().createPlan();
 						
 						// Shoot the activity coords (home activity located inside of the FROM admin unit,
 						// work activity inside of the TO admin unit)
-						Coord homeCoord = transformation.transform(GeometryUtils.shoot(fromEntry.getData()
+						Coord homeCoord = Geoinformation.getTransformation().transform(GeometryUtils.shoot(fromEntry.getData()
 								.getGeometry(),random));
-						Coord workCoord = transformation.transform(GeometryUtils.shoot(toEntry.getData()
+						Coord workCoord = Geoinformation.getTransformation().transform(GeometryUtils.shoot(toEntry.getData()
 								.getGeometry(),random));
 						
 						// Create activities and legs and add them to the plan
-						Activity home = scenario.getPopulation().getFactory().createActivityFromCoord(ActivityTypes.HOME,
+						Activity home = Controller.scenario().getPopulation().getFactory().createActivityFromCoord(ActivityTypes.HOME,
 								homeCoord);
 						home.setEndTime(7 * 3600);
 						plan.addActivity(home);
 						
-						Leg leg = scenario.getPopulation().getFactory().createLeg(TransportMode.car);
+						Leg leg = Controller.scenario().getPopulation().getFactory().createLeg(TransportMode.car);
 						plan.addLeg(leg);
 						
-						Activity work = scenario.getPopulation().getFactory().createActivityFromCoord(ActivityTypes.WORK,
+						Activity work = Controller.scenario().getPopulation().getFactory().createActivityFromCoord(ActivityTypes.WORK,
 								workCoord);
 						work.setEndTime(18 * 3600);
 						plan.addActivity(work);
 						
-						Leg leg2 = scenario.getPopulation().getFactory().createLeg(TransportMode.car);
+						Leg leg2 = Controller.scenario().getPopulation().getFactory().createLeg(TransportMode.car);
 						plan.addLeg(leg2);
 						
-						Activity home2 = scenario.getPopulation().getFactory().createActivityFromCoord(ActivityTypes.HOME,
+						Activity home2 = Controller.scenario().getPopulation().getFactory().createActivityFromCoord(ActivityTypes.HOME,
 								homeCoord);
 						plan.addActivity(home2);
 						
@@ -104,7 +95,7 @@ public class DummyDemandGenerator extends DemandGenerationAlgorithm {
 						person.setSelectedPlan(plan);
 
 						// Add the current person to the population
-						scenario.getPopulation().addPerson(person);
+						Controller.scenario().getPopulation().addPerson(person);
 						
 					}
 					

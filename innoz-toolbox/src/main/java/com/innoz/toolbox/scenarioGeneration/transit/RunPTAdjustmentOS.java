@@ -2,18 +2,16 @@ package com.innoz.toolbox.scenarioGeneration.transit;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.math3.util.OpenIntToDoubleHashMap.Iterator;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Identifiable;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.NetworkReaderMatsimV2;
@@ -30,8 +28,8 @@ import org.matsim.pt.transitSchedule.api.TransitScheduleWriter;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleReaderV1;
-
-import com.innoz.toolbox.utils.GeometryUtils;
+import org.matsim.vehicles.VehicleUtils;
+import org.matsim.vehicles.VehicleWriterV1;
 
 public class RunPTAdjustmentOS {
 	
@@ -42,11 +40,13 @@ public class RunPTAdjustmentOS {
 		
 		Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
 		TransitScheduleReader tsr = new TransitScheduleReader(scenario);
-		tsr.readFile("/home/bmoehring/3connect/Scenarios/scheduleSimplified.xml.gz");
+		tsr.readFile("/home/dhosse/scenarios/3connect/scheduleSimplified.xml.gz");
 		NetworkReaderMatsimV2 nwr = new NetworkReaderMatsimV2(scenario.getNetwork());
-		nwr.readFile("/home/bmoehring/3connect/Scenarios/mergedNetwork.xml.gz");
+		nwr.readFile("/home/dhosse/scenarios/3connect/scenarios/3connect/mergedNetwork_trend.xml");
 		VehicleReaderV1 vhr = new VehicleReaderV1(scenario.getTransitVehicles());
-		vhr.readFile("/home/bmoehring/3connect/Scenarios/transitVehiclesFiltered.xml.gz");
+		vhr.readFile("/home/dhosse/scenarios/3connect/transitVehiclesFiltered.xml.gz");
+		
+		scenario.getTransitVehicles().addVehicleType(VehicleUtils.getDefaultVehicleType());
 		
 		Network network = scenario.getNetwork();
 		TransitSchedule schedule = scenario.getTransitSchedule();
@@ -448,7 +448,7 @@ public class RunPTAdjustmentOS {
 //			nRoute.setStartLinkId(network.getLinks().get("pt_10104").getId());
 //			nRoute.setEndLinkId(network.getLinks().get("pt_7319").getId());
 			List<Id<Link>> linkIds = new ArrayList<Id<Link>>();
-			linkIds.add(Id.createLinkId("pt_10104"));
+//			linkIds.add(Id.createLinkId("pt_10104"));
 			linkIds.add(Id.createLinkId("pt_10105"));
 			linkIds.add(Id.createLinkId("pt_10106"));
 			linkIds.add(Id.createLinkId("pt_10107"));
@@ -483,7 +483,7 @@ public class RunPTAdjustmentOS {
 			linkIds.add(Id.createLinkId("pt_786"));
 			linkIds.add(Id.createLinkId("pt_1000034"));
 			linkIds.add(Id.createLinkId("pt_1000035"));
-			linkIds.add(Id.createLinkId("pt_7319"));
+//			linkIds.add(Id.createLinkId("pt_7319"));
 			
 			new RouteUtils();
 			NetworkRoute nRoute = RouteUtils.createNetworkRoute(linkIds, network);
@@ -493,7 +493,10 @@ public class RunPTAdjustmentOS {
 			
 			for(double dTime = 21600; dTime <= 79200; dTime += 1200){
 				Departure d = schedule.getFactory().createDeparture(Id.create(tRoute.getId().toString() + "_" + dTime, Departure.class), dTime);
-				d.setVehicleId(Id.create(tRoute.getId().toString() + "_" + dTime, Vehicle.class));
+				Id<Vehicle> vehicleId = Id.create(tRoute.getId().toString() + "_" + dTime, Vehicle.class);
+				Vehicle vehicle = scenario.getTransitVehicles().getFactory().createVehicle(vehicleId, VehicleUtils.getDefaultVehicleType());
+				scenario.getTransitVehicles().addVehicle(vehicle);
+				d.setVehicleId(vehicleId);
 				tRoute.addDeparture(d);
 			}
 			
@@ -520,7 +523,7 @@ public class RunPTAdjustmentOS {
 			network.addNode(nRosenburg);
 			Node nJeggenerWeg = network.getFactory().createNode(Id.createNodeId(nodeId()), 			new Coord(437563, 5791709));
 			network.addNode(nJeggenerWeg);
-			Node nKarmannstrasse = network.getFactory().createNode(Id.createNodeId(nodeId()), 		new Coord(437238, 57908496));
+			Node nKarmannstrasse = network.getFactory().createNode(Id.createNodeId(nodeId()), 		new Coord(437238, 5790849));
 			network.addNode(nKarmannstrasse);
 			Node nBuenderStrasse = network.getFactory().createNode(Id.createNodeId(nodeId()), 		new Coord(436021, 5790623));
 			network.addNode(nBuenderStrasse);
@@ -877,17 +880,21 @@ public class RunPTAdjustmentOS {
 			linkIds.add(Id.createLinkId("pt_10073"));
 			linkIds.add(Id.createLinkId("pt_10074"));
 			linkIds.add(Id.createLinkId("pt_10075"));
-			linkIds.add(Id.createLinkId("pt_10076"));
+//			linkIds.add(Id.createLinkId("pt_10076"));
 			
 			new RouteUtils();
 			NetworkRoute nRoute = RouteUtils.createNetworkRoute(linkIds, network);
-			nRoute.setLinkIds(Id.createLinkId("pt_7335"), linkIds, Id.createLinkId("pt_10076"));
+			nRoute.setLinkIds(Id.createLinkId("pt_10076"), linkIds, Id.createLinkId("pt_10076"));
 			
 			TransitRoute tRoute = schedule.getFactory().createTransitRoute(Id.create("100000_1", TransitRoute.class), nRoute, stops, "bus");
 			
 			for(double dTime = 21600; dTime <= 79200; dTime += 1200){
 				Departure d = schedule.getFactory().createDeparture(Id.create(tRoute.getId().toString() + "_" + dTime, Departure.class), dTime);
-				d.setVehicleId(Id.create(tRoute.getId().toString() + "_" + dTime, Vehicle.class));
+				Id<Vehicle> vehicleId = Id.create(tRoute.getId().toString() + "_" + dTime, Vehicle.class);
+				Vehicle vehicle = scenario.getTransitVehicles().getFactory().createVehicle(vehicleId, VehicleUtils.getDefaultVehicleType());
+				scenario.getTransitVehicles().addVehicle(vehicle);
+				d.setVehicleId(vehicleId);
+				d.setVehicleId(vehicleId);
 				tRoute.addDeparture(d);
 			}
 			
@@ -896,7 +903,9 @@ public class RunPTAdjustmentOS {
 		
 		}
 		
-		new TransitScheduleWriter(schedule).writeFile("/home/bmoehring/3connect/Scenarios/2: Ausbau transit/scheduleSimplifiedWithRingbus.xml.gz");
+		new NetworkWriter(network).write("/home/dhosse/scenarios/3connect/scenarios/networkMerged_trendWPt.xml.gz");
+		new VehicleWriterV1(scenario.getTransitVehicles()).writeFile("/home/dhosse/scenarios/3connect/scenarios/TransitVehiclesWithRingbus.xml.gz");
+		new TransitScheduleWriter(schedule).writeFile("/home/dhosse/scenarios/3connect/scenarios/scheduleSimplifiedWithRingbus.xml.gz");
 		
 	}
 

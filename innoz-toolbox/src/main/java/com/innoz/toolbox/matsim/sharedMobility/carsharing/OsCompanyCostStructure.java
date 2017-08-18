@@ -6,6 +6,7 @@ import java.util.Map;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.carsharing.config.FreeFloatingConfigGroup;
+import org.matsim.contrib.carsharing.config.OneWayCarsharingConfigGroup;
 import org.matsim.contrib.carsharing.config.TwoWayCarsharingConfigGroup;
 import org.matsim.contrib.carsharing.manager.demand.RentalInfo;
 import org.matsim.contrib.carsharing.manager.supply.costs.CompanyCosts;
@@ -19,10 +20,10 @@ public class OsCompanyCostStructure {
 	
 	private OsCompanyCostStructure() {}
 	
-	public static CompanyCosts create(Scenario scenario) {
+	public static CompanyCosts create(Scenario scenario, String path) {
 		
 		ServiceArea area = new ServiceArea();
-		area.init("/home/dhosse/01_Projects/3connect/serviceAreaUTM32N.shp");
+		area.init(path);
 		
 		Map<String, CostCalculation> costCalculations = new HashMap<String, CostCalculation>();
 		
@@ -32,6 +33,8 @@ public class OsCompanyCostStructure {
 		costCalculations.put("twoway", new CostCalculationOS(scenario.getConfig().getModules().
 				get(TwoWayCarsharingConfigGroup.GROUP_NAME),
 				scenario, area));
+		costCalculations.put("oneway", new CostCalculationOS(scenario.getConfig().getModules().
+				get(OneWayCarsharingConfigGroup.GROUP_NAME), scenario, area));
 		
 		CompanyCosts costs = new CompanyCosts(costCalculations);
 		
@@ -128,6 +131,11 @@ public class OsCompanyCostStructure {
 				if(distance >= 101000){
 					distanceCost = 0.25 / 1000;
 				}
+				
+			} else if(cg instanceof OneWayCarsharingConfigGroup) {
+				
+				timeCost = Double.parseDouble(((OneWayCarsharingConfigGroup)cg).timeFeeOneWayCarsharing());
+				distanceCost = 0d;
 				
 			}
 			

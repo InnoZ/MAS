@@ -3,8 +3,8 @@ package com.innoz.toolbox.matsim.sharedMobility.carsharing.supply;
 import javax.inject.Inject;
 
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.carsharing.config.CarsharingConfigGroup;
+import org.matsim.contrib.carsharing.config.OneWayCarsharingConfigGroup;
 import org.matsim.contrib.carsharing.config.TwoWayCarsharingConfigGroup;
 import org.matsim.contrib.carsharing.manager.supply.CarsharingSupplyInterface;
 import org.matsim.core.controler.events.IterationEndsEvent;
@@ -38,19 +38,19 @@ public class CarsharingSupplyControlerListener implements StartupListener, Itera
 	CarsharingSupplyEventHandler handler;
 	CarsharingConfigGroup csConfig;
 	TwoWayCarsharingConfigGroup twConfig;
-	
-	@Inject Network network;
+	OneWayCarsharingConfigGroup owConfig;
 	
 	final int averageOverIterations = 5;
 	final int lastIteration = 20;
 	final int threshold = 1;
 	
 	public CarsharingSupplyControlerListener(CarsharingSupplyEventHandler handler, CarsharingConfigGroup carsharing,
-			TwoWayCarsharingConfigGroup twoway) {
+			TwoWayCarsharingConfigGroup twoway, OneWayCarsharingConfigGroup oneway) {
 		
 		this.handler = handler;
 		this.csConfig = carsharing;
 		this.twConfig = twoway;
+		this.owConfig = oneway;
 		
 	}
 	
@@ -75,13 +75,13 @@ public class CarsharingSupplyControlerListener implements StartupListener, Itera
 				log.info("Adding new vehicles to the fleet...");
 				
 				// second, add one vehicle to each location where persons got stuck because of absent vehicles
-				CarsharingSupplyAdaptation.addNewVehicles(network, this.container.getAllVehicles(),
+				CarsharingSupplyAdaptation.addNewVehicles(event.getServices().getScenario().getNetwork(), this.container.getAllVehicles(),
 						this.container.getAllVehicleLocations(), this.handler.stuckEventsCausedByNoCsVeh, this.averageOverIterations);
 			}
 
 			// write output
 			String filename = event.getServices().getControlerIO().getIterationFilename(event.getIteration(), event.getIteration() + 
-					".csVCehicles" + ".xml");
+					".csVCehicles.xml");
 			new CarsharingVehiclesWriter().write(this.container.getAllVehicleLocations(), filename);
 			this.csConfig.setvehiclelocations(filename);
 			this.twConfig.setvehiclelocations(filename);

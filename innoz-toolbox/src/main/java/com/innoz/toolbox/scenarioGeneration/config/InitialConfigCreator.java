@@ -42,7 +42,7 @@ public class InitialConfigCreator {
 		Controller.scenario().getConfig().strategy().setFractionOfIterationsToDisableInnovation(0.8);
 		
 		// Set the last iteration to 100 (may be increased when enabling more replanning strategies or results show it is not enough)
-		Controller.scenario().getConfig().controler().setLastIteration(100);
+		Controller.scenario().getConfig().controler().setLastIteration(200);
 		
 		// If households are used, adapt the parameters that define the usage in MATSim
 		if(Controller.configuration().surveyPopulation().isUsingHouseholds()){

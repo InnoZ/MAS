@@ -8,7 +8,6 @@ import java.util.Map;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.router.Dijkstra;
@@ -17,44 +16,44 @@ import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.matrices.Matrix;
 
+import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.scenarioGeneration.utils.Modes;
 
+/**
+ * 
+ * @author dhosse
+ *
+ */
 public class Distribution {
 
-	private CoordinateTransformation transformation;
-	
 	//activityType, mode, matrix
 	private Map<String, Map<String,Matrix>> transitionMatrices = new HashMap<String, Map<String, Matrix>>();
 	private Matrix distances;
 	
 	private LeastCostPathCalculator lcpc;
-	private final Network network;
 	
-	public Distribution(final Network network, final CoordinateTransformation transformation){
+	public Distribution(){
 
-		this.network = network;
 		TravelDisutility tdis = new FreespeedTravelTimeAndDisutility(-6, 6, 0);
 		TravelTime ttime = new FreespeedTravelTimeAndDisutility(-6, 6, 0);
-		this.lcpc = new Dijkstra(network, tdis, ttime);
-		this.transformation = transformation;
+		this.lcpc = new Dijkstra(Controller.scenario().getNetwork(), tdis, ttime);
 		this.create();
 		
 	}
 	
 	private void create(){
 		
-		String[] activityTypes = {ActivityTypes.WORK, ActivityTypes.EDUCATION, ActivityTypes.SHOPPING,
+		String[] activityTypes = {ActivityTypes.EDUCATION, ActivityTypes.SHOPPING,
 				ActivityTypes.LEISURE, ActivityTypes.OTHER, ActivityTypes.KINDERGARTEN, ActivityTypes.SUPPLY,
 				ActivityTypes.EATING, ActivityTypes.CULTURE, ActivityTypes.SPORTS, ActivityTypes.FURTHER,
 				ActivityTypes.SERVICE, ActivityTypes.HEALTH, ActivityTypes.EVENT, ActivityTypes.ERRAND,
 				ActivityTypes.PRIMARY_SCHOOL, ActivityTypes.SECONDARY_SCHOOL, ActivityTypes.PROFESSIONAL_SCHOOL,
 				ActivityTypes.UNIVERSITY};
-		String[] modes = {TransportMode.bike, TransportMode.car, TransportMode.pt, TransportMode.ride, TransportMode.walk, TransportMode.other};
+		String[] modes = {TransportMode.bike, TransportMode.car, TransportMode.pt, TransportMode.ride, TransportMode.other};
 		
 		distances = new Matrix("distances", "");
 		
@@ -73,14 +72,14 @@ public class Distribution {
 			
 					double distance = 0d;
 
-					Coord u1Coord = transformation.transform(MGC.point2Coord(u1.getGeometry().getCentroid()));
-					Coord u2Coord = transformation.transform(MGC.point2Coord(u2.getGeometry().getCentroid()));
+					Coord u1Coord = Geoinformation.getTransformation().transform(MGC.point2Coord(u1.getGeometry().getCentroid()));
+					Coord u2Coord = Geoinformation.getTransformation().transform(MGC.point2Coord(u2.getGeometry().getCentroid()));
 					
 					if(!u1.equals(u2)){
 
 //						distance = CoordUtils.calcDistance(u1Coord, u2Coord);
-						Node fromNode = NetworkUtils.getNearestRightEntryLink(this.network, u1Coord).getToNode();
-						Node toNode = NetworkUtils.getNearestRightEntryLink(this.network, u2Coord).getFromNode();
+						Node fromNode = NetworkUtils.getNearestRightEntryLink(Controller.scenario().getNetwork(), u1Coord).getToNode();
+						Node toNode = NetworkUtils.getNearestRightEntryLink(Controller.scenario().getNetwork(), u2Coord).getFromNode();
 						
 						Path path = this.lcpc.calcLeastCostPath(fromNode, toNode, 0, null, null);
 						
@@ -140,7 +139,7 @@ public class Distribution {
 							if(u2.getLanduseGeometries().containsKey(key)){
 								
 								double distance = distances.getEntry(u1.getId(), u2.getId()).getValue();
-								double speed = Modes.getSpeedForMode(mode);
+								double speed = Modes.getSpeedForMode(mode) / 1.3;
 								double weight = u2.getLanduseGeometries().get(key).size();
 								double a = Math.exp((-6d / 3600d) * (distance / speed));
 								proba = weight * a;

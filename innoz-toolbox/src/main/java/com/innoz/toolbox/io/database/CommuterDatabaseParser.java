@@ -4,22 +4,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
-import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.matrices.Matrix;
 
-import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.psql.PsqlAdapter;
-import com.innoz.toolbox.config.groups.ConfigurationGroup;
-import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
 import com.innoz.toolbox.config.psql.ResultSetStream;
+import com.innoz.toolbox.run.controller.Controller;
+import com.innoz.toolbox.scenarioGeneration.geoinformation.Geoinformation;
 import com.innoz.toolbox.scenarioGeneration.population.commuters.CommuterDataElement;
 import com.innoz.toolbox.utils.PsqlUtils;
 
@@ -30,7 +26,7 @@ public class CommuterDatabaseParser {
 	Set<CommuterDataElement> commuterData;
 	Matrix od;
 	
-	public void run(Configuration configuration){
+	public void run(){
 		
 		try {
 		
@@ -45,30 +41,22 @@ public class CommuterDatabaseParser {
 				
 				// Select the entries that contain the administrative areas we defined in the
 				// configuration.
-				Map<String, ConfigurationGroup> areaSets = configuration.scenario().getAreaSets();
+				String surveyAreaId = Controller.configuration().scenario().getSurveyAreaId();
 				
-				Set<String> surveyAreaIds = CollectionUtils.stringToSet(((AreaSet)areaSets.get("survey")).getIds());
-				
-				ConfigurationGroup vicinity = (AreaSet)areaSets.get(null);
-				
-				Set<String> vicinityIds = Collections.emptySet();
-				if(vicinity != null){
-					vicinityIds = CollectionUtils.stringToSet((((AreaSet)vicinity).getIds()));
-				}
+				Set<String> vicinityIds = Geoinformation.getInstance().getVicinityIds();
 
 				if(!vicinityIds.isEmpty()){
 				
-					this.execute(connection, "2015_reverse",
-							createChainedStatementFromSet(surveyAreaIds, "home_id"),
+					this.execute(connection, "2015_reverse", "home_id = '" + surveyAreaId + "'", 
 							createChainedStatementFromSet(vicinityIds, "work_id"));
 					this.execute(connection, "2015_commuters",
 							createChainedStatementFromSet(vicinityIds, "home_id"),
-							createChainedStatementFromSet(surveyAreaIds, "work_id"));
+							"work_id = '" + surveyAreaId + "'");
 					
 				}
 
 				this.execute(connection, "2015_internal",
-						createChainedStatementFromSet(surveyAreaIds, "home_id"),
+						"home_id = '" + surveyAreaId + "'",
 						createChainedStatementFromSet(vicinityIds, "work_id"));
 				
 				

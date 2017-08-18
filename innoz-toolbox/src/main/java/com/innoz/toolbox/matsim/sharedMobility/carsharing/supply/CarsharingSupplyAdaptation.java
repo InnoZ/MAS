@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.carsharing.stations.OneWayCarsharingStation;
 import org.matsim.contrib.carsharing.vehicles.CSVehicle;
 import org.matsim.contrib.carsharing.vehicles.FFVehicleImpl;
 import org.matsim.contrib.carsharing.vehicles.StationBasedVehicle;
@@ -62,6 +63,9 @@ public class CarsharingSupplyAdaptation {
 				createFreefloatingVehicles(l, allVehicles, allLocations, 
 						Math.max(entry.getValue().get("freefloating") / averageOverIterations, 1));
 			}
+			if(entry.getValue().containsKey("oneway")) {
+				createOnewayVehicles(l, allVehicles, allLocations, Math.max(entry.getValue().get("oneway") / averageOverIterations, 1));
+			}
 			
 			
 		});
@@ -110,6 +114,17 @@ public class CarsharingSupplyAdaptation {
 			
 			internalCounter++;
 			count--;
+			
+		}
+		
+	}
+	
+	private static void createOnewayVehicles(Link link, Map<String, CSVehicle> allVehicles, Map<CSVehicle, Link> allLocations,
+			int count) {
+		
+		while(count > 0) {
+			
+//			OneWayCarsharingStation owStation = new OneWayCarsharingStation(stationId, link, count, vehiclesPerType, Math.max((int)(1.5 * count), 2));
 			
 		}
 		

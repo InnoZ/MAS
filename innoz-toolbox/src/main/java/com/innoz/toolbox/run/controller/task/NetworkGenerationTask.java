@@ -2,25 +2,16 @@ package com.innoz.toolbox.run.controller.task;
 
 import java.sql.SQLException;
 
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.NetworkWriter;
-import org.matsim.core.network.io.NetworkChangeEventsWriter;
 import org.opengis.referencing.FactoryException;
 
-import com.innoz.toolbox.config.Configuration;
+import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.scenarioGeneration.network.NetworkCreatorFromPsql;
 import com.vividsolutions.jts.io.ParseException;
 
 public final class NetworkGenerationTask implements ControllerTask {
 
-	Scenario scenario;
-	
-	Configuration configuration;
-	
 	private NetworkGenerationTask(Builder builder) {
-		
-		this.configuration = builder.configuration;
-		this.scenario = builder.scenario;
 		
 	}
 	
@@ -29,12 +20,10 @@ public final class NetworkGenerationTask implements ControllerTask {
 
 		try {
 		
-			NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(scenario.getNetwork(), configuration);
+			NetworkCreatorFromPsql nc = new NetworkCreatorFromPsql(Controller.scenario().getNetwork(), Controller.configuration());
 			nc.create();
 
-			new NetworkWriter(scenario.getNetwork()).write(configuration.misc().getOutputDirectory() + "network.xml.gz");
-			
-//			new NetworkChangeEventsWriter().write(configuration.misc().getOutputDirectory() + "networkChangeEvents.xml.gz", nc.getNetworkChangeEvents());
+			new NetworkWriter(Controller.scenario().getNetwork()).write(Controller.configuration().misc().getOutputDirectory() + "network.xml.gz");
 			
 		} catch (InstantiationException | IllegalAccessException
 		        | ClassNotFoundException | SQLException | ParseException
@@ -48,14 +37,7 @@ public final class NetworkGenerationTask implements ControllerTask {
 	
 	public static class Builder {
 	
-		Scenario scenario;
-		
-		Configuration configuration;
-		
-		public Builder(Configuration configuration, Scenario scenario) {
-			
-			this.configuration = configuration;
-			this.scenario = scenario;
+		public Builder() {
 			
 		}
 		

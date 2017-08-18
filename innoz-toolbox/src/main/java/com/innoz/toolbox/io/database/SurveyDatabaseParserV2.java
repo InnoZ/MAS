@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.SurveyType;
 import com.innoz.toolbox.config.groups.SurveyPopulationConfigurationGroup.SurveyVehicleType;
@@ -26,6 +25,7 @@ import com.innoz.toolbox.io.database.validation.ValidateDistances;
 import com.innoz.toolbox.io.database.validation.ValidateMissingTravelTimes;
 import com.innoz.toolbox.io.database.validation.ValidateNegativeTravelTimes;
 import com.innoz.toolbox.io.database.validation.ValidateOverlappingStages;
+import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.scenarioGeneration.population.surveys.SurveyDataContainer;
 
 public class SurveyDatabaseParserV2 {
@@ -43,7 +43,7 @@ public class SurveyDatabaseParserV2 {
 	 * @param container The class containing all survey information needed for demand generation.
 	 * @param geoinformation
 	 */
-	public void run(Configuration configuration, SurveyDataContainer container, Set<String> ids){
+	public void run(Set<String> ids){
 		
 		// Initialize the survey constants
 		this.constants = SurveyConstants.getInstance();
@@ -55,7 +55,7 @@ public class SurveyDatabaseParserV2 {
 			// Instantiate a new postgreSQL driver and establish a connection to the mobility database
 			Connection connection = PsqlAdapter.createConnection(DatabaseConstants.SURVEYS_DB);
 		
-			SurveyPopulationConfigurationGroup group = configuration.surveyPopulation();
+			SurveyPopulationConfigurationGroup group = Controller.configuration().surveyPopulation();
 			
 			if(connection != null){
 				
@@ -65,45 +65,45 @@ public class SurveyDatabaseParserV2 {
 					
 					log.info("Creating survey households...");
 					
-					new ReadHouseholdDatabaseTask(constants, ids).parse(connection, container, group.getSurveyType().name());
+					new ReadHouseholdDatabaseTask(constants, ids).parse(connection, SurveyDataContainer.getInstance(), group.getSurveyType().name());
 						
-					log.info("Read " + container.getHouseholds().size() + " households...");
+					log.info("Read " + SurveyDataContainer.getInstance().getHouseholds().size() + " households...");
 					
 				}
 				
 				log.info("Creating survey persons...");
 				
-				new ReadPersonDatabaseTask(constants, ids, configuration.surveyPopulation().getDayTypes()).parse(connection, container, group.getSurveyType().name());
+				new ReadPersonDatabaseTask(constants, ids, Controller.configuration().surveyPopulation().getDayTypes()).parse(connection, SurveyDataContainer.getInstance(), group.getSurveyType().name());
 				
-				log.info("Read " + container.getPersons().size() + " persons...");
+				log.info("Read " + SurveyDataContainer.getInstance().getPersons().size() + " persons...");
 				
 				log.info("Creating survey trips...");
 
-				new ReadTripsDatabaseTask(constants, ids, configuration.surveyPopulation().getDayTypes()).parse(connection, container, configuration.surveyPopulation().getSurveyType().name());
+				new ReadTripsDatabaseTask(constants, ids, Controller.configuration().surveyPopulation().getDayTypes()).parse(connection, SurveyDataContainer.getInstance(), Controller.configuration().surveyPopulation().getSurveyType().name());
 				
 				if(group.getVehicleType().equals(SurveyVehicleType.SURVEY) && group.getSurveyType().equals(SurveyType.MiD)){
 				
 					log.info("Creating survey cars...");
 					
-					new ReadVehicleDatabaseTask(constants, ids).parse(connection, container, group.getSurveyType().name());
+					new ReadVehicleDatabaseTask(constants, ids).parse(connection, SurveyDataContainer.getInstance(), group.getSurveyType().name());
 					
 				}
 	
-				process(container);
+				process();
 				
 				log.info("Conversion statistics:");
 				
-				if(container.getHouseholds() != null){
+				if(SurveyDataContainer.getInstance().getHouseholds() != null){
 					
-					log.info("#Households in survey: " + container.getHouseholds().size());
+					log.info("#Households in survey: " + SurveyDataContainer.getInstance().getHouseholds().size());
 					
 				}
 				
-				log.info("#Persons in survey   : " + container.getPersons().size());
+				log.info("#Persons in survey   : " + SurveyDataContainer.getInstance().getPersons().size());
 				
-				if(container.getVehicles() != null){
+				if(SurveyDataContainer.getInstance().getVehicles() != null){
 				
-					log.info("#Vehicles in survey  : " + container.getVehicles().size());
+					log.info("#Vehicles in survey  : " + SurveyDataContainer.getInstance().getVehicles().size());
 					
 				}
 				
@@ -123,23 +123,23 @@ public class SurveyDatabaseParserV2 {
 		
 	}
 	
-	private void process(SurveyDataContainer container){
+	private void process(){
 		
-		TaskRunner.exec(new SortStagesTask(), container);
-		TaskRunner.exec(new ValidateMissingTravelTimes(), container.getPersons().values());
-		TaskRunner.exec(new ValidateNegativeTravelTimes(), container.getPersons().values());
-		TaskRunner.exec(new ValidateOverlappingStages(), container.getPersons().values());
-		TaskRunner.exec(new ValidateDistances(), container.getPersons().values());
-		TaskRunner.exec(new PersonRemovalTask(), container);
+		TaskRunner.exec(new SortStagesTask(), SurveyDataContainer.getInstance());
+		TaskRunner.exec(new ValidateMissingTravelTimes(), SurveyDataContainer.getInstance().getPersons().values());
+		TaskRunner.exec(new ValidateNegativeTravelTimes(), SurveyDataContainer.getInstance().getPersons().values());
+		TaskRunner.exec(new ValidateOverlappingStages(), SurveyDataContainer.getInstance().getPersons().values());
+		TaskRunner.exec(new ValidateDistances(), SurveyDataContainer.getInstance().getPersons().values());
+		TaskRunner.exec(new PersonRemovalTask(), SurveyDataContainer.getInstance());
 		
-		if(container.getHouseholds() != null){
+		if(SurveyDataContainer.getInstance().getHouseholds() != null){
 			
-			TaskRunner.exec(new HouseholdRemovalTask(), container);
+			TaskRunner.exec(new HouseholdRemovalTask(), SurveyDataContainer.getInstance());
 			
 		}
 		
-		new ConvertToPlansTask().run(container);
-		new ResolveRoundTripsTask().run(container);
+		new ConvertToPlansTask().run(SurveyDataContainer.getInstance());
+		new ResolveRoundTripsTask().run(SurveyDataContainer.getInstance());
 		
 	}
 	

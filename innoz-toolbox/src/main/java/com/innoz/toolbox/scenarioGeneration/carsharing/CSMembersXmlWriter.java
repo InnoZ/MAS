@@ -47,7 +47,6 @@ public class CSMembersXmlWriter extends MatsimXmlWriter {
 			writeStartTag(TAG_OBJECT, xmlAttributes);
 			xmlAttributes.clear();
 			
-			Map<String, String> objAttributes = new TreeMap<String, String>();
 			for (Entry<String, Set<String>> e : entry.getValue().getMembershipsPerCompany().entrySet()) {
 				String company = e.getKey();
 				xmlAttributes.add(super.createTuple(ATTR_OBJECTID, company));

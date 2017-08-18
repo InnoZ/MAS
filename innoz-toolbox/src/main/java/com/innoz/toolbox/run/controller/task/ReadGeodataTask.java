@@ -1,40 +1,23 @@
 package com.innoz.toolbox.run.controller.task;
 
-import org.matsim.api.core.v01.Scenario;
-
 import com.innoz.toolbox.io.database.DatabaseReader;
+import com.innoz.toolbox.io.database.population.PopulationDatabaseReader;
 
 public final class ReadGeodataTask implements ControllerTask {
 	
-	Scenario scenario;
-	
-	private ReadGeodataTask(Builder builder) {
-		
-		this.scenario = builder.scenario;
-		
-	}
+	private ReadGeodataTask(Builder builder) {}
 	
 	@Override
 	public void run() {
 		
-		DatabaseReader.getInstance().readGeodataFromDatabase(scenario);
-		DatabaseReader.getInstance().readPopulationFromDatabase(scenario);
+		DatabaseReader.getInstance().readGeodataFromDatabase();
+		PopulationDatabaseReader.getInstance().readPopulationFromDatabase();
 		
 	}
 	
 	public static class Builder {
 		
-		// Optional
-		Scenario scenario = null; // If using facilities
-		
 		public Builder() {}
-		
-		public Builder scenario(Scenario scenario) {
-			
-			this.scenario = scenario;
-			return this;
-			
-		}
 		
 		public ReadGeodataTask build() {
 			

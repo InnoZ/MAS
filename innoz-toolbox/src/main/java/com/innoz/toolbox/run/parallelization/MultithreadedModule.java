@@ -5,6 +5,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.log4j.Logger;
 
+import com.innoz.toolbox.run.controller.Controller;
+
 /**
  * 
  * Class that enables multi-threading. It holds an array of {@link Thread}, each invoking an {@link AlgoThread}.
@@ -47,9 +49,9 @@ public final class MultithreadedModule {
 	 * @param numberOfThreads The number of threads that will be invoked by this module. Must be more than or equal one
 	 * and less than the number of available (logical) cores.
 	 */
-	public MultithreadedModule(int numberOfThreads){
+	public MultithreadedModule() {
 		
-		this.numberOfThreads = numberOfThreads;
+		this.numberOfThreads = Controller.configuration().misc().getNumberOfThreads();
 		
 	}
 	

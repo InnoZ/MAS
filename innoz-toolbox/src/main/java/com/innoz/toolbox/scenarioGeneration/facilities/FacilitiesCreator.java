@@ -3,7 +3,6 @@ package com.innoz.toolbox.scenarioGeneration.facilities;
 import java.util.List;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.facilities.ActivityFacilitiesFactory;
@@ -13,6 +12,7 @@ import org.matsim.facilities.ActivityOptionImpl;
 import org.matsim.facilities.OpeningTimeImpl;
 
 import com.innoz.toolbox.io.database.DatabaseReader;
+import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Building;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.ProxyFacility;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
@@ -20,10 +20,9 @@ import com.innoz.toolbox.utils.GlobalNames;
 
 public class FacilitiesCreator {
 
-	public void create(final DatabaseReader reader, final Scenario scenario,
-			List<Building> buildingList, double minX, double minY, double maxX, double maxY){
+	public void create(final DatabaseReader reader, List<Building> buildingList, double minX, double minY, double maxX, double maxY) {
 		
-		ActivityFacilitiesFactory factory = scenario.getActivityFacilities().getFactory();
+		ActivityFacilitiesFactory factory = Controller.scenario().getActivityFacilities().getFactory();
 		
 		int cnt = 0;
 		
@@ -60,7 +59,7 @@ public class FacilitiesCreator {
 				
 				if(!facility.getActivityOptions().isEmpty()){
 					
-					scenario.getActivityFacilities().addActivityFacility(facility);
+					Controller.scenario().getActivityFacilities().addActivityFacility(facility);
 					
 					cnt++;
 					

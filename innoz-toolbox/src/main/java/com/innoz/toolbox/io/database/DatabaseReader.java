@@ -7,17 +7,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
@@ -32,10 +29,7 @@ import org.opengis.referencing.operation.TransformException;
 import org.postgis.PGgeometry;
 
 import com.innoz.toolbox.config.Configuration;
-import com.innoz.toolbox.config.groups.ConfigurationGroup;
 import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.ActivityLocationsType;
-import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet;
-import com.innoz.toolbox.config.groups.ScenarioConfigurationGroup.AreaSet.PopulationSource;
 import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.io.database.datasets.OsmPointDataset;
 import com.innoz.toolbox.io.database.datasets.OsmPolygonDataset;
@@ -52,7 +46,7 @@ import com.innoz.toolbox.scenarioGeneration.network.OsmNodeEntry;
 import com.innoz.toolbox.scenarioGeneration.network.WayEntry;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.utils.GlobalNames;
-import com.innoz.toolbox.utils.data.Tree.Node;
+import com.innoz.toolbox.utils.PsqlUtils;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -82,7 +76,6 @@ public class DatabaseReader {
 	private int counter = 0;
 	private List<Building> buildingList = Collections.synchronizedList(new ArrayList<>());
 	private QuadTree<Building> buildingsQuadTree;
-	private final Configuration configuration;
 	private Map<String, List<OsmPolygonDataset>> polygonData = new HashMap<>();
 	private List<OsmPointDataset> pointData = Collections.synchronizedList(new ArrayList<>());
 	double minX = Double.MAX_VALUE;
@@ -96,7 +89,7 @@ public class DatabaseReader {
 	private Geometry buffer;
 	/////////////////////////////////////////////////////////////////////////////////////////
 	
-	private static DatabaseReader instance = new DatabaseReader(Controller.configuration());
+	private static DatabaseReader instance = new DatabaseReader();
 
 	public static DatabaseReader getInstance() {
 		
@@ -104,17 +97,12 @@ public class DatabaseReader {
 		
 	}
 	
-	private DatabaseReader(final Configuration configuration) {
+	private DatabaseReader() {
 		
 		// Initialize all final fields
 		this.gFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.maximumPreciseValue));
 		this.wktReader = new WKTReader();
-		this.configuration = configuration;
 		
-	}
-	
-	public Configuration getConfiguration(){
-		return this.configuration;
 	}
 	
 	/**
@@ -126,7 +114,7 @@ public class DatabaseReader {
 	 * @param vicinityIdsString The vicinity area id(s).
 	 * @param scenario The MATSim scenario.
 	 */
-	public void readGeodataFromDatabase(Scenario scenario) {
+	public void readGeodataFromDatabase() {
 		
 		try {
 			
@@ -138,12 +126,13 @@ public class DatabaseReader {
 				Log.info("Successfully connected with geodata database...");
 				
 				// Read the administrative borders that have one of the specified ids
-				this.readAdminBorders(connection, configuration);
+				readAdminBorders(connection);
 				
 				// If no administrative units were created, we are unable to proceed
 				// The process would probably finish, but no network or population would be created
 				// Size = 1 means, only the root element (basically the top level container) has been initialized
-				if(Geoinformation.getInstance().getNumberOfAdminUnits() < 2 && this.configuration.scenario().getAreaSets() != null){
+				if(Geoinformation.getInstance().getNumberOfAdminUnits() < 1 &&
+						Controller.configuration().scenario().getSurveyAreaId() != null) {
 				
 					Log.error("No administrative boundaries were created!");
 					Log.error("Maybe the ids you specified don't exist in the database.");
@@ -151,44 +140,9 @@ public class DatabaseReader {
 					
 				}
 				
-				readBbsrData(connection, this.configuration);
+				readBbsrData(connection);
 				
-				if(this.configuration.scenario().getAreaSets() != null) {
-
-					Set<PopulationSource> populationAlgorithms = new HashSet<PopulationSource>(2);
-					
-					for(ConfigurationGroup cg : configuration.scenario().getAreaSets().values()){
-						
-						AreaSet entry = (AreaSet)cg;
-						
-						populationAlgorithms.add(entry.getPopulationSource());
-						
-						for(String id : entry.getIds().split(",")){
-
-							Node<AdministrativeUnit> d = Geoinformation.getInstance().getAdminUnit(id);
-							
-							if(d != null){
-								
-								AdministrativeUnit unit = d.getData();
-								
-								unit.setNumberOfHouseholds(entry.getNumberOfHouseholds());
-								
-							}
-							
-						}
-
-					}
-					
-					// We don't need landuse data if there is no population to be created or
-					// if the source is tracks.
-					if(populationAlgorithms.contains(PopulationSource.COMMUTER) ||
-							populationAlgorithms.contains(PopulationSource.SURVEY)){
-						
-						this.readOsmData(connection, configuration, scenario);
-						
-					}
-					
-				}
+				readOsmData(connection);
 					
 			}
 				
@@ -222,7 +176,7 @@ public class DatabaseReader {
 	 * @throws MismatchedDimensionException
 	 * @throws TransformException
 	 */
-	private void readAdminBorders(Connection connection, Configuration configuration) throws SQLException,
+	private void readAdminBorders(Connection connection) throws SQLException,
 			NoSuchAuthorityCodeException, FactoryException, ParseException,
 			MismatchedDimensionException, TransformException {
 
@@ -230,35 +184,16 @@ public class DatabaseReader {
 
 		// This is needed to transform the WGS84 geometries into the specified CRS
 		MathTransform t = CRS.findMathTransform(CRS.decode(GlobalNames.WGS84, true),
-				CRS.decode(configuration.misc().getCoordinateSystem(), true));
+				CRS.decode(Controller.configuration().misc().getCoordinateSystem(), true));
 		
 		// A collection to temporarily store all geometries
 		List<Geometry> geometryCollection = new ArrayList<Geometry>();
 		
-		if(configuration.scenario().getAreaSets() != null) {
+		if(Controller.configuration().scenario().getSurveyAreaId() != null &&
+				!Controller.configuration().scenario().getSurveyAreaId().isEmpty()) {
 
-			for(ConfigurationGroup cg : configuration.scenario().getAreaSets().values()){
-				
-				AreaSet set = (AreaSet)cg;
-				getAndAddGeodataFromIdSet(connection, configuration, geometryCollection, set);
-			
-				if(set.isSurveyArea()){
-					
-					Geoinformation.getInstance().setSurveyAreaBoundingBox(gFactory.buildGeometry(geometryCollection)
-							.convexHull());
-					
-				} else{
-					
-					Geoinformation.getInstance().setVicinityBoundingBox(gFactory.buildGeometry(geometryCollection)
-							.convexHull());
-					
-				}
-				
-			}
-			
-		} else {
-			
-			geometryCollection.add(setSurveyAreaByBoundingBox(connection, configuration));
+			readSurveyArea(connection, Controller.configuration().scenario().getSurveyAreaId(), geometryCollection);
+			readVicinity(connection, Controller.configuration().scenario().getSurveyAreaId(), geometryCollection);
 			
 		}
 		
@@ -271,129 +206,128 @@ public class DatabaseReader {
 		
 	}
 	
-	private Geometry setSurveyAreaByBoundingBox(Connection connection, Configuration configuration) {
+	private void readSurveyArea(Connection connection, String id, List<Geometry> geometryList) throws SQLException,
+		NoSuchAuthorityCodeException, FactoryException, ParseException, MismatchedDimensionException, TransformException {
 		
-		Coordinate[] coordinates = new Coordinate[]{
-				new Coordinate(11.9236,51.3621),
-				new Coordinate(12.0949,51.3621),
-				new Coordinate(12.0949,51.2273),
-				new Coordinate(11.9236,51.2273),
-				new Coordinate(11.9236,51.3621)
-				};
-
-		Geometry g = gFactory.createPolygon(coordinates);
+		log.info("Reading survey area data...");
 		
-		Geoinformation.getInstance().setSurveyAreaBoundingBox(g.getEnvelope());
-		Geoinformation.getInstance().setVicinityBoundingBox(g.getEnvelope());
-		
-		return g;
-		
-	}
-	
-	private void getAndAddGeodataFromIdSet(Connection connection, Configuration configuration, List<Geometry> geometryCollection,
-			AreaSet areaSet) throws SQLException, NoSuchAuthorityCodeException, FactoryException, ParseException,
-			MismatchedDimensionException, TransformException{
-		
-		// Create a new statement to execute the sql query
 		Statement statement = connection.createStatement();
-		StringBuilder builder = new StringBuilder();
 		
-		int i = 0;
-		
-		String[] splitIds = areaSet.getIds().split(",");
-		
-		// Append all ids inside the given collection to a string
-		for(String id : splitIds){
-
-			if(i < splitIds.length - 1){
-				
-				builder.append(" " + DatabaseConstants.MUN_KEY + " like '" + id + "%' OR");
-				
-			} else {
-				
-				builder.append(" " + DatabaseConstants.MUN_KEY + " like '" + id + "%'");
-				
-			}
-			
-			i++;
-			
-		}
-		
-		// Execute the query and store the returned valued inside a set.
-		String q = "select " + DatabaseConstants.BLAND + "," + DatabaseConstants.MUN_KEY + ", cca_2, ccn_3, "
+		String query = "SELECT " + DatabaseConstants.BLAND + "," + DatabaseConstants.MUN_KEY + ", cca_2, ccn_3, "
 				+ DatabaseConstants.functions.st_astext.name() + "(geom), "
 				+ DatabaseConstants.functions.st_astext.name() + "(st_transform("
 				+ DatabaseConstants.ATT_GEOM + ",4326)) as buffer from " + DatabaseConstants.schemata.gadm.name() + "." +
-				DatabaseConstants.tables.districts.name() + " where" + builder.toString();
-		ResultSet set = statement.executeQuery(q);
-
-		// Go through all the results
-		while(set.next()){
+				DatabaseConstants.tables.districts.name() + " WHERE cca_2 = '" + id + "';";
+		
+		ResultSet set = statement.executeQuery(query);
+		
+		while(set.next()) {
 			
 			String key = set.getString(DatabaseConstants.MUN_KEY);
 			String g = set.getString(DatabaseConstants.functions.st_astext.name());
-			int bland = set.getInt(DatabaseConstants.BLAND);
 			String district = set.getString("cca_2") != null ? set.getString("cca_2") : set.getString("ccn_3").substring(0, 3);
 			
-			// Check if the wkb string returned is neither null nor empty, otherwise this would
-			// crash
-			if(g != null){
+			if(g != null && !g.isEmpty()) {
 				
-				if(!g.isEmpty()){
+				// Create a new administrative unit and its geometry and add it to the
+				// geoinformation
+				AdministrativeUnit au = new AdministrativeUnit(key);
+				Geometry geometry = wktReader.read(g);
+				au.setGeometry(geometry);
+				
+				if(district != null){
 					
-					// Create a new administrative unit and its geometry and add it to the
-					// geoinformation
-					AdministrativeUnit au = new AdministrativeUnit(key);
-					Geometry geometry = wktReader.read(g);
-					au.setGeometry(geometry);
-					au.setBland((int)bland);
-					
-					if(areaSet.isSurveyArea()){
-						bufferedAreasForNetworkGeneration.add(wktReader.read(set.getString("buffer")));
-					}
+					au.setNetworkDetail(Controller.configuration().scenario().getNetworkLevel());
 
-					if(district != null){
-						
-						au.setNetworkDetail(areaSet.getNetworkLevel());
-
-						Geoinformation.getInstance().addAdministrativeUnit(new AdministrativeUnit(district));
-						
-					}
-					
-					Geoinformation.getInstance().addAdministrativeUnit(au);
-					
-					// Store all geometries inside a collection to get the survey area geometry in
-					// the end
-					geometryCollection.add(au.getGeometry());
+					Geoinformation.getInstance().addAdministrativeUnit(new AdministrativeUnit(district));
 					
 				}
+				
+				bufferedAreasForNetworkGeneration.add(wktReader.read(set.getString("buffer")));
+				
+				Geoinformation.getInstance().addAdministrativeUnit(au);
+				Geoinformation.getInstance().setSurveyAreaBoundingBox(geometry.convexHull());
+				geometryList.add(geometry);
 				
 			}
 			
 		}
 		
-		// Close the result set and the statement
 		set.close();
 		statement.close();
 		
 	}
 	
-	private void readBbsrData(Connection connection, Configuration configuration) throws SQLException {
+	private void readVicinity(Connection connection, String id, List<Geometry> geometryList) throws SQLException, ParseException {
+		
+		log.info("Reading vicinity data...");
+		
+		Statement statement = connection.createStatement();
+		
+		ResultSet set = statement.executeQuery("SELECT DISTINCT ON(g2.cca_2) g2.cca_2 as district_id "
+				+ "FROM gadm.districts as g1, gadm.districts as g2 WHERE g2.name_0 = 'Germany' AND "
+				+ "g1.cca_2 = '" + id + "' AND g1.cca_2 <> g2.cca_2 AND st_touches(g1.geom, g2.geom);");
+		
+		while(set.next()) {
+			
+			String districtId = set.getString("district_id");
+			
+			if(districtId != null) {
+				Geoinformation.getInstance().addIdToVicinity(districtId);
+			}
+			
+		}
+		
+		set.close();
+		
+		String ids = PsqlUtils.setToString(Geoinformation.getInstance().getVicinityIds());
+		
+		set = statement.executeQuery("SELECT cca_2 as district_id, cca_4 as mun_id, st_astext(geom) as geometry "
+				+ "FROM gadm.districts WHERE "
+				+ "cca_2 IN(" + ids + ");");
+		
+		while(set.next()) {
+			
+			String munId = set.getString("mun_id");
+			String districtId = set.getString("district_id");
+			String wkt = set.getString("geometry");
+			
+			if(wkt != null && !wkt.isEmpty()) {
+				
+				Geoinformation.getInstance().addIdToVicinity(districtId);
+				
+				AdministrativeUnit au = new AdministrativeUnit(munId);
+				Geometry geometry = wktReader.read(wkt);
+				au.setGeometry(geometry);
+				
+				if(districtId != null){
+					
+					au.setNetworkDetail(Controller.configuration().scenario().getNetworkLevel() - 2);
+
+					Geoinformation.getInstance().addAdministrativeUnit(new AdministrativeUnit(districtId));
+					
+				}
+				
+				Geoinformation.getInstance().addAdministrativeUnit(au);
+				geometryList.add(geometry);
+				
+			}
+			
+		}
+		
+		Geoinformation.getInstance().setVicinityBoundingBox(gFactory.buildGeometry(geometryList).convexHull());
+		
+		set.close();
+		statement.close();
+		
+	}
+	
+	private void readBbsrData(Connection connection) throws SQLException {
 		
 		// Create a new statement to execute the sql query
 		Statement statement = connection.createStatement();
 		
-		StringBuilder builder = new StringBuilder();
-		for(ConfigurationGroup cg : Controller.configuration().scenario().getAreaSets().values()){
-			AreaSet set = (AreaSet) cg;
-			String[] ids = set.getIds().split(",");
-			for(String i : ids)
-				builder.append("'" + i + "%' OR gkz LIKE ");
-		}
-		String ids = builder.toString();
-		ids = ids.substring(0,ids.length()-13);
-		
-		String sql = "SELECT gkz, rtype7 from bbsr.regiontypes WHERE gkz LIKE " + ids + ";";
+		String sql = "SELECT gkz, rtype7 from bbsr.regiontypes WHERE gkz LIKE '" + Controller.configuration().scenario().getSurveyAreaId() + "%';";
 		
 		ResultSet result = statement.executeQuery(sql);
 		
@@ -425,11 +359,11 @@ public class DatabaseReader {
 	 * @throws FactoryException 
 	 * @throws NoSuchAuthorityCodeException 
 	 */
-	private void readOsmData(Connection connection, Configuration configuration, Scenario scenario)
+	private void readOsmData(Connection connection)
 			throws NoSuchAuthorityCodeException, FactoryException{
 
 		final CoordinateReferenceSystem fromCRS = CRS.decode(GlobalNames.WGS84, true);
-		final CoordinateReferenceSystem toCRS = CRS.decode(configuration.misc().getCoordinateSystem(), true);
+		final CoordinateReferenceSystem toCRS = CRS.decode(Controller.configuration().misc().getCoordinateSystem(), true);
 		
 		this.ct = TransformationFactory.getCoordinateTransformation(fromCRS.toString(),
 				toCRS.toString());
@@ -448,20 +382,20 @@ public class DatabaseReader {
 			this.buildingsQuadTree = new QuadTree<Building>(minX, minY, maxX, maxY);
 			
 			// Read polygon geometries
-			readPolygonData(connection, configuration);
+			readPolygonData(connection);
 
 			// Read point geometries
 			readPointData(connection);
 			
-			if(!configuration.scenario().getActivityLocationsType().equals(ActivityLocationsType.LANDUSE)){
+			if(!Controller.configuration().scenario().getActivityLocationsType().equals(ActivityLocationsType.LANDUSE)){
 				
-				if(configuration.scenario().getActivityLocationsType().equals(ActivityLocationsType.FACILITIES)){
+				if(Controller.configuration().scenario().getActivityLocationsType().equals(ActivityLocationsType.FACILITIES)){
 					
-					new FacilitiesCreator().create(this, scenario, buildingList, minX, minY, maxX, maxY);
+					new FacilitiesCreator().create(this, buildingList, minX, minY, maxX, maxY);
 
 				} else {
 					
-					MultithreadedModule module = new MultithreadedModule(configuration.misc().getNumberOfThreads());
+					MultithreadedModule module = new MultithreadedModule();
 					module.initThreads(BuildingThread.class.getName(), this);
 					for(Building b : this.buildingList){
 						module.handle(b);
@@ -482,7 +416,7 @@ public class DatabaseReader {
 		
 	}
 	
-	private void readPolygonData(Connection connection, Configuration configuration) throws SQLException, ParseException{
+	private void readPolygonData(Connection connection) throws SQLException, ParseException {
 		
 		log.info("Processing osm polygon data...");
 		
@@ -535,7 +469,7 @@ public class DatabaseReader {
 		statement.close();
 		
 		//post process
-		MultithreadedModule module = new MultithreadedModule(configuration.misc().getNumberOfThreads());
+		MultithreadedModule module = new MultithreadedModule();
 		module.initThreads(DataProcessingAlgoThread.class.getName(), this, "buildings");
 		for(OsmPolygonDataset dataset : this.polygonData.get("buildings")){
 			module.handle(dataset);
@@ -590,7 +524,7 @@ public class DatabaseReader {
 		statement.close();
 		
 		//post process
-		MultithreadedModule module = new MultithreadedModule(configuration.misc().getNumberOfThreads());
+		MultithreadedModule module = new MultithreadedModule();
 		module.initThreads(DataProcessingAlgoThread.class.getName(), this, "amenities");
 		for(OsmPointDataset dataset : this.pointData){
 			module.handle(dataset);
@@ -795,92 +729,6 @@ public class DatabaseReader {
 		connection.close();
 		
 		log.info("Done.");
-		
-	}
-	
-	/**
-	 * Imports detailed forecast of the population subdivided by sex and age groups
-	 * 
-	 * 
-	 * @param configuration The configuration for the scenario generation process.
-	 * @param surveyAreaIdsString The survey area id(s).
-	 * @param vicinityIdsString The vicinity area id(s).
-	 * @param scenario The MATSim scenario.
-	 */
-	public void readPopulationFromDatabase(Scenario scenario) {
-		
-		try {
-			
-			// Create a postgresql database connection
-			Connection connection = PsqlAdapter.createConnection(DatabaseConstants.POPULATIONFORECAST_DB);
-			
-			if(connection != null){
-
-				Log.info("Successfully connected with population database...");
-				
-				// If no administrative units were created, we are unable to proceed
-				// The process would probably finish, but no network or population would be created
-				// Size = 1 means, only the root element (basically the top level container) has been initialized
-				if(this.configuration.scenario().getAreaSets().isEmpty()){
-				
-					Log.error("No ids found");
-					throw new RuntimeException("Execution aborts...");
-					
-				}
-				
-				for(ConfigurationGroup cg : configuration.scenario().getAreaSets().values()){
-					
-					AreaSet entry = (AreaSet)cg;
-					
-					int year = configuration.scenario().getYear();
-					
-					for(String id : entry.getIds().split(",")){
-
-//						String id = uid.startsWith("0") ? uid.substring(1) : uid;
-						
-						Node<AdministrativeUnit> d = Geoinformation.getInstance().getAdminUnit(id);
-						
-						if(d != null){
-							
-							AdministrativeUnit unit = d.getData();
-							
-							// Execute the query and store the returned valued inside a set.
-							String q = "SELECT agegroup, year" + year
-									+ " FROM bbsrprognose.populationdata "
-									+ " WHERE gkz=" + id + " AND agegroup NOT LIKE '%z%' ";
-
-							Statement statement = connection.createStatement();
-							statement.setFetchSize(100);
-							ResultSet rs = statement.executeQuery(q);
-
-							// Create a map and put all the results
-							HashMap<String, Integer> populationByAgeGroup = new HashMap<String, Integer>();
-							while (rs.next()){
-								populationByAgeGroup.put(rs.getString("agegroup") , rs.getInt("year" + year));
-							}
-							rs.close();
-							
-							unit.setPopulationMap(populationByAgeGroup);;
-							
-						}
-						
-					}
-
-				}
-					
-			}
-			
-			// Close the connection when everything's done.
-			connection.close();
-			
-			Log.info("Done.");
-
-		} catch (SQLException | InstantiationException | IllegalAccessException | ClassNotFoundException | 
-				MismatchedDimensionException e) {
-
-			e.printStackTrace();
-			
-		}
 		
 	}
 	

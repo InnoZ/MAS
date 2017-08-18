@@ -1,18 +1,10 @@
 package com.innoz.toolbox.run.controller.task;
 
-import org.matsim.api.core.v01.Scenario;
-
 import com.innoz.toolbox.scenarioGeneration.config.InitialConfigCreator;
 
 public class ConfigCreatorTask implements ControllerTask{
 	
-	Scenario scenario;
-
-	private ConfigCreatorTask(Builder builder) {
-		
-		this.scenario = builder.scenario;
-		
-	}
+	private ConfigCreatorTask(Builder builder) {}
 	
 	@Override
 	public void run() {
@@ -32,13 +24,7 @@ public class ConfigCreatorTask implements ControllerTask{
 	
 	public static class Builder {
 		
-		public Scenario scenario;
-		
-		public Builder(Scenario scenario) {
-			
-			this.scenario = scenario;
-			
-		}
+		public Builder() {}
 		
 		public ConfigCreatorTask build() {
 			

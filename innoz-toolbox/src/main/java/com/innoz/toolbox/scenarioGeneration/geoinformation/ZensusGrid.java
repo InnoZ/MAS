@@ -7,6 +7,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.geotools.referencing.CRS;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
@@ -14,17 +15,22 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import com.innoz.toolbox.config.Configuration;
 import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.io.database.DatabaseConstants;
 import com.innoz.toolbox.utils.GlobalNames;
 
 public class ZensusGrid {
 
+	private final Logger log = Logger.getLogger(ZensusGrid.class);
+	
 	private List<ZensusGridNode> nodes;
 	private int allInhabitants = 0;
 	
-	public ZensusGrid(Configuration configuration) {
+	private static final ZensusGrid instance = new ZensusGrid();
+	
+	private ZensusGrid() {
+	
+		log.info("Loading population density grid from Zensus 2011 data...");
 		
 		try {
 
@@ -68,6 +74,12 @@ public class ZensusGrid {
 			e.printStackTrace();
 			
 		}
+		
+	}
+	
+	public static ZensusGrid getInstance() {
+		
+		return ZensusGrid.instance;
 		
 	}
 	

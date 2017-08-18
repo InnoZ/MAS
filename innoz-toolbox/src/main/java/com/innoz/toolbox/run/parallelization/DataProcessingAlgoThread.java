@@ -8,6 +8,7 @@ import com.innoz.toolbox.io.database.DatabaseReader;
 import com.innoz.toolbox.io.database.datasets.OsmDataset;
 import com.innoz.toolbox.io.database.datasets.OsmPointDataset;
 import com.innoz.toolbox.io.database.datasets.OsmPolygonDataset;
+import com.innoz.toolbox.run.controller.Controller;
 import com.innoz.toolbox.scenarioGeneration.geoinformation.landuse.Building;
 import com.innoz.toolbox.scenarioGeneration.utils.ActivityTypes;
 import com.innoz.toolbox.utils.osm.OsmKey2ActivityType;
@@ -90,7 +91,7 @@ public final class DataProcessingAlgoThread extends AlgoThread {
 			
 			// Add the landuse geometry to the geoinformation if we have a valid activity option for it
 			
-			if(!reader.getConfiguration().scenario().getActivityLocationsType().equals(ActivityLocationsType.LANDUSE)){
+			if(!Controller.configuration().scenario().getActivityLocationsType().equals(ActivityLocationsType.LANDUSE)){
 				
 					for(Building b : this.reader.getBuildingList()){
 
