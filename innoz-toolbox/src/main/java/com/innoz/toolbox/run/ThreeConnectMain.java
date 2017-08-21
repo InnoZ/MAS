@@ -314,20 +314,6 @@ public class ThreeConnectMain {
 			}
 		});
 		
-		CarsharingSupplyEventHandler eventHandler = new CarsharingSupplyEventHandler();
-		controler.addOverridingModule(new AbstractModule() {
-			
-			@Override
-			public void install() {
-				
-				addEventHandlerBinding().toInstance(eventHandler);
-				TwoWayCarsharingConfigGroup twConfig = (TwoWayCarsharingConfigGroup)controler.getConfig().getModules().get(TwoWayCarsharingConfigGroup.GROUP_NAME);
-				OneWayCarsharingConfigGroup owConfig = (OneWayCarsharingConfigGroup)controler.getConfig().getModules().get(OneWayCarsharingConfigGroup.GROUP_NAME);
-				addControlerListenerBinding().toInstance(new CarsharingSupplyControlerListener(eventHandler, configGroup, twConfig, owConfig));				
-				
-			}
-		});
-		
 	}
 	
 	public static CostsCalculatorContainer createCompanyCostsStructure(Set<String> companies, Scenario scenario, String path) {
