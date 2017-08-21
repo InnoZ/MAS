@@ -55,6 +55,20 @@ public class CarsharingVehiclesWriter {
 				
 			});
 			
+			processVehicles(vehicleLocations, "oneway").entrySet().forEach(entry -> {
+				
+				try {
+				
+					handler.writeOnewayEntry(writer, entry);
+				
+				} catch (IOException e) {
+
+					e.printStackTrace();
+					
+				}
+				
+			});
+			
 			processVehicles(vehicleLocations, "freefloating").entrySet().forEach(entry -> {
 				
 				try {

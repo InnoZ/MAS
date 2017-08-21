@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.carsharing.stations.OneWayCarsharingStation;
 import org.matsim.contrib.carsharing.vehicles.CSVehicle;
 import org.matsim.contrib.carsharing.vehicles.FFVehicleImpl;
 import org.matsim.contrib.carsharing.vehicles.StationBasedVehicle;
@@ -122,9 +121,28 @@ public class CarsharingSupplyAdaptation {
 	private static void createOnewayVehicles(Link link, Map<String, CSVehicle> allVehicles, Map<CSVehicle, Link> allLocations,
 			int count) {
 		
+		StationBasedVehicle ref = null;
+		Optional<Entry<CSVehicle, Link>> opt = allLocations.entrySet().stream().filter(entry ->
+		entry.getValue().equals(link) && entry.getKey() instanceof StationBasedVehicle).findAny();
+		if(opt.isPresent()) ref = (StationBasedVehicle) opt.get().getKey();
+		
 		while(count > 0) {
+		
+			String stationId = null;
+			if(ref != null) {
+				stationId = ref.getStationId();
+			} else {
+				stationId = "station_" + Integer.toString(internalCounter);
+				internalCounter++;
+			}
 			
-//			OneWayCarsharingStation owStation = new OneWayCarsharingStation(stationId, link, count, vehiclesPerType, Math.max((int)(1.5 * count), 2));
+			StationBasedVehicle vehicle = new StationBasedVehicle("car", "oneway_" + Integer.toString(internalCounter),
+					stationId, "oneway", "stadtteilauto");
+			allVehicles.put(vehicle.getVehicleId(), vehicle);
+			allLocations.put(vehicle, link);
+			
+			internalCounter++;
+			count--;
 			
 		}
 		

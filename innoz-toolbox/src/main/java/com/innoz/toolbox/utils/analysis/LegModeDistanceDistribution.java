@@ -22,6 +22,7 @@ package com.innoz.toolbox.utils.analysis;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,10 +41,12 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.io.IOUtils;
+import org.matsim.pt.PtConstants;
 
 /**
  * This tool calculates modal split over predefined distance classes.
@@ -68,6 +71,9 @@ public class LegModeDistanceDistribution {
 	private SortedMap<String, Double> mode2Share;
 
 	public LegModeDistanceDistribution(){
+		// why are the following two lines necessary? bk oct'12
+		log.info("enabled");
+
 		this.distanceClasses = new ArrayList<Integer>();
 		this.usedModes = new TreeSet<String>();
 	}
@@ -76,6 +82,11 @@ public class LegModeDistanceDistribution {
 		this.scenario = sc;
 		initializeDistanceClasses(this.scenario.getPopulation());
 		initializeUsedModes(this.scenario.getPopulation());
+	}
+
+	public List<EventHandler> getEventHandler() {
+		// nothing to return
+		return new LinkedList<EventHandler>();
 	}
 
 	public void preProcessData() {
@@ -91,18 +102,14 @@ public class LegModeDistanceDistribution {
 				PlanElement pe = planElements.get(i);
 				if (pe instanceof Activity) {
 					Activity act = (Activity) pe;
-					if (act.getType().contains("interaction")) {
+					if (PtConstants.TRANSIT_ACTIVITY_TYPE.equals(act.getType())) {
 						PlanElement previousPe = planElements.get(i-1);
-						PlanElement next = planElements.get(i+1);
 						if (previousPe instanceof Leg) {
 							Leg previousLeg = (Leg) previousPe;
-							Leg nextLeg = (Leg) next;
-							if(!nextLeg.getMode().contains("_walk")) {
-								previousLeg.setMode(nextLeg.getMode());
-								previousLeg.setRoute(null);
-							}
+							previousLeg.setMode(TransportMode.pt);
+							previousLeg.setRoute(null);
 						} else {
-							throw new RuntimeException("An activity should follow a leg! Aborting...");
+							throw new RuntimeException("A transit activity should follow a leg! Aborting...");
 						}
 						final int index = i;
 						PopulationUtils.removeActivity(((Plan) selectedPlan), index); // also removes the following leg
@@ -141,6 +148,9 @@ public class LegModeDistanceDistribution {
 	}
 
 	public void writeResults(String outputFolder) {
+		
+//		File outputFolderFile = new File(outputFolder);
+//		outputFolderFile.mkdirs();
 		
 		String outFile = outputFolder + "legModeDistanceDistribution.txt";
 		try{
@@ -338,6 +348,6 @@ public class LegModeDistanceDistribution {
 
 	public void setMode2Share(SortedMap<String, Double> mode2Share) {
 		this.mode2Share = mode2Share;
-	}
+}
 	
 }

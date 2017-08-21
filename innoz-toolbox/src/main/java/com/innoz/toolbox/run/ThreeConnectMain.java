@@ -1,9 +1,7 @@
-package com.innoz.scenarios.osnabrueck;
+package com.innoz.toolbox.run;
 
 import java.util.List;
 import java.util.Set;
-
-import javax.inject.Singleton;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
@@ -30,7 +28,6 @@ import org.matsim.contrib.carsharing.manager.routers.RouteCarsharingTrip;
 import org.matsim.contrib.carsharing.manager.routers.RouteCarsharingTripImpl;
 import org.matsim.contrib.carsharing.manager.routers.RouterProvider;
 import org.matsim.contrib.carsharing.manager.routers.RouterProviderImpl;
-import org.matsim.contrib.carsharing.manager.supply.CarsharingSupplyContainer;
 import org.matsim.contrib.carsharing.manager.supply.CarsharingSupplyInterface;
 import org.matsim.contrib.carsharing.manager.supply.costs.CostsCalculatorContainer;
 import org.matsim.contrib.carsharing.models.ChooseTheCompany;
@@ -42,7 +39,6 @@ import org.matsim.contrib.carsharing.readers.CarsharingXmlReaderNew;
 import org.matsim.contrib.carsharing.replanning.CarsharingSubtourModeChoiceStrategy;
 import org.matsim.contrib.carsharing.replanning.RandomTripToCarsharingStrategy;
 import org.matsim.contrib.carsharing.router.FreeFloatingRoutingModule;
-import org.matsim.contrib.carsharing.router.OneWayCarsharingRoutingModule;
 import org.matsim.contrib.carsharing.router.TwoWayCarsharingRoutingModule;
 import org.matsim.contrib.carsharing.scoring.CarsharingScoringFunctionFactory;
 import org.matsim.core.config.Config;
@@ -50,7 +46,6 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
-import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.network.filter.NetworkFilterManager;
@@ -62,7 +57,6 @@ import org.matsim.core.router.MainModeIdentifierImpl;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 
-import com.google.inject.Provides;
 import com.innoz.toolbox.matsim.sharedMobility.carsharing.CarsharingQsimFactoryNewWithPt;
 import com.innoz.toolbox.matsim.sharedMobility.carsharing.KeepingTheCarModelInnoZ;
 import com.innoz.toolbox.matsim.sharedMobility.carsharing.MyCarsharingSupplyContainer;
@@ -70,6 +64,8 @@ import com.innoz.toolbox.matsim.sharedMobility.carsharing.OneWayCarsharingRoutin
 import com.innoz.toolbox.matsim.sharedMobility.carsharing.OsCompanyCostStructure;
 import com.innoz.toolbox.matsim.sharedMobility.carsharing.VehicleChoiceAgent;
 import com.innoz.toolbox.matsim.sharedMobility.carsharing.VehicleChoiceAgentImpl;
+import com.innoz.toolbox.matsim.sharedMobility.carsharing.supply.CarsharingSupplyControlerListener;
+import com.innoz.toolbox.matsim.sharedMobility.carsharing.supply.CarsharingSupplyEventHandler;
 
 public class ThreeConnectMain {
 
@@ -315,6 +311,20 @@ public class ThreeConnectMain {
                         return defaultModeIdentifier.identifyMainMode( tripElements );
                     }
                 });
+			}
+		});
+		
+		CarsharingSupplyEventHandler eventHandler = new CarsharingSupplyEventHandler();
+		controler.addOverridingModule(new AbstractModule() {
+			
+			@Override
+			public void install() {
+				
+				addEventHandlerBinding().toInstance(eventHandler);
+				TwoWayCarsharingConfigGroup twConfig = (TwoWayCarsharingConfigGroup)controler.getConfig().getModules().get(TwoWayCarsharingConfigGroup.GROUP_NAME);
+				OneWayCarsharingConfigGroup owConfig = (OneWayCarsharingConfigGroup)controler.getConfig().getModules().get(OneWayCarsharingConfigGroup.GROUP_NAME);
+				addControlerListenerBinding().toInstance(new CarsharingSupplyControlerListener(eventHandler, configGroup, twConfig, owConfig));				
+				
 			}
 		});
 		

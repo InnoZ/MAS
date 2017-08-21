@@ -41,7 +41,7 @@ public class CarsharingSupplyControlerListener implements StartupListener, Itera
 	OneWayCarsharingConfigGroup owConfig;
 	
 	final int averageOverIterations = 5;
-	final int lastIteration = 20;
+	final int lastIteration = 80;
 	final int threshold = 1;
 	
 	public CarsharingSupplyControlerListener(CarsharingSupplyEventHandler handler, CarsharingConfigGroup carsharing,
