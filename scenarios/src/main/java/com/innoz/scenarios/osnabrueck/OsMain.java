@@ -1,17 +1,13 @@
 package com.innoz.scenarios.osnabrueck;
 
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.carsharing.config.CarsharingConfigGroup;
-import org.matsim.contrib.carsharing.config.FreeFloatingConfigGroup;
-import org.matsim.contrib.carsharing.config.OneWayCarsharingConfigGroup;
-import org.matsim.contrib.carsharing.config.TwoWayCarsharingConfigGroup;
-import org.matsim.contrib.carsharing.runExample.RunCarsharing;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.config.groups.StrategyConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -21,20 +17,28 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.Default
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.scenario.ScenarioUtils;
 
+import com.innoz.toolbox.run.calibration.ASCModalSplitCallibration;
+import com.innoz.toolbox.run.calibration.RememberModeStats;
+
 public class OsMain {
 
 	public static void main(String args[]){
 		
-		Config config = ConfigUtils.loadConfig("/home/dhosse/scenarios/3connect/config.xml.gz",
-				new CarsharingConfigGroup(), new OneWayCarsharingConfigGroup(), new TwoWayCarsharingConfigGroup(), new FreeFloatingConfigGroup());
+//		INPUT configurationcd
+		Config config = ConfigUtils.loadConfig("/home/bmoehring/scenarios/osnabrueck/03404_2017/config.xml.gz");
+//		INPUT MODAL SPLIT HERE:
+		Map<String, Double> modalSplitGoal = new HashMap<String, Double>();
+		modalSplitGoal.put(TransportMode.bike, 	0.12);
+		modalSplitGoal.put(TransportMode.car, 	0.55);
+		modalSplitGoal.put(TransportMode.pt, 	0.07);
+		modalSplitGoal.put(TransportMode.walk, 	0.24);
+		String holdMode = TransportMode.car;
 		
 		config.plansCalcRoute().setInsertingAccessEgressWalk(false);
 		
 		config.vspExperimental().setWritingOutputEvents(true);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		
-		config.qsim().setMainModes(Arrays.asList(TransportMode.car, "freefloating_vehicle",
-				"twoway_vehicle", "oneway_vehicle"));
+		config.controler().setLastIteration(50);
 		
 		StrategyConfigGroup strategy = config.strategy();
 		{
@@ -51,76 +55,42 @@ public class OsMain {
 		}
 		{
 			StrategySettings stratSets = new StrategySettings();
-			stratSets.setStrategyName(DefaultStrategy.ChangeTripMode.name());
+			stratSets.setStrategyName(DefaultStrategy.SubtourModeChoice.name());
 			stratSets.setWeight(0.1);
 			strategy.addStrategySettings(stratSets);
 		}
-		{
-			StrategySettings stratSets = new StrategySettings();
-			stratSets.setStrategyName("CarsharingSubtourModeChoiceStrategy");
-			stratSets.setWeight(0.05);
-			strategy.addStrategySettings(stratSets);
-		}
-		{
-			StrategySettings stratSets = new StrategySettings();
-			stratSets.setStrategyName("RandomTripToCarsharingStrategy");
-			stratSets.setWeight(0.05);
-			strategy.addStrategySettings(stratSets);
-		}
-		
-		PlanCalcScoreConfigGroup planCalcScore = config.planCalcScore();
-		{
-			ModeParams params = new ModeParams(TransportMode.ride);
-			params.setConstant(0d);
-			params.setMarginalUtilityOfTraveling(0d);
-			planCalcScore.addModeParams(params);
-		}
-		{
-			ModeParams params = new ModeParams("access_walk_tw");
-			params.setConstant(0d);
-			params.setMarginalUtilityOfTraveling(0d);
-			planCalcScore.addModeParams(params);
-		}
-		{
-			ModeParams params = new ModeParams("access_walk_ff");
-			params.setConstant(0d);
-			params.setMarginalUtilityOfTraveling(0d);
-			planCalcScore.addModeParams(params);
-		}
-		{
-			ModeParams params = new ModeParams("egress_walk_tw");
-			params.setConstant(0d);
-			params.setMarginalUtilityOfTraveling(0d);
-			planCalcScore.addModeParams(params);
-		}
-		{
-			ModeParams params = new ModeParams("egress_walk_ff");
-			params.setConstant(0d);
-			params.setMarginalUtilityOfTraveling(0d);
-			planCalcScore.addModeParams(params);
-		}
-		{
-			ModeParams params = new ModeParams("twoway_vehicle");
-			params.setConstant(0d);
-			params.setMarginalUtilityOfTraveling(0d);
-			planCalcScore.addModeParams(params);
-		}
-		{
-			ModeParams params = new ModeParams("freefloating_vehicle");
-			params.setConstant(0d);
-			params.setMarginalUtilityOfTraveling(0d);
-			planCalcScore.addModeParams(params);
-		}
-		
+
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
-		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
-
 		Controler controler = new Controler(scenario);
 		
-		RunCarsharing.installCarSharing(controler);
+		controler.addControlerListener(new RememberModeStats());
+
+		ASCModalSplitCallibration asc = new ASCModalSplitCallibration(modalSplitGoal);
+		double delta = Double.POSITIVE_INFINITY;
+			
+		for(int i = 0 ; i < 10; i++) {
+			
+			System.out.println("Iteration " + i);
+			
+			controler.run();
+			
+			delta = asc.calculateDelta();
+			if(delta < 0.1) break;
+			
+			Map<String, Double> constants = asc.calculateModeConstants(config);
+			
+			for (Entry<String, Double> e : constants.entrySet()){
+				
+				ModeParams params = config.planCalcScore().getOrCreateModeParams(e.getKey());
+				// keep one mode constant at 0 and adjust the others according to the constant
+				params.addParam("constant", String.valueOf(e.getValue()-constants.get(holdMode)));
+				config.planCalcScore().addModeParams(params);
+				
+			}
 		
-		controler.run();
+		}
+		
 		
 	}
 	

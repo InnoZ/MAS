@@ -1,4 +1,4 @@
-package com.innoz.scenarios.osnabrück;
+package com.innoz.scenarios.osnabrueck;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
