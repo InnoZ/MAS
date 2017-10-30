@@ -16,3 +16,8 @@ libraries/*.zip
 *~
 # ignore local documentation
 doc
+# idea
+.idea/
+*.iml
+out/
+innoz-toolbox/src/main/resources/META-INF/
