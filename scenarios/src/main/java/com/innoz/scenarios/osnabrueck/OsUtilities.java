@@ -41,29 +41,31 @@ import org.matsim.vehicles.VehicleWriterV1;
 import com.innoz.toolbox.utils.analysis.LegModeDistanceDistribution;
 
 public class OsUtilities {
+	
+	static String dataDirOS = "/home/bmoehring/3connect/3connect_trend/Trendszenario/";
 
 	// Method for modal split analysis of 3connect scenarios
 	public static void main(String args[]) {
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 
-		new PopulationReader(scenario).readFile(args[0]);
+		new PopulationReader(scenario).readFile(dataDirOS + "output_trend/output_plans.xml.gz");
 		
 		scenario.getPopulation().getPersons().values().stream().forEach(person -> PersonUtils.removeUnselectedPlans(person));
 		
 //		samplePopulation(scenario.getPopulation());
 //		extractCsUsers(scenario.getPopulation());
 		
-		lmdd(scenario);
+//		lmdd(scenario);
 		getToActivityTypesForCsLegs(scenario);
-		getSubstitutedModesForCsLegs(scenario, args[1]);
+//		getSubstitutedModesForCsLegs(scenario, args[1]);
 		
 	}
 	
 	static void extractCsUsers(Population population) {
 		
 		MembershipReader reader = new MembershipReader();
-		reader.readFile("/home/dhosse/scenarios/3connect/csMembers.xml");
+		reader.readFile("/home/bmoehring/3connect/3connect_trend/Trendszenario/input_trend/memberships_filtered.xml.gz");
 		
 		Scenario scenarioOut = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		
@@ -80,7 +82,7 @@ public class OsUtilities {
 			
 		}
 		
-		new PopulationWriter(scenarioOut.getPopulation()).write("/home/dhosse/samplePlans.xml.gz");
+		new PopulationWriter(scenarioOut.getPopulation()).write(dataDirOS + "analysis/data/samplePlans.xml.gz");
 		
 	}
 	
@@ -101,7 +103,7 @@ public class OsUtilities {
 			
 		}
 		
-		new PopulationWriter(scenarioOut.getPopulation()).write("/home/dhosse/scenarios/3connect/samplePlans.xml.gz");
+		new PopulationWriter(scenarioOut.getPopulation()).write(dataDirOS + "analysis/data/samplePlans.xml.gz");
 		
 	}
 	
@@ -161,6 +163,9 @@ public class OsUtilities {
 	}
 	
 	static void assignCsMembers(Scenario scenario) throws IOException{
+		/**
+		 * method to write cs_members.xml based on the attribute "OW_CARD" in personAttributes
+		 */
 		
 		new PopulationReader(scenario).readFile("/home/dhosse/osGtfs/run3/output_plans.xml.gz");
 		ObjectAttributes attributes = new ObjectAttributes();
@@ -216,6 +221,9 @@ public class OsUtilities {
 	}
 	
 	static void getToActivityTypesForCsLegs(Scenario scenario){
+		/**
+		 * 
+		 */
 		
 		Map<String, Integer> actType2Count = new HashMap<>();
 		actType2Count.put("home", 0);
@@ -227,6 +235,7 @@ public class OsUtilities {
 		actType2Count.put("other", 0);
 		
 		Set<Coord> endCoords = new HashSet<>();
+		Set<Coord> fromCoords = new HashSet<>();
 		
 		for(Person person : scenario.getPopulation().getPersons().values()){
 			
@@ -236,9 +245,19 @@ public class OsUtilities {
 				
 				if(pe instanceof Leg){
 					
-					if(((Leg)pe).getMode().equals("twoway")||((Leg)pe).getMode().equals("freefloating")){
+					
+					
+					if(((Leg)pe).getMode().equals("twoway")||((Leg)pe).getMode().equals("oneway")||((Leg)pe).getMode().equals("freefloating")){
 						nextElement = true;
+						
+						int index = person.getSelectedPlan().getPlanElements().indexOf(pe);
+						PlanElement peOld = person.getSelectedPlan().getPlanElements().get(index-1);
+						String type = ((Activity)peOld).getType();
+						if (peOld instanceof Activity && !type.contains("interaction")){
+							fromCoords.add(((Activity)peOld).getCoord());
+						}
 					}
+					
 					
 				} else if(pe instanceof Activity && nextElement){
 					
@@ -255,12 +274,12 @@ public class OsUtilities {
 			}
 			
 		}
-		
+		//toCoords
 		for(Entry<String, Integer> entry : actType2Count.entrySet()){
 			System.out.println(entry.getKey() + ": " + entry.getValue());
 		}
 		
-		BufferedWriter writer = IOUtils.getBufferedWriter("/home/dhosse/scenarios/3connect/endCoords.csv");
+		BufferedWriter writer = IOUtils.getBufferedWriter(dataDirOS + "analysis/data/endCoords.csv");
 		try {
 		
 			writer.write("x;y");
@@ -280,6 +299,26 @@ public class OsUtilities {
 			
 		}
 		
+		//fromCoords
+		writer = IOUtils.getBufferedWriter(dataDirOS + "analysis/data/startCoords.csv");
+		try {
+		
+			writer.write("x;y");
+			
+			for(Coord c : endCoords){
+				
+				writer.newLine();
+				writer.write(c.getX() + ";" + c.getY());
+				
+			}
+			
+			writer.close();
+		
+		} catch (IOException e) {
+
+			e.printStackTrace();
+			
+		}
 	}
 	
 	static Set<Id<Person>> carsharingUsers = new HashSet<>();
