@@ -35,13 +35,13 @@ public class ExtractPersonAttributes {
 	public static void main(String[] args) {
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		new PopulationReader(scenario).readFile("/home/dhosse/scenarios/3connect/input/plans_2025.xml.gz");
-		new ObjectAttributesXmlReader(scenario.getPopulation().getPersonAttributes()).readFile("/home/dhosse/scenarios/3connect/input/"
+		new PopulationReader(scenario).readFile("/home/bmoehring/3connect/3connect_trend/input_trend/plans_2025_routed.xml.gz");
+		new ObjectAttributesXmlReader(scenario.getPopulation().getPersonAttributes()).readFile("/home/bmoehring/3connect/3connect_trend/input_trend/"
 				+ "personAttributes_2025.xml.gz");
 
 		createScenarioFleet(scenario);
 		
-		new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes()).writeFile("/home/dhosse/scenarios/3connect/input/personAttributesPositive.xml.gz");
+		new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes()).writeFile("/home/bmoehring/3connect/3connect_trend/personAttributes_2025_Positiv.xml.gz");
 		
 	}
 	
@@ -58,19 +58,19 @@ public class ExtractPersonAttributes {
 			
 			if(random.nextDouble() <= pGasoline) {
 				
-				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "gasoline");
+				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "verbrenner");
 				
 			} else if(random.nextDouble() <= pDiesel) {
 				
-				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "diesel");
+				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "verbrenner");
 				
 			} else if(random.nextDouble() <= pGas) {
 				
-				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "gas");
+				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "verbrenner");
 				
 			} else if(random.nextDouble() <= pHybrid) {
 				
-				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "hybrid");
+				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "verbrenner");
 				
 			} else {
 				
