@@ -46,6 +46,8 @@ import org.matsim.contrib.util.PopulationUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
+import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
@@ -67,6 +69,7 @@ import org.matsim.core.utils.geometry.CoordUtils;
 
 import com.innoz.toolbox.matsim.routing.AccessConfigGroup;
 import com.innoz.toolbox.matsim.routing.NetworkRoutingModuleWithAccessOption;
+import com.innoz.toolbox.matsim.routing.NetworkRoutingWithAccessRestriction;
 import com.innoz.toolbox.matsim.sharedMobility.carsharing.CarsharingQsimFactoryNewWithPt;
 import com.innoz.toolbox.matsim.sharedMobility.carsharing.KeepingTheCarModelInnoZ;
 import com.innoz.toolbox.matsim.sharedMobility.carsharing.MyCarsharingSupplyContainer;
@@ -83,8 +86,6 @@ public class ThreeConnectPositiv {
 		
 		Config config = ConfigUtils.loadConfig(args[0], new CarsharingConfigGroup(), new TwoWayCarsharingConfigGroup(),
 				new OneWayCarsharingConfigGroup(), new FreeFloatingConfigGroup());
-		
-		config.plansCalcRoute().setInsertingAccessEgressWalk(false);
 		
 		config.planCalcScore().setFractionOfIterationsToStartScoreMSA(0.8);
 		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
@@ -130,16 +131,38 @@ public class ThreeConnectPositiv {
 			config.strategy().addStrategySettings(stratSets);
 		}
 		
+		{
+			ModeParams pedelec = new ModeParams("pedelec");
+			pedelec.setMarginalUtilityOfTraveling(-2.8); //(2 * -1,4) ... 1,4Eur/30min
+			pedelec.setConstant(-1.7692383901); //from callibrated mode bike
+			config.planCalcScore().addModeParams(pedelec);
+		}
+		{
+			ModeRoutingParams pedelec = new ModeRoutingParams();
+			pedelec.setBeelineDistanceFactor(1.3);
+			pedelec.setMode("pedelec");
+			pedelec.setTeleportedModeFreespeedFactor(4.2);
+			config.plansCalcRoute().addModeRoutingParams(pedelec);
+		}
+		
 		config.subtourModeChoice().setChainBasedModes(new String[]{TransportMode.bike, TransportMode.car});
 		config.subtourModeChoice().setConsiderCarAvailability(true);
 		config.subtourModeChoice().setModes(new String[]{TransportMode.bike,TransportMode.car,TransportMode.pt,
-				TransportMode.walk});
+				TransportMode.walk,"pedelec"});
+		
+		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
+		
+		{
+		AccessConfigGroup acg = new AccessConfigGroup();
+		acg.setAccessAttribute("innercity");
+		acg.setMode(TransportMode.car);
+		acg.setExcludedFuelTypes("verbrenner");
+		config.addModule(acg);
+		}
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 
 //		scenario.getPopulation().getPersons().values().removeIf(person -> MatsimRandom.getRandom().nextDouble() > 0.1);
-		
-		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
 		
 		NetworkFilterManager mng = new NetworkFilterManager(scenario.getNetwork());
 		mng.addLinkFilter(new NetworkLinkFilter() {
@@ -199,34 +222,37 @@ public class ThreeConnectPositiv {
 			
 		});
 		
+		for (Person person : scenario.getPopulation().getPersons().values()){
+			String vehicleType = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "vehicleType");
+			person.getAttributes().putAttribute("vehicleType", vehicleType);
+			String hasLicense = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "hasLicense");
+			person.getAttributes().putAttribute("hasLicense", hasLicense);
+			String carAvail = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "carAvail");
+			person.getAttributes().putAttribute("carAvail", carAvail);
+//			String employed = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "employed");
+//			person.getAttributes().putAttribute("employed", employed);
+//			String age = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "age");
+//			person.getAttributes().putAttribute("age", age);
+		}
+		
 		Controler controler = new Controler(scenario);
 		
-		installCarsharing(controler,carNet, args[1]);
+		installCarsharing(controler, carNet, args[1]);
 		
-		installNetworkRoutingModule(controler, scenario, carNet);
+		installNetworkRoutingModule(controler);
 
 		controler.run();
 		
 	}
 	
-	private static void installNetworkRoutingModule(final Controler controler, Scenario scenario, Network carNet){
-		PlansCalcRouteConfigGroup plansCalcRoute = controler.getConfig().plansCalcRoute();
-		AccessConfigGroup accessConfigGroup = new AccessConfigGroup();
-
-		
+	private static void installNetworkRoutingModule(final Controler controler){ 
 
 		controler.addOverridingModule(new AbstractModule() {
+			
 			@Override
 			public void install() {
-				// install custom routing module. car legs should not use the innercity links defined by the attribute innercity=yes
-				addRoutingModuleBinding(TransportMode.car).toInstance(
-						new NetworkRoutingModuleWithAccessOption(
-								TransportMode.car, 
-								scenario.getPopulation().getFactory(), 
-								scenario.getNetwork(), 
-								null, 
-								plansCalcRoute, 
-								accessConfigGroup));
+				addRoutingModuleBinding(TransportMode.car).toProvider(NetworkRoutingWithAccessRestriction.class);
+				
 			}
 		});
 	}
