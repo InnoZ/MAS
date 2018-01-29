@@ -42,7 +42,7 @@ import com.innoz.toolbox.utils.analysis.LegModeDistanceDistribution;
 
 public class OsUtilities {
 	
-	static String dataDirOS = "/home/bmoehring/3connect/3connect_trend/Trendszenario/";
+	static String dataDirOS = "/home/bmoehring/3connect/3connect_trend/Trendszenario_DLR_allAgents/";
 
 	// Method for modal split analysis of 3connect scenarios
 	public static void main(String args[]) {
@@ -54,9 +54,9 @@ public class OsUtilities {
 		scenario.getPopulation().getPersons().values().stream().forEach(person -> PersonUtils.removeUnselectedPlans(person));
 		
 //		samplePopulation(scenario.getPopulation());
-//		extractCsUsers(scenario.getPopulation());
+		extractCsUsers(scenario.getPopulation());
 		
-//		lmdd(scenario);
+		lmdd(scenario);
 		getToActivityTypesForCsLegs(scenario);
 //		getSubstitutedModesForCsLegs(scenario, args[1]);
 		
@@ -65,24 +65,29 @@ public class OsUtilities {
 	static void extractCsUsers(Population population) {
 		
 		MembershipReader reader = new MembershipReader();
-		reader.readFile("/home/bmoehring/3connect/3connect_trend/Trendszenario/input_trend/memberships_filtered.xml.gz");
+		reader.readFile(dataDirOS + "input_trend/carsharingMembers_filtered.xml");
 		
 		Scenario scenarioOut = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+		
+		int csUsers = 0;
 		
 		for(Entry<Id<Person>,PersonMembership> entry : reader.getMembershipContainer().getPerPersonMemberships().entrySet()){
 			
 			PersonMembership m = entry.getValue();
 			
 			for(Entry<String, Set<String>> entries : m.getMembershipsPerCSType().entrySet()){
-				if(entries.getKey().equals("freefloating") || entries.getKey().equals("twoway")){
+				if(entries.getKey().equals("freefloating") || entries.getKey().equals("twoway") || entries.getKey().equals("oneway")){
 					scenarioOut.getPopulation().addPerson(population.getPersons().get(entry.getKey()));
+					csUsers ++;
 					break;
 				}
 			}
 			
 		}
 		
-		new PopulationWriter(scenarioOut.getPopulation()).write(dataDirOS + "analysis/data/samplePlans.xml.gz");
+		new PopulationWriter(scenarioOut.getPopulation()).write(dataDirOS + "/analysis/data/carsharingPlans.xml.gz");
+		
+		System.out.println("csUsers: " + csUsers);
 		
 	}
 	
@@ -158,7 +163,7 @@ public class OsUtilities {
 		lmdd.init(scenario);
 		lmdd.preProcessData();
 		lmdd.postProcessData();
-		lmdd.writeResults("/home/dhosse/osGtfs/");
+		lmdd.writeResults(dataDirOS + "analysis/");
 		
 	}
 	
@@ -235,7 +240,7 @@ public class OsUtilities {
 		actType2Count.put("other", 0);
 		
 		Set<Coord> endCoords = new HashSet<>();
-		Set<Coord> fromCoords = new HashSet<>();
+		Set<Coord> startCoords = new HashSet<>();
 		
 		for(Person person : scenario.getPopulation().getPersons().values()){
 			
@@ -254,7 +259,7 @@ public class OsUtilities {
 						PlanElement peOld = person.getSelectedPlan().getPlanElements().get(index-1);
 						String type = ((Activity)peOld).getType();
 						if (peOld instanceof Activity && !type.contains("interaction")){
-							fromCoords.add(((Activity)peOld).getCoord());
+							startCoords.add(((Activity)peOld).getCoord());
 						}
 					}
 					
@@ -299,13 +304,13 @@ public class OsUtilities {
 			
 		}
 		
-		//fromCoords
+		//startCoords
 		writer = IOUtils.getBufferedWriter(dataDirOS + "analysis/data/startCoords.csv");
 		try {
 		
 			writer.write("x;y");
 			
-			for(Coord c : endCoords){
+			for(Coord c : startCoords){
 				
 				writer.newLine();
 				writer.write(c.getX() + ";" + c.getY());
