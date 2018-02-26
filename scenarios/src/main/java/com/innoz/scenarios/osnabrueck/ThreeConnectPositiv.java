@@ -147,22 +147,26 @@ public class ThreeConnectPositiv {
 		
 		config.subtourModeChoice().setChainBasedModes(new String[]{TransportMode.bike, TransportMode.car});
 		config.subtourModeChoice().setConsiderCarAvailability(true);
+//		config.subtourModeChoice().setModes(new String[]{TransportMode.bike,TransportMode.car,TransportMode.pt,
+//				TransportMode.walk});
 		config.subtourModeChoice().setModes(new String[]{TransportMode.bike,TransportMode.car,TransportMode.pt,
 				TransportMode.walk,"pedelec"});
 		
 		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
 		
 		{
-		AccessConfigGroup acg = new AccessConfigGroup();
-		acg.setAccessAttribute("innercity");
-		acg.setMode(TransportMode.car);
-		acg.setExcludedFuelTypes("verbrenner");
-		config.addModule(acg);
+			AccessConfigGroup acg = new AccessConfigGroup();
+			acg.setAccessAttribute("innercity");
+			acg.setMode(TransportMode.car);
+			acg.setExcludedFuelTypes("verbrenner");
+			config.addModule(acg);
 		}
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 
 //		scenario.getPopulation().getPersons().values().removeIf(person -> MatsimRandom.getRandom().nextDouble() > 0.1);
+		
+		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
 		
 		NetworkFilterManager mng = new NetworkFilterManager(scenario.getNetwork());
 		mng.addLinkFilter(new NetworkLinkFilter() {
@@ -176,7 +180,7 @@ public class ThreeConnectPositiv {
 	
 					boolean motorway = l.getFreespeed() > 50/3.6;
 					
-					if(l.getAllowedModes().contains("pt") || motorway) return false;
+					if(l.getId().toString().startsWith("pt_") || motorway) return false;
 					
 					return true;
 					
@@ -221,19 +225,6 @@ public class ThreeConnectPositiv {
 			});
 			
 		});
-		
-		for (Person person : scenario.getPopulation().getPersons().values()){
-			String vehicleType = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "vehicleType");
-			person.getAttributes().putAttribute("vehicleType", vehicleType);
-			String hasLicense = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "hasLicense");
-			person.getAttributes().putAttribute("hasLicense", hasLicense);
-			String carAvail = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "carAvail");
-			person.getAttributes().putAttribute("carAvail", carAvail);
-//			String employed = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "employed");
-//			person.getAttributes().putAttribute("employed", employed);
-//			String age = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "age");
-//			person.getAttributes().putAttribute("age", age);
-		}
 		
 		Controler controler = new Controler(scenario);
 		

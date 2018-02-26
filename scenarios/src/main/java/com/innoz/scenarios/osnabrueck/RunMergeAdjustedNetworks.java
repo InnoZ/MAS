@@ -1,7 +1,10 @@
 package com.innoz.scenarios.osnabrueck;
 
 import java.awt.List;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Set;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -10,7 +13,14 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.network.algorithms.NetworkCleaner;
+import org.matsim.core.network.filter.NetworkFilterManager;
+import org.matsim.core.network.filter.NetworkLinkFilter;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.gis.ShapeFileReader;
+import org.opengis.feature.Feature;
+import org.opengis.feature.simple.SimpleFeature;
 
 /**
  * 
@@ -25,36 +35,44 @@ public class RunMergeAdjustedNetworks {
 		
 		Config config = ConfigUtils.createConfig();
 		
-		config.network().setInputFile("/home/bmoehring/3connect/Scenarios/Fahrverbot_Verbrenner/mergedNetworkInnerCity.xml");
+		config.network().setInputFile("/home/bmoehring/3connect/Scenarios/Fahrverbot_Brenner_und_NeumarktII/networkMerged_WPt_WInnercity_Wneumarkt.xml");
 		
-		Scenario scenarioVerbrenner = ScenarioUtils.loadScenario(config);
+		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
-		Network verbrenner = scenarioVerbrenner.getNetwork();
+		new NetworkCleaner().run(scenario.getNetwork());
 		
-		config.network().setInputFile("/home/bmoehring/3connect/Scenarios/NeumarktII_Neumarkt_Fußgängerzone(kein IV)/mergedNetwork_links_neumarktANDwittekindstraße_deleted.xml");
-
-		Scenario scenarioNeumarkt = ScenarioUtils.loadScenario(config);
+//		shapefileLinksToAttributes(scenario, "/home/bmoehring/3connect/Scenarios/Fahrverbot_Verbrenner/links_innercity.shp");
 		
-		Network neumarkt = scenarioNeumarkt.getNetwork();
+	}
 		
-		LinkedList<Id<Link>> remove = new LinkedList<Id<Link>>();
+	private static void shapefileLinksToAttributes(Scenario scenario, String shapefile) {
 		
-		for (Link link : verbrenner.getLinks().values()){
-			if (neumarkt.getLinks().containsKey(link.getId())){
-				continue;
+		ShapeFileReader shapeFileReader = new ShapeFileReader();
+		shapeFileReader.readFileAndInitialize(shapefile);
+		
+		Collection<SimpleFeature> features = shapeFileReader.getFeatureSet();
+		ArrayList<String> innercityIds = new ArrayList<>();
+		for (SimpleFeature feature : features){
+			System.out.println(feature.getAttribute("ID").toString() + " " + feature.getAttribute("origId"));
+			innercityIds.add(feature.getAttribute("ID").toString());
+		}
+		int countinnercity= 0;
+		int countouter = 0;
+		
+		for (Link link : scenario.getNetwork().getLinks().values()){
+			String linkId = link.getId().toString();
+			if (innercityIds.contains(linkId)){
+				link.getAttributes().putAttribute("innercity", "yes");
+				countinnercity++;
 			} else {
-				remove.add(link.getId());
-				System.out.println("remove Link: " +  link.getId());
+				link.getAttributes().putAttribute("innercity", "no");
+				countouter++;
 			}
 		}
-		
-		for (Id<Link> linkId : remove){
-			verbrenner.removeLink(linkId);
-		}
-		
-		new NetworkWriter(verbrenner).write("/home/bmoehring/3connect/Scenarios/Fahrverbot_Brenner_und_NeumarktII/network_verbrenner_and_neumarkt.xml");
-		
-		
+		System.out.println("innercity " + countinnercity);
+		System.out.println("outercity " + countouter);
+		new NetworkWriter(scenario.getNetwork()).write("/home/bmoehring/3connect/Scenarios/Fahrverbot_Verbrenner/networkMerged_WPt_WInnercity.xml.gz");
+
 	}
 
 }

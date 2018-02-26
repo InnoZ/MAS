@@ -17,15 +17,15 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 public class Analysis {
 	
-	static String BASE_DIR = "D:/01_Projekte/InnoZ-Simulation/Trendszenario/";
+	static String BASE_DIR = "/home/bmoehring/3connect/3connect_trend/Trendszenario_DLR_allAgents/";
 	
 	public static void main(String args[]) {
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		new PopulationReader(scenario).readFile(BASE_DIR + "output_trend/output_plans.xml.gz");
+		new PopulationReader(scenario).readFile("output_trend/output_plans.xml.gz");
 		
 		MembershipReader mReader = new MembershipReader();
-		mReader.readFile(BASE_DIR + "input_trend/memberships_filtered.xml.gz");
+		mReader.readFile("input_trend/carsharingMembers_filtered.xml");
 		MembershipContainer membership = mReader.getMembershipContainer();
 		
 		getSocDemAttributesOfCarsharingMembersAndUsers(scenario, membership);

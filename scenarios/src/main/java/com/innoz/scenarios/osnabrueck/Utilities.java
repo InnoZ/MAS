@@ -26,7 +26,7 @@ public class Utilities {
 		
 //		filterZeroDistanceLegs();
 		
-//		createCsUsers();
+		createCsUsers();
 		
 //		getFractionOfWorkers();
 		
@@ -64,7 +64,7 @@ public class Utilities {
 
 	private static void filterZeroDistanceLegs() {
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		new PopulationReader(scenario).readFile("D:/01_Projekte/InnoZ-Simulation/Trendszenario/bestehende_plans_bmoehring/plans.xml.gz");
+		new PopulationReader(scenario).readFile("/home/bmoehring/3connect/3connect_trend/input_trend/plans_2025.xml.gz");
 		
 		Scenario scenarioOut = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 
@@ -99,7 +99,9 @@ public class Utilities {
 
 	private static void createCsUsers() {
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		new PopulationReader(scenario).readFile("D:/01_Projekte/InnoZ-Simulation/Trendszenario/bestehende_plans_bmoehring/plans.xml.gz");
+		new PopulationReader(scenario).readFile("/home/bmoehring/3connect/3connect_trend/input_trend/plans_2025_routed.xml.gz");
+		
+		System.out.println(scenario.getPopulation().getPersons().size() + " persons");
 		
 		MembershipContainer membership = new MembershipContainer();
 		
@@ -107,11 +109,14 @@ public class Utilities {
 
 		Population population = scenario.getPopulation();
 		
+		int members = 0;
+		
 		for(Person p : population.getPersons().values()) {
+			
+			boolean hasZeroDistanceLegs = false;
 			
 			if(p.getSelectedPlan().getPlanElements().size() > 1) {
 				
-				boolean hasZeroDistanceLegs = false;
 				for(PlanElement pe : p.getSelectedPlan().getPlanElements()) {
 					if(pe instanceof Leg) {
 						Leg leg = (Leg) pe;
@@ -120,25 +125,30 @@ public class Utilities {
 						}
 					}
 				}
-				
-				scenarioOut.getPopulation().addPerson(p);
-				Map<String, Set<String>> membershipsPerCompany = new HashMap<>();
-				Map<String, Set<String>> membershipsPerCSType = new HashMap<>();
-				
-				if(p.getAttributes().getAttribute("hasLicense") != null && p.getAttributes().getAttribute("hasLicense").equals("yes") &&
-						!hasZeroDistanceLegs) {
-					membershipsPerCompany.put("stadtteilauto", new HashSet<>(Arrays.asList(new String[] {"oneway","freefloating","twoway"})));
-				}
-				
-				PersonMembership personMembership = new PersonMembership(membershipsPerCompany, membershipsPerCSType);
-				membership.addPerson(p.getId().toString(), personMembership);
-				
 			}
+			
+			scenarioOut.getPopulation().addPerson(p);
+			Map<String, Set<String>> membershipsPerCompany = new HashMap<>();
+			Map<String, Set<String>> membershipsPerCSType = new HashMap<>();
+			
+			if(p.getAttributes().getAttribute("hasLicense") != null && p.getAttributes().getAttribute("hasLicense").equals("yes") &&
+					!hasZeroDistanceLegs) {
+				membershipsPerCompany.put("stadtteilauto", new HashSet<>(Arrays.asList(new String[] {"oneway","freefloating","twoway"})));
+				members ++;
+			}
+			
+			PersonMembership personMembership = new PersonMembership(membershipsPerCompany, membershipsPerCSType);
+			membership.addPerson(p.getId().toString(), personMembership);
+			
+			System.out.println(p.getId().toString() + " " + membershipsPerCompany.toString());
 			
 		}
 		
-		new PopulationWriter(scenarioOut.getPopulation()).write("D:/01_Projekte/InnoZ-Simulation/Trendszenario/bestehende_plans_bmoehring/plans_clean.xml.gz");
-		new CSMembersXmlWriter(membership).writeFile("D:/01_Projekte/InnoZ-Simulation/Trendszenario/bestehende_plans_bmoehring/memberships_filtered.xml.gz");
+		System.out.println(membership.getPerPersonMemberships().size() + " CS members defined");
+		System.out.println(members);
+		
+//		new PopulationWriter(scenarioOut.getPopulation()).write("D:/01_Projekte/InnoZ-Simulation/Trendszenario/bestehende_plans_bmoehring/plans_clean.xml.gz");
+		new CSMembersXmlWriter(membership).writeFile("/home/bmoehring/3connect/3connect_trend/input_trend/carsharingMembers_filtered.xml");
 	}
 	
 }

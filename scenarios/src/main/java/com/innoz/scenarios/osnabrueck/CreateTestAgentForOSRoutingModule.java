@@ -23,15 +23,13 @@ public class CreateTestAgentForOSRoutingModule {
 		
 		Config config = ConfigUtils.createConfig();
 		
-		ConfigUtils.loadConfig(config, "/home/bmoehring/3connect/3connect_positiv/config2.xml.gz");
-		
-		Scenario scenario = ScenarioUtils.loadScenario(config);
+		Scenario scenario = ScenarioUtils.createScenario(config);
 		
 		Population population = scenario.getPopulation();
 		
 		createTestAgent(population);
 
-		new PopulationWriter(scenario.getPopulation()).write("/home/bmoehring/3connect/TestRoutingModule/plans.xml");
+		new PopulationWriter(scenario.getPopulation()).write("/home/bmoehring/3connect/TestNetworkRoutingWithAccess/plans.xml.gz");
 		
 	}
 
@@ -39,22 +37,23 @@ public class CreateTestAgentForOSRoutingModule {
 		
 		PopulationFactory pf = population.getFactory();
 		
-		Person person = pf.createPerson(Id.createPersonId("Oskar"));
+		Person person = pf.createPerson(Id.createPersonId("oskar1"));
+		person.getAttributes().putAttribute("vehicleType", "gasoline");
+		person.getAttributes().putAttribute("vehicleType", "gasoline");
 		Plan plan = PopulationUtils.createPlan();
 		
 		Activity act = PopulationUtils.createActivityFromCoord("home", new Coord(431588.499660015, 5794983.07352271));
 		act.setEndTime(7.5*3600);
 		plan.addActivity(act);
 		
-		Leg leg = PopulationUtils.createLeg(TransportMode.pt);
+		Leg leg = PopulationUtils.createLeg(TransportMode.car);
 		plan.addLeg(leg);
-		
 		act = PopulationUtils.createActivityFromCoord("work", new Coord(434974.98393924429547042, 5792027.5684855142608285));
 		act.setStartTime(8.5*3600);
 		act.setEndTime(17.5*3600);
 		plan.addActivity(act);
 		
-		leg = PopulationUtils.createLeg(TransportMode.pt);
+		leg = PopulationUtils.createLeg(TransportMode.car);
 		plan.addLeg(leg);
 		
 		act = PopulationUtils.createActivityFromCoord("home", new Coord(431588.499660015, 5794983.07352271));
