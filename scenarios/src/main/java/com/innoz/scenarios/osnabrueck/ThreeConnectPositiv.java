@@ -141,7 +141,7 @@ public class ThreeConnectPositiv {
 			ModeRoutingParams pedelec = new ModeRoutingParams();
 			pedelec.setBeelineDistanceFactor(1.3);
 			pedelec.setMode("pedelec");
-			pedelec.setTeleportedModeFreespeedFactor(4.2);
+			pedelec.setTeleportedModeFreespeedFactor(4.0);
 			config.plansCalcRoute().addModeRoutingParams(pedelec);
 		}
 		
@@ -226,18 +226,28 @@ public class ThreeConnectPositiv {
 			
 		});
 		
+//		for (Person person : scenario.getPopulation().getPersons().values()){
+//			try {
+//				String vehicleType = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "vehicleType");
+//				person.getAttributes().putAttribute("vehicleType", vehicleType);
+//			} catch (NullPointerException n) {
+//				person.getAttributes().putAttribute("vehicleType", "verbrenner");
+//			}
+////			String hasLicense = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "hasLicense");
+////			person.getAttributes().putAttribute("hasLicense", hasLicense);
+//			String carAvail = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "carAvail");
+//			person.getAttributes().putAttribute("carAvail", carAvail);
+////			String employed = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "employed");
+////			person.getAttributes().putAttribute("employed", employed);
+////			String age = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "age");
+////			person.getAttributes().putAttribute("age", age);
+//		}
+		
 		Controler controler = new Controler(scenario);
 		
 		installCarsharing(controler, carNet, args[1]);
 		
-		installNetworkRoutingModule(controler);
-
-		controler.run();
-		
-	}
-	
-	private static void installNetworkRoutingModule(final Controler controler){ 
-
+		//install Carsharing
 		controler.addOverridingModule(new AbstractModule() {
 			
 			@Override
@@ -246,6 +256,9 @@ public class ThreeConnectPositiv {
 				
 			}
 		});
+
+		controler.run();
+		
 	}
 	
 	private static void installCarsharing(final Controler controler, Network carNet, String path) {

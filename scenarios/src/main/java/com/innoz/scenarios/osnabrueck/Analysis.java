@@ -1,6 +1,8 @@
 package com.innoz.scenarios.osnabrueck;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,18 +19,64 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 public class Analysis {
 	
-	static String BASE_DIR = "/home/bmoehring/3connect/3connect_trend/Trendszenario_DLR_allAgents/";
+	static String BASE_DIR = "/home/bmoehring/3connect/3connect_positiv/";
 	
 	public static void main(String args[]) {
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		new PopulationReader(scenario).readFile("output_trend/output_plans.xml.gz");
+		new PopulationReader(scenario).readFile(BASE_DIR + "output_positiv/output_plans_selected.xml.gz");
 		
-		MembershipReader mReader = new MembershipReader();
-		mReader.readFile("input_trend/carsharingMembers_filtered.xml");
-		MembershipContainer membership = mReader.getMembershipContainer();
+		getSocDemAttributesOfPedelecUsers(scenario);
 		
-		getSocDemAttributesOfCarsharingMembersAndUsers(scenario, membership);
+//		MembershipReader mReader = new MembershipReader();
+//		mReader.readFile(BASE_DIR + "input_positiv/carsharingMembers_filtered.xml");
+//		MembershipContainer membership = mReader.getMembershipContainer();
+//		
+//		getSocDemAttributesOfCarsharingMembersAndUsers(scenario, membership);
+		
+	}
+	
+	private static void getSocDemAttributesOfPedelecUsers(Scenario scenario) {
+		
+		List<String> users = new ArrayList<String>();
+		int count = 0;
+		double totaldist = 0;
+		
+		for(Person person : scenario.getPopulation().getPersons().values()) {
+			
+			for(PlanElement pe : person.getSelectedPlan().getPlanElements()) {
+				if(pe instanceof Leg) {
+					if(((Leg)pe).getMode().equals("bike")) {
+						double dist = ((Leg)pe).getRoute().getDistance();
+						if (dist == 0){
+							continue;
+						}
+						totaldist += dist;
+						count ++;
+						String personHash;
+						try {
+							personHash = createPersonHash(person)+"_depTime="+((Leg)pe).getDepartureTime();
+						} catch (NullPointerException n) {
+							personHash = String.valueOf(users.size()+1);
+						}
+						users.add(personHash);
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+		System.out.println("users:");
+		users.stream().forEach(e -> {
+			System.out.println(e);
+		});
+		
+		System.out.println("number of users: " + users.size());
+		System.out.println("number of rides: " + count);
+		System.out.println("total distance: " + totaldist);
+		System.out.println("average ride dist: " + totaldist / count);
 		
 	}
 

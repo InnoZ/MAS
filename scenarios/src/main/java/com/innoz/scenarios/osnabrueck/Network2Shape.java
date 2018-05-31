@@ -29,8 +29,8 @@ public class Network2Shape {
 
 	public static void main(String[] args) {
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		new NetworkReaderMatsimV2(scenario.getNetwork()).readFile("/home/bmoehring/3connect/Scenarios/Fahrverbot_Verbrenner/mergedNetworkInnerCity.xml.gz");
-		new TransitScheduleReader(scenario).readFile("/home/bmoehring/3connect/Scenarios/Ausbau transit/scheduleSimplifiedWithRingbus.xml.gz");
+		new NetworkReaderMatsimV2(scenario.getNetwork()).readFile("/home/bmoehring/3connect/Scenarios/network_positiv/networkMerged_positiv_WPt_WInnercity_Wneumarkt.xml.gz");
+//		new TransitScheduleReader(scenario).readFile("/home/bmoehring/3connect/Scenarios/Ausbau transit/scheduleSimplifiedWithRingbus.xml.gz");
 		
 //		List<TransitStopFacility> stopFacilities = new ArrayList<>();
 //		List<Id<Link>> ringbusLinkIdList = new ArrayList<>();
@@ -58,9 +58,9 @@ public class Network2Shape {
 //		}
 //		System.out.println(links);
 				
-//		GeometryUtils.writeNetwork2Shapefile(scenario.getNetwork(), "/home/bmoehring/3connect/Scenarios/Fahrverbot_Verbrenner/" , "EPSG:32632");
+		GeometryUtils.writeNetwork2Shapefile(scenario.getNetwork(), "/home/bmoehring/3connect/Scenarios/network_positiv/" , "EPSG:32632");
 		
-		GeometryUtils.writeStopFacilities2Shapefile(scenario.getTransitSchedule().getFacilities().values(), "/home/bmoehring/3connect/Scenarios/Ausbau transit/", "EPSG:32632");
+//		GeometryUtils.writeStopFacilities2Shapefile(scenario.getTransitSchedule().getFacilities().values(), "/home/bmoehring/3connect/Scenarios/Ausbau transit/", "EPSG:32632");
 	
 	}
 

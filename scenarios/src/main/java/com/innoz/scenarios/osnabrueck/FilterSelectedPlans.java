@@ -13,7 +13,7 @@ public class FilterSelectedPlans {
 
 	public static void main(String[] args) {
 		
-		String inputPath = "/home/bmoehring/3connect/1_negativSzenario/"; 
+		String inputPath = "/home/bmoehring/3connect/3connect_positiv/output_positiv/"; 
 		
 		Config config = ConfigUtils.createConfig();
 		config.plans().setInputFile(inputPath + "output_plans.xml.gz");
@@ -23,7 +23,7 @@ public class FilterSelectedPlans {
 		
 		System.out.println(scenario.getPopulation().getPersons().size());
 		
-		new PopulationWriter(scenario.getPopulation()).write("/home/bmoehring/3connect/1_negativSzenario/plans_selected.xml.gz");
+		new PopulationWriter(scenario.getPopulation()).write(inputPath + "output_plans_selected.xml.gz");
 
 	}
 

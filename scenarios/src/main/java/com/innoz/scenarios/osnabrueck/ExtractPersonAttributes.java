@@ -44,14 +44,16 @@ public class ExtractPersonAttributes {
 	public static void main(String[] args) {
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		new PopulationReader(scenario).readFile("/home/bmoehring/3connect/3connect_positiv/input_positiv/plans_2025_routed.xml.gz");
-		new ObjectAttributesXmlReader(scenario.getPopulation().getPersonAttributes()).readFile("/home/bmoehring/3connect/3connect_positiv/input_positiv/"
+		new PopulationReader(scenario).readFile("/home/bmoehring/3connect/3connect_trend/Trendszenario_DLR_allAgents/input_trend/plans_2025.xml.gz");
+		new ObjectAttributesXmlReader(scenario.getPopulation().getPersonAttributes()).readFile("/home/bmoehring/3connect/3connect_trend/Trendszenario_DLR_allAgents/input_trend/"
 				+ "personAttributes_2025.xml.gz");
 
 		createScenarioFleet(scenario);
 		
 		new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes()).writeFile("/home/bmoehring/3connect/testAgentAttributes/personAttributes_2025_Positiv.xml.gz");
-		new PopulationWriter(scenario.getPopulation()).writeV6("/home/bmoehring/3connect/testAgentAttributes/plans_2025_routed.xml.gz");
+		PopulationWriter pw = new PopulationWriter(scenario.getPopulation());
+		pw.writeV6("/home/bmoehring/3connect/testAgentAttributes/plans_2025_routed.xml.gz");
+		
 	}
 	
 	private static void createScenarioFleet(final Scenario scenario) {
@@ -102,11 +104,14 @@ public class ExtractPersonAttributes {
 			if(random.nextDouble() <= pHybrid) {
 				
 				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "verbrenner");
+				p.getAttributes().putAttribute("vehicleType", "verbrenner");
 				verbrenner ++;
 				
 			} else {
 				
 				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "electric");
+				p.getAttributes().putAttribute("vehicleType", "electric");
+
 				electric ++;
 			}
 			

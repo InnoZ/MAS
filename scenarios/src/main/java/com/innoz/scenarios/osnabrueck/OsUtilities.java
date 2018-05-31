@@ -42,14 +42,14 @@ import com.innoz.toolbox.utils.analysis.LegModeDistanceDistribution;
 
 public class OsUtilities {
 	
-	static String dataDirOS = "/home/bmoehring/3connect/3connect_trend/Trendszenario_DLR_allAgents/";
+	static String dataDirOS = "/home/bmoehring/3connect/3connect_positiv/";
 
 	// Method for modal split analysis of 3connect scenarios
 	public static void main(String args[]) {
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 
-		new PopulationReader(scenario).readFile(dataDirOS + "output_trend/output_plans.xml.gz");
+		new PopulationReader(scenario).readFile(dataDirOS + "output_positiv/output_plans_selected.xml.gz");
 		
 		scenario.getPopulation().getPersons().values().stream().forEach(person -> PersonUtils.removeUnselectedPlans(person));
 		
@@ -58,14 +58,14 @@ public class OsUtilities {
 		
 		lmdd(scenario);
 		getToActivityTypesForCsLegs(scenario);
-//		getSubstitutedModesForCsLegs(scenario, args[1]);
+		getSubstitutedModesForCsLegs(scenario, "/home/bmoehring/3connect/3connect_positiv/input_positiv/plans_2025.xml.gz");
 		
 	}
 	
 	static void extractCsUsers(Population population) {
 		
 		MembershipReader reader = new MembershipReader();
-		reader.readFile(dataDirOS + "input_trend/carsharingMembers_filtered.xml");
+		reader.readFile(dataDirOS + "input_positiv/carsharingMembers_filtered.xml");
 		
 		Scenario scenarioOut = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		

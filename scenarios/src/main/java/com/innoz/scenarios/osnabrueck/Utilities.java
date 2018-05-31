@@ -99,7 +99,7 @@ public class Utilities {
 
 	private static void createCsUsers() {
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		new PopulationReader(scenario).readFile("/home/bmoehring/3connect/3connect_trend/input_trend/plans_2025_routed.xml.gz");
+		new PopulationReader(scenario).readFile("/home/bmoehring/3connect/3connect_positiv/input_positiv/plans_2025.xml.gz");
 		
 		System.out.println(scenario.getPopulation().getPersons().size() + " persons");
 		
@@ -115,17 +115,17 @@ public class Utilities {
 			
 			boolean hasZeroDistanceLegs = false;
 			
-			if(p.getSelectedPlan().getPlanElements().size() > 1) {
-				
-				for(PlanElement pe : p.getSelectedPlan().getPlanElements()) {
-					if(pe instanceof Leg) {
-						Leg leg = (Leg) pe;
-						if(leg.getRoute().getDistance() < 100) {
-							hasZeroDistanceLegs = true;
-						}
-					}
-				}
-			}
+//			if(p.getSelectedPlan().getPlanElements().size() > 1) {
+//				
+//				for(PlanElement pe : p.getSelectedPlan().getPlanElements()) {
+//					if(pe instanceof Leg) {
+//						Leg leg = (Leg) pe;
+//						if(leg.getRoute().getDistance() < 100) {
+//							hasZeroDistanceLegs = true;
+//						}
+//					}
+//				}
+//			}
 			
 			scenarioOut.getPopulation().addPerson(p);
 			Map<String, Set<String>> membershipsPerCompany = new HashMap<>();
@@ -148,7 +148,7 @@ public class Utilities {
 		System.out.println(members);
 		
 //		new PopulationWriter(scenarioOut.getPopulation()).write("D:/01_Projekte/InnoZ-Simulation/Trendszenario/bestehende_plans_bmoehring/plans_clean.xml.gz");
-		new CSMembersXmlWriter(membership).writeFile("/home/bmoehring/3connect/3connect_trend/input_trend/carsharingMembers_filtered.xml");
+		new CSMembersXmlWriter(membership).writeFile("/home/bmoehring/3connect/3connect_positiv/input_positiv/carsharingMembers_all.xml");
 	}
 	
 }

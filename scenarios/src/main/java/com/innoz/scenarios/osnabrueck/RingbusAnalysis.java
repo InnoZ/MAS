@@ -1,10 +1,19 @@
 package com.innoz.scenarios.osnabrueck;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -20,37 +29,42 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.population.PersonUtils;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.facilities.Facility;
 import org.matsim.pt.routes.ExperimentalTransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitLine;
-
-import com.innoz.toolbox.utils.GeometryUtils;
+import org.matsim.pt.transitSchedule.api.TransitRoute;
+import org.matsim.pt.transitSchedule.api.TransitSchedule;
 
 public class RingbusAnalysis {
 
 	public static void main(String[] args) throws IOException {	
 		
-		String inputPath = "/home/bmoehring/3connect/3connect_trend/Trendszenario_DLR_allAgents/output_trend/"; 
+		String inputPath = "/home/bmoehring/3connect/0_basisSzenario/";
+//		String inputPath = "/home/bmoehring/3connect/1_negativSzenario/"; 
+//		String inputPath = "/home/bmoehring/3connect/3connect_trend/Trendszenario_DLR_allAgents/output_trend/"; 
+//		String inputPath = "/home/bmoehring/3connect/3connect_positiv/output_positiv/"; 
 			
 		Config config = ConfigUtils.createConfig(); 
 		config.network().setInputFile(inputPath + "output_network.xml.gz");
 		config.plans().setInputFile(inputPath + "output_plans.xml.gz"); 
+		config.transit().setTransitScheduleFile(inputPath + "output_transitSchedule.xml.gz");
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config); 	
 		
+		Map<String, List<String>> routeMap = filterOSRoutesFromCSV("/home/bmoehring/3connect/Scenarios/Ausbau transit/VBN_Eingangsdaten_pt/routes.txt");
+		
+		List<String> lines = new ArrayList<>();
+		lines.add("100000");
+		routeMap.put("ringbus", lines);
+		
+		getCustomersPerLine(scenario, routeMap);
+		
+//		printLines(scenario.getTransitSchedule());
+		
 //		List<Ride> ringbusRides = getRides(scenario, Id.create("100000", TransitLine.class));
-//			
-//		for (Ride route : ringbusRides){
-//			System.out.println(route);
-//		}
-//		
-//		System.out.println("In total: " + ringbusRides.size());
-//		
 //		writeChangeFile(ringbusRides, "/home/bmoehring/3connect/3connect_trend/Trendszenario_DLR_allAgents/analysis/ringbusRides.csv");
 		
-		Population ringbuspopulation = getRidePopulation(scenario, Id.create("100000", TransitLine.class));
-		
-		GeometryUtils.writeActivityLocationsToShapefile(ringbuspopulation, "/home/bmoehring/3connect/3connect_trend/Trendszenario_DLR_allAgents/analysis/", "EPSG:32632");
+//		Population ringbuspopulation = getRidePopulation(scenario, Id.create("100000", TransitLine.class));
+//		GeometryUtils.writeActivityLocationsToShapefile(ringbuspopulation, "/home/bmoehring/3connect/3connect_trend/Trendszenario_DLR_allAgents/analysis/", "EPSG:32632");
 		
 //		List<Facility> fromFacility = new ArrayList<Facility>(); 
 //		for (Ride route : ringbusRides){
@@ -60,6 +74,125 @@ public class RingbusAnalysis {
 		
 	}
 	
+	private static Map<String, List<String>> filterOSRoutesFromCSV(String filepath){
+
+		Map<String, List<String>> routeMap = new HashMap<>();
+		
+		File file = new File(filepath);
+		
+		int count = 0;
+
+        try{
+            // -read from filePooped with Scanner class
+            BufferedReader br = new BufferedReader(new FileReader(filepath));
+            br.readLine();
+            String line = br.readLine();
+            while((line = br.readLine()) != null){
+                String[] route = line.split(",");
+                String routeShort = null;
+                String routeId = null;
+                if (route[1].equalsIgnoreCase("XOS___")){
+                	routeShort = route[2];
+                	routeId = route[0];
+                	count++;
+                }
+                
+                if(routeShort != null && routeId != null){
+                	if (routeMap.containsKey(routeShort)){
+                		routeMap.get(routeShort).add(routeId);
+                	} else {
+                		List<String> list = new ArrayList<String>();
+                		list.add(routeId);
+                		routeMap.put(routeShort, list);
+                	}
+                }
+                line = br.readLine();
+            }
+
+
+        }catch (IOException e){
+
+            e.printStackTrace();
+        }
+        
+        System.out.println("count " + count);
+        System.out.println("routeMapSize: " + routeMap.size());
+        
+        return routeMap;
+	}
+	
+	private static void getCustomersPerLine(Scenario scenario, Map<String, List<String>> routeMap){
+		
+
+		Map<String, Integer> customersPerLineMap = new HashMap<>();
+		ValueComparator comparator = new ValueComparator(customersPerLineMap);
+		TreeMap<String, Integer> sortedCustomersPerLineMap = new TreeMap<String, Integer>(comparator);
+		
+		for (Person p : scenario.getPopulation().getPersons().values()){
+			
+			for (PlanElement pe : p.getSelectedPlan().getPlanElements()){
+				if (pe instanceof Leg && ((Leg)pe).getMode().equals(TransportMode.pt)){
+					
+					ExperimentalTransitRoute route = (ExperimentalTransitRoute) ((Leg) pe).getRoute();
+					
+					String lineId = route.getLineId().toString();
+					
+					for (Entry<String, List<String>> e : routeMap.entrySet()){
+						for (String line : e.getValue()){
+							if ( line.equalsIgnoreCase(lineId)){
+								Integer count = customersPerLineMap.get(e.getKey());
+								if (count == null){ 
+									count = 1;
+								} else {
+									count ++;
+								}
+								customersPerLineMap.put(e.getKey(), count);
+							}
+						}
+					}
+					
+				}
+			}
+			
+		}
+		
+		sortedCustomersPerLineMap.putAll(customersPerLineMap);
+		
+		for (Entry<String, Integer> e : sortedCustomersPerLineMap.entrySet()){
+			String lineCountLines = e.getKey() + "\t" + e.getValue() + "\t";
+//			for(String line : routeMap.get(e.getKey())){
+//				lineCountLines = lineCountLines + line + " ";
+//			}
+			System.out.println(lineCountLines);
+		}
+		
+	}
+	
+	private static void printLines(TransitSchedule transitSchedule) {
+		
+		List<String> allmodes = new ArrayList<>();
+		int numberOfRoutes = 0;
+		
+		for (TransitLine line : transitSchedule.getTransitLines().values()){
+			System.out.println("----");
+			System.out.println(line.getId());
+			List<String> modes = new ArrayList<>();
+			for (TransitRoute route : line.getRoutes().values()){
+				numberOfRoutes ++;
+				if (!modes.contains(route.getTransportMode())){
+					modes.add(route.getTransportMode());
+				}
+				if (!allmodes.contains(route.getTransportMode())){
+					allmodes.add(route.getTransportMode());
+				}
+			}
+			System.out.println(modes.size() + " " + modes);
+		}
+		System.out.println("number of lines" + transitSchedule.getTransitLines().size());
+		System.out.println("number of routes" + numberOfRoutes);
+		System.out.println(allmodes);
+	}
+
 	private static Population getRidePopulation(Scenario scenario, Id<TransitLine> ringbusLine) {
 
 		Population ringbuspopulation = PopulationUtils.createPopulation(ConfigUtils.createConfig()); 
@@ -200,4 +333,22 @@ public class RingbusAnalysis {
         System.out.println();
         System.out.println("Output written to: " + outputFile);
 	}
+}
+
+class ValueComparator implements Comparator<String> {
+    Map<String, Integer> base;
+
+    public ValueComparator(Map<String, Integer> base) {
+        this.base = base;
+    }
+
+    // Note: this comparator imposes orderings that are inconsistent with
+    // equals.
+    public int compare(String a, String b) {
+        if (base.get(a) >= base.get(b)) {
+            return -1;
+        } else {
+            return 1;
+        } // returning 0 would merge keys
+    }
 }

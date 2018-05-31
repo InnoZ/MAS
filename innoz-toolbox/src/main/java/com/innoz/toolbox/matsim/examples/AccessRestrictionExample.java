@@ -18,6 +18,8 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.contrib.otfvis.OTFVis;
+import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
@@ -69,6 +71,8 @@ public class AccessRestrictionExample {
 				
 			}
 		});
+		
+		controler.addOverridingModule(new OTFVisLiveModule());
 		
 		controler.run();
 		
