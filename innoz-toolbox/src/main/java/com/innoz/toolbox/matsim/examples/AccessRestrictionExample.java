@@ -10,6 +10,7 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
+import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
@@ -17,6 +18,8 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.contrib.otfvis.OTFVis;
+import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
@@ -37,7 +40,7 @@ public class AccessRestrictionExample {
 		Config config = ConfigUtils.createConfig();
 		
 		config.controler().setLastIteration(0);
-		config.controler().setOutputDirectory("/home/dhosse/scenarios/accessTest/");
+		config.controler().setOutputDirectory("/home/bmoehring/3connect/TestNetworkRoutingWithAccess/output_test/");
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		
 		ActivityParams params = new ActivityParams();
@@ -51,7 +54,7 @@ public class AccessRestrictionExample {
 		AccessConfigGroup acg = new AccessConfigGroup();
 		acg.setAccessAttribute("innercity");
 		acg.setMode(TransportMode.car);
-		acg.setExcludedFuelTypes("gasoline,diesel");
+		acg.setExcludedFuelTypes("verbrenner");
 		config.addModule(acg);
 		
 		Scenario scenario = ScenarioUtils.createScenario(config);
@@ -68,6 +71,8 @@ public class AccessRestrictionExample {
 				
 			}
 		});
+		
+		controler.addOverridingModule(new OTFVisLiveModule());
 		
 		controler.run();
 		
@@ -212,7 +217,7 @@ public class AccessRestrictionExample {
 		
 		{
 			Person p = factory.createPerson(Id.createPersonId("p0"));
-			p.getAttributes().putAttribute("vehicleType", "gasoline");
+			p.getAttributes().putAttribute("vehicleType", "verbrenner");
 			
 			Plan plan = factory.createPlan();
 			Activity act1 = factory.createActivityFromCoord("dummy", new Coord(10,0));

@@ -89,7 +89,7 @@ public final class NetworkRoutingModuleWithAccessOption implements RoutingModule
 			boolean ice = false;
 			
 			if(vehType != null) {
-				if(vehType.equals("gasoline") || vehType.equals("diesel")) ice = true;
+				if(vehType.equals("verbrenner")) ice = true;
 			}
 			
 			
@@ -101,6 +101,7 @@ public final class NetworkRoutingModuleWithAccessOption implements RoutingModule
 					
 					fromLink = NetworkUtils.getNearestLinkExactly(this.outer, fromLink.getCoord());
 					fromFacility = facilities.getFactory().createActivityFacility(Id.create("from", ActivityFacility.class),
+							fromLink.getCoord(),
 							Id.createLinkId(fromLink.getId()));
 					
 				}
@@ -110,6 +111,7 @@ public final class NetworkRoutingModuleWithAccessOption implements RoutingModule
 					
 					toLink = NetworkUtils.getNearestLinkExactly(this.outer, toLink.getCoord());
 					toFacility = facilities.getFactory().createActivityFacility(Id.create("to", ActivityFacility.class),
+							toLink.getCoord(),
 							Id.createLinkId(toLink.getId()));
 					
 				}
@@ -117,6 +119,8 @@ public final class NetworkRoutingModuleWithAccessOption implements RoutingModule
 			}
 			
 		}
+		
+		
 		
 		return this.delegate.calcRoute(fromFacility, toFacility, departureTime, person);
 		

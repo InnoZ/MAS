@@ -28,12 +28,12 @@ public class Population2Shape {
 		
 		try {
 			
-			String input = "/home/bmoehring/scenarios/osnabrueck/03404_2017/";
-			String output = "/home/bmoehring/3connect/Scenarios/11: Fahrverbot Verbrenner/";
+			String input = "/home/bmoehring/3connect/TestNetworkRoutingWithAccess/input_positiv/config2.xml.gz";
+			String output = "/home/bmoehring/3connect/Scenarios/Fahrverbot_Verbrenner/";
 			
 			Config config = new Config();
 			
-			ConfigUtils.loadConfig( config, input + "config.xml.gz" );
+			ConfigUtils.loadConfig( config, input );
 			
 			Scenario scenario = ScenarioUtils.loadScenario(config);
 				

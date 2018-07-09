@@ -4,16 +4,25 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.SynchronousQueue;
 
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.utils.objectattributes.AttributeConverter;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlReader;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
+import org.matsim.utils.objectattributes.attributable.AttributesUtils;
 
 import com.innoz.toolbox.config.psql.PsqlAdapter;
 import com.innoz.toolbox.io.database.DatabaseConstants;
@@ -35,13 +44,15 @@ public class ExtractPersonAttributes {
 	public static void main(String[] args) {
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		new PopulationReader(scenario).readFile("/home/dhosse/scenarios/3connect/input/plans_2025.xml.gz");
-		new ObjectAttributesXmlReader(scenario.getPopulation().getPersonAttributes()).readFile("/home/dhosse/scenarios/3connect/input/"
+		new PopulationReader(scenario).readFile("/home/bmoehring/3connect/3connect_trend/Trendszenario_DLR_allAgents/input_trend/plans_2025.xml.gz");
+		new ObjectAttributesXmlReader(scenario.getPopulation().getPersonAttributes()).readFile("/home/bmoehring/3connect/3connect_trend/Trendszenario_DLR_allAgents/input_trend/"
 				+ "personAttributes_2025.xml.gz");
 
 		createScenarioFleet(scenario);
 		
-		new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes()).writeFile("/home/dhosse/scenarios/3connect/input/personAttributesPositive.xml.gz");
+		new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes()).writeFile("/home/bmoehring/3connect/testAgentAttributes/personAttributes_2025_Positiv.xml.gz");
+		PopulationWriter pw = new PopulationWriter(scenario.getPopulation());
+		pw.writeV6("/home/bmoehring/3connect/testAgentAttributes/plans_2025_routed.xml.gz");
 		
 	}
 	
@@ -54,31 +65,65 @@ public class ExtractPersonAttributes {
 		
 		Random random = MatsimRandom.getRandom();
 		
-		scenario.getPopulation().getPersons().values().stream().forEach(p -> {
+		List<String> carAvailTypes= new ArrayList<String>();
+		int always = 0;
+		int never = 0;
+		int other = 0;
+		int verbrenner = 0;
+		int electric = 0;
+		
+		for( Person p : scenario.getPopulation().getPersons().values()){
+			String carAvail = p.getAttributes().getAttribute("carAvail").toString();
 			
-			if(random.nextDouble() <= pGasoline) {
+			if (!carAvailTypes.contains(carAvail)){
+				carAvailTypes.add(carAvail);
+			}
+			if (carAvail.equalsIgnoreCase("always")){
+				always ++;
+			} else if (carAvail.equalsIgnoreCase("never")){
+				never++;
+				continue;
+			} else {
+				other++;
+				System.out.println(carAvail);
+			}
+			
+//			if(random.nextDouble() <= pGasoline) {
+//				
+//				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "verbrenner");
+//				
+//			} else if(random.nextDouble() <= pDiesel) {
+//				
+//				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "verbrenner");
+//				
+//			} else if(random.nextDouble() <= pGas) {
+//				
+//				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "verbrenner");
+//				
+//			} else 
+			if(random.nextDouble() <= pHybrid) {
 				
-				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "gasoline");
-				
-			} else if(random.nextDouble() <= pDiesel) {
-				
-				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "diesel");
-				
-			} else if(random.nextDouble() <= pGas) {
-				
-				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "gas");
-				
-			} else if(random.nextDouble() <= pHybrid) {
-				
-				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "hybrid");
+				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "verbrenner");
+				p.getAttributes().putAttribute("vehicleType", "verbrenner");
+				verbrenner ++;
 				
 			} else {
 				
 				scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "vehicleType", "electric");
-				
+				p.getAttributes().putAttribute("vehicleType", "electric");
+
+				electric ++;
 			}
 			
-		});
+		};
+		
+		System.out.println("always " + always);
+		System.out.println("never " + never);
+		System.out.println("other " + other);
+		System.out.println(carAvailTypes.toString());
+		System.out.println(carAvailTypes);
+		System.out.println("electric " + electric);
+		System.out.println("verbrenner " + verbrenner);
 		
 	}
 	

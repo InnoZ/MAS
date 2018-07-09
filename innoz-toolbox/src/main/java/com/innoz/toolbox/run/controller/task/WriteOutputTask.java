@@ -31,8 +31,10 @@ public class WriteOutputTask implements ControllerTask {
 				Controller.configuration().misc().getOutputDirectory() + "plans.xml.gz");
 		new ObjectAttributesXmlWriter(Controller.scenario().getPopulation().getPersonAttributes()).writeFile(
 				Controller.configuration().misc().getOutputDirectory() + "personAttributes.xml.gz");
-		MatsimPsqlAdapter.writeScenarioToPsql(Controller.scenario(), this.scenarioName, this.railsEnvironment);
-
+		if (!railsEnvironment.isEmpty()){ 
+			MatsimPsqlAdapter.writeScenarioToPsql(Controller.scenario(), this.scenarioName, this.railsEnvironment);
+		}
+			
 	}
 	
 	public static class Builder {

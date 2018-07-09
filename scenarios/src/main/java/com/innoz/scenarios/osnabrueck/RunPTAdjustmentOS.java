@@ -1,4 +1,4 @@
-package com.innoz.toolbox.scenarioGeneration.transit;
+package com.innoz.scenarios.osnabrueck;
 
 import java.util.ArrayList;
 import java.util.HashSet;
